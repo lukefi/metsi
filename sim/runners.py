@@ -3,8 +3,10 @@ from typing import Optional, Any, Callable, List
 
 def sequence(input_data: Optional[Any], *instructions: Callable[[Optional[Any]], Optional[Any]]) -> Optional[Any]:
     """
-    Execute all given instruction functions, chaining the input_data argument and iterative results as arguments to
-    subsequent calls. Abort on any function raising an exception.
+    Compute a single processing result for single data input.
+
+    Execute all given instruction functions, chaining the input_data argument and
+    iterative results as arguments to subsequent calls. Abort on any function raising an exception.
 
     :param input_data: argument for the first instruction functions
     :param instructions: *arg list of instruction functions to execute in order
@@ -23,10 +25,12 @@ def sequence(input_data: Optional[Any], *instructions: Callable[[Optional[Any]],
     return result
 
 
-def split(input_data: Optional[Any], *instructions: Callable[..., Optional[Any]]) -> List[Optional[Any]]:
+def alternatives(input_data: Optional[Any], *instructions: Callable[..., Optional[Any]]) -> List[Optional[Any]]:
     """
-    Execute all given instruction functions with input_data and return a list of their results in order. Abort if every
-    callable raises an exception.
+    Compute alternative processing results for single data input.
+
+    Execute all given instruction functions with
+    input_data and return a list of their results in order. Abort if every callable raises an exception.
 
     :param input_data: arguments for instruction functions
     :param instructions: list of functions to execute in order
@@ -46,4 +50,32 @@ def split(input_data: Optional[Any], *instructions: Callable[..., Optional[Any]]
             results.append(None)
     if has_success is False:
         raise Exception("Unable to generate any usable possibilities")
+    return results
+
+
+def follow(input_datas: List[Optional[Any]],
+           instruction: Callable[[Optional[Any]], Optional[Any]]) -> List[Optional[Any]]:
+    """
+    Compute processing results for multiple data inputs using a single instruction function.
+
+    Execute argument instruction function separately for each element in input_datas. Return the results of each
+    call arrayed into a list.
+
+    :param input_datas: list of arguments for instruction functions
+    :param instruction: a function to be called for each input data item
+    :return: list of result values or None from all successful *arg callables in order
+    """
+    results = []
+    has_success = False
+    for input_data in input_datas:
+        try:
+            result = instruction(input_data)
+            results.append(result)
+            has_success = True
+        except Exception as e:
+            print("A branch failed")
+            print(e)
+            results.append(None)
+    if has_success is False:
+        raise Exception("All branches failed to produce results")
     return results
