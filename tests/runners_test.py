@@ -1,6 +1,6 @@
 import unittest
-from sim.runners import sequence, alternatives, follow
-from typing import Any
+from sim.runners import sequence, alternatives, follow, reduce
+from typing import Any, List, Optional
 
 
 def raises(x: Any) -> None:
@@ -21,6 +21,10 @@ def inc(x: int) -> int:
 
 def dec(x: int) -> int:
     return x - 1
+
+
+def max_reducer(x: List[int]) -> Optional[int]:
+    return max(x)
 
 
 class TestOperations(unittest.TestCase):
@@ -128,3 +132,14 @@ class TestOperations(unittest.TestCase):
         )  # --> [[13, 11], [23, 21], [33, 31]]
         result = prepared_function(input_values)
         self.assertEqual([[13, 11], [23, 21], [33, 31]], result)
+
+    def test_reducer_success(self):
+        input_values = [10, 20, 30]
+        prepared_function = lambda: reduce(input_values, max_reducer)
+        result = prepared_function()
+        self.assertEqual(30, result)
+
+    def test_reducer_failure(self):
+        input_values = [10, 20, 30]
+        prepared_function = lambda: reduce(input_values, raises)
+        self.assertRaises(Exception, prepared_function)

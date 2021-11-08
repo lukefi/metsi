@@ -79,3 +79,23 @@ def follow(input_datas: List[Optional[Any]],
     if has_success is False:
         raise Exception("All branches failed to produce results")
     return results
+
+
+def reduce(input_datas: List[Optional[Any]],
+           reducer: Callable[[List[Optional[Any]]], Optional[Any]]) -> Optional[Any]:
+    """
+    Obtain a single result out of multiple data inputs, using the given instruction as a reducer.
+
+    Execute argument instruction function to
+
+    :param input_datas:
+    :param reducer: function which should return a single item based on a list of items of same type
+    :return:
+    """
+    try:
+        result = reducer(input_datas)
+        return result
+    except Exception as e:
+        print("Reduction of results failed")
+        print(e)
+        raise e
