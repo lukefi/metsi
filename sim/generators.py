@@ -3,7 +3,7 @@ from typing import Any, Callable, Iterable
 
 def instruction_with_options(instruction: Callable, options: Iterable[Any]) -> Iterable[Callable]:
     """
-    Curry a function f(X,Y) into a list of functions f(x) with each value of options in order.
+    Partially apply options Y to function f(X,Y) to create an iterable of functions f(X), ...
     Convenience method for obtaining branch entry points for *alternatives* call.
     :param instruction: function with signature f(X,Y)
     :param options: the values Y

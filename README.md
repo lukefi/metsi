@@ -77,7 +77,7 @@ result = follow_up(input)  # 3-item array with return values of operation4 as it
 
 #### instruction_with_options
 
-Curry a given instruction (function) of interest with a list of alternative call parameters, producing a list of functions readily usable with the alternatives primitive.
+Fix a given instruction (function) of interest with a list of alternative call arguments, producing a list of partially applied functions readily usable with the alternatives primitive.
 
 ```python
 def multiply(x, y):
@@ -87,7 +87,7 @@ instructions = instruction_with_options(
     multiply, 
     [1, 2, 3]
 )
-# instructions becomes a list of 1-argument curried functions
+# instructions becomes a list of 1-argument partially applied functions
 
 branch_example = lambda x: alternatives(
     x,
