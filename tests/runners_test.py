@@ -1,30 +1,7 @@
 import unittest
 from sim.runners import sequence, alternatives, follow, reduce
-from typing import Any, List, Optional
 
-
-def raises(x: Any) -> None:
-    raise Exception("Run failure")
-
-
-def idem(x: Any) -> Any:
-    return x
-
-
-def none(x: Any) -> None:
-    return None
-
-
-def inc(x: int) -> int:
-    return x + 1
-
-
-def dec(x: int) -> int:
-    return x - 1
-
-
-def max_reducer(x: List[int]) -> Optional[int]:
-    return max(x)
+from test_utils import raises, identity, none, inc, dec, max_reducer
 
 
 class TestOperations(unittest.TestCase):
@@ -32,7 +9,7 @@ class TestOperations(unittest.TestCase):
         input_value = 1
         result = sequence(
             input_value,
-            idem,
+            identity,
             none
         )
         self.assertEqual(None, result)
@@ -41,9 +18,9 @@ class TestOperations(unittest.TestCase):
         input_value = 1
         prepared_function = lambda: sequence(
             input_value,
-            idem,
+            identity,
             raises,
-            idem
+            identity
         )
         self.assertRaises(Exception, prepared_function)
 
@@ -52,9 +29,9 @@ class TestOperations(unittest.TestCase):
         result = alternatives(
             input_value,
             raises,
-            idem
+            identity
         )
-        self.assertEqual([None, idem(input_value)], result)
+        self.assertEqual([None, identity(input_value)], result)
 
     def test_alternatives_failure(self):
         prepared_function = lambda: alternatives(raises, raises)
@@ -66,14 +43,14 @@ class TestOperations(unittest.TestCase):
             input_value,
             lambda x: alternatives(
                 x,
-                idem,
+                identity,
                 lambda y: sequence(
                     y,
-                    idem,
-                    idem
+                    identity,
+                    identity
                 )
             ),
-            idem
+            identity
         )
         self.assertEqual([1, 1], result)
 
@@ -81,12 +58,12 @@ class TestOperations(unittest.TestCase):
         input_value = 1
         prepared_function = lambda: sequence(
             input_value,
-            idem,
+            identity,
             lambda: alternatives(
                 input_value,
                 raises
             ),
-            idem
+            identity
         )
         self.assertRaises(Exception, prepared_function)
 
@@ -127,7 +104,7 @@ class TestOperations(unittest.TestCase):
                     inc,  # 13 || 23 || 33
                     dec  # 11 || 21 || 31
                 ),
-                idem  # [13, 11] || [23, 21] || [33,31]
+                identity  # [13, 11] || [23, 21] || [33,31]
             )
         )  # --> [[13, 11], [23, 21], [33, 31]]
         result = prepared_function(input_values)
