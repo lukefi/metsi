@@ -1,15 +1,28 @@
 from typing import Callable, List, Optional, Any
 
 
+def identity(x):
+    return x
+
+
 class Step:
     """
     Step represents a computational operation in a tree of alternative computation paths.
     """
-    operation: Callable = lambda: None
+    operation: Callable = identity  # default to the identity function, essentially no-op
     branches: List['Step'] = []
+    previous: 'Step' or None = None
 
-    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]]):
-        self.operation = operation
+    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None, previous: 'Step' or None = None):
+        self.operation = operation if operation is not None else identity
+        self.previous = previous
+
+    def find_root(self: 'Step'):
+        return self if self.previous is None else self.previous.find_root()
+
+    def attach(self, previous: 'Step'):
+        self.previous = previous
+        previous.add_branch(self)
 
     def operation_chains(self):
         """
@@ -28,7 +41,10 @@ class Step:
             return result
 
     def add_branch(self, step: 'Step'):
+        step.previous = self
         self.branches.append(step)
 
     def add_branch_from_operation(self, operation: Callable):
-        self.add_branch(Step(operation))
+        self.add_branch(Step(operation, self))
+
+
