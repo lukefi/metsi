@@ -1,5 +1,9 @@
 import unittest
-from sim.generators import instruction_with_options
+
+from computation_model import Step
+from sim.generators import instruction_with_options, sequence
+from sim.runners import sequence as run_sequence
+from test_utils import inc
 
 
 class TestGenerators(unittest.TestCase):
@@ -12,3 +16,17 @@ class TestGenerators(unittest.TestCase):
         for f in prepared_functions:
             results.append(f(value))
         self.assertEqual([110, 120, 130], results)
+
+    def test_step_sequence_generating(self):
+        root = Step()
+        result = sequence(
+            [root],
+            inc,
+            inc,
+            inc
+        )
+        chain = root.operation_chains()[0]
+        computation_result = run_sequence(0, *chain)
+        self.assertEqual(3, computation_result)
+        self.assertEqual(1, len(result))
+        self.assertEqual(4, len(chain))
