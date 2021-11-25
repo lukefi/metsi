@@ -16,6 +16,7 @@ class Step:
     def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None, previous: 'Step' or None = None):
         self.operation = operation if operation is not None else identity
         self.previous = previous
+        self.branches = []
 
     def find_root(self: 'Step'):
         return self if self.previous is None else self.previous.find_root()
