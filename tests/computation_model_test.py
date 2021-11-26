@@ -5,7 +5,7 @@ from sim.computation_model import Step
 from test_utils import inc
 
 
-class MyTestCase(unittest.TestCase):
+class ComputationModelTest(unittest.TestCase):
     root = Step(inc)
     root.branches = [
         Step(inc),
