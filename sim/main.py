@@ -1,18 +1,18 @@
 from sim.operations import grow, cut, plant, do_nothing
-from sim.runners import sequence, alternatives, follow
+from sim.runners import evaluate_sequence, evaluate_alternatives, follow
 from sim.generators import instruction_with_options
 
 if __name__ == "__main__":
     rounds = 5
     initial_volume = 40000
 
-    actions = lambda x: alternatives(
+    actions = lambda x: evaluate_alternatives(
         x,
         do_nothing,
         *instruction_with_options(cut, [25, 50, 75])
     )
 
-    cycle = lambda y: sequence(
+    cycle = lambda y: evaluate_sequence(
         y,
         grow,
         actions

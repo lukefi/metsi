@@ -1,6 +1,6 @@
 import unittest
 
-from runners import sequence
+from runners import evaluate_sequence
 from sim.computation_model import Step
 from test_utils import inc
 
@@ -31,5 +31,5 @@ class ComputationModelTest(unittest.TestCase):
     def test_run_chains(self):
         chains = self.root.operation_chains()
         for chain in chains:
-            result = sequence(0, *chain)
+            result = evaluate_sequence(0, *chain)
             self.assertEqual(3, result)

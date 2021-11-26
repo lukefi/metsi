@@ -1,7 +1,7 @@
 from typing import Optional, Any, Callable, List
 
 
-def sequence(input_data: Optional[Any], *instructions: Callable[[Optional[Any]], Optional[Any]]) -> Optional[Any]:
+def evaluate_sequence(input_data: Optional[Any], *instructions: Callable[[Optional[Any]], Optional[Any]]) -> Optional[Any]:
     """
     Compute a single processing result for single data input.
 
@@ -25,7 +25,7 @@ def sequence(input_data: Optional[Any], *instructions: Callable[[Optional[Any]],
     return result
 
 
-def alternatives(input_data: Optional[Any], *instructions: Callable[..., Optional[Any]]) -> List[Optional[Any]]:
+def evaluate_alternatives(input_data: Optional[Any], *instructions: Callable[..., Optional[Any]]) -> List[Optional[Any]]:
     """
     Compute alternative processing results for single data input.
 

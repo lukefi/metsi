@@ -1,5 +1,5 @@
 import unittest
-from sim.runners import sequence, alternatives, follow, reduce
+from sim.runners import evaluate_sequence, evaluate_alternatives, follow, reduce
 
 from test_utils import raises, identity, none, inc, dec, max_reducer
 
@@ -7,7 +7,7 @@ from test_utils import raises, identity, none, inc, dec, max_reducer
 class TestOperations(unittest.TestCase):
     def test_sequence_success(self):
         input_value = 1
-        result = sequence(
+        result = evaluate_sequence(
             input_value,
             identity,
             none
@@ -16,7 +16,7 @@ class TestOperations(unittest.TestCase):
 
     def test_sequence_failure(self):
         input_value = 1
-        prepared_function = lambda: sequence(
+        prepared_function = lambda: evaluate_sequence(
             input_value,
             identity,
             raises,
@@ -26,7 +26,7 @@ class TestOperations(unittest.TestCase):
 
     def test_alternatives_success(self):
         input_value = 1
-        result = alternatives(
+        result = evaluate_alternatives(
             input_value,
             raises,
             identity
@@ -34,17 +34,17 @@ class TestOperations(unittest.TestCase):
         self.assertEqual([None, identity(input_value)], result)
 
     def test_alternatives_failure(self):
-        prepared_function = lambda: alternatives(raises, raises)
+        prepared_function = lambda: evaluate_alternatives(raises, raises)
         self.assertRaises(Exception, prepared_function)
 
     def test_sequence_and_alternatives_combination_success(self):
         input_value = 1
-        result = sequence(
+        result = evaluate_sequence(
             input_value,
-            lambda x: alternatives(
+            lambda x: evaluate_alternatives(
                 x,
                 identity,
-                lambda y: sequence(
+                lambda y: evaluate_sequence(
                     y,
                     identity,
                     identity
@@ -56,10 +56,10 @@ class TestOperations(unittest.TestCase):
 
     def test_sequence_and_alternatives_combination_failure(self):
         input_value = 1
-        prepared_function = lambda: sequence(
+        prepared_function = lambda: evaluate_sequence(
             input_value,
             identity,
-            lambda: alternatives(
+            lambda: evaluate_alternatives(
                 input_value,
                 raises
             ),
@@ -69,12 +69,12 @@ class TestOperations(unittest.TestCase):
 
     def test_sequence_and_alternatives_with_utility_function(self):
         input_value = 1
-        prepared_function = lambda: sequence(
+        prepared_function = lambda: evaluate_sequence(
             input_value,
             inc,  # 2
             inc,  # 3
             inc,  # 4
-            lambda x: alternatives(
+            lambda x: evaluate_alternatives(
                 x,  # 4
                 inc,  # 5
                 inc  # 5
@@ -95,11 +95,11 @@ class TestOperations(unittest.TestCase):
         input_values = [10, 20, 30]
         prepared_function = lambda x: follow(
             x,  # [10, 20, 30]
-            lambda y: sequence(
+            lambda y: evaluate_sequence(
                 y,  # 10 || 20 || 30
                 inc,  # 11 || 21 || 31
                 inc,  # 12 || 22 || 32
-                lambda z: alternatives(
+                lambda z: evaluate_alternatives(
                     z,  # 12 || 22 || 32
                     inc,  # 13 || 23 || 33
                     dec  # 11 || 21 || 31

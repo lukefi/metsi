@@ -2,7 +2,7 @@ import unittest
 
 from computation_model import Step
 from sim.generators import instruction_with_options, sequence, compose, alternatives
-from sim.runners import sequence as run_sequence
+from sim.runners import evaluate_sequence as run_sequence
 from test_utils import inc, dec
 
 
