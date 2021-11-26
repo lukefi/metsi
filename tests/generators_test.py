@@ -1,7 +1,7 @@
 import unittest
 
 from computation_model import Step
-from sim.generators import instruction_with_options, sequence
+from sim.generators import instruction_with_options, sequence, compose
 from sim.runners import sequence as run_sequence
 from test_utils import inc
 
@@ -30,3 +30,22 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(3, computation_result)
         self.assertEqual(1, len(result))
         self.assertEqual(4, len(chain))
+
+    def test_sequence_composition(self):
+        generators = [
+            lambda x: sequence(
+                x,
+                inc,
+                inc
+            ),
+            lambda y: sequence(
+                y,
+                inc,
+                inc
+            )
+        ]
+        result = compose(*generators)
+        chain = result.operation_chains()[0]
+        computation_result = run_sequence(0, *chain)
+        self.assertEqual(5, len(chain))
+        self.assertEqual(4, computation_result)
