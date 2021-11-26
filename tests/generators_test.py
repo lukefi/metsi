@@ -1,9 +1,9 @@
 import unittest
 
 from computation_model import Step
-from sim.generators import instruction_with_options, sequence, compose
+from sim.generators import instruction_with_options, sequence, compose, alternatives
 from sim.runners import sequence as run_sequence
-from test_utils import inc
+from test_utils import inc, dec
 
 
 class TestGenerators(unittest.TestCase):
@@ -31,6 +31,17 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(1, len(result))
         self.assertEqual(4, len(chain))
 
+    def test_branch_generating(self):
+        parent1 = Step()
+        parent2 = Step()
+        result = alternatives(
+            [parent1, parent2],
+            *[inc, inc, inc]
+        )
+        self.assertEqual(6, len(result))
+        self.assertEqual(3, len(parent1.branches))
+        self.assertEqual(3, len(parent2.branches))
+
     def test_sequence_composition(self):
         generators = [
             lambda x: sequence(
@@ -49,3 +60,33 @@ class TestGenerators(unittest.TestCase):
         computation_result = run_sequence(0, *chain)
         self.assertEqual(5, len(chain))
         self.assertEqual(4, computation_result)
+
+    def test_branches_and_sequences_chainability(self):
+        generators = [
+            lambda x: sequence(
+                x,
+                inc,
+                inc
+            ),
+            lambda y: alternatives(
+                y,
+                inc,
+                dec
+            ),
+            lambda z: sequence(
+                z,
+                inc,
+                inc
+            )
+        ]
+        result = compose(*generators)
+        chains = result.operation_chains()
+        self.assertEqual(2, len(chains))
+        chain1 = chains[0]
+        chain2 = chains[1]
+        self.assertEqual(6, len(chain1))
+        self.assertEqual(6, len(chain2))
+        computation_result1 = run_sequence(0, *chain1)
+        computation_result2 = run_sequence(0, *chain2)
+        self.assertEqual(5, computation_result1)
+        self.assertEqual(3, computation_result2)

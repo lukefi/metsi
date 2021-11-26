@@ -33,6 +33,24 @@ def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> Lis
     return result
 
 
+def alternatives(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
+    """
+    Generate a branches for an optional list of steps, out of a *args list of given operations
+    :param parents:
+    :param operations:
+    :return: a list of leaf steps now under the given parent steps
+    """
+    result = []
+    if parents is None or len(parents) is 0:
+        parents = [Step()]
+    for step in parents:
+        for operation in operations:
+            branching_step = Step(operation, step)
+            step.add_branch(branching_step)
+            result.append(branching_step)
+    return result
+
+
 def compose(*step_generators: Callable) -> Step:
     """
     Generate a simulation Step tree using the given list of generator functions
