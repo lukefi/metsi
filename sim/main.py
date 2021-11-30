@@ -1,31 +1,51 @@
-from sim.operations import grow, cut, plant, do_nothing
-from sim.runners import evaluate_sequence, evaluate_alternatives, follow
-from sim.generators import instruction_with_options
+from sim.operations import grow, cut, do_nothing
+from sim.runners import evaluate_sequence
+from sim.generators import instruction_with_options, sequence, alternatives, compose
 
 if __name__ == "__main__":
     rounds = 5
-    initial_volume = 40000
+    initial_volume = 200
 
-    actions = lambda x: evaluate_alternatives(
-        x,
-        do_nothing,
-        *instruction_with_options(cut, [25, 50, 75])
+    tree = compose(
+        lambda x: sequence(
+            x,
+            grow
+        ),
+        lambda x: alternatives(
+            x,
+            do_nothing,
+            *instruction_with_options(cut, [25, 50, 75])
+        ),
+        lambda x: sequence(
+            x,
+            grow
+        ),
+        lambda x: alternatives(
+            x,
+            do_nothing,
+            *instruction_with_options(cut, [25, 50, 75])
+        ),
+        lambda x: sequence(
+            x,
+            grow
+        ),
+        lambda x: alternatives(
+            x,
+            do_nothing,
+            *instruction_with_options(cut, [25, 50, 75])
+        )
     )
 
-    cycle = lambda y: evaluate_sequence(
-        y,
-        grow,
-        actions
-    )
+    chains = tree.operation_chains()
 
-    payload = [initial_volume]
-    print(payload)
-    for i in range(1, rounds):
-        generated = []
-        for j in payload:
-            if j is not None:
-                result = cycle(j)
-                print("Branch with " + str(j) + "->" + str(result))
-                for k in result:
-                    generated.append(k)
-        payload = generated
+    iteration_counter = 1
+    for chain in chains:
+        try:
+            print("running chain " + str(iteration_counter))
+            iteration_counter = iteration_counter + 1
+            result = evaluate_sequence(initial_volume, *chain)
+
+            print(result)
+        except Exception as e:
+            print(e)
+        print("\n")
