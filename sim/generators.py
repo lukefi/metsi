@@ -63,3 +63,21 @@ def compose(*step_generators: Callable) -> Step:
         current = generator(previous)
         previous = current
     return root
+
+
+def repeat(times: int, *step_generators: Callable) -> List[Callable]:
+    """
+    For the given, positive, non-zero number of times, repeat the given list of generator functions and return them as
+    a list.
+
+    :param times: positive, non-zero integer for repetition count
+    :param step_generators: functions to repeat in sequence
+    :return:
+    """
+    if times < 1:
+        raise Exception("Repetition count must be a positive integer value")
+    result = []
+    for i in range(1, times):
+        for generator in step_generators:
+            result.append(generator)
+    return result
