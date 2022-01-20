@@ -1,5 +1,5 @@
 from typing import Any, Callable, Iterable, List, Optional
-from computation_model import Step
+from sim.computation_model import Step
 
 
 def instruction_with_options(instruction: Callable, options: Iterable[Any]) -> Iterable[Callable]:

@@ -84,7 +84,7 @@ def multiply(x, y):
     return x * y
 
 instructions = instruction_with_options(
-    multiply, 
+    multiply,
     [1, 2, 3]
 )
 # instructions becomes a list of 1-argument partially applied functions
@@ -95,4 +95,21 @@ branch_example = lambda x: alternatives(
 )
 
 result = branch_example(10)  # likewise [10, 20, 30]
+```
+
+# Instructions
+
+To run test suites use following format:
+```python
+python -m unittest tests.computational_model_test.ComputationalModelTest
+```
+All test suites can be found from ```tests``` folder.
+
+Application can be run from project root with argument(s):
+
+1. source data file in json format
+
+For example:
+```python
+python -m sim.main tests/resources/vmi13_small.json
 ```
