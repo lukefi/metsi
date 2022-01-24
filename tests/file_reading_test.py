@@ -9,7 +9,7 @@ absolute_resource_path = os.path.join(os.getcwd(), 'tests', 'resources')
 class TestFileReading(unittest.TestCase):
     def test_read_forest_json(self):
         input_filename = "vmi13_small.json"
-        input_file_path = absolute_resource_path + "/" + input_filename
+        input_file_path = os.path.join(absolute_resource_path, input_filename)
         stands = read_forest_json(input_file_path)
         self.assertEqual(type(stands[0]), ForestStand)
         self.assertEqual(len(stands), 5)
