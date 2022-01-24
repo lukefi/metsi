@@ -6,7 +6,7 @@ from sim.operations import grow, cut, plant
 class OperationsTest(unittest.TestCase):
     def test_grow(self):
         assertions = [
-            (10000, 12500),
+            (10000, 11085.73620475813),
             (None, None)
         ]
         for i in assertions:
@@ -15,15 +15,15 @@ class OperationsTest(unittest.TestCase):
 
     def test_cut(self):
         assertions = [
-            ((40000, 25), 30000),
-            ((40000, 50), 20000),
+            ((400, 25), 300),
+            ((400, 50), 200),
             ((None, 100), None)
         ]
         for i in assertions:
             result = cut(i[0][0], i[0][1])
             self.assertEqual(i[1], result)
 
-        self.assertRaises(Exception, lambda: cut(10000, 20))
+        self.assertRaises(Exception, lambda: cut(100, 20))
 
     def test_plant(self):
         assertions = [

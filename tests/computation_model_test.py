@@ -1,6 +1,6 @@
 import unittest
 
-from runners import evaluate_sequence
+from sim.runners import evaluate_sequence
 from sim.computation_model import Step
 from test_utils import inc
 
