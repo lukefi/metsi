@@ -2,7 +2,7 @@ import sys
 from sim.operations import grow, cut, do_nothing
 from sim.runners import evaluate_sequence
 from sim.generators import instruction_with_options, sequence, alternatives, compose, repeat
-from sim.read_input import read_forest_json
+from sim.file_io import read_forest_json
 
 if __name__ == "__main__":
     input_filename = sys.argv[1]

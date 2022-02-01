@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from sim.read_input import read_forest_json
+from sim.file_io import read_forest_json
 from sim.ForestDataModels import ForestStand, ReferenceTree
 
 absolute_resource_path = os.path.join(os.getcwd(), 'tests', 'resources')
