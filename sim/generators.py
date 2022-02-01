@@ -1,6 +1,6 @@
+from types import SimpleNamespace
 from typing import Any, Callable, Iterable, List, Optional
 from sim.computation_model import Step
-
 
 def instruction_with_options(instruction: Callable, options: Iterable[Any]) -> Iterable[Callable]:
     """
@@ -81,3 +81,71 @@ def repeat(times: int, *step_generators: Callable) -> List[Callable]:
         for generator in step_generators:
             result.append(generator)
     return result
+
+
+def generator_declarations_for_time_point(simulation_steps: List[dict], time: int) -> List[dict]:
+    """
+    From simulation_steps, find the step generators declared for the given time point. Upon no match,
+    a sequence of a single do_nothing operation is supplanted.
+
+    :param simulation_steps: list of step generator declarations with associated simulation time points
+    :param time: point of simulation time for selecting matching generators
+    :return: list of generator declarations for the desired point of time
+    """
+    generator_declarations = []
+    for generator_candidate in simulation_steps:
+        if time in generator_candidate['time_points']:
+            generator_declarations.extend(generator_candidate['generators'])
+    if len(generator_declarations) == 0:
+        generator_declarations.append({'sequence': ['do_nothing']})
+    return generator_declarations
+
+
+def operation_function(key: str, operation_lookup: dict) -> Callable:
+    """
+    Create an operation function wrapper for function in operation_lookup by the key.
+    Yes, this is a dumb wrapper, established for consistency. Will have to be extended later
+    to supply operation functions with external parameters.
+    """
+    return lambda *operation_arguments: operation_lookup[key](*operation_arguments)
+
+
+def generator_function(key, generator_lookup: dict, *operations: Callable) -> Callable[[Any], List[Step]]:
+    """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
+    argument list of operations with the generator."""
+    return lambda payload: generator_lookup[key](payload, *operations)
+
+
+def generators_from_declaration(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
+    """
+    Creat a list of step generator functions describing a single simulator run.
+
+    :param simulation_declaration: a dict matching the simulation declaration structure. See README.
+    :param operation_lookup: lookup table binding a declared operation name to a Python function reference
+    :return: a list of prepared generator functions
+    """
+
+    generator_lookup = {
+        'sequence': sequence,
+        'alternatives': alternatives,
+    }
+    generator_series = []
+    # TODO: proper class SimulationParams
+    simulation_params = SimpleNamespace(**simulation_declaration['simulation_params'])
+    simulation_steps = simulation_declaration['simulation_steps']
+    simulation_time_points = range(
+        simulation_params.initial_step_time,
+        simulation_params.final_step_time + +1,
+        simulation_params.step_time_interval
+    )
+
+    for time_point in simulation_time_points:
+        generator_declarations = generator_declarations_for_time_point(simulation_steps, time_point)
+        for generator_declaration in generator_declarations:
+            generator_tag = list(generator_declaration.keys())[0]
+            operation_tags = generator_declaration[generator_tag]
+            operation_functions = []
+            for operation in operation_tags:
+                operation_functions.append(operation_function(operation, operation_lookup))
+            generator_series.append(generator_function(generator_tag, generator_lookup, *operation_functions))
+    return generator_series

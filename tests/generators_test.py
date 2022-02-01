@@ -1,5 +1,6 @@
 import unittest
-
+import sim.generators
+import yaml
 from sim.computation_model import Step
 from sim.generators import instruction_with_options, sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence
@@ -104,6 +105,26 @@ class TestGenerators(unittest.TestCase):
                 inc,
                 inc
             ))
+        result = compose(*generators)
+        chain = result.operation_chains()[0]
+        computation_result = run_sequence(0, *chain)
+        self.assertEqual(5, len(chain))
+        self.assertEqual(4, computation_result)
+
+    def test_yaml_declaration(self):
+        declaration = """
+        simulation_params:
+          initial_step_time: 0
+          step_time_interval: 1
+          final_step_time: 1
+        simulation_steps:
+          - time_points: [0, 1]
+            generators:
+              - sequence:
+                - inc
+                - inc
+        """
+        generators = sim.generators.generators_from_declaration(yaml.load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
         computation_result = run_sequence(0, *chain)

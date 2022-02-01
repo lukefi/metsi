@@ -1,28 +1,32 @@
 import sys
-from sim.operations import grow, cut, do_nothing
 from sim.runners import evaluate_sequence
-from sim.generators import instruction_with_options, sequence, alternatives, compose, repeat
-from sim.file_io import read_forest_json
+from sim.generators import compose, generators_from_declaration
+from sim.file_io import read_forest_json, simulation_declaration_from_yaml_file
+import sim.operations
+
+operation_lookup = {
+    'do_nothing': sim.operations.do_nothing,
+    'grow': sim.operations.grow,
+    'basal_area_thinning': sim.operations.basal_area_thinning,
+    'stem_count_thinning': sim.operations.stem_count_thinning,
+    'continuous_growth_thinning': sim.operations.continuous_growth_thinning,
+    'reporting': sim.operations.reporting
+}
 
 if __name__ == "__main__":
-    input_filename = sys.argv[1]
-    stands = read_forest_json(input_filename)
+    # TODO: use argparse
+    try:
+        input_filename = sys.argv[1]
+        stands = read_forest_json(input_filename)
+    except:
+        stands = []
+
+    simulation_declaration = simulation_declaration_from_yaml_file('control.yaml')
+
+    generators = generators_from_declaration(simulation_declaration, operation_lookup)
+    tree = compose(*generators)
 
     initial_volume = 200
-
-    tree = compose(
-        *repeat(
-            3,
-            lambda x: sequence(
-                x,
-                grow
-            ),
-            lambda x: alternatives(
-                x,
-                do_nothing,
-                *instruction_with_options(cut, [25, 50, 75])
-            ))
-    )
 
     chains = tree.operation_chains()
 
