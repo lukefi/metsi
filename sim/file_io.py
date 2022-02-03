@@ -4,11 +4,16 @@ import yaml
 from sim.ForestDataModels import ForestStand, ReferenceTree
 
 
-def read_forest_json(json_file: str) -> List[ForestStand]:
-    with open(json_file, 'r') as f:
-        return json.loads(f.read(), object_hook=lambda d: ReferenceTree(**d) if "tree" in d['identifier'] else ForestStand(**d))
+def file_contents(file_path: str) -> str:
+    with open(file_path, 'r') as f:
+        return f.read()
 
 
-def simulation_declaration_from_yaml_file(filename: str) -> dict:
-    with open(filename, 'r') as f:
-        return yaml.load(f.read())
+def forest_stands_from_json_file(file_path: str) -> List[ForestStand]:
+    # TODO: content validation
+    return json.loads(file_contents(file_path), object_hook=lambda d: ReferenceTree(**d) if "tree" in d['identifier'] else ForestStand(**d))
+
+
+def simulation_declaration_from_yaml_file(file_path: str) -> dict:
+    # TODO: content validation
+    return yaml.load(file_contents(file_path))

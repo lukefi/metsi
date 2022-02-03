@@ -1,7 +1,7 @@
 import sys
 from sim.runners import evaluate_sequence
 from sim.generators import compose, generators_from_declaration
-from sim.file_io import read_forest_json, simulation_declaration_from_yaml_file
+from sim.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
 import sim.operations
 
 operation_lookup = {
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # TODO: use argparse
     try:
         input_filename = sys.argv[1]
-        stands = read_forest_json(input_filename)
+        stands = forest_stands_from_json_file(input_filename)
     except:
         stands = []
 

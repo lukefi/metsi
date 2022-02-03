@@ -1,9 +1,0 @@
-variables:
-  var_one: 2
-
-object_one:
-  property_one: 1
-  property_two: ${variables.var_one}
-  collection:
-    - item1
-    - item2
