@@ -28,7 +28,6 @@ class YamlLibraryTestSuite(unittest.TestCase):
         self.assertEqual(2, len(result['object_one']['primitive_collection']))
         self.assertEqual('item1', result['object_one']['primitive_collection'][0])
         self.assertEqual('item2', result['object_one']['primitive_collection'][1])
-        self.assertEqual('item2', result['object_one']['primitive_collection'][1])
         self.assertEqual('abc', result['object_one']['object_collection'][0]['param1'])
         self.assertEqual('def', result['object_one']['object_collection'][0]['param2'])
         self.assertEqual(True, result['object_one']['object_collection'][1]['param1'])
