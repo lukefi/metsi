@@ -39,3 +39,23 @@ def plant(volume: float, amount: int) -> Optional[float]:
     result = volume + increase
     print("Planting " + str(amount) + " trees. V now " + str(result))
     return result
+
+
+def basal_area_thinning(X):
+    print("basal area thinning")
+    return X
+
+
+def stem_count_thinning(X):
+    print("stem count thinning")
+    return X
+
+
+def continuous_growth_thinning(X):
+    print("continuous growth thinning")
+    return X
+
+
+def reporting(X):
+    print('information output stub')
+    return X
