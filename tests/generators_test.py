@@ -99,11 +99,6 @@ class TestGenerators(unittest.TestCase):
                 x,
                 inc,
                 inc
-            ),
-            lambda y: sequence(
-                y,
-                inc,
-                inc
             ))
         result = compose(*generators)
         chain = result.operation_chains()[0]

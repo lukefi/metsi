@@ -77,7 +77,7 @@ def repeat(times: int, *step_generators: Callable) -> List[Callable]:
     if times < 1:
         raise Exception("Repetition count must be a positive integer value")
     result = []
-    for i in range(1, times):
+    for i in range(0, times):
         for generator in step_generators:
             result.append(generator)
     return result
