@@ -1,17 +1,9 @@
 import sys
+
+from sim.operations import operation_lookup
 from sim.runners import evaluate_sequence
 from sim.generators import compose, generators_from_declaration
 from sim.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
-import sim.operations
-
-operation_lookup = {
-    'do_nothing': sim.operations.do_nothing,
-    'grow': sim.operations.grow,
-    'basal_area_thinning': sim.operations.basal_area_thinning,
-    'stem_count_thinning': sim.operations.stem_count_thinning,
-    'continuous_growth_thinning': sim.operations.continuous_growth_thinning,
-    'reporting': sim.operations.reporting
-}
 
 if __name__ == "__main__":
     # TODO: use argparse

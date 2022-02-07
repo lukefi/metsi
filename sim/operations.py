@@ -59,3 +59,13 @@ def continuous_growth_thinning(X):
 def reporting(X):
     print('information output stub')
     return X
+
+
+operation_lookup = {
+    'do_nothing': do_nothing,
+    'grow': grow,
+    'basal_area_thinning': basal_area_thinning,
+    'stem_count_thinning': stem_count_thinning,
+    'continuous_growth_thinning': continuous_growth_thinning,
+    'reporting': reporting
+}
