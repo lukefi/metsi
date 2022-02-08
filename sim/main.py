@@ -18,7 +18,9 @@ if __name__ == "__main__":
     generators = generators_from_declaration(simulation_declaration, operation_lookup)
     tree = compose(*generators)
 
-    initial_volume = 200
+    payload = {
+        'simulation_state': 200
+    }
 
     chains = tree.operation_chains()
 
@@ -27,7 +29,7 @@ if __name__ == "__main__":
         try:
             print("running chain " + str(iteration_counter))
             iteration_counter = iteration_counter + 1
-            result = evaluate_sequence(initial_volume, *chain)
+            result = evaluate_sequence(payload, *chain)
 
             print(result)
         except Exception as e:

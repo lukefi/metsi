@@ -122,6 +122,6 @@ class TestGenerators(unittest.TestCase):
         generators = sim.generators.generators_from_declaration(yaml.load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        computation_result = run_sequence(0, *chain)
+        computation_result = run_sequence({'simulation_state': 0}, *chain)
         self.assertEqual(5, len(chain))
-        self.assertEqual(4, computation_result)
+        self.assertEqual(4, computation_result['simulation_state'])

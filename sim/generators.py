@@ -1,6 +1,8 @@
 from types import SimpleNamespace
 from typing import Any, Callable, Iterable, List, Optional
 from sim.computation_model import Step
+from sim.operations import prepared_processor
+
 
 def instruction_with_options(instruction: Callable, options: Iterable[Any]) -> Iterable[Callable]:
     """
@@ -101,15 +103,6 @@ def generator_declarations_for_time_point(simulation_steps: List[dict], time: in
     return generator_declarations
 
 
-def operation_function(key: str, operation_lookup: dict) -> Callable:
-    """
-    Create an operation function wrapper for function in operation_lookup by the key.
-    Yes, this is a dumb wrapper, established for consistency. Will have to be extended later
-    to supply operation functions with external parameters.
-    """
-    return lambda *operation_arguments: operation_lookup[key](*operation_arguments)
-
-
 def generator_function(key, generator_lookup: dict, *operations: Callable) -> Callable[[Any], List[Step]]:
     """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
     argument list of operations with the generator."""
@@ -144,8 +137,8 @@ def generators_from_declaration(simulation_declaration: dict, operation_lookup: 
         for generator_declaration in generator_declarations:
             generator_tag = list(generator_declaration.keys())[0]
             operation_tags = generator_declaration[generator_tag]
-            operation_functions = []
-            for operation in operation_tags:
-                operation_functions.append(operation_function(operation, operation_lookup))
-            generator_series.append(generator_function(generator_tag, generator_lookup, *operation_functions))
+            processors = []
+            for operation_tag in operation_tags:
+                processors.append(prepared_processor(operation_tag, operation_lookup))
+            generator_series.append(generator_function(generator_tag, generator_lookup, *processors))
     return generator_series
