@@ -119,7 +119,8 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.generators_from_declaration(yaml.load(declaration), {'inc': inc})
+        generators = sim.generators.generators_from_declaration(
+            yaml.load(declaration, Loader=yaml.CLoader), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
         computation_result = run_sequence({'simulation_state': 0}, *chain)

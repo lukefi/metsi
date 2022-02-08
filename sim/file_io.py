@@ -16,4 +16,4 @@ def forest_stands_from_json_file(file_path: str) -> List[ForestStand]:
 
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     # TODO: content validation
-    return yaml.load(file_contents(file_path))
+    return yaml.load(file_contents(file_path), Loader=yaml.CLoader)
