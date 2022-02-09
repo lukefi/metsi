@@ -23,3 +23,17 @@ def evaluate_sequence(input_data: Optional[Any], *instructions: Callable[[Option
         print("Sequence aborted")
         raise e
     return result
+
+
+def run_chains_iteratively(payload, chains: List[List[Callable]]):
+    iteration_counter = 1
+    for chain in chains:
+        try:
+            print("running chain " + str(iteration_counter))
+            iteration_counter = iteration_counter + 1
+            result = evaluate_sequence(payload, *chain)
+
+            print(result)
+        except Exception as e:
+            print(e)
+        print("\n")

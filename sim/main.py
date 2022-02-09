@@ -1,7 +1,7 @@
 import sys
 
 from sim.operations import operation_lookup
-from sim.runners import evaluate_sequence
+from sim.runners import run_chains_iteratively
 from sim.generators import compose, generators_from_declaration
 from sim.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
 
@@ -24,14 +24,4 @@ if __name__ == "__main__":
 
     chains = tree.operation_chains()
 
-    iteration_counter = 1
-    for chain in chains:
-        try:
-            print("running chain " + str(iteration_counter))
-            iteration_counter = iteration_counter + 1
-            result = evaluate_sequence(payload, *chain)
-
-            print(result)
-        except Exception as e:
-            print(e)
-        print("\n")
+    run_chains_iteratively(payload, chains)
