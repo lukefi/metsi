@@ -1,7 +1,7 @@
 import unittest
 from sim.runners import evaluate_sequence
 
-from test_utils import raises, identity, none
+from tests.test_utils import raises, identity, none
 
 
 class TestOperations(unittest.TestCase):
