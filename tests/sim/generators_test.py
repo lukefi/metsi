@@ -1,7 +1,7 @@
 import unittest
 import sim.generators
 import yaml
-from sim.core_types import Step
+from sim.core_types import Step, OperationPayload
 from sim.generators import instruction_with_options, sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence
 from tests.test_utils import inc, dec
@@ -123,6 +123,7 @@ class TestGenerators(unittest.TestCase):
             yaml.load(declaration, Loader=yaml.CLoader), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        computation_result = run_sequence({'simulation_state': 0}, *chain)
+        payload = OperationPayload(simulation_state=0)
+        computation_result = run_sequence(payload, *chain)
         self.assertEqual(5, len(chain))
-        self.assertEqual(4, computation_result['simulation_state'])
+        self.assertEqual(4, computation_result.simulation_state)

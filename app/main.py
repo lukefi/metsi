@@ -1,5 +1,5 @@
 import sys
-
+from sim.core_types import OperationPayload
 from sim.operations import operation_lookup
 from sim.runners import run_chains_iteratively
 from sim.generators import compose, generators_from_declaration
@@ -18,9 +18,9 @@ if __name__ == "__main__":
     generators = generators_from_declaration(simulation_declaration, operation_lookup)
     tree = compose(*generators)
 
-    payload = {
-        'simulation_state': 200
-    }
+    payload = OperationPayload(
+        simulation_state=stands[1]
+    )
 
     chains = tree.operation_chains()
 

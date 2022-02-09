@@ -1,5 +1,6 @@
 import typing
 from typing import Any
+from sim.core_types import OperationPayload
 from forestry.operations import grow, basal_area_thinning, stem_count_thinning, continuous_growth_thinning, reporting
 
 
@@ -8,26 +9,26 @@ def do_nothing(data: Any) -> Any:
     return data
 
 
-def prepared_operation(operation_entrypoint: typing.Callable, **operation_configuration):
+def prepared_operation(operation_entrypoint: typing.Callable, **operation_parameters):
     """prepares an opertion entrypoint function with configuration parameters"""
-    return lambda state: operation_entrypoint(state, **operation_configuration)
+    return lambda state: operation_entrypoint(state, **operation_parameters)
 
 
-def prepared_processor(operation_tag, processor_lookup, **operation_configuration: dict):
+def prepared_processor(operation_tag, processor_lookup, **operation_parameters: dict):
     """prepares a processor function with an operation entrypoint"""
-    operation = prepared_operation(processor_lookup[operation_tag], **operation_configuration)
+    operation = prepared_operation(processor_lookup[operation_tag], **operation_parameters)
     return lambda payload: processor(payload, operation)
 
 
-def processor(payload: dict, operation: typing.Callable):
+def processor(payload: OperationPayload, operation: typing.Callable):
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
 
     # TODO: run_history for operation
     # TODO: run conditions for operation (is below minimum interval)
-    newstate = operation(payload['simulation_state'])
-    newpayload = {
-        'simulation_state': newstate
-    }
+    newstate = operation(payload.simulation_state)
+    newpayload = OperationPayload(
+        simulation_state=newstate
+    )
     return newpayload
 
 

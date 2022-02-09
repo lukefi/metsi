@@ -1,3 +1,4 @@
+from types import SimpleNamespace
 from typing import Callable, List, Optional, Any
 
 
@@ -49,3 +50,14 @@ class Step:
         self.add_branch(Step(operation, self))
 
 
+class SimulationParams(SimpleNamespace):
+    """Control parameter set for simulation time progressing"""
+    initial_step_time: int
+    step_time_interval: int
+    final_step_time: int
+
+
+class OperationPayload(SimpleNamespace):
+    """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
+    operation calls. """
+    simulation_state: Any

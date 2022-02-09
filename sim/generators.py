@@ -1,6 +1,5 @@
-from types import SimpleNamespace
 from typing import Any, Callable, Iterable, List, Optional
-from sim.core_types import Step
+from sim.core_types import Step, SimulationParams
 from sim.operations import prepared_processor
 
 
@@ -123,8 +122,7 @@ def generators_from_declaration(simulation_declaration: dict, operation_lookup: 
         'alternatives': alternatives,
     }
     generator_series = []
-    # TODO: proper class SimulationParams
-    simulation_params = SimpleNamespace(**simulation_declaration['simulation_params'])
+    simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
     simulation_steps = simulation_declaration['simulation_steps']
     simulation_time_points = range(
         simulation_params.initial_step_time,
