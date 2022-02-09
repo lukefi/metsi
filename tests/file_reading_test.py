@@ -2,7 +2,7 @@ import unittest
 import os
 
 import sim.file_io
-from sim.ForestDataModels import ForestStand, ReferenceTree
+from forestry.ForestDataModels import ForestStand, ReferenceTree
 
 
 class TestFileReading(unittest.TestCase):

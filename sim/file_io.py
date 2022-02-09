@@ -1,7 +1,7 @@
 import json
 from typing import Tuple, List
 import yaml
-from sim.ForestDataModels import ForestStand, ReferenceTree
+from forestry.ForestDataModels import ForestStand, ReferenceTree
 
 
 def file_contents(file_path: str) -> str:

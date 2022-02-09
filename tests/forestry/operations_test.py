@@ -1,6 +1,6 @@
 import unittest
 
-from sim.forestry_models import grow, cut, plant
+from forestry.operations import grow, cut, plant
 
 
 class OperationsTest(unittest.TestCase):

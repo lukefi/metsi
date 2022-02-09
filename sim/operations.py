@@ -1,6 +1,6 @@
 import typing
 from typing import Any
-from sim.forestry_models import grow, basal_area_thinning, stem_count_thinning, continuous_growth_thinning, reporting
+from forestry.operations import grow, basal_area_thinning, stem_count_thinning, continuous_growth_thinning, reporting
 
 
 def do_nothing(data: Any) -> Any:
