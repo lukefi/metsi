@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 from typing import Any, Callable, Iterable, List, Optional
-from sim.computation_model import Step
+from sim.core_types import Step
 from sim.operations import prepared_processor
 
 

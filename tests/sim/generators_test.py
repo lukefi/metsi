@@ -1,7 +1,7 @@
 import unittest
 import sim.generators
 import yaml
-from sim.computation_model import Step
+from sim.core_types import Step
 from sim.generators import instruction_with_options, sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence
 from tests.test_utils import inc, dec
