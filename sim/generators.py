@@ -1,6 +1,7 @@
 from typing import Any, Callable, Iterable, List, Optional
 from sim.core_types import Step, SimulationParams
 from sim.operations import prepared_processor
+from sim.util import get_or_default, dict_value
 
 
 def instruction_with_options(instruction: Callable, options: Iterable[Any]) -> Iterable[Callable]:
@@ -123,10 +124,11 @@ def generators_from_declaration(simulation_declaration: dict, operation_lookup: 
     }
     generator_series = []
     simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
-    simulation_events = simulation_declaration['simulation_events']
+    simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
+    operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
     simulation_time_points = range(
         simulation_params.initial_step_time,
-        simulation_params.final_step_time + +1,
+        simulation_params.final_step_time + 1,
         simulation_params.step_time_interval
     )
 
@@ -138,8 +140,7 @@ def generators_from_declaration(simulation_declaration: dict, operation_lookup: 
 
             processors = []
             for operation_tag in operation_tags:
-                operation_params = simulation_declaration['operation_params'].get(operation_tag)
-                operation_params = {} if operation_params is None else operation_params
-                processors.append(prepared_processor(operation_tag, operation_lookup, **operation_params))
+                this_operation_params = get_or_default(operation_params.get(operation_tag), {})
+                processors.append(prepared_processor(operation_tag, operation_lookup, **this_operation_params))
             generator_series.append(generator_function(generator_tag, generator_lookup, *processors))
     return generator_series
