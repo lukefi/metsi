@@ -112,7 +112,7 @@ class TestGenerators(unittest.TestCase):
           initial_step_time: 0
           step_time_interval: 1
           final_step_time: 1
-        simulation_steps:
+        simulation_events:
           - time_points: [0, 1]
             generators:
               - sequence:

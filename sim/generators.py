@@ -123,7 +123,7 @@ def generators_from_declaration(simulation_declaration: dict, operation_lookup: 
     }
     generator_series = []
     simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
-    simulation_steps = simulation_declaration['simulation_steps']
+    simulation_events = simulation_declaration['simulation_events']
     simulation_time_points = range(
         simulation_params.initial_step_time,
         simulation_params.final_step_time + +1,
@@ -131,7 +131,7 @@ def generators_from_declaration(simulation_declaration: dict, operation_lookup: 
     )
 
     for time_point in simulation_time_points:
-        generator_declarations = generator_declarations_for_time_point(simulation_steps, time_point)
+        generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
         for generator_declaration in generator_declarations:
             generator_tag = list(generator_declaration.keys())[0]
             operation_tags = generator_declaration[generator_tag]
