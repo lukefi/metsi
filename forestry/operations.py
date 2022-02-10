@@ -22,5 +22,9 @@ def continuous_growth_thinning(stand: ForestStand, **operation_parameters) -> Fo
 
 
 def reporting(stand: ForestStand, **operation_parameters) -> ForestStand:
-    print("Stand " + stand.identifier + " appears to be quite green!")
+    level = operation_parameters.get('level')
+    if level is None:
+        print(stand.identifier)
+    elif level is 1:
+        print("Stand " + stand.identifier + " appears to be quite green!")
     return stand

@@ -27,3 +27,10 @@ def dec(x: int) -> int:
 
 def max_reducer(x: List[int]) -> Optional[int]:
     return max(x)
+
+
+def parametrized_operation(x, **kwargs):
+    if kwargs.get('amplify') is True:
+        return x * 1000
+    else:
+        return x
