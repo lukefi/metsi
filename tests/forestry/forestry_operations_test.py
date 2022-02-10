@@ -4,7 +4,7 @@ from forestry.ForestDataModels import ForestStand
 from forestry.operations import grow
 
 
-class OperationsTest(unittest.TestCase):
+class ForestryOperationsTest(unittest.TestCase):
     def test_grow(self):
         fixture = ForestStand()
         fixture.identifier = "123"
