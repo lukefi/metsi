@@ -1,4 +1,3 @@
-import sys
 from sim.core_types import OperationPayload
 from sim.operations import operation_lookup
 from sim.runners import run_chains_iteratively
@@ -7,12 +6,7 @@ from app.file_io import forest_stands_from_json_file, simulation_declaration_fro
 
 if __name__ == "__main__":
     # TODO: use argparse
-    try:
-        input_filename = sys.argv[1]
-        stands = forest_stands_from_json_file(input_filename)
-    except:
-        stands = []
-
+    stands = forest_stands_from_json_file('input.json')
     simulation_declaration = simulation_declaration_from_yaml_file('control.yaml')
 
     generators = generators_from_declaration(simulation_declaration, operation_lookup)
