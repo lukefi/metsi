@@ -28,3 +28,12 @@ def reporting(stand: ForestStand, **operation_parameters) -> ForestStand:
     elif level is 1:
         print("Stand " + stand.identifier + " appears to be quite green!")
     return stand
+
+
+operation_lookup = {
+    'grow': grow,
+    'basal_area_thinning': basal_area_thinning,
+    'stem_count_thinning': stem_count_thinning,
+    'continuous_growth_thinning': continuous_growth_thinning,
+    'reporting': reporting
+}

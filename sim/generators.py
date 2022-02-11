@@ -141,6 +141,9 @@ def generators_from_declaration(simulation_declaration: dict, operation_lookup: 
             processors = []
             for operation_tag in operation_tags:
                 this_operation_params = get_or_default(operation_params.get(operation_tag), {})
-                processors.append(prepared_processor(operation_tag, operation_lookup, **this_operation_params))
+                processors.append(prepared_processor(
+                    operation_tag,
+                    operation_lookup,
+                    **this_operation_params))
             generator_series.append(generator_function(generator_tag, generator_lookup, *processors))
     return generator_series

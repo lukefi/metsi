@@ -1,7 +1,7 @@
 import typing
 from typing import Any
 from sim.core_types import OperationPayload
-from forestry.operations import grow, basal_area_thinning, stem_count_thinning, continuous_growth_thinning, reporting
+from sim.util import get_or_default, dict_value
 
 
 def do_nothing(data: Any) -> Any:
@@ -16,7 +16,7 @@ def prepared_operation(operation_entrypoint: typing.Callable, **operation_parame
 
 def prepared_processor(operation_tag, processor_lookup, **operation_parameters: dict):
     """prepares a processor function with an operation entrypoint"""
-    operation = prepared_operation(processor_lookup[operation_tag], **operation_parameters)
+    operation = prepared_operation(resolve_operation(operation_tag, processor_lookup), **operation_parameters)
     return lambda payload: processor(payload, operation)
 
 
@@ -32,11 +32,16 @@ def processor(payload: OperationPayload, operation: typing.Callable):
     return newpayload
 
 
-operation_lookup = {
-    'do_nothing': do_nothing,
-    'grow': grow,
-    'basal_area_thinning': basal_area_thinning,
-    'stem_count_thinning': stem_count_thinning,
-    'continuous_growth_thinning': continuous_growth_thinning,
-    'reporting': reporting
+def resolve_operation(tag: str, external_operation_lookup: dict) -> typing.Callable:
+    operation = get_or_default(
+        dict_value(external_operation_lookup, tag),
+        dict_value(internal_operation_lookup, tag))
+    if operation is None:
+        raise Exception("Operation " + tag + " not available")
+    else:
+        return operation
+
+
+internal_operation_lookup = {
+    'do_nothing': do_nothing
 }
