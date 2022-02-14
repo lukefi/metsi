@@ -102,11 +102,11 @@ simulation_events:
         - reporting
 ```
 
-# Generators
+## Generators
 
 The three important concepts in the `sim.generators` module are **operations**, **operation processor**, **step tree** and **generators**.
 
-## Operation
+### Operation
 
 An operation is a function whose only responsibility is the simulation state manipulation.
 For the purposes of the simulator, the operation is a partially applied function from the domain package (forestry) such that it will take only one argument, the simulation state.
@@ -114,7 +114,7 @@ They are produced as lambda functions based on the `control.yaml` declaration.
 
 As an example, a single operation such as `grow` would receive a single argument of type `ForestStand` upon which it operates and finally returns a `ForestStand` for the modified/new state. 
 
-## Operation processor
+### Operation processor
 
 A processor is a two parameter function which handles running prepared operations. 
 The parameters are an `OperationPayload` instance and an operation function reference.
@@ -128,12 +128,12 @@ Responsibilities of a processor function are as follows:
 
 Processor functions are produced as lambda functions based on the `control.yaml` declaration.
 
-## The step tree
+### The step tree
 
 The step tree is a tree data structure where each individual node represents a prepared simulation processor.
 It is generated based on the `control.yaml` declaration. Unique operation chains are generated based on the step tree.
 
-## Generators
+### Generators
 
 `sequence` and `alternatives` are functions which produce `Step` instances for given input functions and as successors of previous `Step` instances.
 For the simulation purposes, these input functions are the prepared processors (see above), but the implementation literally does not care what these functions are.
@@ -146,16 +146,16 @@ Step instances are generated and bound to earlier steps (parents) as successors 
 
 The `generators_from_declaration` function prepares the generator functions from the `control.yaml` structure, preparing necessary processor and operation functions within.
 
-# The domain
+## The domain
 
 The `forestry` package contains the data structure and operations necessary to represent the simulation state data and operations acting upon that data.
 
-## State data
+### State data
 
 The class `ForestStand` and the `ReferenceTree` it refers to.
 A single `ForestStand` instance fully represents a simulation state.
 
-## Operations
+### Operations
 
 Operations are functions which take two arguments
 
@@ -165,7 +165,7 @@ Operations are functions which take two arguments
 By convention (since Python as a language does not allow us to properly enforce this), these functions must remain pure and not trigger side-effectful program logic.
 As a design consideration, if it appears that a function needs parameters that can't be supplied by the `control.yaml` and parameters dict, this must be addressed by other development.
 
-# The engine
+## The engine
 
 `sim.runners` module has two functions of interest:
 
@@ -174,3 +174,38 @@ As a design consideration, if it appears that a function needs parameters that c
 
 Note that this package is a simple run-testing implementation.
 In the future we wish to expand upon this to allow for distributed run scenarios using Dask.
+
+# Additional information
+
+## Notes for domain developers
+
+Your primary responsibility is to write the functionality that acts upon simulation state data based on parameters of your choosing.
+For the forestry case, the state data is a single instance of a ForestStand, which always has a member list of ReferenceTree instances.
+
+You write an operation function, which is an entry point to your work.
+
+* It shall take in a single argument, a ForestStand instance.
+* It shall return a ForestStand instance, or it shall raise an Exception when the operation can not complete its work for any reason.
+
+The operation function can internally be whatever you require it to be.
+Write out as many other functions you need for the underlying scientific models.
+
+Keep your work functionally pure.
+This means that the implementations must never access input and output (API calls, file access, etc.).
+This also means that all data must be passed as function arguments, return values and exceptions.
+Do not use shared memory outside of the scope of the functions you write.
+Python does not allow us to be strict about this, so it is up to you!
+**Being strict about it is crucial for producing safe, testable, provable and deterministic implementations.**
+
+Implement unit tests for functions that you write.
+Unit tests allow you to develop your functions completely independently from the rest of the system.
+You do not need to run the simulation to test your work, but use a test to ensure that your function returns what is expected and behaves like it's intended.
+
+* Coordinate with simulator developers when some need arises that you feel can not be addressed with the model described above.
+A solution that doesn't require breaking functional purity can most certainly be found by developing the simulator and operations interface structure.
+* Coordinate with other developers when the work you do and models you write can be shared with other operations.
+* Coordinate with simulator creators about the parameters names and structures that can be passed from control.yaml file.
+
+## Notes for simulation creators
+
+Use the control.yaml structure declaration to control the simulation structure, domain operations and parameters that are to be used.
