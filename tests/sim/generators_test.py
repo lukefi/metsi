@@ -2,22 +2,12 @@ import unittest
 import sim.generators
 import yaml
 from sim.core_types import Step, OperationPayload
-from sim.generators import instruction_with_options, sequence, compose, alternatives, repeat
+from sim.generators import sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence
 from tests.test_utils import inc, dec
 
 
 class TestGenerators(unittest.TestCase):
-    def test_instruction_with_options(self):
-        value = 100
-        options = [10, 20, 30]
-        func = lambda x, y: x + y
-        prepared_functions = instruction_with_options(func, options)
-        results = []
-        for f in prepared_functions:
-            results.append(f(value))
-        self.assertEqual([110, 120, 130], results)
-
     def test_step_sequence_generating(self):
         root = Step()
         result = sequence(

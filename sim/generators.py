@@ -4,17 +4,6 @@ from sim.operations import prepared_processor
 from sim.util import get_or_default, dict_value
 
 
-def instruction_with_options(instruction: Callable, options: Iterable[Any]) -> Iterable[Callable]:
-    """
-    Partially apply options Y to function f(X,Y) to create an iterable of functions f(X), ...
-    Convenience method for obtaining branch entry points for *alternatives* call.
-    :param instruction: function with signature f(X,Y)
-    :param options: the values Y
-    :return: list of functions with signature f(X), curried with values Y
-    """
-    return map(lambda option: lambda x: instruction(x, option), options)
-
-
 def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
     """
     Generate a linear sequence of steps, optionally extending each Step in the given list of Steps with it.
