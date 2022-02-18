@@ -1,19 +1,19 @@
 import unittest
 import os
 
-import sim.file_io
-from sim.ForestDataModels import ForestStand, ReferenceTree
+import app.file_io
+from forestry.ForestDataModels import ForestStand, ReferenceTree
 
 
 class TestFileReading(unittest.TestCase):
     def test_file_contents(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "test_dummy")
-        result = sim.file_io.file_contents(input_file_path)
+        result = app.file_io.file_contents(input_file_path)
         self.assertEqual("kissa123\n", result)
 
     def test_forest_stands_from_json_file(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "vmi13_small.json")
-        stands = sim.file_io.forest_stands_from_json_file(input_file_path)
+        stands = app.file_io.forest_stands_from_json_file(input_file_path)
         self.assertEqual(type(stands[0]), ForestStand)
         self.assertEqual(len(stands), 5)
         self.assertEqual(stands[0].identifier, "77-57-2-1")
@@ -22,5 +22,5 @@ class TestFileReading(unittest.TestCase):
 
     def test_simulation_declaration_from_yaml_file(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "control.yaml")
-        result = sim.file_io.simulation_declaration_from_yaml_file(input_file_path)
+        result = app.file_io.simulation_declaration_from_yaml_file(input_file_path)
         self.assertEqual(2, len(result.keys()))

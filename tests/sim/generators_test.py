@@ -1,23 +1,13 @@
 import unittest
 import sim.generators
 import yaml
-from sim.computation_model import Step
-from sim.generators import instruction_with_options, sequence, compose, alternatives, repeat
+from sim.core_types import Step, OperationPayload
+from sim.generators import sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence
-from test_utils import inc, dec
+from tests.test_utils import inc, dec
 
 
 class TestGenerators(unittest.TestCase):
-    def test_instruction_with_options(self):
-        value = 100
-        options = [10, 20, 30]
-        func = lambda x, y: x + y
-        prepared_functions = instruction_with_options(func, options)
-        results = []
-        for f in prepared_functions:
-            results.append(f(value))
-        self.assertEqual([110, 120, 130], results)
-
     def test_step_sequence_generating(self):
         root = Step()
         result = sequence(
@@ -112,16 +102,18 @@ class TestGenerators(unittest.TestCase):
           initial_step_time: 0
           step_time_interval: 1
           final_step_time: 1
-        simulation_steps:
+        simulation_events:
           - time_points: [0, 1]
             generators:
               - sequence:
                 - inc
                 - inc
         """
-        generators = sim.generators.generators_from_declaration(yaml.load(declaration), {'inc': inc})
+        generators = sim.generators.generators_from_declaration(
+            yaml.load(declaration, Loader=yaml.CLoader), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        computation_result = run_sequence(0, *chain)
+        payload = OperationPayload(simulation_state=0)
+        computation_result = run_sequence(payload, *chain)
         self.assertEqual(5, len(chain))
-        self.assertEqual(4, computation_result)
+        self.assertEqual(4, computation_result.simulation_state)

@@ -1,16 +1,7 @@
-from types import SimpleNamespace
 from typing import Any, Callable, Iterable, List, Optional
-from sim.computation_model import Step
-
-def instruction_with_options(instruction: Callable, options: Iterable[Any]) -> Iterable[Callable]:
-    """
-    Partially apply options Y to function f(X,Y) to create an iterable of functions f(X), ...
-    Convenience method for obtaining branch entry points for *alternatives* call.
-    :param instruction: function with signature f(X,Y)
-    :param options: the values Y
-    :return: list of functions with signature f(X), curried with values Y
-    """
-    return map(lambda option: lambda x: instruction(x, option), options)
+from sim.core_types import Step, SimulationParams
+from sim.operations import prepared_processor
+from sim.util import get_or_default, dict_value
 
 
 def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
@@ -101,15 +92,6 @@ def generator_declarations_for_time_point(simulation_steps: List[dict], time: in
     return generator_declarations
 
 
-def operation_function(key: str, operation_lookup: dict) -> Callable:
-    """
-    Create an operation function wrapper for function in operation_lookup by the key.
-    Yes, this is a dumb wrapper, established for consistency. Will have to be extended later
-    to supply operation functions with external parameters.
-    """
-    return lambda *operation_arguments: operation_lookup[key](*operation_arguments)
-
-
 def generator_function(key, generator_lookup: dict, *operations: Callable) -> Callable[[Any], List[Step]]:
     """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
     argument list of operations with the generator."""
@@ -130,22 +112,27 @@ def generators_from_declaration(simulation_declaration: dict, operation_lookup: 
         'alternatives': alternatives,
     }
     generator_series = []
-    # TODO: proper class SimulationParams
-    simulation_params = SimpleNamespace(**simulation_declaration['simulation_params'])
-    simulation_steps = simulation_declaration['simulation_steps']
+    simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
+    simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
+    operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
     simulation_time_points = range(
         simulation_params.initial_step_time,
-        simulation_params.final_step_time + +1,
+        simulation_params.final_step_time + 1,
         simulation_params.step_time_interval
     )
 
     for time_point in simulation_time_points:
-        generator_declarations = generator_declarations_for_time_point(simulation_steps, time_point)
+        generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
         for generator_declaration in generator_declarations:
             generator_tag = list(generator_declaration.keys())[0]
             operation_tags = generator_declaration[generator_tag]
-            operation_functions = []
-            for operation in operation_tags:
-                operation_functions.append(operation_function(operation, operation_lookup))
-            generator_series.append(generator_function(generator_tag, generator_lookup, *operation_functions))
+
+            processors = []
+            for operation_tag in operation_tags:
+                this_operation_params = get_or_default(operation_params.get(operation_tag), {})
+                processors.append(prepared_processor(
+                    operation_tag,
+                    operation_lookup,
+                    **this_operation_params))
+            generator_series.append(generator_function(generator_tag, generator_lookup, *processors))
     return generator_series

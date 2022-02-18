@@ -3,7 +3,7 @@ simulation_params:
   step_time_interval: 1
   final_step_time: 2
 
-simulation_steps:
+simulation_events:
   # we describe here objects with schedule for which time points they are active
   - time_points: [1]
     generators:

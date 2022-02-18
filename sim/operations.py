@@ -1,30 +1,7 @@
-from math import log, e
-from typing import Any, Optional
-
-
-def grow(volume: float) -> Optional[float]:
-    if volume is None:
-        return None
-    multiplier = 1 + 1 / log(volume, e)
-    result = multiplier * volume
-    print("Forest growing by factor of " + str(multiplier) + ". V = " + str(volume) + " -> " + str(multiplier * volume))
-    return result
-
-
-def cut(volume: float, pct: float = 100) -> Optional[float]:
-    if volume is None:
-        return None
-    multiplier = pct / 100
-    result = volume - multiplier * volume
-    if can_cut(volume) is False:
-        raise Exception("Can not cut " + str(pct) + " %. Tree volume " + str(result) + " is below cutting threshold.")
-
-    print("Cutting " + str(pct) + " %. V = " + str(volume) + " -> " + str(result))
-    return result
-
-
-def can_cut(volume: float, threshold: float = 200) -> bool:
-    return volume > threshold
+import typing
+from typing import Any
+from sim.core_types import OperationPayload
+from sim.util import get_or_default, dict_value
 
 
 def do_nothing(data: Any) -> Any:
@@ -32,30 +9,39 @@ def do_nothing(data: Any) -> Any:
     return data
 
 
-def plant(volume: float, amount: int) -> Optional[float]:
-    if volume is None:
-        return None
-    increase = amount / 100
-    result = volume + increase
-    print("Planting " + str(amount) + " trees. V now " + str(result))
-    return result
+def prepared_operation(operation_entrypoint: typing.Callable, **operation_parameters):
+    """prepares an opertion entrypoint function with configuration parameters"""
+    return lambda state: operation_entrypoint(state, **operation_parameters)
 
 
-def basal_area_thinning(X):
-    print("basal area thinning")
-    return X
+def prepared_processor(operation_tag, processor_lookup, **operation_parameters: dict):
+    """prepares a processor function with an operation entrypoint"""
+    operation = prepared_operation(resolve_operation(operation_tag, processor_lookup), **operation_parameters)
+    return lambda payload: processor(payload, operation)
 
 
-def stem_count_thinning(X):
-    print("stem count thinning")
-    return X
+def processor(payload: OperationPayload, operation: typing.Callable):
+    """Managed run conditions and history of a simulator operation. Evaluates the operation."""
+
+    # TODO: run_history for operation
+    # TODO: run conditions for operation (is below minimum interval)
+    newstate = operation(payload.simulation_state)
+    newpayload = OperationPayload(
+        simulation_state=newstate
+    )
+    return newpayload
 
 
-def continuous_growth_thinning(X):
-    print("continuous growth thinning")
-    return X
+def resolve_operation(tag: str, external_operation_lookup: dict) -> typing.Callable:
+    operation = get_or_default(
+        dict_value(external_operation_lookup, tag),
+        dict_value(internal_operation_lookup, tag))
+    if operation is None:
+        raise Exception("Operation " + tag + " not available")
+    else:
+        return operation
 
 
-def reporting(X):
-    print('information output stub')
-    return X
+internal_operation_lookup = {
+    'do_nothing': do_nothing
+}

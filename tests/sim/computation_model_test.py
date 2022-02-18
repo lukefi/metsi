@@ -1,8 +1,8 @@
 import unittest
 
 from sim.runners import evaluate_sequence
-from sim.computation_model import Step
-from test_utils import inc
+from sim.core_types import Step
+from tests.test_utils import inc
 
 
 class ComputationModelTest(unittest.TestCase):
