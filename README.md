@@ -1,7 +1,7 @@
 # Mela 2.0 simulator
 
 Mela 2.0 simulator is a Python based forest growth and maintenance operation simulator developed in Natural Resources Institute Finland.
-It is meant to be the modernized version of the older Fortran based MELA simulator program developed in  since the 1980s.
+It is a part of a software collection replacing the older Fortran based MELA simulator program developed since the 1980s.
 
 The simulator is a stepwise branching state simulator operating upon forest state data.
 The state data is manipulated by **simulator operations**, which in turn rely upon scientific **model function chains**.
@@ -67,13 +67,15 @@ The structure will be expanded to allow parameters and constraints declaration f
    1. `initial_step_time` is the integer point of time for the simulation's first cycle
    2. `step_time_interval` is the integer amount of time between each simulation cycle
    3. `final_step_time` is the integer point of time for the simulations's last cycle
-2. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
+2. Operation parameters in the object `operation_params`
+3. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
    1. `time_points` is a list of integers which assign this set of operations to simulation time points
    2. `generators` is a list of chained generator functions (see section on step generators)
       1. `sequence` a list of operations to be executed as a chain
       2. `alternatives` a list of operations which represent alternative branches
 
 The following example declares a simulation, which runs four event cycles at time points 0, 5, 10 and 15.
+Images below describe the simulation as a step tree, and further as the computation chains that are generated from the tree.
 
 * At time point 0, `reporting` of the simulation state is done.
 * At time point 5, the `grow` operation is done on the simulation state and the simulation is branched by 2.
@@ -82,13 +84,24 @@ One branch does not modify the forest state data with `do_nothing`, the other pe
 * At time point 15, `reporting` is done on the 4 individual state branches.
 
 ```yaml
+# simulation run control parameters
+# simulation epoch at intial_step_time 0
+# simulation progresses in step_time_interval of 5 units
+# simulation end at final_step_time 15
 simulation_params:
   initial_step_time: 0
   step_time_interval: 5
   final_step_time: 15
 
+# example of operation parameters
+# reporting operation gets parameter level with value 1
+operation_params:
+   reporting:
+      level: 1
+
+# simulation_events are a collection of operations meant to be executed at
+# the specified time_points
 simulation_events:
-  # we describe here objects with schedule for which time points they are active
   - time_points: [5, 10]
     generators:
       - sequence:          
@@ -102,9 +115,17 @@ simulation_events:
         - reporting
 ```
 
-## Generators
+Step tree from declaration above
 
-The three important concepts in the `sim.generators` module are **operations**, **operation processor**, **step tree** and **generators**.
+![Step tree](doc/20220221_sim-tree.drawio.png)
+
+Operation chains from step tree above
+
+![Operation chains](doc/20220221_sim-chains.drawio.png)
+
+## Simulator
+
+The three important concepts in the `sim` package are **operations**, **operation processor**, **step tree** and **generators**.
 
 ### Operation
 
