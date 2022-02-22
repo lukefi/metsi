@@ -3,9 +3,9 @@ simulation_params:
   step_time_interval: 1
   final_step_time: 20
 
-operation_params:
-  reporting:
-    level: 1
+run_constrains:
+  basal_area_thinning:
+    minimum_time_interval: 10
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
