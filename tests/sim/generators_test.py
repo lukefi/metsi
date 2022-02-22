@@ -113,7 +113,54 @@ class TestGenerators(unittest.TestCase):
             yaml.load(declaration, Loader=yaml.CLoader), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0)
+        payload = OperationPayload(simulation_state=0, run_history={})
         computation_result = run_sequence(payload, *chain)
         self.assertEqual(5, len(chain))
         self.assertEqual(4, computation_result.simulation_state)
+
+    def test_operation_run_constrains_success(self):
+        declaration="""
+        simulation_params:
+            initial_step_time: 0
+            step_time_interval: 1
+            final_step_time: 3
+        run_constrains:
+            inc:
+                minimum_time_interval: 2
+        simulation_events:
+          - time_points: [1, 3]
+            generators:
+              - sequence:
+                - inc
+        """
+        generators = sim.generators.generators_from_declaration(
+            yaml.safe_load(declaration), {'inc': inc})
+        result = compose(*generators)
+        chain = result.operation_chains()[0]
+        payload = OperationPayload(simulation_state=0, run_history={})
+        computation_result = run_sequence(payload, *chain)
+        self.assertEqual(5, len(chain))
+        self.assertEqual(2, computation_result.simulation_state)
+
+    def test_operation_run_constrains_fail(self):
+        declaration="""
+        simulation_params:
+            initial_step_time: 0
+            step_time_interval: 1
+            final_step_time: 3
+        run_constrains:
+            inc:
+                minimum_time_interval: 2
+        simulation_events:
+          - time_points: [1, 3]
+            generators:
+              - sequence:
+                - inc
+                - inc
+        """
+        generators = sim.generators.generators_from_declaration(
+            yaml.safe_load(declaration), {'inc': inc})
+        result = compose(*generators)
+        chain = result.operation_chains()[0]
+        payload = OperationPayload(simulation_state=0, run_history={})
+        self.assertRaises(Exception, run_sequence, payload, *chain)

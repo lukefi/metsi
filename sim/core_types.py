@@ -61,3 +61,4 @@ class OperationPayload(SimpleNamespace):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
     simulation_state: Any
+    run_history: dict or None
