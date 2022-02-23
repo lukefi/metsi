@@ -42,7 +42,7 @@ python -m app.main
 
 In this phase of development, the program assumes files two files to exist in working directory.
 
-* `input.json` is a forest data file used for forestry simulation. It is sourced from vmi-data-converter and adheres to MELA RSD specification for properties of forest stands and reference trees. 
+* `input.json` is a forest data file used for forestry simulation. It is sourced from vmi-data-converter and adheres to MELA RSD specification for properties of forest stands and reference trees.
 * `control.yaml` is the declared structure for a simulation run.
 
 To run unit test suites, run in the project root
@@ -67,8 +67,9 @@ The structure will be expanded to allow parameters and constraints declaration f
    1. `initial_step_time` is the integer point of time for the simulation's first cycle
    2. `step_time_interval` is the integer amount of time between each simulation cycle
    3. `final_step_time` is the integer point of time for the simulations's last cycle
-2. Operation parameters in the object `operation_params`
-3. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
+2. Operaton run constrains in the object `run_constrains`
+3. Operation parameters in the object `operation_params`
+4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
    1. `time_points` is a list of integers which assign this set of operations to simulation time points
    2. `generators` is a list of chained generator functions (see section on step generators)
       1. `sequence` a list of operations to be executed as a chain
@@ -93,6 +94,12 @@ simulation_params:
   step_time_interval: 5
   final_step_time: 15
 
+# example of operation run constrains
+# minimum time interval constrain between thinnings is 10 years
+run_constrains:
+  thinning:
+    minimum_time_interval: 10
+
 # example of operation parameters
 # reporting operation gets parameter level with value 1
 operation_params:
@@ -104,7 +111,7 @@ operation_params:
 simulation_events:
   - time_points: [5, 10]
     generators:
-      - sequence:          
+      - sequence:
         - grow
       - alternatives:
         - do_nothing
@@ -133,11 +140,11 @@ An operation is a function whose only responsibility is the simulation state man
 For the purposes of the simulator, the operation is a partially applied function from the domain package (forestry) such that it will take only one argument, the simulation state.
 They are produced as lambda functions based on the `control.yaml` declaration.
 
-As an example, a single operation such as `grow` would receive a single argument of type `ForestStand` upon which it operates and finally returns a `ForestStand` for the modified/new state. 
+As an example, a single operation such as `grow` would receive a single argument of type `ForestStand` upon which it operates and finally returns a `ForestStand` for the modified/new state.
 
 ### Operation processor
 
-A processor is a two parameter function which handles running prepared operations. 
+A processor is a two parameter function which handles running prepared operations.
 The parameters are an `OperationPayload` instance and an operation function reference.
 The `OperationPayload` is primarily the container for simulation state data, along with a record of simulation run history and operation run constraints.
 Responsibilities of a processor function are as follows:
@@ -160,7 +167,7 @@ It is generated based on the `control.yaml` declaration. Unique operation chains
 For the simulation purposes, these input functions are the prepared processors (see above), but the implementation literally does not care what these functions are.
 Sequences are linear chains of steps.
 Alternatives are branching steps.
-The generators are chainable such that they can expand the step tree in formation based on the results of earlier generator results. 
+The generators are chainable such that they can expand the step tree in formation based on the results of earlier generator results.
 
 Step instances are generated and bound to earlier steps (parents) as successors (children).
 `compose` function executes the `sequence` and `alternatives` to build the complete simulation step tree.

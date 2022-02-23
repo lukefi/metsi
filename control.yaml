@@ -3,6 +3,10 @@ simulation_params:
   step_time_interval: 1
   final_step_time: 20
 
+run_constrains:
+  basal_area_thinning:
+    minimum_time_interval: 10
+
 operation_params:
   reporting:
     level: 1

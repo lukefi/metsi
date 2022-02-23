@@ -13,7 +13,8 @@ if __name__ == "__main__":
     tree = compose(*generators)
 
     payload = OperationPayload(
-        simulation_state=stands[1]
+        simulation_state=stands[1],
+        run_history = {}
     )
 
     chains = tree.operation_chains()
