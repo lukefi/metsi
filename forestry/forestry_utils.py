@@ -20,10 +20,7 @@ def filter_reference_trees_by_species(reference_trees: List[ReferenceTree]) -> L
     return trees_by_species
 
 def calculate_attribute_sum(reference_trees: List[ReferenceTree], f: Callable) -> float:
-    total = 0
-    for tree in reference_trees:
-        total = total + f(tree)
-    return total
+    return sum(map(f, reference_trees))
 
 def calculate_attribute_aggregate(reference_trees: List[ReferenceTree], f: Callable) -> float:
     basal_area_total = calculate_attribute_sum(reference_trees, calculate_basal_area)
