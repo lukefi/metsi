@@ -4,7 +4,15 @@ from forestry.ForestDataModels import ForestStand, ReferenceTree
 from typing import List, Callable
 
 def calculate_basal_area(tree: ReferenceTree) -> float:
-    return math.pi * math.pow(tree.breast_height_diameter / 200, 2) * tree.stems_per_ha
+    """ Single tree basal area calculation.
+
+    :param tree: Single ReferenceTree instance that must contain members of breast height diameter (in meters) and stems per hectare.
+    """
+    radius_m = 200
+    try:
+        return math.pi * math.pow(tree.breast_height_diameter / radius_m, 2) * tree.stems_per_ha
+    except:
+        return 0.0
 
 def solve_dominant_height(reference_trees: List[ReferenceTree]) -> float:
     heights = list(map(lambda tree: tree.height, reference_trees))
