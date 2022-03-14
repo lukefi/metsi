@@ -45,8 +45,8 @@ class ForestryUtilsTest(unittest.TestCase):
         result = f_util.calculate_attribute_sum(reference_trees, f)
         self.assertEquals(30, result)
 
-    def test_calculate_attribute_aggregate(self):
-        # Tests the generic function calculate_attribute_aggregate by counting the basal area weighted sum for breast height diameter for pine (species==1)
+    def test_calculate_basal_area_weighted_attribute_aggregate(self):
+        """ Tests the generic function calculate_attribute_aggregate by counting the basal area weighted sum for breast height diameter for pine (species==1) """
         f = lambda x: x.breast_height_diameter * f_util.calculate_basal_area(x)
         reference_trees = []
         for i in range(1, 6):
@@ -55,7 +55,7 @@ class ForestryUtilsTest(unittest.TestCase):
             reference_tree.breast_height_diameter = 10.0 + i
             reference_tree.stems_per_ha = 50.0 + i
             reference_trees.append(reference_tree)
-        result = f_util.calculate_attribute_sum(reference_trees, f)
-        self.assertEquals(47.7506, round(result,4))
+        result = f_util.calculate_basal_area_weighted_attribute_aggregate(reference_trees, f)
+        self.assertEquals(13.3402, round(result,4))
 
 

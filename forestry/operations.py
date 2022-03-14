@@ -3,6 +3,7 @@ import forestry.forestry_utils as f_util
 from forestry.ForestDataModels import ForestStand, ReferenceTree
 
 def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
+    """ Acta Forestalia Fennica 163 """
     print("Grow operation for stand " + str(stand.identifier))
     # Count ForestStand aggregate values
     basal_area_total = f_util.calculate_attribute_sum(stand.reference_trees, f_util.calculate_basal_area)
@@ -12,15 +13,15 @@ def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
     # Calculate growth for each tree species
     for trees in trees_of_same_species:
         # Count species spesific aggregate values
-        d13_aggregate = f_util.calculate_attribute_aggregate(
+        d13_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
                 trees,
                 lambda tree: tree.__getattribute__('breast_height_diameter') * f_util.calculate_basal_area(tree)
             )
-        height_aggregate = f_util.calculate_attribute_aggregate(
+        height_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
                 trees,
                 lambda tree: tree.__getattribute__('height') * f_util.calculate_basal_area(tree)
             )
-        biological_age_aggregate = f_util.calculate_attribute_aggregate(
+        biological_age_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
                 trees,
                 lambda tree: tree.__getattribute__('biological_age') * f_util.calculate_basal_area(tree)
             )
