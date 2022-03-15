@@ -45,4 +45,14 @@ class ForestryUtilsTest(unittest.TestCase):
         result = f_util.calculate_basal_area_weighted_attribute_aggregate(reference_trees, f)
         self.assertEquals(13.3402, round(result,4))
 
+    def test_compaunded_growth_factor(self):
+        assertions = [
+            ((1.0, 5), 1.051),
+            ((1.0, 1), 1.01),
+            ((0.0, 1), 1.0),
+            ((123.0, 10), 3041.226)
+        ]
+        for i in assertions:
+            result = f_util.compounded_growth_factor(i[0][0], i[0][1])
+            self.assertEquals(i[1], round(result, 3))
 

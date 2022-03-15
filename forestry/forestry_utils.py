@@ -1,7 +1,13 @@
 import math
 import statistics
 from forestry.ForestDataModels import ForestStand, ReferenceTree
-from typing import List, Callable
+from typing import List, Callable, Iterator
+
+def compounded_growth_factor(growth_percent: float, years: int) -> float:
+    try:
+        return math.pow(1.0+(growth_percent/100.0), years)
+    except:
+        return 0.0
 
 def calculate_basal_area(tree: ReferenceTree) -> float:
     """ Single tree basal area calculation.

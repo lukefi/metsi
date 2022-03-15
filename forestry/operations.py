@@ -6,6 +6,8 @@ from forestry.ForestDataModels import ForestStand, ReferenceTree
 def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
     """ Acta Forestalia Fennica 163 """
     print("Grow operation for stand " + str(stand.identifier))
+    # TODO: Source years from simulator configurations
+    years = 5
     # Count ForestStand aggregate values
     basal_area_total = f_util.calculate_attribute_sum(stand.reference_trees, f_util.calculate_basal_area)
     dominant_height = f_util.solve_dominant_height(stand.reference_trees)
@@ -36,16 +38,9 @@ def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
             else:
                 growth_percent_diameter = math.exp(6.9342 - 0.8808*math.log(biological_age_aggregate)-0.4982*math.log(basal_area_total)+0.4159*math.log(d13_aggregate)-0.3865*math.log(height_aggregate)-0.6267*math.log(tree.breast_height_diameter)+0.1287*math.log(tree.height))
                 growth_percent_height = 12.7402-1.1786*math.log(biological_age_aggregate)-0.0937*math.log(basal_area_total)-0.1434*math.log(d13_aggregate)-0.8070*math.log(height_aggregate)+0.7563*math.log(tree.breast_height_diameter)-2.0522*math.log(tree.height)
-            # Calculate the intersets and updated values of height and diameter
-            compound_interest = (1.0+(growth_percent_diameter/100.0))
-            compound_interest = math.pow(compound_interest, 5)
-            d13_tree_updated = tree.breast_height_diameter * compound_interest
-            compound_interest = (1.0+(growth_percent_height/100.0))
-            compound_interest = math.pow(compound_interest, 5)
-            height_tree_updated = tree.height * compound_interest
-            # Update tree
-            tree.breast_height_diameter = d13_tree_updated
-            tree.height = height_tree_updated
+            # Calculate the growth and update tree
+            tree.breast_height_diameter = tree.breast_height_diameter * f_util.compounded_growth_factor(growth_percent_diameter, years)
+            tree.height = tree.height * f_util.compounded_growth_factor(growth_percent_height, years)
     return stand
 
 
