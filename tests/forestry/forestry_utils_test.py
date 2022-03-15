@@ -21,19 +21,6 @@ class ForestryUtilsTest(unittest.TestCase):
         result = f_util.solve_dominant_height(reference_trees)
         self.assertEquals(31.0, result)
 
-    def test_filter_reference_trees_by_species(self):
-        reference_trees = []
-        species = [1, 1, 2, 3, 3]
-        for i in range(0, 5):
-            reference_tree = ReferenceTree()
-            reference_tree.species = species[i]
-            reference_trees.append(reference_tree)
-        result = f_util.filter_reference_trees_by_species(reference_trees)
-        self.assertEquals(3, len(result))
-        self.assertEquals(1, result[0][0].species)
-        self.assertEquals(2, result[1][0].species)
-        self.assertEquals(3, result[2][0].species)
-
     def test_calcualte_attribute_sum(self):
         f = lambda x: x.stems_per_ha
         reference_trees = []

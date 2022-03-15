@@ -19,14 +19,6 @@ def solve_dominant_height(reference_trees: List[ReferenceTree]) -> float:
     dominant_height = statistics.median(heights)
     return dominant_height
 
-def filter_reference_trees_by_species(reference_trees: List[ReferenceTree]) -> List[ReferenceTree]:
-    species = set(map(lambda tree: tree.species, reference_trees))
-    trees_by_species = []
-    for spe in species:
-        trees = list(filter(lambda tree: tree.species == spe, reference_trees))
-        trees_by_species.append(trees)
-    return trees_by_species
-
 def calculate_attribute_sum(reference_trees: List[ReferenceTree], f: Callable) -> float:
     return sum(map(f, reference_trees))
 

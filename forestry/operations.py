@@ -1,4 +1,5 @@
 import math
+import itertools
 import forestry.forestry_utils as f_util
 from forestry.ForestDataModels import ForestStand, ReferenceTree
 
@@ -8,10 +9,11 @@ def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
     # Count ForestStand aggregate values
     basal_area_total = f_util.calculate_attribute_sum(stand.reference_trees, f_util.calculate_basal_area)
     dominant_height = f_util.solve_dominant_height(stand.reference_trees)
-    # Generate a list where each element corresponds to a list of reference trees with same species
-    trees_of_same_species = f_util.filter_reference_trees_by_species(stand.reference_trees)
+    # Group reference trees with same species
+    tree_groups = itertools.groupby(stand.reference_trees, lambda tree: tree.species)
     # Calculate growth for each tree species
-    for trees in trees_of_same_species:
+    for _, tree_group in tree_groups:
+        trees = list(tree_group)
         # Count species spesific aggregate values
         d13_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
                 trees,
