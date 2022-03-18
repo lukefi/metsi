@@ -28,8 +28,13 @@ def solve_dominant_height(reference_trees: List[ReferenceTree]) -> float:
 def calculate_attribute_sum(reference_trees: List[ReferenceTree], f: Callable) -> float:
     return sum(map(f, reference_trees))
 
-def calculate_basal_area_weighted_attribute_aggregate(reference_trees: List[ReferenceTree], f: Callable) -> float:
-    """ Calcualtes basal area weighted sum of the reference trees attribute predefined in function f """
+def calculate_basal_area_weighted_attribute_aggregate(reference_trees: List[ReferenceTree], f: Callable[[ReferenceTree], float]) -> float:
+    """ Calcualtes basal area weighted sum for reference trees attribute predefined in function f
+
+    predefined function f contains the logic of calculating reference tree attribute (eg. tree height).
+    For example:
+        f = lambda x: x.height * calculate_basal_area(x)
+    """
     basal_area_total = calculate_attribute_sum(reference_trees, calculate_basal_area)
     attribute_total = calculate_attribute_sum(reference_trees, f)
     return attribute_total / basal_area_total
