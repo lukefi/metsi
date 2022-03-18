@@ -64,15 +64,15 @@ def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
         # Count species spesific aggregate values
         d13_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
                 trees,
-                lambda tree: tree.__getattribute__('breast_height_diameter') * f_util.calculate_basal_area(tree)
+                lambda tree: tree.breast_height_diameter * f_util.calculate_basal_area(tree)
             )
         height_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
                 trees,
-                lambda tree: tree.__getattribute__('height') * f_util.calculate_basal_area(tree)
+                lambda tree: tree.height * f_util.calculate_basal_area(tree)
             )
         biological_age_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
                 trees,
-                lambda tree: tree.__getattribute__('biological_age') * f_util.calculate_basal_area(tree)
+                lambda tree: tree.biological_age * f_util.calculate_basal_area(tree)
             )
         # Solve and update growth for each tree
         for tree in trees:
