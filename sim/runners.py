@@ -22,13 +22,16 @@ def evaluate_sequence(payload, *operations: Callable) -> Optional:
     return result
 
 
-def run_chains_iteratively(payload, chains: List[List[Callable]]):
+def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
     iteration_counter = 1
     total_chains = len(chains)
+    results = []
     for chain in chains:
         try:
             print("running chain {} of {}".format(iteration_counter, total_chains))
             iteration_counter = iteration_counter + 1
-            result = evaluate_sequence(deepcopy(payload), *chain)
+            results.append(evaluate_sequence(deepcopy(payload), *chain))
         except Exception as e:
             print(e)
+    print("Completed iteration with {} results".format(len(results)))
+    return results

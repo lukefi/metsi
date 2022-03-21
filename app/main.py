@@ -12,11 +12,12 @@ if __name__ == "__main__":
     generators = generators_from_declaration(simulation_declaration, forestry.operations.operation_lookup)
     tree = compose(*generators)
 
-    payload = OperationPayload(
-        simulation_state=stands[1],
-        run_history = {}
-    )
-
-    chains = tree.operation_chains()
-
-    run_chains_iteratively(payload, chains)
+    for stand in stands:
+        print("Running simulation for stand {}".format(stand.identifier))
+        payload = OperationPayload(
+            simulation_state=stand,
+            run_history={}
+        )
+        chains = tree.operation_chains()
+        result = run_chains_iteratively(payload, chains)
+        print("Obtained {} variants for stand {}".format(len(result), stand.identifier))
