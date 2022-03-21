@@ -1,4 +1,5 @@
 from typing import Optional, Any, Callable, List
+from copy import deepcopy
 
 
 def evaluate_sequence(payload: Any, *operations: Callable) -> Optional[Any]:
@@ -15,25 +16,19 @@ def evaluate_sequence(payload: Any, *operations: Callable) -> Optional[Any]:
     """
     result = None
     current = payload
-    try:
-        for func in operations:
-            result = func(current)
-            current = result
-    except Exception as e:
-        print("Sequence aborted")
-        raise e
+    for func in operations:
+        result = func(current)
+        current = result
     return result
 
 
 def run_chains_iteratively(payload: Any, chains: List[List[Callable]]):
     iteration_counter = 1
+    total_chains = len(chains)
     for chain in chains:
         try:
-            print("running chain " + str(iteration_counter))
+            print("running chain {} of {}".format(iteration_counter, total_chains))
             iteration_counter = iteration_counter + 1
-            result = evaluate_sequence(payload, *chain)
-
-            print(result)
+            result = evaluate_sequence(deepcopy(payload), *chain)
         except Exception as e:
             print(e)
-        print("\n")
