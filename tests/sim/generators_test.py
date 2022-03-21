@@ -109,7 +109,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.generators_from_declaration(
+        generators = sim.generators.full_tree_generators_from_declaration(
             yaml.load(declaration, Loader=yaml.CLoader), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
@@ -133,7 +133,7 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc
         """
-        generators = sim.generators.generators_from_declaration(
+        generators = sim.generators.full_tree_generators_from_declaration(
             yaml.safe_load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
@@ -158,7 +158,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.generators_from_declaration(
+        generators = sim.generators.full_tree_generators_from_declaration(
             yaml.safe_load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]

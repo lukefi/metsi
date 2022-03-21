@@ -98,7 +98,7 @@ def generator_function(key, generator_lookup: dict, *operations: Callable) -> Ca
     return lambda payload: generator_lookup[key](payload, *operations)
 
 
-def generators_from_declaration(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
+def full_tree_generators_from_declaration(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
     """
     Creat a list of step generator functions describing a single simulator run.
 
