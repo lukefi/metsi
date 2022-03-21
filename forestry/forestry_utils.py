@@ -10,15 +10,17 @@ def compounded_growth_factor(growth_percent: float, years: int) -> float:
         return 0.0
 
 def calculate_basal_area(tree: ReferenceTree) -> float:
-    """ Single tree basal area calculation.
+    """ Single reference tree basal area calculation.
 
-    :param tree: Single ReferenceTree instance that must contain members of breast height diameter (in meters) and stems per hectare.
+    The tree should contain breast height diameter (in cm) and stesm per hectare for the species spesific calculations.
+
+    :param tree: Single ReferenceTree instance with breast height diameter (in cm) and stems per hectare properties.
+    :return reference tree basal area in square meters
     """
-    radius_m = 200
-    try:
-        return math.pi * math.pow(tree.breast_height_diameter / radius_m, 2) * tree.stems_per_ha
-    except:
-        return 0.0
+    meters_factor = 0.01
+    radius = tree.breast_height_diameter * 0.5 * meters_factor
+    single_basal_area = math.pi * math.pow(radius, 2)
+    return single_basal_area * tree.stems_per_ha
 
 def solve_dominant_height(reference_trees: List[ReferenceTree]) -> float:
     heights = list(map(lambda tree: tree.height, reference_trees))

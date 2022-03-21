@@ -6,10 +6,17 @@ from forestry.ForestDataModels import ForestStand, ReferenceTree
 class ForestryUtilsTest(unittest.TestCase):
     def test_calculate_basal_area(self):
         tree = ReferenceTree()
-        tree.breast_height_diameter = 10.0
-        tree.stems_per_ha = 50.0
-        result = f_util.calculate_basal_area(tree)
-        self.assertEquals(0.3927, round(result, 4))
+        assertions = [
+            [(10.0, 50.0), 0.3927],
+            [(0.0, 50.0), 0.0],
+            [(10.0, 0.0), 0.0],
+            [(0.0, 0.0), 0.0]
+        ]
+        for i in assertions:
+            tree.breast_height_diameter = i[0][0]
+            tree.stems_per_ha = i[0][1]
+            result = f_util.calculate_basal_area(tree)
+            self.assertEquals(i[1], round(result, 4))
 
     def test_solve_dominant_height(self):
         reference_trees = []
