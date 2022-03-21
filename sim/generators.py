@@ -115,7 +115,7 @@ def full_tree_generators_from_declaration(simulation_declaration: dict, operatio
     simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
     simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
     operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
-    run_constrains = get_or_default(dict_value(simulation_declaration, 'run_constrains'), {})
+    run_constraints = get_or_default(dict_value(simulation_declaration, 'run_constraints'), {})
     simulation_time_points = range(
         simulation_params.initial_step_time,
         simulation_params.final_step_time + 1,
@@ -131,12 +131,12 @@ def full_tree_generators_from_declaration(simulation_declaration: dict, operatio
             processors = []
             for operation_tag in operation_tags:
                 this_operation_params = get_or_default(operation_params.get(operation_tag), {})
-                this_run_constrains = get_or_default(run_constrains.get(operation_tag), None)
+                this_run_constraints = get_or_default(run_constraints.get(operation_tag), None)
                 processors.append(prepared_processor(
                     operation_tag,
                     operation_lookup,
                     time_point,
-                    this_run_constrains,
+                    this_run_constraints,
                     **this_operation_params))
             generator_series.append(generator_function(generator_tag, generator_lookup, *processors))
     return generator_series

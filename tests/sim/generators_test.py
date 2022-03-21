@@ -118,13 +118,13 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(5, len(chain))
         self.assertEqual(4, computation_result.simulation_state)
 
-    def test_operation_run_constrains_success(self):
+    def test_operation_run_constraints_success(self):
         declaration="""
         simulation_params:
             initial_step_time: 0
             step_time_interval: 1
             final_step_time: 3
-        run_constrains:
+        run_constraints:
             inc:
                 minimum_time_interval: 2
         simulation_events:
@@ -142,13 +142,13 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(5, len(chain))
         self.assertEqual(2, computation_result.simulation_state)
 
-    def test_operation_run_constrains_fail(self):
+    def test_operation_run_constraints_fail(self):
         declaration="""
         simulation_params:
             initial_step_time: 0
             step_time_interval: 1
             final_step_time: 3
-        run_constrains:
+        run_constraints:
             inc:
                 minimum_time_interval: 2
         simulation_events:
