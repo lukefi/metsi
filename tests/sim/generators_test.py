@@ -139,7 +139,7 @@ class TestGenerators(unittest.TestCase):
         chain = result.operation_chains()[0]
         payload = OperationPayload(simulation_state=0, run_history={})
         computation_result = run_sequence(payload, *chain)
-        self.assertEqual(5, len(chain))
+        self.assertEqual(3, len(chain))
         self.assertEqual(2, computation_result.simulation_state)
 
     def test_operation_run_constraints_fail(self):

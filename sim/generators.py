@@ -87,8 +87,6 @@ def generator_declarations_for_time_point(simulation_steps: List[dict], time: in
     for generator_candidate in simulation_steps:
         if time in generator_candidate['time_points']:
             generator_declarations.extend(generator_candidate['generators'])
-    if len(generator_declarations) == 0:
-        generator_declarations.append({'sequence': ['do_nothing']})
     return generator_declarations
 
 
