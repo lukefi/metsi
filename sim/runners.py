@@ -1,8 +1,8 @@
-from typing import Optional, Any, Callable, List
+from typing import Optional, Callable, List
 from copy import deepcopy
 
 
-def evaluate_sequence(payload: Any, *operations: Callable) -> Optional[Any]:
+def evaluate_sequence(payload, *operations: Callable) -> Optional:
     """
     Compute a single processing result for single data input.
 
@@ -22,7 +22,7 @@ def evaluate_sequence(payload: Any, *operations: Callable) -> Optional[Any]:
     return result
 
 
-def run_chains_iteratively(payload: Any, chains: List[List[Callable]]):
+def run_chains_iteratively(payload, chains: List[List[Callable]]):
     iteration_counter = 1
     total_chains = len(chains)
     for chain in chains:
