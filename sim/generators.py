@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, List, Optional
+from typing import Any, Callable, List, Optional
 from sim.core_types import Step, SimulationParams
 from sim.operations import prepared_processor
 from sim.util import get_or_default, dict_value
@@ -114,13 +114,8 @@ def full_tree_generators_from_declaration(simulation_declaration: dict, operatio
     simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
     operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
     run_constraints = get_or_default(dict_value(simulation_declaration, 'run_constraints'), {})
-    simulation_time_points = range(
-        simulation_params.initial_step_time,
-        simulation_params.final_step_time + 1,
-        simulation_params.step_time_interval
-    )
 
-    for time_point in simulation_time_points:
+    for time_point in simulation_params.simulation_time_series():
         generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
         for generator_declaration in generator_declarations:
             generator_tag = list(generator_declaration.keys())[0]
@@ -128,13 +123,20 @@ def full_tree_generators_from_declaration(simulation_declaration: dict, operatio
 
             processors = []
             for operation_tag in operation_tags:
-                this_operation_params = get_or_default(operation_params.get(operation_tag), {})
-                this_run_constraints = get_or_default(run_constraints.get(operation_tag), None)
-                processors.append(prepared_processor(
-                    operation_tag,
-                    operation_lookup,
-                    time_point,
-                    this_run_constraints,
-                    **this_operation_params))
-            generator_series.append(generator_function(generator_tag, generator_lookup, *processors))
+                processors.append(generate_processor(operation_lookup, operation_params, operation_tag, run_constraints,
+                                                     time_point))
+            generator = generator_function(generator_tag, generator_lookup, *processors)
+            generator_series.append(generator)
     return generator_series
+
+
+def generate_processor(operation_lookup, operation_params, operation_tag, run_constraints, time_point):
+    this_operation_params = get_or_default(operation_params.get(operation_tag), {})
+    this_run_constraints = get_or_default(run_constraints.get(operation_tag), None)
+    result = prepared_processor(
+        operation_tag,
+        operation_lookup,
+        time_point,
+        this_run_constraints,
+        **this_operation_params)
+    return result

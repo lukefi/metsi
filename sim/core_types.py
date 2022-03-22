@@ -56,6 +56,13 @@ class SimulationParams(SimpleNamespace):
     step_time_interval: int
     final_step_time: int
 
+    def simulation_time_series(self) -> range:
+        return range(
+            self.initial_step_time,
+            self.final_step_time + 1,
+            self.step_time_interval
+        )
+
 
 class OperationPayload(SimpleNamespace):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
