@@ -6,7 +6,7 @@ from app.file_io import forest_stands_from_json_file, simulation_declaration_fro
 
 if __name__ == "__main__":
     # TODO: use argparse
-    stands = forest_stands_from_json_file('input.json')
+    stands = forest_stands_from_json_file('vmi12_weibull_trees.json')
     simulation_declaration = simulation_declaration_from_yaml_file('control.yaml')
 
     generators = full_tree_generators_from_declaration(simulation_declaration, forestry.operations.operation_lookup)
@@ -20,4 +20,4 @@ if __name__ == "__main__":
         )
         chains = tree.operation_chains()
         result = run_chains_iteratively(payload, chains)
-        print("Obtained {} variants for stand {}".format(len(result), stand.identifier))
+        print("Obtained {} variants for stand {}\n".format(len(result), stand.identifier))
