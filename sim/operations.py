@@ -24,14 +24,14 @@ def processor(payload: OperationPayload, operation: typing.Callable, operation_t
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     run_history = deepcopy(payload.run_history)
     operation_run_history = get_or_default(run_history.get(operation_tag), {})
-    print("{}...".format(operation_tag))
+    print("time {}: {}...".format(time_point, operation_tag))
     if operation_run_constraints is not None:
         # check operation constrains
         last_run_time_point = operation_run_history.get('last_run_time_point')
         minimum_time_interval = operation_run_constraints.get('minimum_time_interval')
         if last_run_time_point is not None and minimum_time_interval > (time_point - last_run_time_point):
-            raise Exception("{} aborted - last run at {}, time now {}, minimum time interval {}"
-                            .format(operation_tag, last_run_time_point, time_point, minimum_time_interval))
+            raise UserWarning("{} aborted - last run at {}, time now {}, minimum time interval {}"
+                              .format(operation_tag, last_run_time_point, time_point, minimum_time_interval))
     newstate = operation(payload.simulation_state)
     new_operation_run_history = {}
     new_operation_run_history['last_run_time_point'] = time_point

@@ -31,7 +31,7 @@ def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
             print("running chain {} of {}".format(iteration_counter, total_chains))
             iteration_counter = iteration_counter + 1
             results.append(evaluate_sequence(deepcopy(payload), *chain))
-        except Exception as e:
+        except UserWarning as e:
             print(e)
     print("Completed iteration with {} results".format(len(results)))
     return results
