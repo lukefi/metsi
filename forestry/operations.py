@@ -52,7 +52,7 @@ def yearly_height_growth_by_species(tree: ReferenceTree, biological_age_aggregat
     return growth_percent
 
 
-def grow_simple(stand: ForestStand, **operation_parameters) -> ForestStand:
+def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
     # TODO: Source years from simulator configurations
     years = 5
     # Count ForestStand aggregate values
@@ -96,11 +96,6 @@ def grow_simple(stand: ForestStand, **operation_parameters) -> ForestStand:
             # Calculate the growth and update tree
             tree.breast_height_diameter = tree.breast_height_diameter * f_util.compounded_growth_factor(growth_percent_diameter, years)
             tree.height = tree.height * f_util.compounded_growth_factor(growth_percent_height, years)
-    return stand
-
-
-def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
-    """This function is a no-op example stub"""
     return stand
 
 
