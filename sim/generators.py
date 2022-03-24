@@ -12,7 +12,7 @@ def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> Lis
     :return:
     """
     result = []
-    if parents is None or len(parents) is 0:
+    if parents is None or len(parents) == 0:
         parents = [Step()]
     for root_step in parents:
         previous_step = root_step
@@ -32,7 +32,7 @@ def alternatives(parents: Optional[List[Step]] = None, *operations: Callable) ->
     :return: a list of leaf steps now under the given parent steps
     """
     result = []
-    if parents is None or len(parents) is 0:
+    if parents is None or len(parents) == 0:
         parents = [Step()]
     for step in parents:
         for operation in operations:
