@@ -118,16 +118,22 @@ def full_tree_generators_from_declaration(simulation_declaration: dict, operatio
     for time_point in simulation_params.simulation_time_series():
         generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
         for generator_declaration in generator_declarations:
-            generator_tag = list(generator_declaration.keys())[0]
-            operation_tags = generator_declaration[generator_tag]
-
-            processors = []
-            for operation_tag in operation_tags:
-                processors.append(generate_processor(operation_lookup, operation_params, operation_tag, run_constraints,
-                                                     time_point))
-            generator = generator_function(generator_tag, generator_lookup, *processors)
+            generator = prepare_step_generator(generator_declaration, generator_lookup, operation_lookup,
+                                               operation_params, run_constraints, time_point)
             generator_series.append(generator)
     return generator_series
+
+
+def prepare_step_generator(generator_declaration, generator_lookup, operation_lookup, operation_params, run_constraints,
+                           time_point):
+    generator_tag = list(generator_declaration.keys())[0]
+    operation_tags = generator_declaration[generator_tag]
+    processors = []
+    for operation_tag in operation_tags:
+        processor = generate_processor(operation_lookup, operation_params, operation_tag, run_constraints, time_point)
+        processors.append(processor)
+    generator = generator_function(generator_tag, generator_lookup, *processors)
+    return generator
 
 
 def generate_processor(operation_lookup, operation_params, operation_tag, run_constraints, time_point):
