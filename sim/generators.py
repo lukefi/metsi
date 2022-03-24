@@ -124,6 +124,37 @@ def full_tree_generators_from_declaration(simulation_declaration: dict, operatio
     return generator_series
 
 
+def tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> dict[int, List[Callable]]:
+    """
+    Creat a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
+    partial step trees of the simulation.
+
+    :param simulation_declaration: a dict matching the simulation declaration structure. See README.
+    :param operation_lookup: lookup table binding a declared operation name to a Python function reference
+    :return: a list of prepared generator functions
+    """
+
+    generator_lookup = {
+        'sequence': sequence,
+        'alternatives': alternatives,
+    }
+    generators_by_time_point = {}
+    simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
+    simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
+    operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
+    run_constraints = get_or_default(dict_value(simulation_declaration, 'run_constraints'), {})
+
+    for time_point in simulation_params.simulation_time_series():
+        generator_series = []
+        generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
+        for generator_declaration in generator_declarations:
+            generator = prepare_step_generator(generator_declaration, generator_lookup, operation_lookup,
+                                               operation_params, run_constraints, time_point)
+            generator_series.append(generator)
+        generators_by_time_point[time_point] = generator_series
+    return generators_by_time_point
+
+
 def prepare_step_generator(generator_declaration, generator_lookup, operation_lookup, operation_params, run_constraints,
                            time_point):
     generator_tag = list(generator_declaration.keys())[0]

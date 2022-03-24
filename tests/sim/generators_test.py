@@ -164,3 +164,38 @@ class TestGenerators(unittest.TestCase):
         chain = result.operation_chains()[0]
         payload = OperationPayload(simulation_state=0, run_history={})
         self.assertRaises(Exception, run_sequence, payload, *chain)
+
+    def test_tree_generators_by_time_point(self):
+        declaration = """
+        simulation_params:
+          initial_step_time: 0
+          step_time_interval: 1
+          final_step_time: 1
+        simulation_events:
+          - time_points: [0, 1]
+            generators:
+              - sequence:
+                - inc
+                - inc
+        """
+
+        # generators for 2 time points'
+        generators = sim.generators.tree_generators_by_time_point(yaml.safe_load(declaration), {'inc': inc})
+        self.assertEqual(2, len(generators.values()))
+
+        # 1 sequence generators in each time point
+        gen_one = generators[0]
+        gen_two = generators[1]
+        self.assertEqual(1, len(gen_one))
+        self.assertEqual(1, len(gen_two))
+
+        # 1 chain from both generated trees
+        # 1 root + 2 processors (inc) in both chains
+        tree_one = compose(*generators[0])
+        tree_two = compose(*generators[1])
+        chain_one = tree_one.operation_chains()
+        chain_two = tree_two.operation_chains()
+        self.assertEqual(1, len(chain_one))
+        self.assertEqual(1, len(chain_two))
+        self.assertEqual(3, len(chain_one[0]))
+        self.assertEqual(3, len(chain_two[0]))
