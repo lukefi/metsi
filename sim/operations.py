@@ -24,7 +24,6 @@ def processor(payload: OperationPayload, operation: typing.Callable, operation_t
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     run_history = deepcopy(payload.run_history)
     operation_run_history = get_or_default(run_history.get(operation_tag), {})
-    print("time {}: {}...".format(time_point, operation_tag))
     if operation_run_constraints is not None:
         # check operation constrains
         last_run_time_point = operation_run_history.get('last_run_time_point')

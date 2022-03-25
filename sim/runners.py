@@ -1,6 +1,8 @@
 from typing import Optional, Callable, List
 from copy import deepcopy
 
+from sim.core_types import Step, OperationPayload
+
 
 def evaluate_sequence(payload, *operations: Callable) -> Optional:
     """
@@ -23,15 +25,11 @@ def evaluate_sequence(payload, *operations: Callable) -> Optional:
 
 
 def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
-    iteration_counter = 1
-    total_chains = len(chains)
     results = []
     for chain in chains:
         try:
-            print("running chain {} of {}".format(iteration_counter, total_chains))
-            iteration_counter = iteration_counter + 1
             results.append(evaluate_sequence(deepcopy(payload), *chain))
         except UserWarning as e:
-            print(e)
-    print("Completed iteration with {} results".format(len(results)))
+            ...
+            # TODO aborted run reporting
     return results
