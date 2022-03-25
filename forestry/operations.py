@@ -1,5 +1,6 @@
 import math
 import itertools
+from functools import reduce
 import forestry.forestry_utils as f_util
 from forestry.ForestDataModels import ForestStand, ReferenceTree
 
@@ -125,10 +126,24 @@ def reporting(stand: ForestStand, **operation_parameters) -> ForestStand:
     return stand
 
 
+def compute_volume(stand: ForestStand) -> float:
+    """Debug level function. Does not reflect any real usable model computation.
+
+    Return the sum of the product of basal area and height for all reference trees in the stand"""
+    return reduce(lambda acc, cur: f_util.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
+
+
+def print_volume(stand: ForestStand) -> ForestStand:
+    """Debug level function for printout of timber volume """
+    print("stand {} total volume {}".format(stand.identifier, compute_volume(stand)))
+    return stand
+
+
 operation_lookup = {
     'grow': grow,
     'basal_area_thinning': basal_area_thinning,
     'stem_count_thinning': stem_count_thinning,
     'continuous_growth_thinning': continuous_growth_thinning,
-    'reporting': reporting
+    'reporting': reporting,
+    'print_volume': print_volume
 }
