@@ -25,6 +25,8 @@ def run_stands(
         stands: List[ForestStand], simulation_declaration: dict,
         run_strategy: Callable[[OperationPayload, dict, dict], List[OperationPayload]]
 ) -> dict[str, List[OperationPayload]]:
+    """Run the simulation for all given stands, from the given declaration, using the given run strategy. Return the
+    results organized into a dict keyed with stand identifiers."""
 
     retval = {}
     for stand in stands:
