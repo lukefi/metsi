@@ -40,9 +40,7 @@ def run_stands(
 
 
 def main():
-    # TODO: use argparse
     app_arguments = parse_cli_arguments(sys.argv[1:])
-    print("app_arguments: ", app_arguments)
     stands = forest_stands_from_json_file(app_arguments.domain_state_file)
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
 
