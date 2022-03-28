@@ -1,7 +1,7 @@
 import unittest
 
 from forestry.ForestDataModels import ForestStand, ReferenceTree
-from forestry.operations import grow_simple, yearly_diameter_growth_by_species, yearly_height_growth_by_species
+from forestry.operations import grow, yearly_diameter_growth_by_species, yearly_height_growth_by_species
 
 
 class ForestryOperationsTest(unittest.TestCase):
@@ -18,7 +18,7 @@ class ForestryOperationsTest(unittest.TestCase):
             reference_trees.append(reference_tree)
         stand = ForestStand()
         stand.reference_trees = reference_trees
-        result_stand = grow_simple(stand)
+        result_stand = grow(stand)
         self.assertEquals(5, len(result_stand.reference_trees))
         self.assertEquals(13.1827, round(result_stand.reference_trees[0].breast_height_diameter, 4))
         self.assertEquals(29.8520, round(result_stand.reference_trees[0].height, 4))

@@ -37,13 +37,32 @@ pip install --user pytest
 To run the application, run in the project root
 
 ```
-python -m app.main
+python -m app.main input.json control.yaml
 ```
 
-In this phase of development, the program assumes files two files to exist in working directory.
+In this phase of development, the program assumes two files.
 
 * `input.json` is a forest data file used for forestry simulation. It is sourced from vmi-data-converter and adheres to MELA RSD specification for properties of forest stands and reference trees.
 * `control.yaml` is the declared structure for a simulation run.
+
+Use the following command to output application help menu
+```
+python -m app.main --help
+```
+The command will output the following
+```
+Mela2.0 simulator
+
+positional arguments:
+  domain_state_file  A .json file containing the initial state of the
+                     simulation
+  control_file       Simulation control logic as a .yaml file
+
+optional arguments:
+  -h, --help         show this help message and exit
+
+```
+
 
 To run unit test suites, run in the project root
 
