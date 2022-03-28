@@ -1,23 +1,60 @@
+import time
+from typing import List, Callable
+
 import forestry.operations
 from sim.core_types import OperationPayload
-from sim.runners import run_chains_iteratively
-from sim.generators import compose, full_tree_generators_from_declaration
+from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
+from forestry.ForestDataModels import ForestStand
 from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
 
-if __name__ == "__main__":
-    # TODO: use argparse
-    stands = forest_stands_from_json_file('vmi12_weibull_trees.json')
-    simulation_declaration = simulation_declaration_from_yaml_file('control.yaml')
 
-    generators = full_tree_generators_from_declaration(simulation_declaration, forestry.operations.operation_lookup)
-    tree = compose(*generators)
+def print_stand_result(stand: ForestStand):
+    print("volume {}".format(forestry.operations.compute_volume(stand)))
 
+
+def print_run_result(results: dict):
+    for id in results.keys():
+        print("Results for stand {}; obtained {} variants:".format(id, len(results[id])))
+        for i, result in enumerate(results[id]):
+            print("variant {} result: ".format(i), end='')
+            print_stand_result(result.simulation_state)
+
+
+def run_stands(
+        stands: List[ForestStand], simulation_declaration: dict,
+        run_strategy: Callable[[OperationPayload, dict, dict], List[OperationPayload]]
+) -> dict[str, List[OperationPayload]]:
+
+    retval = {}
     for stand in stands:
-        print("Running simulation for stand {}".format(stand.identifier))
         payload = OperationPayload(
             simulation_state=stand,
             run_history={}
         )
-        chains = tree.operation_chains()
-        result = run_chains_iteratively(payload, chains)
-        print("Obtained {} variants for stand {}\n".format(len(result), stand.identifier))
+        result = run_strategy(payload, simulation_declaration, forestry.operations.operation_lookup)
+        retval[stand.identifier] = result
+    return retval
+
+
+def main():
+    # TODO: use argparse
+    stands = forest_stands_from_json_file('vmi12_weibull_trees.json')
+    simulation_declaration = simulation_declaration_from_yaml_file('control.yaml')
+
+    # run full tree
+    full_run_time = int(time.time_ns())
+    full_run_result = run_stands(stands, simulation_declaration, run_full_tree_strategy)
+    full_run_time = (int(time.time_ns()) - full_run_time) / 1000000000
+
+    # run partial trees
+    partial_run_time = int(time.time_ns())
+    partial_run_result = run_stands(stands, simulation_declaration, run_partial_tree_strategy)
+    partial_run_time = (int(time.time_ns()) - partial_run_time) / 1000000000
+    print_run_result(full_run_result)
+    print_run_result(partial_run_result)
+    print("Full tree run in    {}".format(full_run_time))
+    print("Partial tree run in {}".format(partial_run_time))
+
+
+if __name__ == "__main__":
+    main()
