@@ -1,8 +1,12 @@
 """
 This module contains a collection of util functions and dummy payload functions for test cases
 """
-
+import os
 from typing import Any, List, Optional
+
+import yaml
+
+from sim.core_types import OperationPayload
 
 
 def raises(x: Any) -> None:
@@ -34,3 +38,16 @@ def parametrized_operation(x, **kwargs):
         return x * 1000
     else:
         return x
+
+
+def collect_results(payloads: List[OperationPayload]) -> List:
+    return list(map(lambda payload: payload.simulation_state, payloads))
+
+
+def file_contents(file_path: str) -> str:
+    with open(file_path, 'r') as f:
+        return f.read()
+
+
+def load_yaml(file_name: str) -> dict:
+    return yaml.load(file_contents(os.path.join(os.getcwd(), "tests", "resources", file_name)), Loader=yaml.CLoader)

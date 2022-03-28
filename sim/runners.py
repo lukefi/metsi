@@ -1,7 +1,9 @@
 from typing import Optional, Callable, List
 from copy import deepcopy
 
-from sim.core_types import Step, OperationPayload
+import forestry.operations
+from sim.core_types import Step, OperationPayload, SimulationParams
+from sim.generators import full_tree_generators_from_declaration, compose, tree_generators_by_time_point
 
 
 def evaluate_sequence(payload, *operations: Callable) -> Optional:
@@ -33,3 +35,27 @@ def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
             ...
             # TODO aborted run reporting
     return results
+
+
+def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict) -> List[OperationPayload]:
+    full_generators = full_tree_generators_from_declaration(simulation_declaration, operation_lookup)
+    tree = compose(*full_generators)
+    chains = tree.operation_chains()
+    result = run_chains_iteratively(payload, chains)
+    return result
+
+
+def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict) -> List[OperationPayload]:
+    generators_by_time_point = tree_generators_by_time_point(simulation_declaration, operation_lookup)
+    chains_by_time_point = {}
+    result = [payload]
+    for k, v in generators_by_time_point.items():
+        chains_by_time_point[k] = compose(*v).operation_chains()
+
+    for time_point in SimulationParams(**simulation_declaration['simulation_params']).simulation_time_series():
+        time_point_result: list[OperationPayload] = []
+        for payload in result:
+            result = run_chains_iteratively(payload, chains_by_time_point[time_point])
+            time_point_result.extend(result)
+        result = time_point_result
+    return result
