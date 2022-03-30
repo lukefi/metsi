@@ -109,7 +109,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.full_tree_generators_from_declaration(
+        generators = sim.generators.full_tree_generators(
             yaml.load(declaration, Loader=yaml.CLoader), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
@@ -133,7 +133,7 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc
         """
-        generators = sim.generators.full_tree_generators_from_declaration(
+        generators = sim.generators.full_tree_generators(
             yaml.safe_load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
@@ -158,7 +158,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.full_tree_generators_from_declaration(
+        generators = sim.generators.full_tree_generators(
             yaml.safe_load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
@@ -180,7 +180,7 @@ class TestGenerators(unittest.TestCase):
         """
 
         # generators for 2 time points'
-        generators = sim.generators.tree_generators_by_time_point(yaml.safe_load(declaration), {'inc': inc})
+        generators = sim.generators.partial_tree_generators_by_time_point(yaml.safe_load(declaration), {'inc': inc})
         self.assertEqual(2, len(generators.values()))
 
         # 1 sequence generators in each time point

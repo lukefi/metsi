@@ -1,9 +1,8 @@
 from typing import Optional, Callable, List
 from copy import deepcopy
 
-import forestry.operations
-from sim.core_types import Step, OperationPayload, SimulationParams
-from sim.generators import full_tree_generators_from_declaration, compose, tree_generators_by_time_point
+from sim.core_types import OperationPayload, SimulationParams
+from sim.generators import full_tree_generators, compose, partial_tree_generators_by_time_point
 
 
 def evaluate_sequence(payload, *operations: Callable) -> Optional:
@@ -53,7 +52,7 @@ def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: di
     :param operation_lookup: a dictionary of operation tags mapped to a python function capable of processing a simulation state
     :return: a list of resulting simulation state payloads
     """
-    full_generators = full_tree_generators_from_declaration(simulation_declaration, operation_lookup)
+    full_generators = full_tree_generators(simulation_declaration, operation_lookup)
     tree = compose(*full_generators)
     chains = tree.operation_chains()
     result = run_chains_iteratively(payload, chains)
@@ -70,7 +69,7 @@ def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration:
     :param operation_lookup: a dictionary of operation tags mapped to a python function capable of processing a simulation state
     :return: a list of resulting simulation state payloads
     """
-    generators_by_time_point = tree_generators_by_time_point(simulation_declaration, operation_lookup)
+    generators_by_time_point = partial_tree_generators_by_time_point(simulation_declaration, operation_lookup)
     chains_by_time_point = {}
     result = [payload]
     for k, v in generators_by_time_point.items():

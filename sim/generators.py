@@ -96,7 +96,7 @@ def generator_function(key, generator_lookup: dict, *operations: Callable) -> Ca
     return lambda payload: generator_lookup[key](payload, *operations)
 
 
-def full_tree_generators_from_declaration(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
+def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
     """
     Creat a list of step generator functions describing a single simulator run.
 
@@ -124,7 +124,7 @@ def full_tree_generators_from_declaration(simulation_declaration: dict, operatio
     return generator_series
 
 
-def tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> dict[int, List[Callable]]:
+def partial_tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> dict[int, List[Callable]]:
     """
     Creat a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
     partial step trees of the simulation.
