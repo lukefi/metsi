@@ -86,7 +86,7 @@ The structure will be expanded to allow parameters and constraints declaration f
    1. `initial_step_time` is the integer point of time for the simulation's first cycle
    2. `step_time_interval` is the integer amount of time between each simulation cycle
    3. `final_step_time` is the integer point of time for the simulations's last cycle
-2. Operaton run constrains in the object `run_constrains`
+2. Operaton run constrains in the object `run_constraints`
 3. Operation parameters in the object `operation_params`
 4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
    1. `time_points` is a list of integers which assign this set of operations to simulation time points
@@ -115,7 +115,7 @@ simulation_params:
 
 # example of operation run constrains
 # minimum time interval constrain between thinnings is 10 years
-run_constrains:
+run_constraints:
   thinning:
     minimum_time_interval: 10
 

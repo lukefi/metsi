@@ -1,7 +1,11 @@
-from typing import Optional, Any, Callable, List
+from typing import Optional, Callable, List
+from copy import deepcopy
+
+from sim.core_types import OperationPayload, SimulationParams
+from sim.generators import full_tree_generators, compose, partial_tree_generators_by_time_point
 
 
-def evaluate_sequence(payload: Any, *operations: Callable) -> Optional[Any]:
+def evaluate_sequence(payload, *operations: Callable) -> Optional:
     """
     Compute a single processing result for single data input.
 
@@ -15,25 +19,66 @@ def evaluate_sequence(payload: Any, *operations: Callable) -> Optional[Any]:
     """
     result = None
     current = payload
-    try:
-        for func in operations:
-            result = func(current)
-            current = result
-    except Exception as e:
-        print("Sequence aborted")
-        raise e
+    for func in operations:
+        result = func(current)
+        current = result
     return result
 
 
-def run_chains_iteratively(payload: Any, chains: List[List[Callable]]):
-    iteration_counter = 1
+def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
+    """Execute all given operation chains for the given state payload. Return the collection of success results from
+    all chains.
+
+    :param payload: a simulation state payload
+    :param chains: list of a list of functions usable to process the payload
+    :return: list of success results of applying the function chains on the payload"""
+    results = []
     for chain in chains:
         try:
-            print("running chain " + str(iteration_counter))
-            iteration_counter = iteration_counter + 1
-            result = evaluate_sequence(payload, *chain)
+            results.append(evaluate_sequence(deepcopy(payload), *chain))
+        except UserWarning as e:
+            ...
+            # TODO aborted run reporting
+    return results
 
-            print(result)
-        except Exception as e:
-            print(e)
-        print("\n")
+
+def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict) -> List[OperationPayload]:
+    """Process the given operation payload using a simulation state tree created from the declaration. Full simulation
+    tree and operation chains are pre-generated for the run. This tree strategy creates the full theoretical branching
+    tree for the simulation, carrying a significant memory and runtime overhead for large trees.
+
+    :param payload: a simulation state payload
+    :param simulation_declaration: a dictionary structure describing the simulation tree and its parameters (see control.yaml examples)
+    :param operation_lookup: a dictionary of operation tags mapped to a python function capable of processing a simulation state
+    :return: a list of resulting simulation state payloads
+    """
+    full_generators = full_tree_generators(simulation_declaration, operation_lookup)
+    tree = compose(*full_generators)
+    chains = tree.operation_chains()
+    result = run_chains_iteratively(payload, chains)
+    return result
+
+
+def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict) -> List[OperationPayload]:
+    """Process the given operation payload using a simulation state tree created from the declaration. The simulation
+    tree and operation chains are generated and executed in order per simulation time point. This reduces the amount of
+    redundant, always-failing operation chains and redundant branches of the simulation tree.
+
+    :param payload: a simulation state payload
+    :param simulation_declaration: a dictionary structure describing the simulation tree and its parameters (see control.yaml examples)
+    :param operation_lookup: a dictionary of operation tags mapped to a python function capable of processing a simulation state
+    :return: a list of resulting simulation state payloads
+    """
+    generators_by_time_point = partial_tree_generators_by_time_point(simulation_declaration, operation_lookup)
+    chains_by_time_point = {}
+    results = [payload]
+    for k, v in generators_by_time_point.items():
+        chains_by_time_point[k] = compose(*v).operation_chains()
+
+    for time_point in SimulationParams(**simulation_declaration['simulation_params']).simulation_time_series():
+        time_point_results: list[OperationPayload] = []
+        for payload in results:
+            payload_results = run_chains_iteratively(payload, chains_by_time_point[time_point])
+            time_point_results.extend(payload_results)
+        results = time_point_results
+    return results

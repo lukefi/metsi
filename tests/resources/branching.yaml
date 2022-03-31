@@ -1,0 +1,18 @@
+simulation_params:
+  initial_step_time: 0
+  step_time_interval: 1
+  final_step_time: 4
+
+run_constraints:
+  inc:
+    minimum_time_interval: 2
+
+simulation_events:
+  # we describe here objects with schedule for which time points they are active
+  - time_points: [1, 2, 3, 4]
+    generators:
+      - sequence:
+          - do_nothing
+      - alternatives:
+          - do_nothing
+          - inc

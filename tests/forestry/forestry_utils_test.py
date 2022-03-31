@@ -16,7 +16,7 @@ class ForestryUtilsTest(unittest.TestCase):
             tree.breast_height_diameter = i[0][0]
             tree.stems_per_ha = i[0][1]
             result = f_util.calculate_basal_area(tree)
-            self.assertEquals(i[1], round(result, 4))
+            self.assertEqual(i[1], round(result, 4))
 
     def test_solve_dominant_height(self):
         reference_trees = []
@@ -26,7 +26,7 @@ class ForestryUtilsTest(unittest.TestCase):
             reference_trees.append(reference_tree)
         # heights are [29.0, 30.0, 31.0, 32.0, 33.0]
         result = f_util.solve_dominant_height(reference_trees)
-        self.assertEquals(31.0, result)
+        self.assertEqual(31.0, result)
 
     def test_calcualte_attribute_sum(self):
         f = lambda x: x.stems_per_ha
@@ -37,7 +37,7 @@ class ForestryUtilsTest(unittest.TestCase):
             reference_trees.append(reference_tree)
         # stems_per_ha are [2, 4, 6, 8, 10]
         result = f_util.calculate_attribute_sum(reference_trees, f)
-        self.assertEquals(30, result)
+        self.assertEqual(30, result)
 
     def test_calculate_basal_area_weighted_attribute_aggregate(self):
         """ Tests the generic function calculate_attribute_aggregate by counting the basal area weighted sum for breast height diameter for pine (species==1) """
@@ -50,7 +50,7 @@ class ForestryUtilsTest(unittest.TestCase):
             reference_tree.stems_per_ha = 50.0 + i
             reference_trees.append(reference_tree)
         result = f_util.calculate_basal_area_weighted_attribute_aggregate(reference_trees, f)
-        self.assertEquals(13.3402, round(result,4))
+        self.assertEqual(13.3402, round(result,4))
 
     def test_compaunded_growth_factor(self):
         assertions = [
@@ -61,5 +61,5 @@ class ForestryUtilsTest(unittest.TestCase):
         ]
         for i in assertions:
             result = f_util.compounded_growth_factor(i[0][0], i[0][1])
-            self.assertEquals(i[1], round(result, 3))
+            self.assertEqual(i[1], round(result, 3))
 
