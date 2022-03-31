@@ -71,14 +71,14 @@ def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration:
     """
     generators_by_time_point = partial_tree_generators_by_time_point(simulation_declaration, operation_lookup)
     chains_by_time_point = {}
-    result = [payload]
+    results = [payload]
     for k, v in generators_by_time_point.items():
         chains_by_time_point[k] = compose(*v).operation_chains()
 
     for time_point in SimulationParams(**simulation_declaration['simulation_params']).simulation_time_series():
-        time_point_result: list[OperationPayload] = []
-        for payload in result:
-            result = run_chains_iteratively(payload, chains_by_time_point[time_point])
-            time_point_result.extend(result)
-        result = time_point_result
-    return result
+        time_point_results: list[OperationPayload] = []
+        for payload in results:
+            payload_results = run_chains_iteratively(payload, chains_by_time_point[time_point])
+            time_point_results.extend(payload_results)
+        results = time_point_results
+    return results
