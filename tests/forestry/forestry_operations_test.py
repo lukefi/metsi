@@ -19,11 +19,11 @@ class ForestryOperationsTest(unittest.TestCase):
         stand = ForestStand()
         stand.reference_trees = reference_trees
         result_stand = grow(stand)
-        self.assertEquals(5, len(result_stand.reference_trees))
-        self.assertEquals(13.1827, round(result_stand.reference_trees[0].breast_height_diameter, 4))
-        self.assertEquals(29.8520, round(result_stand.reference_trees[0].height, 4))
-        self.assertEquals(14.4723, round(result_stand.reference_trees[1].breast_height_diameter, 4))
-        self.assertEquals(30.8415, round(result_stand.reference_trees[1].height, 4))
+        self.assertEqual(5, len(result_stand.reference_trees))
+        self.assertEqual(13.1827, round(result_stand.reference_trees[0].breast_height_diameter, 4))
+        self.assertEqual(29.8520, round(result_stand.reference_trees[0].height, 4))
+        self.assertEqual(14.4723, round(result_stand.reference_trees[1].breast_height_diameter, 4))
+        self.assertEqual(30.8415, round(result_stand.reference_trees[1].height, 4))
 
     def test_yearly_diameter_growth_by_species(self):
         tree = ReferenceTree()
@@ -47,7 +47,7 @@ class ForestryOperationsTest(unittest.TestCase):
                 height_aggregate,
                 dominant_height,
                 basal_area_total)
-            self.assertEquals(i[1], round(result, 4))
+            self.assertEqual(i[1], round(result, 4))
 
     def test_yearly_height_growth_by_species(self):
         tree = ReferenceTree()
@@ -71,5 +71,5 @@ class ForestryOperationsTest(unittest.TestCase):
                 height_aggregate,
                 dominant_height,
                 basal_area_total)
-            self.assertEquals(i[1], round(result, 4))
+            self.assertEqual(i[1], round(result, 4))
 
