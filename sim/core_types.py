@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from types import SimpleNamespace
 from typing import Callable, List, Optional, Any
 
@@ -69,3 +70,4 @@ class OperationPayload(SimpleNamespace):
     operation calls. """
     simulation_state: Any
     run_history: dict or None
+    aggregated_results: dict[str, OrderedDict[int, Any]]

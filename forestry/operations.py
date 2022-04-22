@@ -1,6 +1,8 @@
 import math
 import itertools
 from functools import reduce
+from typing import Any
+
 import forestry.forestry_utils as f_util
 from forestry.ForestDataModels import ForestStand, ReferenceTree
 
@@ -53,7 +55,8 @@ def yearly_height_growth_by_species(tree: ReferenceTree, biological_age_aggregat
     return growth_percent
 
 
-def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
+def grow(input: tuple[ForestStand, Any], **operation_parameters) -> tuple[ForestStand, Any]:
+    stand, previous_aggregate = input
     # TODO: Source years from simulator configurations
     years = 5
     # Count ForestStand aggregate values
@@ -97,7 +100,7 @@ def grow(stand: ForestStand, **operation_parameters) -> ForestStand:
             # Calculate the growth and update tree
             tree.breast_height_diameter = tree.breast_height_diameter * f_util.compounded_growth_factor(growth_percent_diameter, years)
             tree.height = tree.height * f_util.compounded_growth_factor(growth_percent_height, years)
-    return stand
+    return stand, None
 
 
 def basal_area_thinning(stand: ForestStand, **operation_parameters) -> ForestStand:
@@ -133,6 +136,22 @@ def compute_volume(stand: ForestStand) -> float:
     return reduce(lambda acc, cur: f_util.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
 
 
+def report_volume(input: tuple[ForestStand, dict], **operation_parameters) -> tuple[ForestStand, Any]:
+    stand, previous_aggregate = input
+    result = compute_volume(stand)
+    if previous_aggregate is None:
+        return stand, {'accrued_volume': 0.0, 'current_volume': result}
+    else:
+        new_aggregate = {
+            'accrued_volume': previous_aggregate['accrued_volume'] + (result - previous_aggregate['current_volume']),
+            'current_volume': result
+        }
+        return stand, new_aggregate
+
+
+
+
+
 def print_volume(stand: ForestStand) -> ForestStand:
     """Debug level function for printout of timber volume """
     print("stand {} total volume {}".format(stand.identifier, compute_volume(stand)))
@@ -145,5 +164,6 @@ operation_lookup = {
     'stem_count_thinning': stem_count_thinning,
     'continuous_growth_thinning': continuous_growth_thinning,
     'reporting': reporting,
-    'print_volume': print_volume
+    'print_volume': print_volume,
+    'report_volume': report_volume
 }
