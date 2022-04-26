@@ -10,6 +10,15 @@ def spe2motti(spe: int) -> pymotti.Species:
     return pymotti.Species(spe if spe <= 6 else spe+1)
 
 
+def _precompute_weather(stand: ForestStand):
+    if not hasattr(stand, "_weather"):
+        lat, lon, h, cs = stand.geo_location
+        if cs != "ERTS-TM35FIN":
+            raise NotImplementedError("TODO")
+        p = pymotti.Predict(X=lat, Y=lon, Z=h)
+        setattr(stand, "_weather", { "sea": p.sea, "lake": p.lake })
+
+
 class Model(pymotti.Predict):
 
     def __init__(self, stand: ForestStand):
@@ -42,6 +51,16 @@ class Model(pymotti.Predict):
     @property
     def dd(self) -> float:
         return self.stand.degree_days
+
+    @property
+    def sea(self) -> float:
+        _precompute_weather(self.stand)
+        return getattr(self.stand, "_weather")["sea"]
+
+    @property
+    def lake(self) -> float:
+        _precompute_weather(self.stand)
+        return getattr(self.stand, "_weather")["lake"]
 
     @property
     def mal(self) -> pymotti.LandUseCategoryVMI:
