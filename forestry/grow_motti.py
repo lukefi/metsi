@@ -15,7 +15,7 @@ def _precompute_weather(stand: ForestStand):
         lat, lon, h, cs = stand.geo_location
         if cs != "ERTS-TM35FIN":
             raise NotImplementedError("TODO")
-        p = pymotti.Predict(X=lat, Y=lon, Z=h)
+        p = pymotti.Predict(Y=lat, X=lon, Z=h)
         setattr(stand, "_weather", { "sea": p.sea, "lake": p.lake })
 
 
@@ -31,14 +31,14 @@ class Model(pymotti.Predict):
         return self.stand.year
 
     @cached_property
-    def X(self) -> float:
+    def Y(self) -> float:
         lat, _, _, cs = self.stand.geo_location
         if cs != "ERTS-TM35FIN":
             raise NotImplementedError("TODO")
         return lat
 
     @cached_property
-    def Y(self) -> float:
+    def X(self) -> float:
         _, lon, _, cs = self.stand.geo_location
         if cs != "ERTS-TM35FIN":
             raise NotImplementedError("TODO")
