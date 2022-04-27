@@ -5,28 +5,27 @@ from forestry.ForestDataModels import ForestStand, ReferenceTree
 
 
 def yearly_diameter_growth_by_species(tree: ReferenceTree, biological_age_aggregate: float, d13_aggregate: float,
-                                      height_aggregate: float, dominant_height: float, basal_area_total: float) -> float:
+                                      height_aggregate: float, dominant_height: float,
+                                      basal_area_total: float) -> float:
     """ Model source: Acta Forestalia Fennica 163 """
     if tree.species == 1:
-        growth_percent = math.exp(
-                5.4625
-                - 0.6675 * math.log(biological_age_aggregate)
-                - 0.4758 * math.log(basal_area_total)
-                + 0.1173 * math.log(d13_aggregate)
-                - 0.9442 * math.log(dominant_height)
-                - 0.3631 * math.log(tree.breast_height_diameter)
-                + 0.7762 * math.log(tree.height)
-            )
+        growth_percent = math.exp(5.4625
+                                  - 0.6675 * math.log(biological_age_aggregate)
+                                  - 0.4758 * math.log(basal_area_total)
+                                  + 0.1173 * math.log(d13_aggregate)
+                                  - 0.9442 * math.log(dominant_height)
+                                  - 0.3631 * math.log(tree.breast_height_diameter)
+                                  + 0.7762 * math.log(tree.height)
+                                  )
     else:
-        growth_percent = math.exp(
-                6.9342
-                - 0.8808 * math.log(biological_age_aggregate)
-                - 0.4982 * math.log(basal_area_total)
-                + 0.4159 * math.log(d13_aggregate)
-                - 0.3865 * math.log(height_aggregate)
-                - 0.6267 * math.log(tree.breast_height_diameter)
-                + 0.1287 * math.log(tree.height)
-            )
+        growth_percent = math.exp(6.9342
+                                  - 0.8808 * math.log(biological_age_aggregate)
+                                  - 0.4982 * math.log(basal_area_total)
+                                  + 0.4159 * math.log(d13_aggregate)
+                                  - 0.3865 * math.log(height_aggregate)
+                                  - 0.6267 * math.log(tree.breast_height_diameter)
+                                  + 0.1287 * math.log(tree.height)
+                                  )
     return growth_percent
 
 
@@ -34,12 +33,11 @@ def yearly_height_growth_by_species(tree: ReferenceTree, biological_age_aggregat
                                     height_aggregate: float, dominant_height: float, basal_area_total: float) -> float:
     """ Model source: Acta Forestalia Fennica 163 """
     if tree.species == 1:
-        growth_percent = math.exp(
-                5.4636
-                - 0.9002 * math.log(biological_age_aggregate)
-                + 0.5475 * math.log(d13_aggregate)
-                - 1.1339 * math.log(tree.height)
-            )
+        growth_percent = math.exp(5.4636
+                                  - 0.9002 * math.log(biological_age_aggregate)
+                                  + 0.5475 * math.log(d13_aggregate)
+                                  - 1.1339 * math.log(tree.height)
+                                  )
     else:
         growth_percent = (12.7402
                           - 1.1786 * math.log(biological_age_aggregate)
@@ -65,17 +63,14 @@ def grow_acta(input: tuple[ForestStand, None], **operation_parameters) -> tuple[
         trees = list(tree_group)
         # Count species spesific aggregate values
         d13_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
-                trees,
-                lambda tree: tree.breast_height_diameter * f_util.calculate_basal_area(tree)
-            )
+            trees,
+            lambda tree: tree.breast_height_diameter * f_util.calculate_basal_area(tree))
         height_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
-                trees,
-                lambda tree: tree.height * f_util.calculate_basal_area(tree)
-            )
+            trees,
+            lambda tree: tree.height * f_util.calculate_basal_area(tree))
         biological_age_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
-                trees,
-                lambda tree: tree.biological_age * f_util.calculate_basal_area(tree)
-            )
+            trees,
+            lambda tree: tree.biological_age * f_util.calculate_basal_area(tree))
         # Solve and update growth for each tree
         for tree in trees:
             # Calculate yearly growth percents
@@ -94,6 +89,8 @@ def grow_acta(input: tuple[ForestStand, None], **operation_parameters) -> tuple[
                 dominant_height,
                 basal_area_total)
             # Calculate the growth and update tree
-            tree.breast_height_diameter = tree.breast_height_diameter * f_util.compounded_growth_factor(growth_percent_diameter, years)
+            tree.breast_height_diameter = tree.breast_height_diameter * f_util.compounded_growth_factor(
+                growth_percent_diameter,
+                years)
             tree.height = tree.height * f_util.compounded_growth_factor(growth_percent_height, years)
     return stand, None
