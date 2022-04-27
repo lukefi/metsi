@@ -5,8 +5,13 @@ import pymotti
 
 
 def spe2motti(spe: int) -> pymotti.Species:
-    # 1-5 match, but alders are combined.
-    # TODO: this is a quick&dirty hack, the proper way is to convert on data import.
+    """Convert RSD species code to Motti.
+
+    The coding almost matches directly, but we have combined black/gray alders
+    while Motti distinguishes between them. The current implementation just
+    converts all alders to gray alder, but a proper implementation should
+    store the Motti-coded species in :class:`ReferenceTree`
+    so that we don't lose information on trees created by Motti."""
     return pymotti.Species(spe if spe <= 6 else spe+1)
 
 
@@ -64,7 +69,7 @@ class MottiGrowthPredictor(pymotti.Predict):
 
     @property
     def mal(self) -> pymotti.LandUseCategoryVMI:
-        # coding matches RSD
+        """Land use category. Our coding (RSD) matches Motti."""
         # TODO: this should not have zeros, should be checked when loading and not here.
         if self.stand.owner_category == 0:
             return pymotti.LandUseCategoryVMI.FOREST
@@ -72,34 +77,38 @@ class MottiGrowthPredictor(pymotti.Predict):
 
     @property
     def mty(self) -> pymotti.SiteTypeVMI:
-        # coding matches RSD
+        """Site type category. Our coding (RSD) matches Motti."""
         return pymotti.SiteTypeVMI(self.stand.site_type_category)
 
     @property
     def alr(self) -> pymotti.SoilCategoryVMI:
-        # coding matches RSD
+        """Soil category. Our coding (RSD) matches Motti."""
         return pymotti.SoilCategoryVMI(self.stand.soil_peatland_category)
 
     @property
     def verl(self) -> pymotti.TaxClass:
-        # coding matches RSD
+        """Tax class. Our coding (RSD) matches Motti."""
         return pymotti.TaxClass(self.stand.tax_class)
 
     @property
     def verlt(self) -> pymotti.TaxClassReduction:
-        # coding matches RSD
+        """Tax class reduction. Our coding (RSD) matches Motti."""
         return pymotti.TaxClassReduction(self.stand.tax_class_reduction)
 
     #-- management variables --------------------
 
     @property
     def spedom(self) -> pymotti.Species:
-        # TODO: we don't have this, should be set in regeneration.
+        """Main species.
+
+        We don't have this yet, should be set in regeneration."""
         return pymotti.Species.PINE
 
     @property
     def prt(self) -> pymotti.Origin:
-        # TODO: we don't have this, should be set in regeneration.
+        """Regeneration method.
+
+        We don't have this yet, should be set in regeneration."""
         return pymotti.Origin.NATURAL
 
     # TODO: missing operations, since we don't have those yet.
@@ -132,12 +141,15 @@ class MottiGrowthPredictor(pymotti.Predict):
 
     @cached_property
     def trees_storie(self) -> List[pymotti.Storie]:
-        # TODO: we don't have this. should be set in regeneration, data import or by promotion rules.
+        """Storie of trees.
+
+        We don't have this yet, should be set in regeneration.
+        For imported trees, should either come from data, be computed or just set to NONE."""
         return [pymotti.Storie.NONE for _ in self.stand.reference_trees]
 
     @cached_property
     def trees_snt(self) -> List[pymotti.Origin]:
-        # coding matches, but offset by 1
+        """Origin of trees. Our coding (RSD) matches, but is offset by 1."""
         # TODO: default origin should go into data loading, not here.
         return [pymotti.Origin(t.origin+1) if t.origin is not None else pymotti.Origin.NATURAL
                 for t in self.stand.reference_trees]
