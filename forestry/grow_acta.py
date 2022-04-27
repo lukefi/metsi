@@ -41,14 +41,13 @@ def yearly_height_growth_by_species(tree: ReferenceTree, biological_age_aggregat
                 - 1.1339 * math.log(tree.height)
             )
     else:
-        growth_percent = \
-        12.7402
-        - 1.1786 * math.log(biological_age_aggregate)
-        - 0.0937 * math.log(basal_area_total)
-        - 0.1434 * math.log(d13_aggregate)
-        - 0.8070 * math.log(height_aggregate)
-        + 0.7563 * math.log(tree.breast_height_diameter)
-        - 2.0522 * math.log(tree.height)
+        growth_percent = (12.7402
+                          - 1.1786 * math.log(biological_age_aggregate)
+                          - 0.0937 * math.log(basal_area_total)
+                          - 0.1434 * math.log(d13_aggregate)
+                          - 0.8070 * math.log(height_aggregate)
+                          + 0.7563 * math.log(tree.breast_height_diameter)
+                          - 2.0522 * math.log(tree.height))
     return growth_percent
 
 

@@ -60,7 +60,7 @@ class ForestryOperationsTest(unittest.TestCase):
         basal_area_total = 32.0
         assertations_by_species = [
             (1, 3.9595),
-            (2, 12.7402)
+            (2, 1.5397)
         ]
         for i in assertations_by_species:
             tree.species = i[0]
