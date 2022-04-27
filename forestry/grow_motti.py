@@ -19,7 +19,7 @@ def _precompute_weather(stand: ForestStand):
         setattr(stand, "_weather", { "sea": p.sea, "lake": p.lake })
 
 
-class Model(pymotti.Predict):
+class MottiGrowthPredictor(pymotti.Predict):
 
     def __init__(self, stand: ForestStand):
         self.stand = stand
@@ -147,7 +147,7 @@ class Model(pymotti.Predict):
 
 
 def grow_motti(stand: ForestStand, **operation_params) -> ForestStand:
-    growth = Model(stand).evolve()
+    growth = MottiGrowthPredictor(stand).evolve()
     for i,t in enumerate(stand.reference_trees):
         t.stems_per_ha += growth.trees_if[i]
         t.breast_height_diameter += growth.trees_id[i]
