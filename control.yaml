@@ -13,12 +13,16 @@ operation_params:
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
-  - time_points: [5, 10, 15, 20, 35, 30]
+  - time_points: [0, 5, 10, 15, 20, 35, 30]
     generators:
       - sequence:
-        - grow
+        - grow_acta
+  - time_points: [5, 15, 25]
+    generators:
       - alternatives:
-        - do_nothing
-        - basal_area_thinning
-        - stem_count_thinning
-        - continuous_growth_thinning
+          - do_nothing
+          - basal_area_thinning
+  - time_points: [0, 10, 20, 30]
+    generators:
+      - sequence:
+          - report_volume
