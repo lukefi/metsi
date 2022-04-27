@@ -19,6 +19,8 @@ def print_run_result(results: dict):
         for i, result in enumerate(results[id]):
             print("variant {} result: ".format(i), end='')
             print_stand_result(result.simulation_state)
+            last_reporting_aggregate = list(result.aggregated_results.get('report_volume').values())[-1]
+            print("variant {} growth report: {}".format(i, last_reporting_aggregate))
 
 
 def run_stands(
