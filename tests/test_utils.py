@@ -21,6 +21,12 @@ def none(x: Any) -> None:
     return None
 
 
+def aggregating_increment(input: tuple[int, dict]) -> tuple[int, dict]:
+    state, previous = input
+    aggregate = {'run_count': 1} if previous is None else {'run_count': previous['run_count'] + 1}
+    return state + 1, aggregate
+
+
 def inc(x: int) -> int:
     return x + 1
 

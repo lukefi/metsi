@@ -18,7 +18,7 @@ class ForestryOperationsTest(unittest.TestCase):
             reference_trees.append(reference_tree)
         stand = ForestStand()
         stand.reference_trees = reference_trees
-        result_stand = grow_acta(stand)
+        result_stand, _ = grow_acta((stand, None))
         self.assertEqual(5, len(result_stand.reference_trees))
         self.assertEqual(13.1827, round(result_stand.reference_trees[0].breast_height_diameter, 4))
         self.assertEqual(29.8520, round(result_stand.reference_trees[0].height, 4))
