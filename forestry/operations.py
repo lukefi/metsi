@@ -51,7 +51,7 @@ operation_lookup = {
 
 try:
     from forestry.grow_motti import grow_motti
-except Exception:
+except ImportError:
     # just don't register it when pymotti isn't found.
     # we don't want to make pymotti a required dependency until it's public.
     pass
