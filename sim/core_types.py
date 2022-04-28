@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from typing import Callable, List, Optional, Any
+from typing import Callable, List, Optional, Any, OrderedDict, Dict
 
 
 def identity(x):
@@ -14,7 +14,8 @@ class Step:
     branches: List['Step'] = []
     previous: 'Step' or None = None
 
-    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None, previous: 'Step' or None = None):
+    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None,
+                 previous: 'Step' or None = None):
         self.operation = operation if operation is not None else identity
         self.previous = previous
         self.branches = []
@@ -69,3 +70,4 @@ class OperationPayload(SimpleNamespace):
     operation calls. """
     simulation_state: Any
     run_history: dict or None
+    aggregated_results: Dict[str, OrderedDict[int, Any]]

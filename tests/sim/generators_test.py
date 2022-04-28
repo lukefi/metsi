@@ -4,7 +4,7 @@ import yaml
 from sim.core_types import Step, OperationPayload
 from sim.generators import sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence
-from tests.test_utils import inc, dec
+from tests.test_utils import inc, dec, aggregating_increment
 
 
 class TestGenerators(unittest.TestCase):
@@ -110,16 +110,16 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         generators = sim.generators.full_tree_generators(
-            yaml.load(declaration, Loader=yaml.CLoader), {'inc': inc})
+            yaml.load(declaration, Loader=yaml.CLoader), {'inc': aggregating_increment})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, run_history={})
+        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results={})
         computation_result = run_sequence(payload, *chain)
         self.assertEqual(5, len(chain))
         self.assertEqual(4, computation_result.simulation_state)
 
     def test_operation_run_constraints_success(self):
-        declaration="""
+        declaration = """
         simulation_params:
             initial_step_time: 0
             step_time_interval: 1
@@ -134,16 +134,16 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         generators = sim.generators.full_tree_generators(
-            yaml.safe_load(declaration), {'inc': inc})
+            yaml.safe_load(declaration), {'inc': aggregating_increment})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, run_history={})
+        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results={})
         computation_result = run_sequence(payload, *chain)
         self.assertEqual(3, len(chain))
         self.assertEqual(2, computation_result.simulation_state)
 
     def test_operation_run_constraints_fail(self):
-        declaration="""
+        declaration = """
         simulation_params:
             initial_step_time: 0
             step_time_interval: 1
@@ -162,7 +162,7 @@ class TestGenerators(unittest.TestCase):
             yaml.safe_load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, run_history={})
+        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results={})
         self.assertRaises(Exception, run_sequence, payload, *chain)
 
     def test_tree_generators_by_time_point(self):

@@ -34,6 +34,14 @@ pip install --user -r requirements.txt
 pip install --user pytest
 ```
 
+To use Motti growth models, clone the pymotti repository to a location of your choosing and install the module with pip.
+
+```
+# adjust the command below to your environment specifics about authentication and protocol
+git clone https://github.com/menu-hanke/pymotti
+pip install --user pymotti
+```
+
 To run the application, run in the project root
 
 ```

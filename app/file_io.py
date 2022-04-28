@@ -11,7 +11,8 @@ def file_contents(file_path: str) -> str:
 
 def forest_stands_from_json_file(file_path: str) -> List[ForestStand]:
     # TODO: content validation
-    return json.loads(file_contents(file_path), object_hook=lambda d: ReferenceTree(**d) if "tree" in d['identifier'] else ForestStand(**d))
+    return json.loads(file_contents(file_path),
+                      object_hook=lambda d: ReferenceTree(**d) if "tree" in d['identifier'] else ForestStand(**d))
 
 
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:

@@ -1,5 +1,5 @@
 import time
-from typing import List, Callable
+from typing import List, Callable, Dict
 import sys
 import forestry.operations
 from sim.core_types import OperationPayload
@@ -19,12 +19,14 @@ def print_run_result(results: dict):
         for i, result in enumerate(results[id]):
             print("variant {} result: ".format(i), end='')
             print_stand_result(result.simulation_state)
+            last_reporting_aggregate = list(result.aggregated_results.get('report_volume').values())[-1]
+            print("variant {} growth report: {}".format(i, last_reporting_aggregate))
 
 
 def run_stands(
         stands: List[ForestStand], simulation_declaration: dict,
         run_strategy: Callable[[OperationPayload, dict, dict], List[OperationPayload]]
-) -> dict[str, List[OperationPayload]]:
+) -> Dict[str, List[OperationPayload]]:
     """Run the simulation for all given stands, from the given declaration, using the given run strategy. Return the
     results organized into a dict keyed with stand identifiers."""
 
@@ -32,7 +34,8 @@ def run_stands(
     for stand in stands:
         payload = OperationPayload(
             simulation_state=stand,
-            run_history={}
+            run_history={},
+            aggregated_results={}
         )
         result = run_strategy(payload, simulation_declaration, forestry.operations.operation_lookup)
         retval[stand.identifier] = result
