@@ -1,7 +1,7 @@
 import unittest
 import forestry.forestry_utils as f_util
+from forestry.ForestDataModels import ReferenceTree
 
-from forestry.ForestDataModels import ForestStand, ReferenceTree
 
 class ForestryUtilsTest(unittest.TestCase):
     def test_calculate_basal_area(self):
@@ -50,7 +50,7 @@ class ForestryUtilsTest(unittest.TestCase):
             reference_tree.stems_per_ha = 50.0 + i
             reference_trees.append(reference_tree)
         result = f_util.calculate_basal_area_weighted_attribute_aggregate(reference_trees, f)
-        self.assertEqual(13.3402, round(result,4))
+        self.assertEqual(13.3402, round(result, 4))
 
     def test_compaunded_growth_factor(self):
         assertions = [
@@ -62,4 +62,3 @@ class ForestryUtilsTest(unittest.TestCase):
         for i in assertions:
             result = f_util.compounded_growth_factor(i[0][0], i[0][1])
             self.assertEqual(i[1], round(result, 3))
-

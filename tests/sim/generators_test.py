@@ -119,7 +119,7 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(4, computation_result.simulation_state)
 
     def test_operation_run_constraints_success(self):
-        declaration="""
+        declaration = """
         simulation_params:
             initial_step_time: 0
             step_time_interval: 1
@@ -143,7 +143,7 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(2, computation_result.simulation_state)
 
     def test_operation_run_constraints_fail(self):
-        declaration="""
+        declaration = """
         simulation_params:
             initial_step_time: 0
             step_time_interval: 1

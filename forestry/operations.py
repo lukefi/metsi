@@ -1,7 +1,5 @@
-
 from functools import reduce
 from typing import Tuple
-
 import forestry.forestry_utils as f_util
 from forestry.ForestDataModels import ForestStand
 from forestry.grow_acta import grow_acta
@@ -49,7 +47,6 @@ operation_lookup = {
     'continuous_growth_thinning': continuous_growth_thinning,
     'report_volume': report_volume
 }
-
 
 try:
     from forestry.grow_motti import grow_motti

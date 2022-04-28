@@ -15,13 +15,15 @@ def prepared_operation(operation_entrypoint: typing.Callable, **operation_parame
     return lambda state: operation_entrypoint(state, **operation_parameters)
 
 
-def prepared_processor(operation_tag, processor_lookup, time_point: int, operation_run_constraints: dict, **operation_parameters: dict):
+def prepared_processor(operation_tag, processor_lookup, time_point: int, operation_run_constraints: dict,
+                       **operation_parameters: dict):
     """prepares a processor function with an operation entrypoint"""
     operation = prepared_operation(resolve_operation(operation_tag, processor_lookup), **operation_parameters)
     return lambda payload: processor(payload, operation, operation_tag, time_point, operation_run_constraints)
 
 
-def processor(payload: OperationPayload, operation: typing.Callable, operation_tag, time_point: int, operation_run_constraints: Optional[dict]):
+def processor(payload: OperationPayload, operation: typing.Callable, operation_tag, time_point: int,
+              operation_run_constraints: Optional[dict]):
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     run_history = deepcopy(payload.run_history)
     operation_run_history = get_or_default(run_history.get(operation_tag), {})

@@ -124,7 +124,8 @@ def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -
     return generator_series
 
 
-def partial_tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> Dict[int, List[Callable]]:
+def partial_tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> Dict[
+    int, List[Callable]]:
     """
     Creat a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
     partial step trees of the simulation.

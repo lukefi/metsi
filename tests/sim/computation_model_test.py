@@ -1,5 +1,4 @@
 import unittest
-
 from sim.runners import evaluate_sequence
 from sim.core_types import Step
 from tests.test_utils import inc

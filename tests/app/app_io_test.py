@@ -1,6 +1,6 @@
 import unittest
-
 from app import app_io as aio
+
 
 class TestAppIO(unittest.TestCase):
     def test_app_io(self):
