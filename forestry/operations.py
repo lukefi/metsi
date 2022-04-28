@@ -1,5 +1,7 @@
 
 from functools import reduce
+from typing import Tuple
+
 import forestry.forestry_utils as f_util
 from forestry.ForestDataModels import ForestStand
 from forestry.grow_acta import grow_acta
@@ -27,7 +29,7 @@ def compute_volume(stand: ForestStand) -> float:
     return reduce(lambda acc, cur: f_util.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
 
 
-def report_volume(input: tuple[ForestStand, dict], **operation_parameters) -> tuple[ForestStand, dict]:
+def report_volume(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
     stand, previous = input
     result = compute_volume(stand)
     if previous is None:

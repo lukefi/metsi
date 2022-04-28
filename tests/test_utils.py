@@ -2,7 +2,7 @@
 This module contains a collection of util functions and dummy payload functions for test cases
 """
 import os
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 
 import yaml
 
@@ -21,7 +21,7 @@ def none(x: Any) -> None:
     return None
 
 
-def aggregating_increment(input: tuple[int, dict]) -> tuple[int, dict]:
+def aggregating_increment(input: Tuple[int, dict]) -> Tuple[int, dict]:
     state, previous = input
     aggregate = {'run_count': 1} if previous is None else {'run_count': previous['run_count'] + 1}
     return state + 1, aggregate

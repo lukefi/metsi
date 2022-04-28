@@ -1,3 +1,4 @@
+from typing import Tuple
 import itertools
 import math
 import forestry.forestry_utils as f_util
@@ -49,7 +50,7 @@ def yearly_height_growth_by_species(tree: ReferenceTree, biological_age_aggregat
     return growth_percent
 
 
-def grow_acta(input: tuple[ForestStand, None], **operation_parameters) -> tuple[ForestStand, None]:
+def grow_acta(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[ForestStand, None]:
     # TODO: Source years from simulator configurations
     stand, aggregated_data = input
     years = 5

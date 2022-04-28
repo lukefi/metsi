@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import List
+from typing import List, Tuple
 from forestry.ForestDataModels import ForestStand
 import pymotti
 
@@ -158,7 +158,7 @@ class MottiGrowthPredictor(pymotti.Predict):
     # TODO: we don't have these yet.
 
 
-def grow_motti(input: tuple[ForestStand, None], **operation_parameters) -> tuple[ForestStand, None]:
+def grow_motti(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[ForestStand, None]:
     stand, _ = input
     growth = MottiGrowthPredictor(stand).evolve()
     for i,t in enumerate(stand.reference_trees):
