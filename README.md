@@ -39,7 +39,7 @@ To use Motti growth models, clone the pymotti repository to a location of your c
 ```
 # adjust the command below to your environment specifics about authentication and protocol
 git clone https://github.com/menu-hanke/pymotti
-pip install --user pymotti
+pip install --user ./pymotti
 ```
 
 To run the application, run in the project root
