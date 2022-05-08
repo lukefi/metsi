@@ -1,5 +1,5 @@
 import unittest
-from forestry.ForestDataModels import ForestStand, ReferenceTree
+from forestdatamodel import ForestStand, ReferenceTree
 from forestry.grow_acta import grow_acta, yearly_diameter_growth_by_species, yearly_height_growth_by_species
 
 
