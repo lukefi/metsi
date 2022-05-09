@@ -2,7 +2,7 @@ from typing import Tuple
 import itertools
 import math
 import forestry.forestry_utils as f_util
-from forestry.ForestDataModels import ForestStand, ReferenceTree
+from forestdatamodel import ForestStand, ReferenceTree
 
 
 def yearly_diameter_growth_by_species(tree: ReferenceTree, biological_age_aggregate: float, d13_aggregate: float,

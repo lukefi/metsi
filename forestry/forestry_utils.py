@@ -1,6 +1,6 @@
 import math
 import statistics
-from forestry.ForestDataModels import ReferenceTree
+from forestdatamodel import ReferenceTree
 from typing import List, Callable
 
 
