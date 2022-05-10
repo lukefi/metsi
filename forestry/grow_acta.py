@@ -52,7 +52,9 @@ def yearly_height_growth_by_species(tree: ReferenceTree, biological_age_aggregat
 
 def grow_acta(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[ForestStand, None]:
     # TODO: Source years from simulator configurations
-    stand, aggregated_data = input
+    stand, _ = input
+    if len(stand.reference_trees) == 0:
+        return input
     years = 5
     # Count ForestStand aggregate values
     basal_area_total = f_util.calculate_attribute_sum(stand.reference_trees, f_util.calculate_basal_area)
