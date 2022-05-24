@@ -1,0 +1,58 @@
+install.packages("lmfor", repos = "https://cran.r-project.org")
+library(lmfor)
+
+volmods <- readRDS("r/vol_mods_final_LM.rds")
+
+# test <- data.frame(
+#   height = c(10.3, 14.7),
+#   breast_height_diameter = c(25.3, 32.3),
+#   degree_days = c(400.3, 400.3),
+#   species = c("pine", "spruce"),
+#   measurement_method = c("climbed", "climbed")
+# )
+
+known_species <- c("birch", "pine", "spruce")
+known_methods <- c("climbed", "felled", "scanned")
+
+has_species <- function(tree_data, species) {
+  any(tree_data$species == species)
+}
+
+computable_dataframe <- function(tree_data) {
+  data.frame(
+    h = tree_data$height,
+    dbh = tree_data$breast_height_diameter,
+    temp_sum = tree_data$degree_days,
+    species = factor(tree_data$species, levels = known_species),
+    dataset = factor(tree_data$measurement_method, levels = known_methods)
+  )
+}
+
+volumes_for_species <- function(prepared_data, species) {
+  # Need to do explicit check for existence of specific species
+  # predvff raises an Error with empty data.
+  # Maybe handle with tryCatch instead?
+  if (has_species(prepared_data, species)) {
+    attr(predvff(prepared_data[prepared_data$species == species,], get(species, volmods$model3)), "trees")$volume
+  }
+  else {
+    vector()
+  }
+}
+
+compute_tree_volumes <- function(tree_data) {
+  # we assume data is a dataframe with members h, dbh, temp_sum and species
+  # where species is an array of enumerations: "pine", "spruce", "birch"
+  # and h, dbh and temp_sum are float arrays
+  # of equal length (N of trees)
+  # returning N-length float array
+  prepared_data <- computable_dataframe(tree_data)
+  volpred <- vector("numeric", length(tree_data$species))
+
+  volpred[prepared_data$species == "pine"] <- volumes_for_species(prepared_data, "pine")
+  volpred[prepared_data$species == "spruce"] <- volumes_for_species(prepared_data, "spruce")
+  volpred[prepared_data$species == "birch"] <- volumes_for_species(prepared_data, "birch")
+  volpred
+}
+
+# result <- compute_tree_volumes(test)
