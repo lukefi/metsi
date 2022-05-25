@@ -30,7 +30,7 @@ def lmfor_volume(stand: ForestStand) -> float:
         'breast_height_diameter': robjects.FloatVector([tree.breast_height_diameter for tree in stand.reference_trees]),
         'degree_days': robjects.FloatVector([stand.degree_days for _ in range(len(stand.reference_trees))]),
         'species': robjects.StrVector([lmfor_species_map[tree.species] for tree in stand.reference_trees]),
-        'model_type': robjects.StrVector(['climbed' for _ in range(len(stand.reference_trees))])
+        'model_type': robjects.StrVector(['scanned' for _ in range(len(stand.reference_trees))])
     }
     df = robjects.DataFrame(source_data)
     volumes = list(robjects.r['compute_tree_volumes'](df))
