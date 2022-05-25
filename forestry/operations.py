@@ -3,6 +3,7 @@ from typing import Tuple
 import forestry.forestry_utils as f_util
 from forestry.ForestDataModels import ForestStand
 from forestry.grow_acta import grow_acta
+from forestry.r_utils import lmfor_volume
 
 
 def basal_area_thinning(stand: ForestStand, **operation_parameters) -> ForestStand:
@@ -28,8 +29,11 @@ def compute_volume(stand: ForestStand) -> float:
 
 
 def report_volume(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    volume_function = compute_volume
+    if operation_parameters.get('lmfor_volume'):
+        volume_function = lmfor_volume
     stand, previous = input
-    result = compute_volume(stand)
+    result = volume_function(stand)
     if previous is None:
         return stand, {'growth_volume': 0.0, 'current_volume': result}
     else:

@@ -8,8 +8,8 @@ run_constraints:
     minimum_time_interval: 10
 
 operation_params:
-  reporting:
-    level: 1
+  report_volume:
+    lmfor_volume: false
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
