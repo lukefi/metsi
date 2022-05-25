@@ -1,4 +1,4 @@
-from forestry.ForestDataModels import ForestStand
+from forestdatamodel.model import ForestStand
 try:
     import rpy2.robjects as robjects
 except ImportError:
