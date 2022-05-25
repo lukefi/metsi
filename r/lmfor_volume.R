@@ -12,7 +12,7 @@ volmods <- readRDS("r/vol_mods_final_LM.rds")
 # )
 
 known_species <- c("birch", "pine", "spruce")
-known_methods <- c("climbed", "felled", "scanned")
+known_model_types <- c("climbed", "felled", "scanned")
 
 has_species <- function(tree_data, species) {
   any(tree_data$species == species)
@@ -24,7 +24,7 @@ computable_dataframe <- function(tree_data) {
     dbh = tree_data$breast_height_diameter,
     temp_sum = tree_data$degree_days,
     species = factor(tree_data$species, levels = known_species),
-    dataset = factor(tree_data$measurement_method, levels = known_methods)
+    dataset = factor(tree_data$model_type, levels = known_model_types)
   )
 }
 
@@ -40,7 +40,7 @@ volumes_for_species <- function(prepared_data, species) {
   }
 }
 
-compute_tree_volumes <- function(tree_data) {
+compute_tree_volumes <- function(tree_data, model_type) {
   # we assume data is a dataframe with members h, dbh, temp_sum and species
   # where species is an array of enumerations: "pine", "spruce", "birch"
   # and h, dbh and temp_sum are float arrays
