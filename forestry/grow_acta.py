@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, List
 import itertools
 import math
 import forestry.forestry_utils as f_util
@@ -50,17 +50,13 @@ def yearly_height_growth_by_species(tree: ReferenceTree, biological_age_aggregat
     return growth_percent
 
 
-def grow_acta(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[ForestStand, None]:
-    # TODO: Source years from simulator configurations
-    stand, _ = input
-    if len(stand.reference_trees) == 0:
-        return input
+def grow_trees(tree_data: List[ReferenceTree]):
     years = 5
     # Count ForestStand aggregate values
-    basal_area_total = f_util.calculate_attribute_sum(stand.reference_trees, f_util.calculate_basal_area)
-    dominant_height = f_util.solve_dominant_height(stand.reference_trees)
+    basal_area_total = f_util.calculate_attribute_sum(tree_data, f_util.calculate_basal_area)
+    dominant_height = f_util.solve_dominant_height(tree_data)
     # Group reference trees with same species
-    tree_groups = itertools.groupby(stand.reference_trees, lambda tree: tree.species)
+    tree_groups = itertools.groupby(tree_data, lambda tree: tree.species)
     # Calculate growth for each tree species
     for _, tree_group in tree_groups:
         trees = list(tree_group)
@@ -96,4 +92,12 @@ def grow_acta(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[
                 growth_percent_diameter,
                 years)
             tree.height = tree.height * f_util.compounded_growth_factor(growth_percent_height, years)
+
+
+def grow_acta(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[ForestStand, None]:
+    # TODO: Source years from simulator configurations
+    stand, _ = input
+    if len(stand.reference_trees) == 0:
+        return input
+    grow_trees(stand.reference_trees)
     return stand, None
