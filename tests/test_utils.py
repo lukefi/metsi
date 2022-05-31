@@ -2,11 +2,19 @@
 This module contains a collection of util functions and dummy payload functions for test cases
 """
 import os
-from typing import Any, List, Optional, Tuple
+import unittest
+from typing import Any, List, Optional, Tuple, Callable
 
 import yaml
 
 from sim.core_types import OperationPayload
+
+
+class ConverterTestSuite(unittest.TestCase):
+    def run_with_test_assertions(self, assertions: List[Tuple], fn: Callable):
+        for case in assertions:
+            result = fn(*case[0])
+            self.assertEqual(case[1], result)
 
 
 def raises(x: Any) -> None:
