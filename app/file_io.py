@@ -1,5 +1,6 @@
 import json
-from typing import List
+import pickle
+from typing import List, Any, Callable
 import yaml
 from forestdatamodel import ForestStand, ReferenceTree
 
@@ -18,3 +19,13 @@ def forest_stands_from_json_file(file_path: str) -> List[ForestStand]:
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     # TODO: content validation
     return yaml.load(file_contents(file_path), Loader=yaml.CLoader)
+
+
+def pickle_writer(file_path: str, data: Any):
+    with open(file_path, 'wb') as f:
+        pickle.dump(data, f, 5)
+
+
+def pickle_reader(file_path: str) -> Any:
+    with open(file_path, 'rb') as f:
+        return pickle.load(f)
