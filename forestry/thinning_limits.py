@@ -1,9 +1,8 @@
 """
-Thinning limits are solved from thinning limits dict.
+The module is basicly a utility file for thinning operations that are basal area based.
 
-The dict has different layers based stand and tree variables.
-The value which is obtained from dict is the lower (y0) and upper (y1) bound of basal area thinning.
-
+Thinning limits lookup table is used for solving lower (y0) and upper (y1) bound
+of basal area thinnings.
 """
 from typing import Tuple
 from forestdatamodel import ReferenceTree, ForestStand
