@@ -5,7 +5,7 @@ Thinning limits lookup table is used for solving lower (y0) and upper (y1) bound
 of basal area thinnings.
 """
 from typing import Tuple
-from forestdatamodel import ReferenceTree, ForestStand
+from forestdatamodel.model import ReferenceTree, ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
 from collections.abc import KeysView
 from enum import Enum
@@ -494,12 +494,13 @@ def solve_hdom_key(hdom_x: int, hdoms: KeysView[int]) -> int:
             return hdom_n
 
 
-def get_limits(reference_tree: ReferenceTree, stand: ForestStand) -> Tuple[float, float]:
-    """ get reference trees basal area lower and upper bound for thinning """
+def get_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
+    """ get lower and upper bound for thinning """
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
-    species_key = species_to_key(reference_tree.species)
+    sdom = stand.solve_dominant_species()
+    species_key = species_to_key(sdom)
     hdom = stand.calculate_dominant_height()
 
     spe_limits = THINNING_LIMITS[county_key][sp_category_key][site_type_key][species_key]

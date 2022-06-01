@@ -2,7 +2,7 @@ import unittest
 from forestdatamodel import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 from tests.test_utils import ConverterTestSuite
-from forestry.thinning_limits import site_type_to_key, soil_peatland_category_to_key, species_to_key, solve_hdom_key, get_limits
+from forestry.thinning_limits import site_type_to_key, soil_peatland_category_to_key, species_to_key, solve_hdom_key, get_thinning_bounds
 from forestry.thinning_limits import THINNING_LIMITS, SiteTypeKey, SoilPeatlandKey, SpeciesKey
 
 
@@ -49,26 +49,6 @@ class ThinningsTest(ConverterTestSuite):
         self.assertRaises(UserWarning, species_to_key, 'kissa123')
         self.assertRaises(UserWarning, species_to_key, None)
 
-    def test_get_limits(self):
-        tree_variables = {
-            'species': 1,
-            'breast_height_diameter': 15.0,
-            'stems_per_ha': 99.0
-        }
-        stand_variables = {
-            'site_type_category': 1,
-            'soil_peatland_category': 1
-        }
-        stand = ForestStand(**stand_variables)
-        stand.reference_trees = [ReferenceTree(**tree_variables)]
-
-        assertions = [
-            ([stand.reference_trees[0], stand], (19.0, 26.1))
-        ]
-        self.run_with_test_assertions(assertions, get_limits)
-
-
-
     def test_solve_hdom_key(self):
         d = {
             10: None,
@@ -87,4 +67,35 @@ class ThinningsTest(ConverterTestSuite):
         for i in assertions:
             result = solve_hdom_key(i[0], d.keys())
             self.assertEqual(i[1], result)
+
+    def test_get_thinning_bounds(self):
+        tree_variables = [
+            {
+                'species': 2,
+                'breast_height_diameter': 10.0,
+                'stems_per_ha': 100.0
+            },
+            {
+                'species': 1,
+                'breast_height_diameter': 10.0,
+                'stems_per_ha': 100.0
+            },
+            {
+                'species': 2,
+                'breast_height_diameter': 10.0,
+                'stems_per_ha': 100.0
+            }
+        ]
+        stand_variables = {
+            'site_type_category': 1,
+            'soil_peatland_category': 1
+        }
+        stand = ForestStand(**stand_variables)
+        stand.reference_trees = [ReferenceTree(**tv) for tv in tree_variables]
+
+        assertions = [
+            ([stand], (15.2, 24.0))
+        ]
+        self.run_with_test_assertions(assertions, get_thinning_bounds)
+
 
