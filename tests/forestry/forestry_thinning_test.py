@@ -1,5 +1,5 @@
 import unittest
-from forestdatamodel import ForestStand, ReferenceTree
+from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 from tests.test_utils import ConverterTestSuite
 from forestry.thinning_limits import site_type_to_key, soil_peatland_category_to_key, species_to_key, solve_hdom_key, get_thinning_bounds
