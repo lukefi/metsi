@@ -5,7 +5,7 @@ import forestry.operations
 from sim.core_types import OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from forestdatamodel import ForestStand
-from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
+from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file, pickle_writer
 from app.app_io import parse_cli_arguments
 
 
@@ -46,10 +46,12 @@ def main():
     app_arguments = parse_cli_arguments(sys.argv[1:])
     stands = forest_stands_from_json_file(app_arguments.domain_state_file)
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
+    output_filename = app_arguments.output_file
 
     # run full tree
     full_run_time = int(time.time_ns())
     full_run_result = run_stands(stands, simulation_declaration, run_full_tree_strategy)
+    pickle_writer(output_filename, full_run_result)
     full_run_time = (int(time.time_ns()) - full_run_time) / 1000000000
 
     # run partial trees
