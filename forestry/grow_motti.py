@@ -1,6 +1,6 @@
 from functools import cached_property
 from typing import List, Tuple
-from forestdatamodel import ForestStand
+from forestdatamodel.model import ForestStand
 import pymotti
 
 
