@@ -3,9 +3,9 @@ from app import app_io as aio
 
 
 class TestAppIO(unittest.TestCase):
-    def test_app_io(self):
+    def test_sim_cli_arguments(self):
         args = ['input.json', 'control.yaml', 'output.pickle', '-s', 'partial']
-        result = aio.parse_cli_arguments(args)
+        result = aio.sim_cli_arguments(args)
         print(result)
         print(dir(result))
         self.assertEqual(4, len(result.__dict__.keys()))
