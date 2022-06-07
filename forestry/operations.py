@@ -1,6 +1,7 @@
 from functools import reduce
+from collections import OrderedDict
 from typing import Tuple
-import forestry.forestry_utils as f_util
+import forestry.forestry_utils as futil
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
 
@@ -24,19 +25,29 @@ def compute_volume(stand: ForestStand) -> float:
     """Debug level function. Does not reflect any real usable model computation.
 
     Return the sum of the product of basal area and height for all reference trees in the stand"""
-    return reduce(lambda acc, cur: f_util.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
+    return reduce(lambda acc, cur: futil.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
 
 
 def report_volume(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
-    stand, previous = input
+    stand, simulation_aggregates = input
+    time_point = simulation_aggregates['current_time_point']
+    operation_results = simulation_aggregates.get('operation_results')
+
+    operation_aggregates: OrderedDict = operation_results.get('report_volume', OrderedDict()).copy()
+    latest_aggregate = None if len(operation_aggregates) == 0 else list(operation_aggregates.values())[-1]
+
     result = compute_volume(stand)
-    if previous is None:
-        return stand, {'growth_volume': 0.0, 'current_volume': result}
+    if latest_aggregate is None:
+        next_aggregate = {'growth_volume': 0.0, 'current_volume': result}
     else:
-        return stand, {
-            'growth_volume': previous['growth_volume'] + result - previous['current_volume'],
+        next_aggregate = {
+            'growth_volume': latest_aggregate['growth_volume'] + result - latest_aggregate['current_volume'],
             'current_volume': result
         }
+    operation_aggregates[time_point] = next_aggregate
+    operation_results['report_volume'] = operation_aggregates
+    return stand, simulation_aggregates
+
 
 
 operation_lookup = {
