@@ -18,8 +18,8 @@ def spe2motti(spe: int) -> pymotti.Species:
 def _precompute_weather(stand: ForestStand):
     if not hasattr(stand, "_weather"):
         lat, lon, h, cs = stand.geo_location
-        if cs != "ERTS-TM35FIN":
-            raise NotImplementedError("TODO")
+        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
+            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
         p = pymotti.Predict(Y=lat, X=lon, Z=h)
         setattr(stand, "_weather", {"sea": p.sea, "lake": p.lake})
 
@@ -38,15 +38,15 @@ class MottiGrowthPredictor(pymotti.Predict):
     @cached_property
     def Y(self) -> float:
         lat, _, _, cs = self.stand.geo_location
-        if cs != "ERTS-TM35FIN":
-            raise NotImplementedError("TODO")
+        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
+            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
         return lat
 
     @cached_property
     def X(self) -> float:
         _, lon, _, cs = self.stand.geo_location
-        if cs != "ERTS-TM35FIN":
-            raise NotImplementedError("TODO")
+        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
+            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
         return lon
 
     @property
