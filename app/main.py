@@ -56,7 +56,7 @@ def resolve_strategy_runner(source: str) -> Callable:
 
 def main():
     app_arguments = sim_cli_arguments(sys.argv[1:])
-    stands = forest_stands_from_json_file(app_arguments.domain_state_file)
+    stands = forest_stands_from_json_file(app_arguments.input_file)
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     output_filename = app_arguments.output_file
     strategy_runner = resolve_strategy_runner(app_arguments.strategy)

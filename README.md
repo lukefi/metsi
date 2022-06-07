@@ -62,9 +62,9 @@ The command will output the following
 Mela2.0 simulator
 
 positional arguments:
-  domain_state_file     A .json file containing the initial state of the simulation
-  control_file          Simulation control logic as a .yaml file
-  output_file           Simulator output (pickle) file for alternatives and aggregated data
+  input_file            Simulator input file
+  control_file          Simulation control declaration file
+  output_file           Simulator output file for alternatives and aggregated data
 
 options:
   -h, --help            show this help message and exit
