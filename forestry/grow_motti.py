@@ -70,10 +70,7 @@ class MottiGrowthPredictor(pymotti.Predict):
     @property
     def mal(self) -> pymotti.LandUseCategoryVMI:
         """Land use category. Our coding (RSD) matches Motti."""
-        # TODO: this should not have zeros, should be checked when loading and not here.
-        if self.stand.owner_category == 0:
-            return pymotti.LandUseCategoryVMI.FOREST
-        return pymotti.LandUseCategoryVMI(self.stand.owner_category)
+        return pymotti.LandUseCategoryVMI(self.stand.land_use_category)
 
     @property
     def mty(self) -> pymotti.SiteTypeVMI:
