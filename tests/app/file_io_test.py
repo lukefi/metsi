@@ -1,7 +1,7 @@
 import unittest
 import os
 import app.file_io
-from forestdatamodel import ForestStand, ReferenceTree
+from forestdatamodel.model import ForestStand, ReferenceTree
 
 
 class TestFileReading(unittest.TestCase):
