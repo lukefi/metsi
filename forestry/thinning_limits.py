@@ -495,7 +495,7 @@ def solve_hdom_key(hdom_x: int, hdoms: KeysView[int]) -> int:
 
 
 def get_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
-    """ get lower and upper bound for thinning """
+    """ Get lower and upper bound for thinning. Values are in meters """
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)

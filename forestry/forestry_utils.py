@@ -17,7 +17,7 @@ def calculate_basal_area(tree: ReferenceTree) -> float:
     The tree should contain breast height diameter (in cm) and stesm per hectare for the species spesific calculations.
 
     :param tree: Single ReferenceTree instance with breast height diameter (in cm) and stems per hectare properties.
-    :return reference tree basal area in square meters
+    :return reference tree basal area in square meters (m^2)
     """
     meters_factor = 0.01
     radius = tree.breast_height_diameter * 0.5 * meters_factor
