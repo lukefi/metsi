@@ -1,7 +1,16 @@
 import unittest
 import os
 import app.file_io
+from dataclasses import dataclass
 from forestdatamodel.model import ForestStand, ReferenceTree
+
+
+@dataclass
+class Test:
+    a: int
+
+    def __eq__(self, other):
+        return self.a == other.a
 
 
 class TestFileReading(unittest.TestCase):
@@ -23,3 +32,14 @@ class TestFileReading(unittest.TestCase):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "control.yaml")
         result = app.file_io.simulation_declaration_from_yaml_file(input_file_path)
         self.assertEqual(2, len(result.keys()))
+
+    def test_pickle(self):
+        data = [
+            Test(a=1),
+            Test(a=2)
+        ]
+        app.file_io.pickle_writer('testpickle', data)
+        result = app.file_io.pickle_reader('testpickle')
+        self.assertListEqual(data, result)
+        os.remove('testpickle')
+
