@@ -1,6 +1,6 @@
 import math
 import statistics
-from forestdatamodel.model import ReferenceTree
+from forestdatamodel.model import ReferenceTree, ForestStand
 from typing import List, Callable
 
 
@@ -28,6 +28,11 @@ def solve_dominant_height_c_largest(stand, c: int = 100):
             n += w
         # average of weighted sums
         return dw_sum / n if n > 0 else 0
+
+
+def overall_basal_area(stand: ForestStand) -> float:
+    """ Overall basal area of stand in square centimeters """
+    return sum(calculate_basal_area(rt) for rt in stand.reference_trees)
 
 
 def calculate_basal_area(tree: ReferenceTree) -> float:
