@@ -4,6 +4,7 @@ The module is basicly a utility file for thinning operations that are basal area
 Thinning limits lookup table is used for solving lower (y0) and upper (y1) bound
 of basal area thinnings.
 """
+import forestry.forestry_utils as futil
 from typing import Tuple
 from forestdatamodel.model import ReferenceTree, ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
@@ -499,9 +500,9 @@ def get_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
-    sdom = stand.solve_dominant_species()
+    sdom = futil.solve_dominant_species(stand)
     species_key = species_to_key(sdom)
-    hdom = stand.calculate_dominant_height()
+    hdom = futil.solve_dominant_height_c_largest(stand)
 
     spe_limits = THINNING_LIMITS[county_key][sp_category_key][site_type_key][species_key]
 

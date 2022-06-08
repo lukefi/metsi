@@ -1,7 +1,7 @@
 from typing import Tuple
 import itertools
 import math
-import forestry.forestry_utils as f_util
+import forestry.forestry_utils as futil
 from forestdatamodel.model import ForestStand, ReferenceTree
 
 
@@ -57,23 +57,23 @@ def grow_acta(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[
         return input
     years = 5
     # Count ForestStand aggregate values
-    basal_area_total = f_util.calculate_attribute_sum(stand.reference_trees, f_util.calculate_basal_area)
-    dominant_height = f_util.solve_dominant_height(stand.reference_trees)
+    basal_area_total = futil.calculate_attribute_sum(stand.reference_trees, futil.calculate_basal_area)
+    dominant_height = futil.solve_dominant_height(stand.reference_trees)
     # Group reference trees with same species
     tree_groups = itertools.groupby(stand.reference_trees, lambda tree: tree.species)
     # Calculate growth for each tree species
     for _, tree_group in tree_groups:
         trees = list(tree_group)
         # Count species spesific aggregate values
-        d13_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
+        d13_aggregate = futil.calculate_basal_area_weighted_attribute_aggregate(
             trees,
-            lambda tree: tree.breast_height_diameter * f_util.calculate_basal_area(tree))
-        height_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
+            lambda tree: tree.breast_height_diameter * futil.calculate_basal_area(tree))
+        height_aggregate = futil.calculate_basal_area_weighted_attribute_aggregate(
             trees,
-            lambda tree: tree.height * f_util.calculate_basal_area(tree))
-        biological_age_aggregate = f_util.calculate_basal_area_weighted_attribute_aggregate(
+            lambda tree: tree.height * futil.calculate_basal_area(tree))
+        biological_age_aggregate = futil.calculate_basal_area_weighted_attribute_aggregate(
             trees,
-            lambda tree: tree.biological_age * f_util.calculate_basal_area(tree))
+            lambda tree: tree.biological_age * futil.calculate_basal_area(tree))
         # Solve and update growth for each tree
         for tree in trees:
             # Calculate yearly growth percents
@@ -92,8 +92,8 @@ def grow_acta(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[
                 dominant_height,
                 basal_area_total)
             # Calculate the growth and update tree
-            tree.breast_height_diameter = tree.breast_height_diameter * f_util.compounded_growth_factor(
+            tree.breast_height_diameter = tree.breast_height_diameter * futil.compounded_growth_factor(
                 growth_percent_diameter,
                 years)
-            tree.height = tree.height * f_util.compounded_growth_factor(growth_percent_height, years)
+            tree.height = tree.height * futil.compounded_growth_factor(growth_percent_height, years)
     return stand, None
