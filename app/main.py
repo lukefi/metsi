@@ -4,6 +4,7 @@ import sys
 import forestry.operations
 from sim.core_types import OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
+from sim.preprocessing import preprocess_stands
 from forestdatamodel.model import ForestStand
 from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
 from app.app_io import parse_cli_arguments
@@ -44,8 +45,10 @@ def run_stands(
 
 def main():
     app_arguments = parse_cli_arguments(sys.argv[1:])
-    stands = forest_stands_from_json_file(app_arguments.domain_state_file)
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
+    stands = forest_stands_from_json_file(app_arguments.domain_state_file)
+    stands = preprocess_stands(stands, simulation_declaration['pre_processing'])
+
 
     # run full tree
     full_run_time = int(time.time_ns())
