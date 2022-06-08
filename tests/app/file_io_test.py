@@ -2,7 +2,7 @@ import unittest
 import os
 import app.file_io
 from dataclasses import dataclass
-from forestdatamodel import ForestStand, ReferenceTree
+from forestdatamodel.model import ForestStand, ReferenceTree
 
 
 @dataclass

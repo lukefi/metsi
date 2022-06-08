@@ -1,6 +1,6 @@
 import unittest
 import forestry.forestry_utils as f_util
-from forestdatamodel import ReferenceTree
+from forestdatamodel.model import ReferenceTree
 
 
 class ForestryUtilsTest(unittest.TestCase):

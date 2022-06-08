@@ -2,7 +2,7 @@ import json
 import pickle
 from typing import List, Any, Callable
 import yaml
-from forestdatamodel import ForestStand, ReferenceTree
+from forestdatamodel.model import ForestStand, ReferenceTree
 
 
 def file_contents(file_path: str) -> str:

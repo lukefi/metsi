@@ -4,7 +4,7 @@ import sys
 import forestry.operations
 from sim.core_types import OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
-from forestdatamodel import ForestStand
+from forestdatamodel.model import ForestStand
 from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file, pickle_writer
 from app.app_io import parse_cli_arguments
 
