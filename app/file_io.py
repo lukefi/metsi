@@ -2,7 +2,7 @@ import json
 import pickle
 from typing import List, Any, Callable
 import yaml
-from forestdatamodel import ForestStand, ReferenceTree
+from forestdatamodel.model import ForestStand, ReferenceTree
 
 
 def file_contents(file_path: str) -> str:
@@ -23,7 +23,7 @@ def simulation_declaration_from_yaml_file(file_path: str) -> dict:
 
 def pickle_writer(file_path: str, data: Any):
     with open(file_path, 'wb') as f:
-        pickle.dump(data, f, 5)
+        pickle.dump(data, f, protocol=5)
 
 
 def pickle_reader(file_path: str) -> Any:

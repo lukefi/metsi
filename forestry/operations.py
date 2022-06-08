@@ -1,7 +1,7 @@
 from functools import reduce
 from typing import Tuple
 import forestry.forestry_utils as f_util
-from forestdatamodel import ForestStand
+from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
 
 
