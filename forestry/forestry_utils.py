@@ -11,6 +11,25 @@ def compounded_growth_factor(growth_percent: float, years: int) -> float:
         return 0.0
 
 
+def solve_dominant_height_c_largest(stand, c: int = 100):
+        """ Calculate stands weighted average of c largest stems (100 by default) """
+        sorted_trees = sorted(stand.reference_trees, key=lambda rt: rt.breast_height_diameter, reverse=True)
+        dw_sum, n = 0, 0
+        for rt in sorted_trees:
+            d = rt.breast_height_diameter
+            w = rt.stems_per_ha
+            if n + w >= c:
+                wn = (c - n) # notice only portion of stems as last weight
+                dw_sum += d * wn
+                n = c
+                break
+            # weighted sum
+            dw_sum += d * w
+            n += w
+        # average of weighted sums
+        return dw_sum / n if n > 0 else 0
+
+
 def calculate_basal_area(tree: ReferenceTree) -> float:
     """ Single reference tree basal area calculation.
 

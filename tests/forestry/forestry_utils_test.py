@@ -1,9 +1,33 @@
 import unittest
 import forestry.forestry_utils as f_util
-from forestdatamodel.model import ReferenceTree
+from forestdatamodel.model import ReferenceTree, ForestStand
+from forestdatamodel.enums.internal import TreeSpecies
 
 
 class ForestryUtilsTest(unittest.TestCase):
+
+    def test_calculate_dominant_height(self):
+        stems = [
+            [82, 30],
+            [13, 51]
+        ]
+        diameters = [
+            [18.1, 5.7],
+            [50.1, 35.9]
+        ]
+        assertions = [
+            # over 100 stems
+            ([diameters[0], stems[0]], 15.868),
+            # under 100 stems
+            ([diameters[1], stems[1]], 38.784375),
+        ]
+        for i in assertions:
+            stand = ForestStand()
+            fixtures = [ReferenceTree(breast_height_diameter=d, stems_per_ha=f) for d, f in zip(i[0][0], i[0][1])]
+            stand.reference_trees = fixtures
+            result = f_util.solve_dominant_height_c_largest(stand, c=100)
+            self.assertEqual(i[1], result)
+
     def test_calculate_basal_area(self):
         tree = ReferenceTree()
         assertions = [
