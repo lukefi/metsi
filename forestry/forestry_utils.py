@@ -1,5 +1,6 @@
 import math
 import statistics
+from enum import Enum
 from forestdatamodel.model import ReferenceTree, ForestStand
 from typing import List, Callable
 
@@ -33,6 +34,15 @@ def solve_dominant_height_c_largest(stand, c: int = 100):
 def overall_basal_area(stand: ForestStand) -> float:
     """ Overall basal area of stand in square centimeters """
     return sum(calculate_basal_area(rt) for rt in stand.reference_trees)
+
+
+def solve_dominant_species(stand: ForestStand) -> Enum:
+    """ Solves dominant species of a stand based on basal area """
+    spe_ba = [ (rt.species, calculate_basal_area(rt)) for rt in stand.reference_trees ]
+    bucket = { x[0]: 0.0 for x in spe_ba }
+    for spe, basal_area in spe_ba:
+        bucket[spe] += basal_area
+    return max(bucket, key=bucket.get)
 
 
 def calculate_basal_area(tree: ReferenceTree) -> float:

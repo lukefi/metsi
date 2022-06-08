@@ -39,6 +39,18 @@ class ForestryUtilsTest(unittest.TestCase):
         result = f_util.overall_basal_area(stand)
         self.assertEqual(2.8702, round(result, 4))
 
+    def test_solve_dominant_species(self):
+        stand = ForestStand()
+        diameters = [10.0, 11.0, 12.0]
+        stems = [99, 100, 101]
+        species = [1, 2, 2]
+        stand.reference_trees = [
+            ReferenceTree(breast_height_diameter=d, stems_per_ha=f, species=s)
+            for d, f, s in zip(diameters, stems, species)
+            ]
+        result = f_util.solve_dominant_species(stand)
+        self.assertEqual(TreeSpecies.SPRUCE, result)
+
     def test_calculate_basal_area(self):
         tree = ReferenceTree()
         assertions = [
