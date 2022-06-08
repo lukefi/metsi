@@ -3,7 +3,7 @@ import sim.generators
 import yaml
 from sim.core_types import Step, OperationPayload
 from sim.generators import sequence, compose, alternatives, repeat
-from sim.runners import evaluate_sequence as run_sequence
+from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from tests.test_utils import inc, dec, aggregating_increment
 
 
@@ -199,3 +199,13 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(1, len(chain_two))
         self.assertEqual(3, len(chain_one[0]))
         self.assertEqual(3, len(chain_two[0]))
+
+    def test_simple_processable_chain(self):
+        operation_tags = ['inc', 'inc', 'inc']
+        operation_params = {}
+        operation_lookup = {'inc': inc}
+        chain = sim.generators.simple_processable_chain(operation_tags, operation_params, operation_lookup)
+        self.assertEqual(len(operation_tags), len(chain))
+        result = evaluate_sequence(1, *chain)
+        self.assertEqual(4, result)
+
