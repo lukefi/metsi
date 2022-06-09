@@ -4,9 +4,40 @@ from forestdatamodel.enums.internal import TreeSpecies
 from tests.test_utils import ConverterTestSuite
 from forestry.thinning_limits import site_type_to_key, soil_peatland_category_to_key, species_to_key, solve_hdom_key, get_thinning_bounds
 from forestry.thinning_limits import THINNING_LIMITS, SiteTypeKey, SoilPeatlandKey, SpeciesKey
+from forestry.thinning import thinning_from_below
+from forestdatamodel.enums.internal import TreeSpecies
 
 
 class ThinningsTest(ConverterTestSuite):
+
+    def test_thinning_from_below(self):
+        species = [ TreeSpecies(i) for i in [1,2,3] ]
+        diameters = [ 20.0 + i for i in range(0, 3) ]
+        stems = [ 200.0 + i for i in range(0, 3) ]
+
+        stand = ForestStand()
+        stand.site_type_category = 1
+        stand.soil_peatland_category = 1
+        stand.reference_trees = [
+            ReferenceTree(species=s, breast_height_diameter=d, stems_per_ha=f)
+            for s, d, f in zip(species, diameters, stems)
+        ]
+
+        simulation_aggregates = {
+            'operation_results': {},
+            'current_time_point': 0,
+        }
+        operation_parameters = {'c': 0.97, 'e': 0.2}
+
+        oper_input = (stand, simulation_aggregates)
+        result_stand, collected_aggregates = thinning_from_below(oper_input, **operation_parameters)
+        self.assertEqual(3, len(result_stand.reference_trees))
+        self.assertEqual(119.1652, round(result_stand.reference_trees[0].stems_per_ha, 4))
+        self.assertEqual(142.5737, round(result_stand.reference_trees[1].stems_per_ha, 4))
+        self.assertEqual(170.2745, round(result_stand.reference_trees[2].stems_per_ha, 4))
+        self.assertEqual(170.9866, round(list(collected_aggregates['operation_results']['thinning_from_below'].values())[-1]['stems_removed'], 4))
+
+
 
     def test_site_type_to_key(self):
         assertions = [
