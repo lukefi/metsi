@@ -1,6 +1,6 @@
 from typing import Any, Callable, List, Optional, Dict
 from sim.core_types import Step, SimulationParams
-from sim.operations import prepared_processor, prepared_operation
+from sim.operations import prepared_processor, prepared_operation, resolve_operation
 from sim.util import get_or_default, dict_value
 
 
@@ -71,6 +71,17 @@ def repeat(times: int, *step_generators: Callable) -> List[Callable]:
     for i in range(0, times):
         for generator in step_generators:
             result.append(generator)
+    return result
+
+
+def simple_processable_chain(operation_tags: List[str], operation_params: dict, operation_lookup: dict) -> List[
+    Callable]:
+    """Prepare a list of partially applied (parametrized) operation functions based on given declaration of operation
+    tags and operation parameters"""
+    result = []
+    for tag in operation_tags:
+        params = operation_params.get(tag, {})
+        result.append(prepared_operation(resolve_operation(tag, operation_lookup), **params))
     return result
 
 
