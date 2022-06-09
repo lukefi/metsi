@@ -4,7 +4,7 @@ from typing import Tuple
 import forestry.forestry_utils as futil
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
-
+from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
 
 def basal_area_thinning(stand: ForestStand, **operation_parameters) -> ForestStand:
     """This function is a no-op example stub"""
@@ -28,25 +28,22 @@ def compute_volume(stand: ForestStand) -> float:
     return reduce(lambda acc, cur: futil.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
 
 
-def report_volume(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
-    stand, simulation_aggregates = input
-    time_point = simulation_aggregates['current_time_point']
-    operation_results = simulation_aggregates.get('operation_results')
-
-    operation_aggregates: OrderedDict = operation_results.get('report_volume', OrderedDict()).copy()
-    latest_aggregate = None if len(operation_aggregates) == 0 else list(operation_aggregates.values())[-1]
+def report_volume(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    stand, simulation_aggregates = payload
+    latest_aggregate = get_latest_operation_aggregate(simulation_aggregates, 'report_volume')
 
     result = compute_volume(stand)
     if latest_aggregate is None:
-        next_aggregate = {'growth_volume': 0.0, 'current_volume': result}
+        new_aggregate = {'growth_volume': 0.0, 'current_volume': result}
     else:
-        next_aggregate = {
+        new_aggregate = {
             'growth_volume': latest_aggregate['growth_volume'] + result - latest_aggregate['current_volume'],
             'current_volume': result
         }
-    operation_aggregates[time_point] = next_aggregate
-    operation_results['report_volume'] = operation_aggregates
-    return stand, simulation_aggregates
+
+    new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, new_aggregate, 'report_volume')
+
+    return stand, new_simulation_aggregates
 
 
 
