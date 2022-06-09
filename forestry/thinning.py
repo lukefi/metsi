@@ -3,7 +3,7 @@ from collections import OrderedDict
 from forestdatamodel.model import ForestStand
 from typing import Tuple
 from forestry.thinning_limits import get_thinning_bounds
-from forestry.aggregate_utils import store_operation_aggregate
+from forestry.aggregate_utils import store_operation_aggregate, get_operation_aggregates, get_latest_operation_aggregate
 
 
 def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
@@ -41,3 +41,17 @@ def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters)
     # store number of removed stems to simualtion aggregates
     store_operation_aggregate(simulation_aggregates, new_aggregate, operation_tag)
     return (stand, simulation_aggregates)
+
+
+def report_removal(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    stand, simulation_aggregates = payload
+    thinning_aggregates = get_operation_aggregates(simulation_aggregates, 'thinning_from_below')
+
+    if thinning_aggregates is None:
+        new_aggregate = {'overall_stems_removed': 0.0}
+    else:
+        s = sum( x['stems_removed'] for x in thinning_aggregates.values() )
+        new_aggregate = {'overall_stems_removed': s}
+
+    new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, new_aggregate, 'report_removal')
+    return stand, new_simulation_aggregates
