@@ -7,7 +7,7 @@ from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from forestdatamodel.model import ForestStand
 from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
 from app.app_io import parse_cli_arguments
-from forestry.aggregate_utils import get_latest_operation_aggregate
+from forestry.aggregate_utils import get_latest_operation_aggregate, get_operation_aggregates
 
 
 def print_stand_result(stand: ForestStand):
@@ -21,7 +21,13 @@ def print_run_result(results: dict):
             print("variant {} result: ".format(i), end='')
             print_stand_result(result.simulation_state)
             last_volume_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_volume')
+            last_removal_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_removal')
             print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
+            print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
+            thinning_results = get_operation_aggregates(result.aggregated_results, 'thinning_from_below')
+            if thinning_results is not None:
+                thinning_aggregates = list(thinning_results.items())
+                print("variant {} all thinnings: {}".format(i, thinning_aggregates))
 
 
 def run_stands(

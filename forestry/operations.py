@@ -4,6 +4,7 @@ from typing import Tuple
 import forestry.forestry_utils as futil
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
+from forestry.thinning import thinning_from_below, report_removal
 from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
 
 def basal_area_thinning(stand: ForestStand, **operation_parameters) -> ForestStand:
@@ -53,7 +54,9 @@ operation_lookup = {
     'basal_area_thinning': basal_area_thinning,
     'stem_count_thinning': stem_count_thinning,
     'continuous_growth_thinning': continuous_growth_thinning,
-    'report_volume': report_volume
+    'thinning_from_below': thinning_from_below,
+    'report_volume': report_volume,
+    'report_removal': report_removal
 }
 
 try:
