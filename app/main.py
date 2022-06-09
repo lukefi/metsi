@@ -7,6 +7,7 @@ from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from forestdatamodel.model import ForestStand
 from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
 from app.app_io import parse_cli_arguments
+from forestry.aggregate_utils import get_latest_operation_aggregate
 
 
 def print_stand_result(stand: ForestStand):
@@ -19,8 +20,8 @@ def print_run_result(results: dict):
         for i, result in enumerate(results[id]):
             print("variant {} result: ".format(i), end='')
             print_stand_result(result.simulation_state)
-            last_reporting_aggregate = list(result.aggregated_results['operation_results'].get('report_volume').values())[-1]
-            print("variant {} growth report: {}".format(i, last_reporting_aggregate))
+            last_volume_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_volume')
+            print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
 
 
 def run_stands(
