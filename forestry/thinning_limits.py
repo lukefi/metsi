@@ -481,13 +481,13 @@ def solve_hdom_key(hdom_x: int, hdoms: KeysView[int]) -> int:
     hdoms = list(hdoms)
     hdom_0 = hdoms.pop(0)
     hdom_n = hdoms.pop(-1)
-    if hdom_0 < hdom_x < hdom_n:
+    if hdom_0 <= hdom_x < hdoms[-1]:
         # in between
         for hdom_i in hdoms:
             if hdom_x < hdom_i:
                 return hdom_i
     else:
-        if hdom_x <= hdom_0:
+        if hdom_x < hdom_0:
             # under
             return hdom_0
         else:

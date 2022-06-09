@@ -50,7 +50,7 @@ class ThinningsTest(ConverterTestSuite):
         self.assertRaises(UserWarning, species_to_key, None)
 
     def test_solve_hdom_key(self):
-        d = {
+        hdoms = {
             10: None,
             12: None,
             14: None,
@@ -58,14 +58,17 @@ class ThinningsTest(ConverterTestSuite):
             18: None
         }
         assertions = [
-            (10, 10),
-            (11, 12),
-            (11.1111, 12),
             (9, 10),
+            (10, 12),
+            (11, 12),
+            (14, 16),
+            (14.11111, 16),
+            (17, 18),
+            (18, 18),
             (20, 18),
         ]
         for i in assertions:
-            result = solve_hdom_key(i[0], d.keys())
+            result = solve_hdom_key(i[0], hdoms.keys())
             self.assertEqual(i[1], result)
 
     def test_get_thinning_bounds(self):
