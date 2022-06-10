@@ -4,6 +4,7 @@ This module contains a collection of util functions and dummy payload functions 
 import os
 import unittest
 from typing import Any, List, Optional, Tuple, Callable
+from forestry.aggregate_utils import get_latest_operation_aggregate, store_operation_aggregate
 
 import yaml
 
@@ -30,9 +31,11 @@ def none(x: Any) -> None:
 
 
 def aggregating_increment(input: Tuple[int, dict]) -> Tuple[int, dict]:
-    state, previous = input
-    aggregate = {'run_count': 1} if previous is None else {'run_count': previous['run_count'] + 1}
-    return state + 1, aggregate
+    state, aggregates = input
+    latest_aggregate = get_latest_operation_aggregate(aggregates, 'aggregating_increment')
+    aggregate = {'run_count': 1} if latest_aggregate is None else {'run_count': latest_aggregate['run_count'] + 1}
+    new_aggregates = store_operation_aggregate(aggregates, aggregate, 'aggregating_increment')
+    return state + 1, new_aggregates
 
 
 def inc(x: int) -> int:
