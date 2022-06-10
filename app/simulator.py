@@ -5,8 +5,8 @@ import forestry.operations
 from sim.core_types import OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from forestdatamodel.model import ForestStand
-from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file
-from app.app_io import parse_cli_arguments
+from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file, pickle_writer
+from app.app_io import sim_cli_arguments
 from forestry.aggregate_utils import get_latest_operation_aggregate, get_operation_aggregates
 
 
@@ -55,24 +55,31 @@ def run_stands(
     return retval
 
 
+def resolve_strategy_runner(source: str) -> Callable:
+    strategy_map = {
+        'full': run_full_tree_strategy,
+        'partial': run_partial_tree_strategy
+    }
+
+    try:
+        return strategy_map[source]
+    except Exception:
+        raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
+
+
 def main():
-    app_arguments = parse_cli_arguments(sys.argv[1:])
-    stands = forest_stands_from_json_file(app_arguments.domain_state_file)
+    app_arguments = sim_cli_arguments(sys.argv[1:])
+    stands = forest_stands_from_json_file(app_arguments.input_file)
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
+    output_filename = app_arguments.output_file
+    strategy_runner = resolve_strategy_runner(app_arguments.strategy)
 
-    # run full tree
-    full_run_time = int(time.time_ns())
-    full_run_result = run_stands(stands, simulation_declaration, run_full_tree_strategy)
-    full_run_time = (int(time.time_ns()) - full_run_time) / 1000000000
-
-    # run partial trees
-    partial_run_time = int(time.time_ns())
-    partial_run_result = run_stands(stands, simulation_declaration, run_partial_tree_strategy)
-    partial_run_time = (int(time.time_ns()) - partial_run_time) / 1000000000
-    print_run_result(full_run_result)
-    print_run_result(partial_run_result)
-    print("Full tree run in    {}".format(full_run_time))
-    print("Partial tree run in {}".format(partial_run_time))
+    run_time = int(time.time_ns())
+    run_result = run_stands(stands, simulation_declaration, strategy_runner)
+    run_time = (int(time.time_ns()) - run_time) / 1000000000
+    print_run_result(run_result)
+    pickle_writer(output_filename, run_result)
+    print("Run in {}".format(run_time))
 
 
 if __name__ == "__main__":

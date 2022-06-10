@@ -1,7 +1,7 @@
+import forestry.forestry_utils as futil
 from functools import reduce
 from collections import OrderedDict
 from typing import Tuple
-import forestry.forestry_utils as futil
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
 from forestry.thinning import thinning_from_below, report_removal
