@@ -10,8 +10,6 @@ def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters)
     stand, simulation_aggregates = input
     operation_tag = 'thinning_from_below'
     time_point = simulation_aggregates['current_time_point']
-    operation_results = simulation_aggregates['operation_results']
-    operation_aggregates = operation_results.get(operation_tag, OrderedDict()).copy()
 
     # sort reference trees in increasing order by diameter.
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
