@@ -6,7 +6,7 @@ from sim.core_types import OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from forestdatamodel.model import ForestStand
 from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file, pickle_writer
-from app.app_io import parse_cli_arguments
+from app.app_io import sim_cli_arguments
 
 
 def print_stand_result(stand: ForestStand):
@@ -55,8 +55,8 @@ def resolve_strategy_runner(source: str) -> Callable:
 
 
 def main():
-    app_arguments = parse_cli_arguments(sys.argv[1:])
-    stands = forest_stands_from_json_file(app_arguments.domain_state_file)
+    app_arguments = sim_cli_arguments(sys.argv[1:])
+    stands = forest_stands_from_json_file(app_arguments.input_file)
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     output_filename = app_arguments.output_file
     strategy_runner = resolve_strategy_runner(app_arguments.strategy)

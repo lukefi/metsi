@@ -25,7 +25,7 @@ Python 3.9 is the current target platform.
 We aim to keep compatibility down to Python 3.7.
 The `pip` utility is assumed for dependency management.
 
-## Usage
+## Usage of the simulator
 
 Preliminarily, ensure that the project's library dependencies are installed and pytest is available for unit tests.
 
@@ -42,29 +42,28 @@ git clone https://github.com/menu-hanke/pymotti
 pip install --user ./pymotti
 ```
 
-To run the application, run in the project root
+To run the simulator application, run in the project root
 
 ```
-python -m app.main input.json control.yaml
+python -m app.simulator input.json control.yaml output.pickle
 ```
-
-In this phase of development, the program assumes two files.
 
 * `input.json` is a forest data file used for forestry simulation. It is sourced from vmi-data-converter and adheres to MELA RSD specification for properties of forest stands and reference trees.
 * `control.yaml` is the declared structure for a simulation run.
+* `output.pickle` is the output file for computed results
 
-Use the following command to output application help menu
+Use the following command to output simulator application help menu
 ```
-python -m app.main --help
+python -m app.simulator --help
 ```
 The command will output the following
 ```
 Mela2.0 simulator
 
 positional arguments:
-  domain_state_file     A .json file containing the initial state of the simulation
-  control_file          Simulation control logic as a .yaml file
-  output_file           Simulator output (pickle) file for alternatives and aggregated data
+  input_file            Simulator input file
+  control_file          Simulation control declaration file
+  output_file           Simulator output file for alternatives and aggregated data
 
 options:
   -h, --help            show this help message and exit
@@ -85,6 +84,18 @@ You can also use python internal module unittest
 ```
 python -m unittest <test suite module.class path>
 ```
+
+## Usage of the post processing application
+
+To run the post processing application, run in the project root
+
+```
+python -m app.post_processing input.pickle pp_control.yaml output.pickle
+```
+
+* `input.pickle` The result file of a simulator run.
+* `pp_control.yaml` is the declaration of post processing function chain.
+* `output.pickle` is the output file for post processed results
 
 # Simulation control
 
