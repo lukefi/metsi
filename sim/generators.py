@@ -189,12 +189,3 @@ def generate_processor(operation_lookup, operation_params, operation_tag, run_co
         this_run_constraints,
         **this_operation_params)
     return result
-
-def get_preprocessing_funcs(operations: list, operation_params: dict, operation_lookup: dict) -> List[Callable]:
-    funcs = []
-    for operation in operations:
-        if operation in operation_lookup:
-            funcs.append(prepared_operation(operation_lookup[operation], **operation_params))
-        else:
-            raise ValueError(f"{operation} is not a valid preprocessing operation.")
-    return funcs
