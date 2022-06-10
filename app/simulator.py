@@ -65,10 +65,10 @@ def resolve_strategy_runner(source: str) -> Callable:
 def main():
     app_arguments = sim_cli_arguments(sys.argv[1:])
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
-    stands = forest_stands_from_json_file(app_arguments.input_file)
-    stands = preprocess_stands(stands, simulation_declaration)
     output_filename = app_arguments.output_file
     strategy_runner = resolve_strategy_runner(app_arguments.strategy)
+    stands = forest_stands_from_json_file(app_arguments.input_file)
+    stands = preprocess_stands(stands, simulation_declaration)
 
     run_time = int(time.time_ns())
     run_result = run_stands(stands, simulation_declaration, strategy_runner)
