@@ -33,8 +33,7 @@ class PreprocessingTest(unittest.TestCase):
         stands = [generate_sapling_tree_stands(sapling_tree_count, reference_tree_count)]
         excluded = preprocessing.exclude_sapling_trees(stands) #do not pass kwargs
         #count of reference trees in the stand after sapling exclusion should equal to the original count minus saplings
-        #casting to list is done to collect values from the generator (produced by filter())
-        self.assertEqual(len(list(excluded[0].reference_trees)), reference_tree_count - sapling_tree_count)
+        self.assertEqual(len(excluded[0].reference_trees), reference_tree_count - sapling_tree_count)
 
     def test_exclude_empty_stands(self):
         stand_count = 4
@@ -42,5 +41,4 @@ class PreprocessingTest(unittest.TestCase):
 
         stands = generate_empty_stands(stand_count, empty_stand_count)
         excluded = preprocessing.exclude_empty_stands(stands) #do not pass kwargs
-        #casting to list is done to collect values from the generator (produced by filter())
-        self.assertEqual(len(list(excluded)), stand_count - empty_stand_count)
+        self.assertEqual(len(excluded), stand_count - empty_stand_count)
