@@ -3,4 +3,3 @@
 *.iml
 __pycache__
 .env
-*.pickle
