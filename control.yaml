@@ -11,9 +11,17 @@ operation_params:
   reporting:
     level: 1
 
+preprocessing_params:
+  exclude_sapling_trees:
+
+
+preprocessing_operations:
+  - exclude_sapling_trees
+  - exclude_empty_stands
+
 simulation_events:
   # we describe here objects with schedule for which time points they are active
-  - time_points: [0, 5, 10, 15, 20, 35, 30]
+  - time_points: [0, 5, 10, 15, 20, 25, 30]
     generators:
       - sequence:
         - grow_acta

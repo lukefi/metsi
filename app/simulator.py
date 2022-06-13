@@ -2,8 +2,10 @@ import time
 from typing import List, Callable, Dict
 import sys
 import forestry.operations
+import forestry.preprocessing as preprocessing
 from sim.core_types import OperationPayload
-from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
+from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evaluate_sequence
+from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
 from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file, pickle_writer
 from app.app_io import sim_cli_arguments
@@ -22,6 +24,12 @@ def print_run_result(results: dict):
             last_reporting_aggregate = list(result.aggregated_results.get('report_volume').values())[-1]
             print("variant {} growth report: {}".format(i, last_reporting_aggregate))
 
+def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -> List[ForestStand]:
+    preprocessing_operations = simulation_declaration['preprocessing_operations']
+    preprocessing_params = simulation_declaration['preprocessing_params']
+    preprocessing_funcs = simple_processable_chain(preprocessing_operations, preprocessing_params, preprocessing.operation_lookup)
+    stands = evaluate_sequence(stands, *preprocessing_funcs)
+    return stands
 
 def run_stands(
         stands: List[ForestStand], simulation_declaration: dict,
@@ -56,10 +64,11 @@ def resolve_strategy_runner(source: str) -> Callable:
 
 def main():
     app_arguments = sim_cli_arguments(sys.argv[1:])
-    stands = forest_stands_from_json_file(app_arguments.input_file)
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     output_filename = app_arguments.output_file
     strategy_runner = resolve_strategy_runner(app_arguments.strategy)
+    stands = forest_stands_from_json_file(app_arguments.input_file)
+    stands = preprocess_stands(stands, simulation_declaration)
 
     run_time = int(time.time_ns())
     run_result = run_stands(stands, simulation_declaration, strategy_runner)
