@@ -13,8 +13,7 @@ operation_params:
 
 preprocessing_params:
   exclude_sapling_trees:
-    test: "123" 
-    hello: "world"
+
 
 preprocessing_operations:
   - exclude_sapling_trees
