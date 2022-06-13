@@ -89,6 +89,7 @@ class ThinningsTest(ConverterTestSuite):
         overall_removal = sum(x for x in overall_removals.values())
         self.assertEqual(600, overall_removal)
 
+class ThinningLimitsTest(ConverterTestSuite):
     def test_site_type_to_key(self):
         assertions = [
             ([1], SiteTypeKey.OMT),
