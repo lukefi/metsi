@@ -8,11 +8,25 @@ from forestry.aggregate_utils import store_operation_aggregate, get_operation_ag
 
 def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
     stand, simulation_aggregates = input
-    operation_tag = 'thinning_from_below'
-    time_point = simulation_aggregates['current_time_point']
-
-    # sort reference trees in increasing order by diameter.
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
+    new_stand, new_aggregate = thinning( (stand, simulation_aggregates), **operation_parameters )
+    new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, new_aggregate, 'thinning_from_below')
+    return new_stand, new_simulation_aggregates
+
+
+def thinning_from_above(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    stand, simulation_aggregates = input
+    stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter, reverse=True)
+    new_stand, new_aggregate = thinning( (stand, simulation_aggregates), **operation_parameters )
+    new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, new_aggregate, 'thinning_from_above')
+    return new_stand, new_simulation_aggregates
+
+
+def thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    stand, simulation_aggregates = input
+    time_point = simulation_aggregates['current_time_point']
+    operation_tag = simulation_aggregates['current_operation_tag']
+
     # solve basal area lower and upper bound
     (lower_basal_area, upper_basal_area) = get_thinning_bounds(stand)
     new_aggregate = { 'stems_removed': 0.0 }
@@ -36,9 +50,8 @@ def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters)
         raise UserWarning("unable to perform operation {}, at time point {} basal area upper bound not reached"
             .format(operation_tag, time_point))
 
-    # store number of removed stems to simualtion aggregates
-    store_operation_aggregate(simulation_aggregates, new_aggregate, operation_tag)
-    return (stand, simulation_aggregates)
+
+    return (stand, new_aggregate)
 
 
 def report_removal(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
