@@ -54,15 +54,20 @@ def thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[F
     return (stand, new_aggregate)
 
 
-def report_removal(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
-    stand, simulation_aggregates = payload
-    thinning_aggregates = get_operation_aggregates(simulation_aggregates, 'thinning_from_below')
+def report_overall_removal(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    _, simulation_aggregates = payload
+    operation_tags = operation_parameters['thinning_method']
 
-    if thinning_aggregates is None:
-        new_aggregate = {'overall_stems_removed': 0.0}
-    else:
-        s = sum( x['stems_removed'] for x in thinning_aggregates.values() )
-        new_aggregate = {'overall_stems_removed': s}
+    report_removal_collection = {}
+    for tag in operation_tags:
+        thinning_aggregates = get_operation_aggregates(simulation_aggregates, tag)
+        if thinning_aggregates is None:
+            new_aggregate = 0.0
+        else:
+            s = sum( x['stems_removed'] for x in thinning_aggregates.values() )
+            new_aggregate = s
+        report_removal_collection[tag] = new_aggregate
 
-    new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, new_aggregate, 'report_removal')
-    return stand, new_simulation_aggregates
+    new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, report_removal_collection, 'report_overall_removal')
+
+    return _, new_simulation_aggregates

@@ -1,12 +1,12 @@
 import unittest
+from collections import OrderedDict
+from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
-from tests.test_utils import ConverterTestSuite
 from forestry.thinning_limits import site_type_to_key, soil_peatland_category_to_key, species_to_key, solve_hdom_key, get_thinning_bounds
 from forestry.thinning_limits import THINNING_LIMITS, SiteTypeKey, SoilPeatlandKey, SpeciesKey
-from forestry.thinning import thinning_from_below, thinning_from_above
-from forestdatamodel.enums.internal import TreeSpecies
-
+from forestry.thinning import thinning_from_below, thinning_from_above, report_overall_removal
+import forestry.aggregate_utils as aggutil
 
 class ThinningsTest(ConverterTestSuite):
 
@@ -69,7 +69,25 @@ class ThinningsTest(ConverterTestSuite):
         self.assertEqual(170.2745, round(result_stand.reference_trees[2].stems_per_ha, 4))
         self.assertEqual(170.9866, round(list(collected_aggregates['operation_results']['thinning_from_below'].values())[-1]['stems_removed'], 4))
 
-
+    def test_report_overall_removal(self):
+        operation_results = {
+            'thin1': OrderedDict({
+                        0: { 'stems_removed': 100 }
+                    }),
+            'thin2': OrderedDict({
+                        0: { 'stems_removed': 200 },
+                        15: { 'stems_removed': 300 }
+                    })
+        }
+        simulation_aggregates = {
+            'operation_results': operation_results,
+            'current_time_point': 30,
+        }
+        payload = (None, simulation_aggregates)
+        (_, result) = report_overall_removal(payload, thinning_method=['thin1', 'thin2'])
+        overall_removals = aggutil.get_latest_operation_aggregate(result, 'report_overall_removal')
+        overall_removal = sum(x for x in overall_removals.values())
+        self.assertEqual(600, overall_removal)
 
     def test_site_type_to_key(self):
         assertions = [
