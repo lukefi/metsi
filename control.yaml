@@ -11,8 +11,15 @@ operation_params:
   reporting:
     level: 1
   thinning_from_below:
-    c: 0.97 # thinning factor
-    e: 0.2 # (lower bound + e)
+    c: 0.97
+    e: 0.2
+  thinning_from_above:
+    c: 0.98
+    e: 0.2
+  report_overall_removal:
+    thinning_method:
+      - thinning_from_below
+      - thinning_from_above
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
@@ -25,6 +32,7 @@ simulation_events:
       - alternatives:
           - do_nothing
           - thinning_from_below
+          - thinning_from_above
   - time_points: [0, 10, 20, 30]
     generators:
       - sequence:
@@ -32,4 +40,4 @@ simulation_events:
   - time_points: [30]
     generators:
       - sequence:
-          - report_removal
+          - report_overall_removal

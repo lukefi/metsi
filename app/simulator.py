@@ -21,13 +21,9 @@ def print_run_result(results: dict):
             print("variant {} result: ".format(i), end='')
             print_stand_result(result.simulation_state)
             last_volume_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_volume')
-            last_removal_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_removal')
+            last_removal_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_overall_removal')
             print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
             print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
-            thinning_results = get_operation_aggregates(result.aggregated_results, 'thinning_from_below')
-            if thinning_results is not None:
-                thinning_aggregates = list(thinning_results.items())
-                print("variant {} all thinnings: {}".format(i, thinning_aggregates))
 
 
 def run_stands(
