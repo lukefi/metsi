@@ -21,6 +21,14 @@ operation_params:
       - thinning_from_below
       - thinning_from_above
 
+preprocessing_params:
+  exclude_sapling_trees:
+
+
+preprocessing_operations:
+  - exclude_sapling_trees
+  - exclude_empty_stands
+
 simulation_events:
   # we describe here objects with schedule for which time points they are active
   - time_points: [0, 5, 10, 15, 20, 25, 30]
