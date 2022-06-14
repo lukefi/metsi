@@ -3,8 +3,7 @@ from collections import OrderedDict
 from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
-from forestry.thinning_limits import site_type_to_key, soil_peatland_category_to_key, species_to_key, solve_hdom_key, get_thinning_bounds
-from forestry.thinning_limits import THINNING_LIMITS, SiteTypeKey, SoilPeatlandKey, SpeciesKey
+from forestry.thinning_limits import *
 from forestry.thinning import thinning_from_below, thinning_from_above, report_overall_removal
 import forestry.aggregate_utils as aggutil
 
