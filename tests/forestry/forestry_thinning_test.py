@@ -89,6 +89,21 @@ class ThinningsTest(ConverterTestSuite):
         self.assertEqual(600, overall_removal)
 
 class ThinningLimitsTest(ConverterTestSuite):
+
+    def test_get_first_thinning_residue(self):
+        stand = ForestStand()
+        stand.site_type_category = 1
+        species = [1,2,2]
+        diameters = [12.0, 16.0, 12.0]
+        stems = [450.0, 600.0, 500.0]
+        stand.reference_trees = [
+            ReferenceTree(species=spe, breast_height_diameter=d, stems_per_ha=f)
+            for spe, d, f in zip(species, diameters, stems)
+        ]
+        result = get_first_thinning_residue(stand)
+        residue_stems = 1000.0
+        self.assertEqual(residue_stems, result)
+
     def test_site_type_to_key(self):
         assertions = [
             ([1], SiteTypeKey.OMT),

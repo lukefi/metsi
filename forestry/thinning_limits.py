@@ -508,3 +508,41 @@ def get_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
 
     hdom_key = solve_hdom_key(hdom, spe_limits.keys())
     return spe_limits[hdom_key]
+
+# ---- first thinning stem count residue and util functions----
+
+FIRST_THINNING_RESIDUE_STEMS = {
+    SiteTypeKey.OMT: {
+        SpeciesKey.PINE: 1250.0,
+        SpeciesKey.SPRUCE: 1000.0,
+        SpeciesKey.SILVER_BIRCH: 750.0,
+        SpeciesKey.DOWNY_BIRCH: 950
+    },
+    SiteTypeKey.MT: {
+        SpeciesKey.PINE: 1100,
+        SpeciesKey.SPRUCE: 1000,
+        SpeciesKey.SILVER_BIRCH: 750,
+        SpeciesKey.DOWNY_BIRCH: 950
+    },
+    SiteTypeKey.VT: {
+        SpeciesKey.PINE: 1000,
+        SpeciesKey.SPRUCE: 1000,
+        SpeciesKey.SILVER_BIRCH: 750,
+        SpeciesKey.DOWNY_BIRCH: 950
+    },
+    SiteTypeKey.CT: {
+        SpeciesKey.PINE: 1000,
+        SpeciesKey.SPRUCE: 1000,
+        SpeciesKey.SILVER_BIRCH: 750,
+        SpeciesKey.DOWNY_BIRCH: 950
+    }
+}
+
+
+def get_first_thinning_residue(stand: ForestStand) -> float:
+    """ Gets stem count residue for first thinning operation """
+    sdom = futil.solve_dominant_species(stand)
+    st_key = site_type_to_key(stand.site_type_category)
+    spe_key = species_to_key(sdom)
+    lower_limit = FIRST_THINNING_RESIDUE_STEMS[st_key][spe_key]
+    return lower_limit
