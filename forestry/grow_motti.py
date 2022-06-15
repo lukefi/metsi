@@ -1,6 +1,6 @@
 from functools import cached_property
 from typing import List, Tuple
-from forestdatamodel import ForestStand
+from forestdatamodel.model import ForestStand
 import pymotti
 
 
@@ -18,8 +18,8 @@ def spe2motti(spe: int) -> pymotti.Species:
 def _precompute_weather(stand: ForestStand):
     if not hasattr(stand, "_weather"):
         lat, lon, h, cs = stand.geo_location
-        if cs != "ERTS-TM35FIN":
-            raise NotImplementedError("TODO")
+        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
+            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
         p = pymotti.Predict(Y=lat, X=lon, Z=h)
         setattr(stand, "_weather", {"sea": p.sea, "lake": p.lake})
 
@@ -38,15 +38,15 @@ class MottiGrowthPredictor(pymotti.Predict):
     @cached_property
     def Y(self) -> float:
         lat, _, _, cs = self.stand.geo_location
-        if cs != "ERTS-TM35FIN":
-            raise NotImplementedError("TODO")
+        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
+            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
         return lat
 
     @cached_property
     def X(self) -> float:
         _, lon, _, cs = self.stand.geo_location
-        if cs != "ERTS-TM35FIN":
-            raise NotImplementedError("TODO")
+        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
+            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
         return lon
 
     @property
@@ -70,10 +70,7 @@ class MottiGrowthPredictor(pymotti.Predict):
     @property
     def mal(self) -> pymotti.LandUseCategoryVMI:
         """Land use category. Our coding (RSD) matches Motti."""
-        # TODO: this should not have zeros, should be checked when loading and not here.
-        if self.stand.owner_category == 0:
-            return pymotti.LandUseCategoryVMI.FOREST
-        return pymotti.LandUseCategoryVMI(self.stand.owner_category)
+        return pymotti.LandUseCategoryVMI(self.stand.land_use_category)
 
     @property
     def mty(self) -> pymotti.SiteTypeVMI:

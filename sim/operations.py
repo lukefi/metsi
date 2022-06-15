@@ -6,7 +6,7 @@ from sim.core_types import OperationPayload
 from sim.util import get_or_default, dict_value
 
 
-def do_nothing(data: Any) -> Any:
+def do_nothing(data: Any, **kwargs) -> Any:
     return data
 
 
