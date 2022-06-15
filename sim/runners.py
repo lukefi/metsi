@@ -16,12 +16,10 @@ def evaluate_sequence(payload, *operations: Callable) -> Optional:
     :raises Exception: on any instruction function raising, catch and propagate the exception
     :return: return value of the last instruction function
     """
-    result = None
     current = payload
     for func in operations:
-        result = func(current)
-        current = result
-    return result
+        current = func(current)
+    return current
 
 
 def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
