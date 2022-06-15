@@ -4,10 +4,26 @@ from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.thinning_limits import *
-from forestry.thinning import thinning_from_below, thinning_from_above, report_overall_removal
+import forestry.thinning as thin
 import forestry.aggregate_utils as aggutil
 
 class ThinningsTest(ConverterTestSuite):
+
+    def test_evaluate_thinning_conditions(self):
+        assertions = [
+            (1, False),
+            (2, False),
+            (3, True),
+            (4, False),
+            (5, False),
+        ]
+        for i in assertions:
+            p1 = lambda: i[0] < 5
+            p2 = lambda: i[0] == 3
+            predicates = [p1, p2]
+            result = thin.evaluate_thinning_conditions(predicates)
+            self.assertEqual(i[1], result)
+
 
     def test_thinning_from_above(self):
         species = [ TreeSpecies(i) for i in [1,2,3] ]
@@ -28,10 +44,10 @@ class ThinningsTest(ConverterTestSuite):
             'current_time_point': 0,
             'current_operation_tag': operation_tag
         }
-        operation_parameters = {'c': 0.97, 'e': 0.2}
+        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
 
         oper_input = (stand, simulation_aggregates)
-        result_stand, collected_aggregates = thinning_from_above(oper_input, **operation_parameters)
+        result_stand, collected_aggregates = thin.thinning_from_above(oper_input, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
         self.assertEqual([22.0, 21.0, 20.0], [rt.breast_height_diameter for rt in stand.reference_trees])
         self.assertEqual(124.0792, round(result_stand.reference_trees[0].stems_per_ha, 4))
@@ -57,10 +73,10 @@ class ThinningsTest(ConverterTestSuite):
             'current_time_point': 0,
             'current_operation_tag': 'thinning_from_below'
         }
-        operation_parameters = {'c': 0.97, 'e': 0.2}
+        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
 
         oper_input = (stand, simulation_aggregates)
-        result_stand, collected_aggregates = thinning_from_below(oper_input, **operation_parameters)
+        result_stand, collected_aggregates = thin.thinning_from_below(oper_input, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
         self.assertEqual([20.0, 21.0, 22.0], [rt.breast_height_diameter for rt in stand.reference_trees])
         self.assertEqual(119.1652, round(result_stand.reference_trees[0].stems_per_ha, 4))
@@ -83,7 +99,7 @@ class ThinningsTest(ConverterTestSuite):
             'current_time_point': 30,
         }
         payload = (None, simulation_aggregates)
-        (_, result) = report_overall_removal(payload, thinning_method=['thin1', 'thin2'])
+        (_, result) = thin.report_overall_removal(payload, thinning_method=['thin1', 'thin2'])
         overall_removals = aggutil.get_latest_operation_aggregate(result, 'report_overall_removal')
         overall_removal = sum(x for x in overall_removals.values())
         self.assertEqual(600, overall_removal)
