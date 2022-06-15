@@ -31,7 +31,7 @@ class SoilPeatlandKey(Enum):
 class SpeciesKey(Enum):
     PINE = 'pine'
     SPRUCE = 'spruce'
-    SILVER_BIRCH = 'silver_birch'
+    SILVER_BIRCH = 'silver_birch_and_other_deciduous'
     DOWNY_BIRCH = 'downy_birch'
 
 
