@@ -1,4 +1,6 @@
-install.packages("lmfor", repos = "https://cran.r-project.org")
+library_requirements <- c("lmfor")
+if(!all(library_requirements %in% installed.packages()[, "Package"]))
+  install.packages(repos="https://cran.r-project.org", dependencies=TRUE, library_requirements)
 library(lmfor)
 
 volmods <- readRDS("r/vol_mods_final_LM.rds")
