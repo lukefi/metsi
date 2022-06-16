@@ -34,5 +34,5 @@ def lmfor_volume(stand: ForestStand) -> float:
     }
     df = robjects.DataFrame(source_data)
     volumes = list(robjects.r['compute_tree_volumes'](df))
-    total_volume = round(sum(volumes), 1)
+    total_volume = sum(volumes)
     return total_volume

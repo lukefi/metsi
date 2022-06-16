@@ -12,4 +12,4 @@ class RUtilsTest(unittest.TestCase):
         ]
 
         result = forestry.r_utils.lmfor_volume(fixture)
-        self.assertEqual(170.0, result)
+        self.assertAlmostEqual(170.04, result, 2)
