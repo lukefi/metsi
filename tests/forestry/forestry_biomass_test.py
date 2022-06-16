@@ -1,5 +1,5 @@
 import unittest
-from forestry.ForestDataModels import ForestStand, ReferenceTree
+from forestdatamodel.model import ForestStand, ReferenceTree
 import pandas as pd
 import forestry.biomass_repola as biomass
 import os
@@ -339,6 +339,4 @@ class ForestryOperationsTest(unittest.TestCase):
  
 
 
-if __name__ == '__main__':
-        unittest.main()
 

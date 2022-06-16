@@ -1,9 +1,7 @@
 import math
 import pandas as pd
-import volume_ak as vol
-from ForestDataModels import ForestStand,ReferenceTree
+from forestdatamodel.model import ForestStand,ReferenceTree
 
-#from forestry.ForestDataModels import ForestStand
 
 #Laasasenaho 1975, stump diameter f(d):
 #Needed in biomass calculations
