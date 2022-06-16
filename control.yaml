@@ -22,8 +22,8 @@ operation_params:
       - thinning_from_above
 
 preprocessing_params:
-  exclude_sapling_trees:
-
+  example_operation:
+    example_param: "example_value"
 
 preprocessing_operations:
   - exclude_sapling_trees

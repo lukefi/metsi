@@ -28,8 +28,8 @@ def print_run_result(results: dict):
             print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
 
 def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -> List[ForestStand]:
-    preprocessing_operations = simulation_declaration['preprocessing_operations']
-    preprocessing_params = simulation_declaration['preprocessing_params']
+    preprocessing_operations = simulation_declaration.get('preprocessing_operations', {})
+    preprocessing_params = simulation_declaration.get('preprocessing_params', {})
     preprocessing_funcs = simple_processable_chain(preprocessing_operations, preprocessing_params, preprocessing.operation_lookup)
     stands = evaluate_sequence(stands, *preprocessing_funcs)
     return stands

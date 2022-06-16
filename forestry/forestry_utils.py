@@ -32,7 +32,7 @@ def solve_dominant_height_c_largest(stand, c: int = 100):
 
 
 def overall_basal_area(stand: ForestStand) -> float:
-    """ Overall basal area of stand in square centimeters """
+    """ Overall basal area of stand in square meters (m^2) """
     return sum(calculate_basal_area(rt) for rt in stand.reference_trees)
 
 
