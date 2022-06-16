@@ -1,9 +1,9 @@
 simulation_params:
   initial_step_time: 0
-  step_time_interval: 1
-  final_step_time: 20
+  step_time_interval: 5
+  final_step_time: 30
 
-run_constrains:
+run_constraints:
   basal_area_thinning:
     minimum_time_interval: 10
 
@@ -11,18 +11,26 @@ operation_params:
   reporting:
     level: 1
 
+preprocessing_params:
+  example_operation:
+    example_param: "example_value"
+
+preprocessing_operations:
+  - exclude_sapling_trees
+  - exclude_empty_stands
+
 simulation_events:
   # we describe here objects with schedule for which time points they are active
-  - time_points: [5, 10, 15, 20]
+  - time_points: [0, 5, 10, 15, 20, 25, 30]
     generators:
       - sequence:
-        - grow
+        - grow_acta
+  - time_points: [5, 15, 25]
+    generators:
       - alternatives:
-        - do_nothing
-        - basal_area_thinning
-        - stem_count_thinning
-        - continuous_growth_thinning
-  - time_points: [0, 25]
+          - do_nothing
+          - basal_area_thinning
+  - time_points: [0, 10, 20, 30]
     generators:
       - sequence:
-        - reporting
+          - report_volume

@@ -1,0 +1,7 @@
+operation_params:
+  do_nothing:
+    param: value
+
+post_processing:
+  - do_nothing
+  - do_nothing

@@ -1,13 +1,15 @@
 import math
 import statistics
-from forestry.ForestDataModels import ForestStand, ReferenceTree
-from typing import List, Callable, Iterator
+from forestdatamodel.model import ReferenceTree
+from typing import List, Callable
+
 
 def compounded_growth_factor(growth_percent: float, years: int) -> float:
     try:
-        return math.pow(1.0+(growth_percent/100.0), years)
+        return math.pow(1.0 + (growth_percent / 100.0), years)
     except:
         return 0.0
+
 
 def calculate_basal_area(tree: ReferenceTree) -> float:
     """ Single reference tree basal area calculation.
@@ -22,15 +24,19 @@ def calculate_basal_area(tree: ReferenceTree) -> float:
     single_basal_area = math.pi * math.pow(radius, 2)
     return single_basal_area * tree.stems_per_ha
 
+
 def solve_dominant_height(reference_trees: List[ReferenceTree]) -> float:
     heights = list(map(lambda tree: tree.height, reference_trees))
     dominant_height = statistics.median(heights)
     return dominant_height
 
+
 def calculate_attribute_sum(reference_trees: List[ReferenceTree], f: Callable) -> float:
     return sum(map(f, reference_trees))
 
-def calculate_basal_area_weighted_attribute_aggregate(reference_trees: List[ReferenceTree], f: Callable[[ReferenceTree], float]) -> float:
+
+def calculate_basal_area_weighted_attribute_aggregate(reference_trees: List[ReferenceTree],
+                                                      f: Callable[[ReferenceTree], float]) -> float:
     """ Calcualtes basal area weighted sum for reference trees attribute predefined in function f
 
     predefined function f contains the logic of calculating reference tree attribute (eg. tree height).

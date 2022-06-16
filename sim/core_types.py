@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from typing import Callable, List, Optional, Any
+from typing import Callable, List, Optional, Any, OrderedDict, Dict
 
 
 def identity(x):
@@ -14,7 +14,8 @@ class Step:
     branches: List['Step'] = []
     previous: 'Step' or None = None
 
-    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None, previous: 'Step' or None = None):
+    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None,
+                 previous: 'Step' or None = None):
         self.operation = operation if operation is not None else identity
         self.previous = previous
         self.branches = []
@@ -56,9 +57,17 @@ class SimulationParams(SimpleNamespace):
     step_time_interval: int
     final_step_time: int
 
+    def simulation_time_series(self) -> range:
+        return range(
+            self.initial_step_time,
+            self.final_step_time + 1,
+            self.step_time_interval
+        )
+
 
 class OperationPayload(SimpleNamespace):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
     simulation_state: Any
     run_history: dict or None
+    aggregated_results: Dict[str, OrderedDict[int, Any]]

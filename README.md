@@ -25,7 +25,7 @@ Python 3.9 is the current target platform.
 We aim to keep compatibility down to Python 3.7.
 The `pip` utility is assumed for dependency management.
 
-## Usage
+## Usage of the simulator
 
 Preliminarily, ensure that the project's library dependencies are installed and pytest is available for unit tests.
 
@@ -34,32 +34,41 @@ pip install --user -r requirements.txt
 pip install --user pytest
 ```
 
-To run the application, run in the project root
+To use Motti growth models, clone the pymotti repository to a location of your choosing and install the module with pip.
 
 ```
-python -m app.main input.json control.yaml
+# adjust the command below to your environment specifics about authentication and protocol
+git clone https://github.com/menu-hanke/pymotti
+pip install --user ./pymotti
 ```
 
-In this phase of development, the program assumes two files.
+To run the simulator application, run in the project root
+
+```
+python -m app.simulator input.json control.yaml output.pickle
+```
 
 * `input.json` is a forest data file used for forestry simulation. It is sourced from vmi-data-converter and adheres to MELA RSD specification for properties of forest stands and reference trees.
 * `control.yaml` is the declared structure for a simulation run.
+* `output.pickle` is the output file for computed results
 
-Use the following command to output application help menu
+Use the following command to output simulator application help menu
 ```
-python -m app.main --help
+python -m app.simulator --help
 ```
 The command will output the following
 ```
 Mela2.0 simulator
 
 positional arguments:
-  domain_state_file  A .json file containing the initial state of the
-                     simulation
-  control_file       Simulation control logic as a .yaml file
+  input_file            Simulator input file
+  control_file          Simulation control declaration file
+  output_file           Simulator output file for alternatives and aggregated data
 
-optional arguments:
-  -h, --help         show this help message and exit
+options:
+  -h, --help            show this help message and exit
+  -s STRATEGY, --strategy STRATEGY
+                        Simulation alternatives tree formation strategy: 'full' (default), 'partial'
 
 ```
 
@@ -76,6 +85,18 @@ You can also use python internal module unittest
 python -m unittest <test suite module.class path>
 ```
 
+## Usage of the post processing application
+
+To run the post processing application, run in the project root
+
+```
+python -m app.post_processing input.pickle pp_control.yaml output.pickle
+```
+
+* `input.pickle` The result file of a simulator run.
+* `pp_control.yaml` is the declaration of post processing function chain.
+* `output.pickle` is the output file for post processed results
+
 # Simulation control
 
 A simulation run is declared in the YAML file `control.yaml`.
@@ -86,13 +107,14 @@ The structure will be expanded to allow parameters and constraints declaration f
    1. `initial_step_time` is the integer point of time for the simulation's first cycle
    2. `step_time_interval` is the integer amount of time between each simulation cycle
    3. `final_step_time` is the integer point of time for the simulations's last cycle
-2. Operaton run constrains in the object `run_constrains`
+2. Operaton run constrains in the object `run_constraints`
 3. Operation parameters in the object `operation_params`
 4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
    1. `time_points` is a list of integers which assign this set of operations to simulation time points
    2. `generators` is a list of chained generator functions (see section on step generators)
       1. `sequence` a list of operations to be executed as a chain
       2. `alternatives` a list of operations which represent alternative branches
+5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional) arguments under `preprocessing_params` as key-value pairs. 
 
 The following example declares a simulation, which runs four event cycles at time points 0, 5, 10 and 15.
 Images below describe the simulation as a step tree, and further as the computation chains that are generated from the tree.
@@ -115,7 +137,7 @@ simulation_params:
 
 # example of operation run constrains
 # minimum time interval constrain between thinnings is 10 years
-run_constrains:
+run_constraints:
   thinning:
     minimum_time_interval: 10
 

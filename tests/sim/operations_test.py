@@ -1,5 +1,4 @@
 import unittest
-
 import tests.test_utils
 from sim.operations import prepared_operation
 

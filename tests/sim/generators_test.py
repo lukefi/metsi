@@ -3,8 +3,8 @@ import sim.generators
 import yaml
 from sim.core_types import Step, OperationPayload
 from sim.generators import sequence, compose, alternatives, repeat
-from sim.runners import evaluate_sequence as run_sequence
-from tests.test_utils import inc, dec
+from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
+from tests.test_utils import inc, dec, aggregating_increment
 
 
 class TestGenerators(unittest.TestCase):
@@ -109,22 +109,22 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.generators_from_declaration(
-            yaml.load(declaration, Loader=yaml.CLoader), {'inc': inc})
+        generators = sim.generators.full_tree_generators(
+            yaml.load(declaration, Loader=yaml.CLoader), {'inc': aggregating_increment})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, run_history={})
+        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results={})
         computation_result = run_sequence(payload, *chain)
         self.assertEqual(5, len(chain))
         self.assertEqual(4, computation_result.simulation_state)
 
-    def test_operation_run_constrains_success(self):
-        declaration="""
+    def test_operation_run_constraints_success(self):
+        declaration = """
         simulation_params:
             initial_step_time: 0
             step_time_interval: 1
             final_step_time: 3
-        run_constrains:
+        run_constraints:
             inc:
                 minimum_time_interval: 2
         simulation_events:
@@ -133,22 +133,22 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc
         """
-        generators = sim.generators.generators_from_declaration(
-            yaml.safe_load(declaration), {'inc': inc})
+        generators = sim.generators.full_tree_generators(
+            yaml.safe_load(declaration), {'inc': aggregating_increment})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, run_history={})
+        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results={})
         computation_result = run_sequence(payload, *chain)
-        self.assertEqual(5, len(chain))
+        self.assertEqual(3, len(chain))
         self.assertEqual(2, computation_result.simulation_state)
 
-    def test_operation_run_constrains_fail(self):
-        declaration="""
+    def test_operation_run_constraints_fail(self):
+        declaration = """
         simulation_params:
             initial_step_time: 0
             step_time_interval: 1
             final_step_time: 3
-        run_constrains:
+        run_constraints:
             inc:
                 minimum_time_interval: 2
         simulation_events:
@@ -158,9 +158,54 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.generators_from_declaration(
+        generators = sim.generators.full_tree_generators(
             yaml.safe_load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, run_history={})
+        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results={})
         self.assertRaises(Exception, run_sequence, payload, *chain)
+
+    def test_tree_generators_by_time_point(self):
+        declaration = """
+        simulation_params:
+          initial_step_time: 0
+          step_time_interval: 1
+          final_step_time: 1
+        simulation_events:
+          - time_points: [0, 1]
+            generators:
+              - sequence:
+                - inc
+                - inc
+        """
+
+        # generators for 2 time points'
+        generators = sim.generators.partial_tree_generators_by_time_point(yaml.safe_load(declaration), {'inc': inc})
+        self.assertEqual(2, len(generators.values()))
+
+        # 1 sequence generators in each time point
+        gen_one = generators[0]
+        gen_two = generators[1]
+        self.assertEqual(1, len(gen_one))
+        self.assertEqual(1, len(gen_two))
+
+        # 1 chain from both generated trees
+        # 1 root + 2 processors (inc) in both chains
+        tree_one = compose(*generators[0])
+        tree_two = compose(*generators[1])
+        chain_one = tree_one.operation_chains()
+        chain_two = tree_two.operation_chains()
+        self.assertEqual(1, len(chain_one))
+        self.assertEqual(1, len(chain_two))
+        self.assertEqual(3, len(chain_one[0]))
+        self.assertEqual(3, len(chain_two[0]))
+
+    def test_simple_processable_chain(self):
+        operation_tags = ['inc', 'inc', 'inc']
+        operation_params = {}
+        operation_lookup = {'inc': inc}
+        chain = sim.generators.simple_processable_chain(operation_tags, operation_params, operation_lookup)
+        self.assertEqual(len(operation_tags), len(chain))
+        result = evaluate_sequence(1, *chain)
+        self.assertEqual(4, result)
+
