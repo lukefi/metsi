@@ -298,6 +298,18 @@ operation_params:
     lmfor_volume: true
 ```
 
+The project contains a `DESCRIPTION` file which must be used to declare R library dependencies for R scripts.
+This is not necessary for running the R scripts locally, but is required for dependency resolution in the GitHub Actions test runs pipeline.
+Local dependencies are handled by the script files as exemplified by the beginning of the `lmfor_volume.R`.
+It will install its dependencies on run if they are not found from the local environment R libraries.
+
+```
+library_requirements <- c("lmfor")
+if(!all(library_requirements %in% installed.packages()[, "Package"]))
+  install.packages(repos="https://cran.r-project.org", dependencies=TRUE, library_requirements)
+library(lmfor)
+```
+
 
 ## Notes for simulation creators
 
