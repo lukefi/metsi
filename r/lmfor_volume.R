@@ -10,7 +10,7 @@ volmods <- readRDS("r/vol_mods_final_LM.rds")
 #   breast_height_diameter = c(25.3, 32.3),
 #   degree_days = c(400.3, 400.3),
 #   species = c("pine", "spruce"),
-#   measurement_method = c("climbed", "climbed")
+#   model_type = c("climbed", "climbed")
 # )
 
 known_species <- c("birch", "pine", "spruce")
