@@ -10,6 +10,30 @@ def evaluate_thinning_conditions(predicates):
     return all(f() for f in predicates)
 
 
+def first_thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    stand, simulation_aggregates = input
+    epsilon = operation_parameters['e']
+    factor = operation_parameters['thinning_factor']
+    hdom_0 = operation_parameters['dominant_height_lower_bound']
+    hdom_n = operation_parameters['dominant_height_upper_bound']
+    hdom_0 = 11 if hdom_0 is None else hdom_0
+    hdom_n = 16 if hdom_n is None else hdom_n
+
+    residue_stems = get_first_thinning_residue(stand)
+
+    stems_over_limit = lambda: residue_stems < futil.overall_stems_per_ha(stand)
+    hdom_in_between = lambda: hdom_0 <= futil.solve_dominant_height_c_largest(stand) <= hdom_n
+    predicates = [stems_over_limit, hdom_in_between]
+
+    if evaluate_thinning_conditions(predicates):
+        stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
+        stop_condition = lambda stand: (residue_stems + epsilon) <= futil.overall_stems_per_ha(stand)
+        new_stand, new_aggregate = thinning(stand, factor, stop_condition)
+    else:
+        raise UserWarning("Unable to perform first thinning")
+    return new_stand, store_operation_aggregate(simulation_aggregates, new_aggregate, 'first_thinning')
+
+
 def thinning_from_above(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
     stand, simulation_aggregates = input
     epsilon = operation_parameters['e']

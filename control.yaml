@@ -46,6 +46,7 @@ simulation_events:
           - do_nothing
           - thinning_from_below
           - thinning_from_above
+          - first_thinning
   - time_points: [0, 10, 20, 30]
     generators:
       - sequence:

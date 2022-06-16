@@ -24,6 +24,36 @@ class ThinningsTest(ConverterTestSuite):
             result = thin.evaluate_thinning_conditions(predicates)
             self.assertEqual(i[1], result)
 
+    def test_first_thinning(self):
+        species = [1,2,2]
+        diameters = [12.0, 16.0, 12.0]
+        stems = [300, 600, 200]
+
+        stand = ForestStand()
+        stand.site_type_category = 1
+        stand.reference_trees = [
+            ReferenceTree(species=spe, breast_height_diameter=d, stems_per_ha=f)
+            for spe, d, f in zip(species, diameters, stems)
+        ]
+        operation_tag = 'first_thinning'
+        simulation_aggregates = {
+            'operation_results': {},
+            'current_time_point': 0,
+            'current_operation_tag': operation_tag
+        }
+        operation_parameters = {
+            'thinning_factor': 0.97,
+            'e': 10,
+            'dominant_height_lower_bound': 11,
+            'dominant_height_upper_bound': 16
+        }
+        payload = (stand, simulation_aggregates)
+        result_stand, result_aggregates = thin.first_thinning(payload, **operation_parameters)
+        self.assertEqual(3, len(result_stand.reference_trees))
+        self.assertEqual(257.6202, round(result_stand.reference_trees[0].stems_per_ha, 4))
+        self.assertEqual(180.7842, round(result_stand.reference_trees[1].stems_per_ha, 4))
+        self.assertEqual(570.594, round(result_stand.reference_trees[2].stems_per_ha, 4))
+        self.assertEqual(91.0016, round(result_aggregates['operation_results'][operation_tag][0]['stems_removed'], 4))
 
     def test_thinning_from_above(self):
         species = [ TreeSpecies(i) for i in [1,2,3] ]
