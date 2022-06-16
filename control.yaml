@@ -1,15 +1,18 @@
 simulation_params:
   initial_step_time: 0
-  step_time_interval: 5
+  step_time_interval: 1
   final_step_time: 30
 
 run_constraints:
-  basal_area_thinning:
+  thinning_from_below:
     minimum_time_interval: 10
 
 operation_params:
   reporting:
     level: 1
+  thinning_from_below:
+    c: 0.97 # thinning factor
+    e: 0.2 # (lower bound + e)
 
 preprocessing_params:
   example_operation:
@@ -29,8 +32,12 @@ simulation_events:
     generators:
       - alternatives:
           - do_nothing
-          - basal_area_thinning
+          - thinning_from_below
   - time_points: [0, 10, 20, 30]
     generators:
       - sequence:
           - report_volume
+  - time_points: [30]
+    generators:
+      - sequence:
+          - report_removal

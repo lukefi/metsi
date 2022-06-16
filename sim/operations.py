@@ -34,22 +34,18 @@ def processor(payload: OperationPayload, operation: typing.Callable, operation_t
         if last_run_time_point is not None and minimum_time_interval > (time_point - last_run_time_point):
             raise UserWarning("{} aborted - last run at {}, time now {}, minimum time interval {}"
                               .format(operation_tag, last_run_time_point, time_point, minimum_time_interval))
-    operation_aggregates: OrderedDict = get_or_default(
-        payload.aggregated_results.get(operation_tag), OrderedDict()).copy()
-    latest_aggregate = None if len(operation_aggregates) == 0 else list(operation_aggregates.values())[-1]
 
-    new_state, new_aggregate = operation((payload.simulation_state, latest_aggregate))
+    payload.aggregated_results['current_time_point'] = time_point
+    new_state, new_aggregated_results = operation((payload.simulation_state, payload.aggregated_results))
+
     new_operation_run_history = {}
     new_operation_run_history['last_run_time_point'] = time_point
     run_history[operation_tag] = new_operation_run_history
-    if new_aggregate is not None:
-        operation_aggregates[time_point] = new_aggregate
     newpayload = OperationPayload(
         simulation_state=new_state,
         run_history=run_history,
-        aggregated_results=payload.aggregated_results
+        aggregated_results=payload.aggregated_results if new_aggregated_results is None else new_aggregated_results
     )
-    newpayload.aggregated_results[operation_tag] = operation_aggregates
     return newpayload
 
 
