@@ -30,6 +30,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f optional-requirements.txt ]; then pip install -r optional-requirements.txt; fi
     - name: Install R dependencies
       uses: r-lib/actions/setup-r-dependencies@v2
       with:
