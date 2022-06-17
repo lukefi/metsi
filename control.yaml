@@ -8,8 +8,8 @@ run_constraints:
     minimum_time_interval: 10
 
 operation_params:
-  reporting:
-    level: 1
+  report_volume:
+    lmfor_volume: false
   thinning_from_below:
     c: 0.97
     e: 0.2
