@@ -4,6 +4,7 @@ from collections import OrderedDict
 from typing import Tuple
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
+from forestry.r_utils import lmfor_volume
 from forestry.thinning import thinning_from_below, report_removal
 from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
 
@@ -33,7 +34,11 @@ def report_volume(payload: Tuple[ForestStand, dict], **operation_parameters) -> 
     stand, simulation_aggregates = payload
     latest_aggregate = get_latest_operation_aggregate(simulation_aggregates, 'report_volume')
 
-    result = compute_volume(stand)
+    volume_function = compute_volume
+    if operation_parameters.get('lmfor_volume'):
+        volume_function = lmfor_volume
+    result = volume_function(stand)
+    
     if latest_aggregate is None:
         new_aggregate = {'growth_volume': 0.0, 'current_volume': result}
     else:
