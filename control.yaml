@@ -8,8 +8,8 @@ run_constraints:
     minimum_time_interval: 10
 
 operation_params:
-  reporting:
-    level: 1
+  report_volume:
+    lmfor_volume: false
   first_thinning:
     thinning_factor: 0.97
     e: 0.2
@@ -27,8 +27,8 @@ operation_params:
       - thinning_from_above
 
 preprocessing_params:
-  exclude_sapling_trees:
-
+  example_operation:
+    example_param: "example_value"
 
 preprocessing_operations:
   - exclude_sapling_trees

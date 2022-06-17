@@ -4,12 +4,13 @@ The module is basicly a utility file for thinning operations that are basal area
 Thinning limits lookup table is used for solving lower (y0) and upper (y1) bound
 of basal area thinnings.
 """
-import forestry.forestry_utils as futil
 from typing import Tuple
-from forestdatamodel.model import ReferenceTree, ForestStand
-from forestdatamodel.enums.internal import TreeSpecies
-from collections.abc import KeysView
 from enum import Enum
+from collections.abc import KeysView
+from bisect import bisect
+from forestdatamodel.model import ForestStand
+from forestdatamodel.enums.internal import TreeSpecies
+import forestry.forestry_utils as futil
 
 
 class CountyKey(Enum):
@@ -479,21 +480,9 @@ def species_to_key(value: int) -> str:
 def solve_hdom_key(hdom_x: int, hdoms: KeysView[int]) -> int:
     """ solves dominant height key for stand dominant height for thinning limit lookup table """
     hdoms = list(hdoms)
-    hdom_0 = hdoms.pop(0)
-    hdom_n = hdoms.pop(-1)
-    if hdom_0 <= hdom_x < hdoms[-1]:
-        # in between
-        for hdom_i in hdoms:
-            if hdom_x < hdom_i:
-                return hdom_i
-    else:
-        if hdom_x < hdom_0:
-            # under
-            return hdom_0
-        else:
-            # over
-            return hdom_n
-
+    i = bisect(hdoms, hdom_x)
+    key_idx = min(i, len(hdoms)-1)
+    return hdoms[key_idx]
 
 def get_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
     """ Get lower and upper bound for thinning. Values are in meters """
