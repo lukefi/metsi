@@ -1,6 +1,7 @@
 import math
 import statistics
-from forestdatamodel.model import ReferenceTree
+from enum import Enum
+from forestdatamodel.model import ReferenceTree, ForestStand
 from typing import List, Callable
 
 
@@ -11,13 +12,46 @@ def compounded_growth_factor(growth_percent: float, years: int) -> float:
         return 0.0
 
 
+def solve_dominant_height_c_largest(stand, c: int = 100):
+        """ Calculate stands weighted average of c largest stems (100 by default) """
+        sorted_trees = sorted(stand.reference_trees, key=lambda rt: rt.breast_height_diameter, reverse=True)
+        dw_sum, n = 0, 0
+        for rt in sorted_trees:
+            d = rt.breast_height_diameter
+            w = rt.stems_per_ha
+            if n + w >= c:
+                wn = (c - n) # notice only portion of stems as last weight
+                dw_sum += d * wn
+                n = c
+                break
+            # weighted sum
+            dw_sum += d * w
+            n += w
+        # average of weighted sums
+        return dw_sum / n if n > 0 else 0
+
+
+def overall_basal_area(stand: ForestStand) -> float:
+    """ Overall basal area of stand in square meters (m^2) """
+    return sum(calculate_basal_area(rt) for rt in stand.reference_trees)
+
+
+def solve_dominant_species(stand: ForestStand) -> Enum:
+    """ Solves dominant species of a stand based on basal area """
+    spe_ba = [ (rt.species, calculate_basal_area(rt)) for rt in stand.reference_trees ]
+    bucket = { x[0]: 0.0 for x in spe_ba }
+    for spe, basal_area in spe_ba:
+        bucket[spe] += basal_area
+    return max(bucket, key=bucket.get)
+
+
 def calculate_basal_area(tree: ReferenceTree) -> float:
     """ Single reference tree basal area calculation.
 
     The tree should contain breast height diameter (in cm) and stesm per hectare for the species spesific calculations.
 
     :param tree: Single ReferenceTree instance with breast height diameter (in cm) and stems per hectare properties.
-    :return reference tree basal area in square meters
+    :return reference tree basal area in square meters (m^2)
     """
     meters_factor = 0.01
     radius = tree.breast_height_diameter * 0.5 * meters_factor
