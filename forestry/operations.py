@@ -7,20 +7,6 @@ from forestry.grow_acta import grow_acta
 from forestry.thinning import thinning_from_above, thinning_from_below, report_overall_removal
 from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
 
-def basal_area_thinning(stand: ForestStand, **operation_parameters) -> ForestStand:
-    """This function is a no-op example stub"""
-    return stand
-
-
-def stem_count_thinning(stand: ForestStand, **operation_parameters) -> ForestStand:
-    """This function is a no-op example stub"""
-    return stand
-
-
-def continuous_growth_thinning(stand: ForestStand, **operation_parameters) -> ForestStand:
-    """This function is a no-op example stub"""
-    return stand
-
 
 def compute_volume(stand: ForestStand) -> float:
     """Debug level function. Does not reflect any real usable model computation.
@@ -51,9 +37,6 @@ def report_volume(payload: Tuple[ForestStand, dict], **operation_parameters) -> 
 operation_lookup = {
     'grow_acta': grow_acta,
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
-    'basal_area_thinning': basal_area_thinning,
-    'stem_count_thinning': stem_count_thinning,
-    'continuous_growth_thinning': continuous_growth_thinning,
     'thinning_from_below': thinning_from_below,
     'thinning_from_above': thinning_from_above,
     'report_volume': report_volume,
