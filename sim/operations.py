@@ -36,6 +36,7 @@ def processor(payload: OperationPayload, operation: typing.Callable, operation_t
                               .format(operation_tag, last_run_time_point, time_point, minimum_time_interval))
 
     payload.aggregated_results['current_time_point'] = time_point
+    payload.aggregated_results['current_operation_tag'] = operation_tag
     new_state, new_aggregated_results = operation((payload.simulation_state, payload.aggregated_results))
 
     new_operation_run_history = {}
