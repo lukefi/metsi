@@ -3,12 +3,57 @@ from collections import OrderedDict
 from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
-from forestry.thinning_limits import site_type_to_key, soil_peatland_category_to_key, species_to_key, solve_hdom_key, get_thinning_bounds
-from forestry.thinning_limits import THINNING_LIMITS, SiteTypeKey, SoilPeatlandKey, SpeciesKey
-from forestry.thinning import thinning_from_below, thinning_from_above, report_overall_removal
+from forestry.thinning_limits import *
+import forestry.thinning as thin
 import forestry.aggregate_utils as aggutil
 
 class ThinningsTest(ConverterTestSuite):
+
+    def test_evaluate_thinning_conditions(self):
+        assertions = [
+            (1, False),
+            (2, False),
+            (3, True),
+            (4, False),
+            (5, False),
+        ]
+        for i in assertions:
+            p1 = lambda: i[0] < 5
+            p2 = lambda: i[0] == 3
+            predicates = [p1, p2]
+            result = thin.evaluate_thinning_conditions(predicates)
+            self.assertEqual(i[1], result)
+
+    def test_first_thinning(self):
+        species = [1,2,2]
+        diameters = [12.0, 16.0, 12.0]
+        stems = [300, 600, 200]
+
+        stand = ForestStand()
+        stand.site_type_category = 1
+        stand.reference_trees = [
+            ReferenceTree(species=spe, breast_height_diameter=d, stems_per_ha=f)
+            for spe, d, f in zip(species, diameters, stems)
+        ]
+        operation_tag = 'first_thinning'
+        simulation_aggregates = {
+            'operation_results': {},
+            'current_time_point': 0,
+            'current_operation_tag': operation_tag
+        }
+        operation_parameters = {
+            'thinning_factor': 0.97,
+            'e': 10,
+            'dominant_height_lower_bound': 11,
+            'dominant_height_upper_bound': 16
+        }
+        payload = (stand, simulation_aggregates)
+        result_stand, result_aggregates = thin.first_thinning(payload, **operation_parameters)
+        self.assertEqual(3, len(result_stand.reference_trees))
+        self.assertEqual(257.6202, round(result_stand.reference_trees[0].stems_per_ha, 4))
+        self.assertEqual(180.7842, round(result_stand.reference_trees[1].stems_per_ha, 4))
+        self.assertEqual(570.594, round(result_stand.reference_trees[2].stems_per_ha, 4))
+        self.assertEqual(91.0016, round(result_aggregates['operation_results'][operation_tag][0]['stems_removed'], 4))
 
     def test_thinning_from_above(self):
         species = [ TreeSpecies(i) for i in [1,2,3] ]
@@ -29,10 +74,10 @@ class ThinningsTest(ConverterTestSuite):
             'current_time_point': 0,
             'current_operation_tag': operation_tag
         }
-        operation_parameters = {'c': 0.97, 'e': 0.2}
+        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
 
         oper_input = (stand, simulation_aggregates)
-        result_stand, collected_aggregates = thinning_from_above(oper_input, **operation_parameters)
+        result_stand, collected_aggregates = thin.thinning_from_above(oper_input, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
         self.assertEqual([22.0, 21.0, 20.0], [rt.breast_height_diameter for rt in stand.reference_trees])
         self.assertEqual(124.0792, round(result_stand.reference_trees[0].stems_per_ha, 4))
@@ -58,10 +103,10 @@ class ThinningsTest(ConverterTestSuite):
             'current_time_point': 0,
             'current_operation_tag': 'thinning_from_below'
         }
-        operation_parameters = {'c': 0.97, 'e': 0.2}
+        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
 
         oper_input = (stand, simulation_aggregates)
-        result_stand, collected_aggregates = thinning_from_below(oper_input, **operation_parameters)
+        result_stand, collected_aggregates = thin.thinning_from_below(oper_input, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
         self.assertEqual([20.0, 21.0, 22.0], [rt.breast_height_diameter for rt in stand.reference_trees])
         self.assertEqual(119.1652, round(result_stand.reference_trees[0].stems_per_ha, 4))
@@ -84,12 +129,27 @@ class ThinningsTest(ConverterTestSuite):
             'current_time_point': 30,
         }
         payload = (None, simulation_aggregates)
-        (_, result) = report_overall_removal(payload, thinning_method=['thin1', 'thin2'])
+        (_, result) = thin.report_overall_removal(payload, thinning_method=['thin1', 'thin2'])
         overall_removals = aggutil.get_latest_operation_aggregate(result, 'report_overall_removal')
         overall_removal = sum(x for x in overall_removals.values())
         self.assertEqual(600, overall_removal)
 
 class ThinningLimitsTest(ConverterTestSuite):
+
+    def test_get_first_thinning_residue(self):
+        stand = ForestStand()
+        stand.site_type_category = 1
+        species = [1,2,2]
+        diameters = [12.0, 16.0, 12.0]
+        stems = [450.0, 600.0, 500.0]
+        stand.reference_trees = [
+            ReferenceTree(species=spe, breast_height_diameter=d, stems_per_ha=f)
+            for spe, d, f in zip(species, diameters, stems)
+        ]
+        result = resolve_first_thinning_residue(stand)
+        residue_stems = 1000.0
+        self.assertEqual(residue_stems, result)
+
     def test_site_type_to_key(self):
         assertions = [
             ([1], SiteTypeKey.OMT),
@@ -181,6 +241,6 @@ class ThinningLimitsTest(ConverterTestSuite):
         assertions = [
             ([stand], (15.2, 24.0))
         ]
-        self.run_with_test_assertions(assertions, get_thinning_bounds)
+        self.run_with_test_assertions(assertions, resolve_thinning_bounds)
 
 

@@ -35,6 +35,10 @@ def overall_basal_area(stand: ForestStand) -> float:
     """ Overall basal area of stand in square meters (m^2) """
     return sum(calculate_basal_area(rt) for rt in stand.reference_trees)
 
+def overall_stems_per_ha(stand: ForestStand) -> float:
+    """ Sums up the stems of all reference trees """
+    return sum(rt.stems_per_ha for rt in stand.reference_trees)
+
 
 def solve_dominant_species(stand: ForestStand) -> Enum:
     """ Solves dominant species of a stand based on basal area """

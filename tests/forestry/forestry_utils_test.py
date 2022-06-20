@@ -28,6 +28,16 @@ class ForestryUtilsTest(unittest.TestCase):
             result = futil.solve_dominant_height_c_largest(stand, c=100)
             self.assertEqual(i[1], result)
 
+    def test_overall_stems_per_ha(self):
+        stand = ForestStand()
+        stems = [99.0, 100.0, 101.0]
+        stand.reference_trees = [
+            ReferenceTree(stems_per_ha=f)
+            for f in stems
+            ]
+        result = futil.overall_stems_per_ha(stand)
+        self.assertEqual(300.0, result)
+
     def test_overall_basal_area(self):
         stand = ForestStand()
         diameters = [10.0, 11.0, 12.0]

@@ -10,11 +10,16 @@ run_constraints:
 operation_params:
   report_volume:
     lmfor_volume: false
+  first_thinning:
+    thinning_factor: 0.97
+    e: 0.2
+    dominant_height_lower_bound: 11
+    dominant_height_upper_bound: 16
   thinning_from_below:
-    c: 0.97
+    thinning_factor: 0.97
     e: 0.2
   thinning_from_above:
-    c: 0.98
+    thinning_factor: 0.98
     e: 0.2
   report_overall_removal:
     thinning_method:
@@ -41,6 +46,7 @@ simulation_events:
           - do_nothing
           - thinning_from_below
           - thinning_from_above
+          - first_thinning
   - time_points: [0, 10, 20, 30]
     generators:
       - sequence:

@@ -32,7 +32,7 @@ class SoilPeatlandKey(Enum):
 class SpeciesKey(Enum):
     PINE = 'pine'
     SPRUCE = 'spruce'
-    SILVER_BIRCH = 'silver_birch'
+    SILVER_BIRCH = 'silver_birch_and_other_deciduous'
     DOWNY_BIRCH = 'downy_birch'
 
 
@@ -484,8 +484,8 @@ def solve_hdom_key(hdom_x: int, hdoms: KeysView[int]) -> int:
     key_idx = min(i, len(hdoms)-1)
     return hdoms[key_idx]
 
-def get_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
-    """ Get lower and upper bound for thinning. Values are in meters """
+def resolve_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
+    """ Resolves lower and upper bound for thinning. Values are in meters (m). """
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
@@ -497,3 +497,41 @@ def get_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
 
     hdom_key = solve_hdom_key(hdom, spe_limits.keys())
     return spe_limits[hdom_key]
+
+# ---- first thinning stem count residue and util functions----
+
+FIRST_THINNING_RESIDUE_STEMS = {
+    SiteTypeKey.OMT: {
+        SpeciesKey.PINE: 1250.0,
+        SpeciesKey.SPRUCE: 1000.0,
+        SpeciesKey.SILVER_BIRCH: 750.0,
+        SpeciesKey.DOWNY_BIRCH: 950
+    },
+    SiteTypeKey.MT: {
+        SpeciesKey.PINE: 1100,
+        SpeciesKey.SPRUCE: 1000,
+        SpeciesKey.SILVER_BIRCH: 750,
+        SpeciesKey.DOWNY_BIRCH: 950
+    },
+    SiteTypeKey.VT: {
+        SpeciesKey.PINE: 1000,
+        SpeciesKey.SPRUCE: 1000,
+        SpeciesKey.SILVER_BIRCH: 750,
+        SpeciesKey.DOWNY_BIRCH: 950
+    },
+    SiteTypeKey.CT: {
+        SpeciesKey.PINE: 1000,
+        SpeciesKey.SPRUCE: 1000,
+        SpeciesKey.SILVER_BIRCH: 750,
+        SpeciesKey.DOWNY_BIRCH: 950
+    }
+}
+
+
+def resolve_first_thinning_residue(stand: ForestStand) -> float:
+    """ Resolves stem count residue for first thinning operation. Values are stems per hectare. """
+    sdom = futil.solve_dominant_species(stand)
+    st_key = site_type_to_key(stand.site_type_category)
+    spe_key = species_to_key(sdom)
+    lower_limit = FIRST_THINNING_RESIDUE_STEMS[st_key][spe_key]
+    return lower_limit
