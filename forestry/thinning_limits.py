@@ -484,8 +484,8 @@ def solve_hdom_key(hdom_x: int, hdoms: KeysView[int]) -> int:
     key_idx = min(i, len(hdoms)-1)
     return hdoms[key_idx]
 
-def get_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
-    """ Get lower and upper bound for thinning. Values are in meters """
+def resolve_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
+    """ Resolves lower and upper bound for thinning. Values are in meters (m). """
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
@@ -528,8 +528,8 @@ FIRST_THINNING_RESIDUE_STEMS = {
 }
 
 
-def get_first_thinning_residue(stand: ForestStand) -> float:
-    """ Gets stem count residue for first thinning operation """
+def resolve_first_thinning_residue(stand: ForestStand) -> float:
+    """ Resolves stem count residue for first thinning operation. Values are stems per hectare. """
     sdom = futil.solve_dominant_species(stand)
     st_key = site_type_to_key(stand.site_type_category)
     spe_key = species_to_key(sdom)

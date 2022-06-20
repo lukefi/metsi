@@ -146,7 +146,7 @@ class ThinningLimitsTest(ConverterTestSuite):
             ReferenceTree(species=spe, breast_height_diameter=d, stems_per_ha=f)
             for spe, d, f in zip(species, diameters, stems)
         ]
-        result = get_first_thinning_residue(stand)
+        result = resolve_first_thinning_residue(stand)
         residue_stems = 1000.0
         self.assertEqual(residue_stems, result)
 
@@ -241,6 +241,6 @@ class ThinningLimitsTest(ConverterTestSuite):
         assertions = [
             ([stand], (15.2, 24.0))
         ]
-        self.run_with_test_assertions(assertions, get_thinning_bounds)
+        self.run_with_test_assertions(assertions, resolve_thinning_bounds)
 
 

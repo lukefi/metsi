@@ -2,7 +2,7 @@ import forestry.forestry_utils as futil
 from collections import OrderedDict
 from forestdatamodel.model import ForestStand
 from typing import Tuple, Callable
-from forestry.thinning_limits import get_thinning_bounds, get_first_thinning_residue
+from forestry.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
 from forestry.aggregate_utils import store_operation_aggregate, get_operation_aggregates, get_latest_operation_aggregate
 
 
@@ -19,7 +19,7 @@ def first_thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> T
     hdom_0 = 11 if hdom_0 is None else hdom_0
     hdom_n = 16 if hdom_n is None else hdom_n
 
-    residue_stems = get_first_thinning_residue(stand)
+    residue_stems = resolve_first_thinning_residue(stand)
 
     stems_over_limit = lambda: residue_stems < futil.overall_stems_per_ha(stand)
     hdom_in_between = lambda: hdom_0 <= futil.solve_dominant_height_c_largest(stand) <= hdom_n
@@ -41,7 +41,7 @@ def thinning_from_above(input: Tuple[ForestStand, dict], **operation_parameters)
 
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter, reverse=True)
 
-    (lower_limit, upper_limit) = get_thinning_bounds(stand)
+    (lower_limit, upper_limit) = resolve_thinning_bounds(stand)
     upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
     predicates = [upper_limit_reached]
 
@@ -60,7 +60,7 @@ def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters)
 
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
 
-    (lower_limit, upper_limit) = get_thinning_bounds(stand)
+    (lower_limit, upper_limit) = resolve_thinning_bounds(stand)
     upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
     predicates = [upper_limit_reached]
 
