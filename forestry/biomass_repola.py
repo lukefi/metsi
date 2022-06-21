@@ -2,12 +2,6 @@ import math
 import pandas as pd
 from forestdatamodel.model import ForestStand,ReferenceTree
 
-
-#Laasasenaho 1975, stump diameter f(d):
-#Needed in biomass calculations
-def stump_diameter(tree: ReferenceTree) -> float:
-    return 2.0+1.25*tree.breast_height_diameter
-
 #Sources
 #Repola J. (2013). Modelling tree biomasses in Finland
 #https://dissertationesforestales.fi/pdf/article1941.pdf
@@ -15,17 +9,6 @@ def stump_diameter(tree: ReferenceTree) -> float:
 #https://www.silvafennica.fi/pdf/article184.pdf
 #Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland
 #https://www.silvafennica.fi/pdf/article236.pdf
-
-#Biomass components 
-#1. Stem with bark
-#2. Stem roundwood with bark
-#3. Stem waste with bark
-#4. Living branches
-#5. Dead branches
-#6. Needles / Foliage
-#7. Stump
-#8. Roots > 1 cm
-
 
 #Models 1-3 inputs:
 #d = tree diameter at breast height, cm
@@ -36,14 +19,22 @@ def stump_diameter(tree: ReferenceTree) -> float:
 #cr = crown ratio, 0-1
 #t = tree age at breast height
 #-------------------------------------------------------
-#Model 3 inputs:
+#Model 3 inputs (no functions yet for these):
 #ig5 = cross-sectional area increment at breast height during the last five years (cm^2)
 #i5 = brest height radial increment during the last five years (cm, *mm for birch)
 #bt = double bark thickness at breat height (cm)
 
-def stem_wood_biomass_vol_MELA_2(tree: ReferenceTree,stand: ForestStand,treevolume) -> list:
-    #should age be biological age or age at breast height?
-    #MELA2016 biomassat_repola.f comments say model is by Repola & co, but couldn't find original source
+def stump_diameter(tree: ReferenceTree) -> float:
+    """
+    Laasasenaho 1975, stump diameter f(d):
+    Needed in biomass calculations
+    """
+    return 2.0+1.25*tree.breast_height_diameter
+
+def stem_wood_biomass_vol_1(tree: ReferenceTree,stand: ForestStand, treevolume) -> list:
+    """
+    Returns list: stem wood, stem bark
+    """
     if(tree.species ==1 ):
          stem_with_bark_bm=treevolume*(378.39-78.829*tree.breast_height_diameter/tree.breast_height_age+0.039*stand.degree_days)          
     elif(tree.species ==2):
@@ -54,9 +45,10 @@ def stem_wood_biomass_vol_MELA_2(tree: ReferenceTree,stand: ForestStand,treevolu
     stem_wood = (stem_wood_biomass_1(tree)/(stem_wood_biomass_1(tree)+stem_bark_biomass_1(tree)))*stem_with_bark_bm
     return [stem_wood/1000,stem_bark/1000]
 
-def stem_wood_biomass_vol_MOTTI(tree: ReferenceTree,stand: ForestStand,treevolume,treevolumewaste) -> list:
-    #should age be biological age or age at breast height?
-    #MELA2016 biomassat_repola.f comments say model is by Repola & co, but couldn't find original source
+def stem_wood_biomass_vol_2(tree: ReferenceTree,stand: ForestStand,treevolume,treevolumewaste) -> list:
+    """
+    Returns list: stem with bark, stem wood with bark, stem waste with bark
+    """
     if(tree.species ==1 ):
          stem_with_bark_bm=treevolume*(378.39-78.829*tree.breast_height_diameter/tree.breast_height_age+0.039*stand.degree_days)          
     elif(tree.species ==2):
@@ -67,34 +59,36 @@ def stem_wood_biomass_vol_MOTTI(tree: ReferenceTree,stand: ForestStand,treevolum
     stem_wood = stem_with_bark_bm-stem_waste
     return [stem_with_bark_bm/1000,stem_wood/1000,stem_waste/1000]
 
-#Equations for Scots pine, Norway spruce and Silver/pubescent birch
-####REPOLA MODELS 1 f(d,h)#####
-#Stem wood biomass
-#f(d,h)
 def stem_wood_biomass_1(tree: ReferenceTree) -> float:
-     if tree.species==1: #Scots Pine
+    """
+    Repola J. (2013). Modelling tree biomasses in Finland, p. 25
+    """
+    if tree.species==1: #Scots Pine
         lnbm=-3.721+8.103*(stump_diameter(tree)/(stump_diameter(tree)+14))+5.066*(tree.height/(tree.height+12))+(0.002+0.009)/2
         bm=math.exp(lnbm)
-     elif tree.species==2: #Norway Spruce
+    elif tree.species==2: #Norway Spruce
         lnbm=-3.555+8.042*(stump_diameter(tree)/(stump_diameter(tree)+14))+0.869*math.log(tree.height)+0.015*tree.height+(0.009+0.009)/2
         bm=math.exp(lnbm)
-     else: #Others, model for Birch
+    else: #Others, model for Birch
         lnbm=-4.879+9.651*(stump_diameter(tree)/(stump_diameter(tree)+12))+1.012*math.log(tree.height)+(0.00263+0.00544)/2
         bm=math.exp(lnbm)
      #bm = Biomass of component, kg
      #to tons:
-     bm=bm/1000
-     return bm
+    bm=bm/1000
+    return bm
 
-#f(d,h,cr)
+#Stem wood biomass f(d,h,t)
 def stem_wood_biomass_2(tree: ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 641-645
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
+    """
     cl = tree.height-tree.lowest_living_branch_height
-    cr =(tree.height-tree.lowest_living_branch_height)/tree.height
     if tree.species==1: #Scots Pine
         lnbm=-4.018+8.358*(stump_diameter(tree)/(stump_diameter(tree)+14))+4.646*(tree.height/(tree.height+10))+0.041*math.log(tree.breast_height_age)+(0.001+0.008)/2
         bm=math.exp(lnbm)
     elif tree.species==2: #Norway Spruce
-        lnbm=-4.000+8.881*(stump_diameter(tree)/(stump_diameter(tree)+12))+0.728*math.log(tree.height)+0.022*tree.height-0.273*tree.breast_height_diameter/tree.breast_height_age+(0.003+0.008)/2
+        lnbm=-4.000+8.881*stump_diameter(tree)/(stump_diameter(tree)+12)+0.728*math.log(tree.height)+0.022*tree.height-0.273*stump_diameter(tree)/tree.breast_height_age+(0.003+0.008)/2
         bm=math.exp(lnbm)
     else: #Others, model for Birch
         lnbm=-4.886+9.965*(stump_diameter(tree)/(stump_diameter(tree)+12))+0.966*math.log(tree.height)-0.135*tree.breast_height_diameter/tree.breast_height_age+(0.002+0.005)/2
@@ -104,9 +98,12 @@ def stem_wood_biomass_2(tree: ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Stem bark biomass
-#f(d,h)
+#Stem bark biomass 1 #f(d,h)
 def stem_bark_biomass_1(tree:ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
+    """
     if tree.species==1: #Scots Pine
         lnbm=-4.548+7.997*(stump_diameter(tree)/(stump_diameter(tree)+12))+0.357*(math.log(tree.height))+(0.015+0.061)/2
         bm=math.exp(lnbm)
@@ -121,9 +118,12 @@ def stem_bark_biomass_1(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Stem bark biomass
-#f(d,h,cr)
+#Stem bark biomass 2 f(d,h,cr)
 def stem_bark_biomass_2(tree:ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 641-645
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
+    """
     if tree.species==1: #Scots Pine
         lnbm=-4.695+8.727*(stump_diameter(tree)/(stump_diameter(tree)+14))+0.357*math.log(tree.height)+(0.014+0.057)/2
         bm=math.exp(lnbm)
@@ -138,8 +138,12 @@ def stem_bark_biomass_2(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Living branches biomass f(d,f)
+#Living branches biomass 1 f(d,f)
 def living_branches_biomass_1(tree:ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
+    """
     if tree.species==1: #Scots Pine
         lnbm=-6.162+15.075*(stump_diameter(tree)/(stump_diameter(tree)+12))-2.618*(tree.height/(tree.height+12))+(0.041+0.089)/2
         bm=math.exp(lnbm)
@@ -154,8 +158,12 @@ def living_branches_biomass_1(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Living branches biomass f(d,h,cr)
+#Living branches biomass 2 f(d,h,cr)
 def living_branches_biomass_2(tree:ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 641-645
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
+    """
     cl = tree.height-tree.lowest_living_branch_height
     if tree.species==1: #Scots Pine
         lnbm=-5.224+13.022*(stump_diameter(tree)/(stump_diameter(tree)+12))-4.867*(tree.height/(tree.height+8))+1.058*math.log(cl)+(0.02+0.067)/2
@@ -171,8 +179,12 @@ def living_branches_biomass_2(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Dead branches biomass f(d,h)
+#Dead branches biomass 1 f(d,h)
 def dead_branches_biomass_1(tree:ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
+    """
     if tree.species==1: #Scots Pine
         lnbm=-5.201+10.574*(stump_diameter(tree)/(stump_diameter(tree)+16))
         bm=math.exp(lnbm)
@@ -190,8 +202,12 @@ def dead_branches_biomass_1(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Dead branches biomass f(d,h,cr)
+#Dead branches biomass 2 f(d,h,cr)
 def dead_branches_biomass_2(tree:ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 641-645
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
+    """
     if tree.species==1: #Scots Pine
         lnbm=-5.318+10.771*(stump_diameter(tree)/(stump_diameter(tree)+16))
         bm=math.exp(lnbm)*0.913
@@ -206,8 +222,8 @@ def dead_branches_biomass_2(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Dead branches biomass MOTTI f(d,h,cr)
-def dead_branches_biomass_MOTTI(tree:ReferenceTree) -> float:
+#Dead branches biomass 2b f(d,h,cr)
+def dead_branches_biomass_2b(tree:ReferenceTree) -> float:
     if tree.species==1: #Scots Pine
         lnbm=-5.334+10.789*(stump_diameter(tree)/(stump_diameter(tree)+16))
         bm=math.exp(lnbm)*1.242
@@ -222,8 +238,12 @@ def dead_branches_biomass_MOTTI(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Foliage/needles biomass f(d,h)
+#Foliage/needles biomass 1 f(d,h)
 def foliage_biomass_1(tree: ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
+    """
     if tree.species==1: #Scots Pine
         lnbm=-6.303+14.472*(stump_diameter(tree)/(stump_diameter(tree)+6))-3.976*(tree.height/(tree.height+1))+(0.109+0.118)/2
         bm=math.exp(lnbm)
@@ -238,8 +258,12 @@ def foliage_biomass_1(tree: ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Foliage/needles biomass f(d,h,cr)
+#Foliage/needles biomass 2 f(d,h,cr)
 def foliage_biomass_2(tree: ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 641-645
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
+    """
     cl = tree.height-tree.lowest_living_branch_height
     cr =(tree.height-tree.lowest_living_branch_height)/tree.height
     if tree.species==1: #Scots Pine
@@ -256,8 +280,8 @@ def foliage_biomass_2(tree: ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Foliage/needles biomass MOTTI f(d,h,cr)
-def foliage_biomass_MOTTI(tree: ReferenceTree) -> float:
+#Foliage/needles biomass 2b f(d,h,cr)
+def foliage_biomass_2b(tree: ReferenceTree) -> float:
     cl = tree.height-tree.lowest_living_branch_height
     cr =(tree.height-tree.lowest_living_branch_height)/tree.height
     if tree.species==1: #Scots Pine
@@ -274,9 +298,12 @@ def foliage_biomass_MOTTI(tree: ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-
 #Stump biomass f(d,h)
 def stump_biomass_1(tree:ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
+    """
     if tree.species==1: #Scots Pine
         lnbm=-6.753+12.681*(stump_diameter(tree)/(stump_diameter(tree)+12))+(0.010+0.044)/2
         bm=math.exp(lnbm)
@@ -291,8 +318,8 @@ def stump_biomass_1(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Stump biomass MOTTI f(d,h)
-def stump_biomass_MOTTI(tree:ReferenceTree) -> float:
+#Stump biomass 1b f(d,h)
+def stump_biomass_1b(tree:ReferenceTree) -> float:
     if tree.species==1: #Scots Pine
         lnbm=-6.739+12.658*(stump_diameter(tree)/(stump_diameter(tree)+12))+(0.009+0.044)/2
         bm=math.exp(lnbm)
@@ -307,8 +334,12 @@ def stump_biomass_MOTTI(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Coarse roots (>1cm) biomass f(d,h)
+#Coarse roots (>1cm) biomass 1 f(d,h)
 def roots_biomass_1(tree:ReferenceTree) -> float:
+    """
+    Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
+    Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
+    """
     if tree.species==1: #Scots Pine
         lnbm=-5.550+13.408*(stump_diameter(tree)/(stump_diameter(tree)+15))+(0.000+0.079)/2
         bm=math.exp(lnbm)
@@ -323,8 +354,8 @@ def roots_biomass_1(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#Coarse roots (>1cm) biomass MOTTI f(d,h)
-def roots_biomass_MOTTI(tree:ReferenceTree) -> float:
+#Coarse roots (>1cm) 1b f(d,h)
+def roots_biomass_1b(tree:ReferenceTree) -> float:
     if tree.species==1: #Scots Pine
         lnbm=-5.6+13.49*(stump_diameter(tree)/(stump_diameter(tree)+15))+(0.077)/2
         bm=math.exp(lnbm)
@@ -339,18 +370,17 @@ def roots_biomass_MOTTI(tree:ReferenceTree) -> float:
     bm=bm/1000
     return bm
 
-#list of tree biomass weights in tons by biomass component 
-#[0]: Stem with bark, [1]:Stem roundwood with bark, 
-#[2]: Stem waste with bark, [3]: Living branches, [4]: Dead branches, 
-#[5]: Needles / Foliage,[6]: Stump,[7]: Roots > 1 cm
-#For trees taller than (or equal to) 1.3m:
-#Models: 1: Repola f(d,h), 2: Repola f(d,h,cr) (/f (d,h)), 3: Repola f(d,h,cr) MOTTI, 4: MELA    
-def tree_biomass(tree:ReferenceTree,stand:ForestStand,volume,volumewaste,models) -> list:
+def tree_biomass(tree:ReferenceTree,stand: ForestStand, volume,volumewaste,models) -> list:
+    """
+    list of tree biomass weights in tons by biomass component
+    Models: 1: Repola f(d,h), 2: Repola f(d,h,cr), 
+    3: Repola f(d,h,cr) components like MOTTI, 
+    4: Repola f(d,h,cr) components like MELA
+    MODELS=1-3: stem wood, stem bark, living branches, dead branches, foliage, stump roots
+    MODELS=4: stem w bark, stem merchantable wood, stem waste, living branches, dead branches, foliage, stump roots 
+    input vol used only if MODELS=3|4, input volwaste used only if MODELS=3
+    """
     biomass_components = [0,0,0,0,0,0,0,0]
-    stem = stem_wood_biomass_vol_MOTTI(tree,stand,volume,volumewaste)
-    biomass_components[0] = stem[0]
-    biomass_components[1] = stem[1]
-    biomass_components[2] = stem[2]
     if(models==1):
         biomass_components[0] = stem_wood_biomass_1(tree) 
         biomass_components[1] = stem_bark_biomass_1(tree)
@@ -368,33 +398,36 @@ def tree_biomass(tree:ReferenceTree,stand:ForestStand,volume,volumewaste,models)
         biomass_components[5] = stump_biomass_1(tree)
         biomass_components[6] = roots_biomass_1(tree)  
     elif(models==3):
-        stem = stem_wood_biomass_vol_MOTTI(tree,stand,volume,volumewaste)
+        stem = stem_wood_biomass_vol_2(tree,stand,volume,volumewaste)
         biomass_components[0] = stem[0]
         biomass_components[1] = stem[1]
         biomass_components[2] = stem[2]
         biomass_components[3] = living_branches_biomass_2(tree) 
-        biomass_components[4] = dead_branches_biomass_MOTTI(tree)
+        biomass_components[4] = dead_branches_biomass_2b(tree)
         biomass_components[5] = foliage_biomass_2(tree) 
-        biomass_components[6] = stump_biomass_MOTTI(tree)
-        biomass_components[7] = roots_biomass_MOTTI(tree)
+        biomass_components[6] = stump_biomass_1b(tree)
+        biomass_components[7] = roots_biomass_1b(tree)
     else:
-        stem = stem_wood_biomass_vol_MELA_2(tree,stand,volume)
+        stem = stem_wood_biomass_vol_1(tree,stand,volume)
         biomass_components[0] = stem[0]
         biomass_components[1] = stem[1]
         biomass_components[2] = living_branches_biomass_2(tree) 
         biomass_components[3] = dead_branches_biomass_1(tree)
-        biomass_components[4] = foliage_biomass_MOTTI(tree)
+        biomass_components[4] = foliage_biomass_2b(tree)
         biomass_components[5] = stump_biomass_1(tree)
         biomass_components[6] = roots_biomass_1(tree)  
     return biomass_components
 
-#list of tree biomass weights in tons by biomass component 
-#[0]: Stem with bark, [1]:Stem roundwood with bark, 
-#[2]: Stem waste with bark, [3]: Living branches, [4]: Dead branches, 
-#[5]: Needles / Foliage,[6]: Stump,[7]: Roots > 1 cm
-#For trees shorter than 1.3m: 
-#models: 1: Repola f(d,h), 2: Repola f(d,h,cr) (/f (d,h)), 3: Repola f(d,h,cr) MOTTI
-def small_tree_biomass(tree: ReferenceTree, stand:ForestStand,volume,volumewaste,models) -> list:
+def small_tree_biomass(tree: ReferenceTree,stand: ForestStand, volume,volumewaste,models) -> list:
+    """
+    list of tree biomass weights in tons by biomass component
+    Models: 1: Repola f(d,h), 2: Repola f(d,h,cr), 
+    3: Repola f(d,h,cr) components like MOTTI, 
+    4: Repola f(d,h,cr) components like MELA
+    MODELS=1-3: stem wood, stem bark, living branches, dead branches, foliage, stump roots
+    MODELS=4: stem w bark, stem merchantable wood, stem waste, living branches, dead branches, foliage, stump roots 
+    input vol used only if MODELS=3|4, input volwaste used only if MODELS=3
+    """
     reference_tree = ReferenceTree()
     reference_tree.species = tree.species
     reference_tree.breast_height_diameter = tree.breast_height_diameter
@@ -406,11 +439,6 @@ def small_tree_biomass(tree: ReferenceTree, stand:ForestStand,volume,volumewaste
     small_tree_bm = [x*coef for x in minimum_model_tree_biomass]
     return small_tree_bm
 
-#list of stand biomass weights in tons by biomass component 
-#[0]: Stem with bark, [1]:Stem roundwood with bark, 
-#[2]: Stem waste with bark, [3]: Living branches, [4]: Dead branches, 
-#[5]: Needles / Foliage,[6]: Stump,[7]: Roots > 1 cm
-#models: 1: Repola f(d,h), 2: Repola f(d,h,cr) (f(d,h), 3: Repola f(d,h,cr) MOTTI 
 def biomasses_by_component_stand(stand: ForestStand,treevolumes,wastevolumes,models) -> list:
     biomass_components = [0,0,0,0,0,0,0,0]
     for i in range(0, len(stand.reference_trees)):
@@ -425,3 +453,5 @@ def biomasses_by_component_stand(stand: ForestStand,treevolumes,wastevolumes,mod
             biomass_components = [x1 + x2 for x1,x2 in zip(biomass_components,tree_x_stemcount)]
     return biomass_components
 
+   
+     
