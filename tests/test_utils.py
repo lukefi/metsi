@@ -2,11 +2,20 @@
 This module contains a collection of util functions and dummy payload functions for test cases
 """
 import os
-from typing import Any, List, Optional, Tuple
+import unittest
+from typing import Any, List, Optional, Tuple, Callable
+from forestry.aggregate_utils import get_latest_operation_aggregate, store_operation_aggregate
 
 import yaml
 
 from sim.core_types import OperationPayload
+
+
+class ConverterTestSuite(unittest.TestCase):
+    def run_with_test_assertions(self, assertions: List[Tuple], fn: Callable):
+        for case in assertions:
+            result = fn(*case[0])
+            self.assertEqual(case[1], result)
 
 
 def raises(x: Any) -> None:
@@ -22,9 +31,11 @@ def none(x: Any) -> None:
 
 
 def aggregating_increment(input: Tuple[int, dict]) -> Tuple[int, dict]:
-    state, previous = input
-    aggregate = {'run_count': 1} if previous is None else {'run_count': previous['run_count'] + 1}
-    return state + 1, aggregate
+    state, aggregates = input
+    latest_aggregate = get_latest_operation_aggregate(aggregates, 'aggregating_increment')
+    aggregate = {'run_count': 1} if latest_aggregate is None else {'run_count': latest_aggregate['run_count'] + 1}
+    new_aggregates = store_operation_aggregate(aggregates, aggregate, 'aggregating_increment')
+    return state + 1, new_aggregates
 
 
 def inc(x: int) -> int:

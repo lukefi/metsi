@@ -275,6 +275,42 @@ A solution that doesn't require breaking functional purity can most certainly be
 * Coordinate with other developers when the work you do and models you write can be shared with other operations.
 * Coordinate with simulator creators about the parameters names and structures that can be passed from control.yaml file.
 
+### Using R functions
+
+To run operations using the R functions you need R available in the local environment.
+You must additionally install the Python `rpy2` package for the necessary API.
+For convenience, this can be installed via the `optional-requirements.txt`.
+
+```
+pip install --user -r optional-requirements.txt
+```
+
+
+The forestry.r_utils.py module contains functions and examples of how to bind into R functions.
+The `r` directory houses related R script and data files.
+
+An example implementation `lmfor_volume` exists for forest stand volume calculation.
+Currently, this can be taken into use with the `report_volume` operation function in the control.yaml, following the example below
+
+```
+operation_params:
+  report_volume:
+    lmfor_volume: true
+```
+
+The project contains a `DESCRIPTION` file which must be used to declare R library dependencies for R scripts.
+This is not necessary for running the R scripts locally, but is required for dependency resolution in the GitHub Actions test runs pipeline.
+Local dependencies are handled by the script files as exemplified by the beginning of the `lmfor_volume.R`.
+It will install its dependencies on run if they are not found from the local environment R libraries.
+
+```
+library_requirements <- c("lmfor")
+if(!all(library_requirements %in% installed.packages()[, "Package"]))
+  install.packages(repos="https://cran.r-project.org", dependencies=TRUE, library_requirements)
+library(lmfor)
+```
+
+
 ## Notes for simulation creators
 
 Use the control.yaml structure declaration to control the simulation structure, domain operations and parameters that are to be used.

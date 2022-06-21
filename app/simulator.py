@@ -9,6 +9,7 @@ from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
 from app.file_io import forest_stands_from_json_file, simulation_declaration_from_yaml_file, pickle_writer
 from app.app_io import sim_cli_arguments
+from forestry.aggregate_utils import get_latest_operation_aggregate, get_operation_aggregates
 
 
 def print_stand_result(stand: ForestStand):
@@ -21,8 +22,10 @@ def print_run_result(results: dict):
         for i, result in enumerate(results[id]):
             print("variant {} result: ".format(i), end='')
             print_stand_result(result.simulation_state)
-            last_reporting_aggregate = list(result.aggregated_results.get('report_volume').values())[-1]
-            print("variant {} growth report: {}".format(i, last_reporting_aggregate))
+            last_volume_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_volume')
+            last_removal_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_overall_removal')
+            print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
+            print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
 
 def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -> List[ForestStand]:
     preprocessing_operations = simulation_declaration.get('preprocessing_operations', {})
@@ -43,7 +46,13 @@ def run_stands(
         payload = OperationPayload(
             simulation_state=stand,
             run_history={},
-            aggregated_results={}
+            aggregated_results={
+                'operation_results': {},
+                'current_time_point': None,
+                 # NOTE: two lines under is just for reminder of how the new aggregating of values could work
+                'thinning_stats': None,
+                'biomass_stats': None
+            }
         )
         result = run_strategy(payload, simulation_declaration, forestry.operations.operation_lookup)
         retval[stand.identifier] = result

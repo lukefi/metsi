@@ -1,15 +1,30 @@
 simulation_params:
   initial_step_time: 0
-  step_time_interval: 5
+  step_time_interval: 1
   final_step_time: 30
 
 run_constraints:
-  basal_area_thinning:
+  thinning_from_below:
     minimum_time_interval: 10
 
 operation_params:
-  reporting:
-    level: 1
+  report_volume:
+    lmfor_volume: false
+  first_thinning:
+    thinning_factor: 0.97
+    e: 0.2
+    dominant_height_lower_bound: 11
+    dominant_height_upper_bound: 16
+  thinning_from_below:
+    thinning_factor: 0.97
+    e: 0.2
+  thinning_from_above:
+    thinning_factor: 0.98
+    e: 0.2
+  report_overall_removal:
+    thinning_method:
+      - thinning_from_below
+      - thinning_from_above
 
 preprocessing_params:
   example_operation:
@@ -29,8 +44,14 @@ simulation_events:
     generators:
       - alternatives:
           - do_nothing
-          - basal_area_thinning
+          - thinning_from_below
+          - thinning_from_above
+          - first_thinning
   - time_points: [0, 10, 20, 30]
     generators:
       - sequence:
           - report_volume
+  - time_points: [30]
+    generators:
+      - sequence:
+          - report_overall_removal

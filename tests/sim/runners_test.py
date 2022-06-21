@@ -30,7 +30,7 @@ class TestOperations(unittest.TestCase):
         initial = OperationPayload(
             simulation_state=1,
             run_history={},
-            aggregated_results={}
+            aggregated_results={ 'operation_results': {} }
         )
         results_full = collect_results(
             run_full_tree_strategy(initial, self.declaration, {'inc': aggregating_increment}))
