@@ -33,6 +33,7 @@ preprocessing_params:
 preprocessing_operations:
   - exclude_sapling_trees
   - exclude_empty_stands
+  - exclude_zero_stem_trees
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
