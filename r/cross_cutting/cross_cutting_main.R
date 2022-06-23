@@ -3,20 +3,21 @@
 # Esimerkki runkokäyrien soveltamiseen
 # Tarvittavat aliohjelmat
 
-# species_string can be pine, spruce, birch
-cross_cut <- function(species_string, dbh, height, hkanto) {
+# species_string can be one of "pine", "spruce" or "birch".
+# dbh is breast height diameter
+# height is the tree height 
+# hkanto is "kannonkorkeus" i.e. stump height i.e. height at which the cross cutting starts (default 10cm)
+# Div is the segment height in cm (default 10cm)
+cross_cut <- function(species_string, dbh, height, hkanto=0.1, div=10) {
 
-    ######################################
     source("./r/cross_cutting/ApteerausNasberg.R")
     source("./r/cross_cutting/Runkokayraennusteet.R")
     source("./r/cross_cutting/Tilavuus.R")
     source("./r/cross_cutting/Runkokayran korjausmalli.R")
     source("./r/cross_cutting/Korjauskertoimet.R")
 
-    # luetaan tarvittavat taulukot tässä
-    # mallien kertoimet ovat tässä rds-tiedostossa
+    # read taper curves
     taper_curve_file <- file.path("./r/cross_cutting/taper_curves", paste(species_string,".rds", sep=''))
-    print(taper_curve_file)
     taper_curve <- readRDS(taper_curve_file) #"./r/cross_cutting/taper_curves/pine taper curve.rds")#
     # josta ne voi lukea tavalliseksi vektoriksi
     # Laasasenahon malli "climbed", VAPU-aineistosta malli "felled"
@@ -29,15 +30,8 @@ cross_cut <- function(species_string, dbh, height, hkanto) {
 
     # m -- number of timber assortment price classes, integer
     m <- length(P[, 1])
-    #    div -- tree stem divisor (segment length), double
-    div <- 10 # 10 cm segmentit
 
-    # sps <- c("pine", "spruce", "birch")
-    # coef <- vector("list", length(sps)) # preallocate a vector into which coefs are read into
-    # names(coef) <- sps
-    # coef[["pine"]] <- models_pine[["climbed"]]$coefficients
-    # coef[["spruce"]] <- models_spruce[["climbed"]]$coefficients
-    # coef[["birch"]] <- models_birch[["climbed"]]$coefficients
+    # read taper curve coefficients using the "climbed" model
     coefs <- taper_curve[["climbed"]]$coefficients
 
     # esimerkkipuu
