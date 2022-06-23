@@ -51,7 +51,7 @@ def thinning_from_above(input: Tuple[ForestStand, dict], **operation_parameters)
         extra_factor_solver = lambda i, n, c: (1.0-c) * i/n
         new_stand, new_aggregate = thinning(stand, factor, thin_condition, extra_factor_solver)
     else:
-        raise UserWarning("Unable to perform thinning from below")
+        raise UserWarning("Unable to perform thinning from above")
     return new_stand,  store_operation_aggregate(simulation_aggregates, new_aggregate, 'thinning_from_above')
 
 
