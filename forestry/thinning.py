@@ -75,6 +75,24 @@ def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters)
     return new_stand,  store_operation_aggregate(simulation_aggregates, new_aggregate, 'thinning_from_below')
 
 
+def even_thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    stand, simulation_aggregates = input
+    epsilon = operation_parameters['e']
+    factor = operation_parameters['thinning_factor']
+
+    (lower_limit, upper_limit) = resolve_thinning_bounds(stand)
+    upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
+    predicates = [upper_limit_reached]
+
+    if evaluate_thinning_conditions(predicates):
+        thin_condition = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand)
+        extra_factor_solver = lambda i, n, c: 0
+        new_stand, new_aggregate = thinning(stand, factor, thin_condition, extra_factor_solver)
+    else:
+        raise UserWarning("Unable to perform even thinning")
+    return new_stand,  store_operation_aggregate(simulation_aggregates, new_aggregate, 'even_thinning')
+
+
 def thinning(
         stand: ForestStand, thinning_factor: float,
         thin_predicate: Callable,
