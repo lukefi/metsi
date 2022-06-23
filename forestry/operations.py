@@ -5,7 +5,7 @@ from typing import Tuple
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
 from forestry.r_utils import lmfor_volume
-from forestry.thinning import thinning_from_above, thinning_from_below, report_overall_removal
+from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal
 from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
 
 
@@ -44,6 +44,7 @@ operation_lookup = {
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
     'thinning_from_below': thinning_from_below,
     'thinning_from_above': thinning_from_above,
+    'first_thinning': first_thinning,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal
 }
