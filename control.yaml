@@ -21,10 +21,15 @@ operation_params:
   thinning_from_above:
     thinning_factor: 0.98
     e: 0.2
+  even_thinning:
+    thinning_factor: 0.9
+    e: 0.2
   report_overall_removal:
     thinning_method:
       - thinning_from_below
       - thinning_from_above
+      - first_thinning
+      - even_thinning
 
 preprocessing_params:
   example_operation:
@@ -48,6 +53,7 @@ simulation_events:
           - thinning_from_below
           - thinning_from_above
           - first_thinning
+          - even_thinning
   - time_points: [0, 10, 20, 30]
     generators:
       - sequence:
