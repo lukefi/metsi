@@ -28,7 +28,8 @@ def first_thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> T
     if evaluate_thinning_conditions(predicates):
         stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
         stop_condition = lambda stand: (residue_stems + epsilon) <= futil.overall_stems_per_ha(stand)
-        new_stand, new_aggregate = thinning(stand, factor, stop_condition)
+        extra_factor_solver = lambda i, n, c: (1.0-c) * i/n
+        new_stand, new_aggregate = thinning(stand, factor, stop_condition, extra_factor_solver)
     else:
         raise UserWarning("Unable to perform first thinning")
     return new_stand, store_operation_aggregate(simulation_aggregates, new_aggregate, 'first_thinning')
@@ -47,7 +48,8 @@ def thinning_from_above(input: Tuple[ForestStand, dict], **operation_parameters)
 
     if evaluate_thinning_conditions(predicates):
         thin_condition = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand)
-        new_stand, new_aggregate = thinning(stand, factor, thin_condition)
+        extra_factor_solver = lambda i, n, c: (1.0-c) * i/n
+        new_stand, new_aggregate = thinning(stand, factor, thin_condition, extra_factor_solver)
     else:
         raise UserWarning("Unable to perform thinning from below")
     return new_stand,  store_operation_aggregate(simulation_aggregates, new_aggregate, 'thinning_from_above')
@@ -66,20 +68,25 @@ def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters)
 
     if evaluate_thinning_conditions(predicates):
         thin_condition = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand)
-        new_stand, new_aggregate = thinning(stand, factor, thin_condition)
+        extra_factor_solver = lambda i, n, c: (1.0-c) * i/n
+        new_stand, new_aggregate = thinning(stand, factor, thin_condition, extra_factor_solver)
     else:
         raise UserWarning("Unable to perform thinning from below")
     return new_stand,  store_operation_aggregate(simulation_aggregates, new_aggregate, 'thinning_from_below')
 
 
-def thinning(stand: ForestStand, thinning_factor: float, thin_predicate: Callable) -> Tuple[ForestStand, dict]:
+def thinning(
+        stand: ForestStand, thinning_factor: float,
+        thin_predicate: Callable,
+        extra_factor_solver: Callable
+) -> Tuple[ForestStand, dict]:
     n = len(stand.reference_trees)
     c = thinning_factor
     stems_removed = 0.0
     while thin_predicate(stand):
         # cut until lower bound reached
         for i, rt in enumerate(stand.reference_trees):
-            thin_factor = (1.0-c)/n * i + c
+            thin_factor = c + extra_factor_solver(i, n, c)
             thin_factor = 1.0 if thin_factor > 1.0 else thin_factor
             new_stems_per_ha = rt.stems_per_ha * thin_factor
             stems_removed += rt.stems_per_ha - new_stems_per_ha
