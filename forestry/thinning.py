@@ -1,10 +1,10 @@
-import forestry.forestry_utils as futil
 from collections import OrderedDict
 from forestdatamodel.model import ForestStand
 from typing import Tuple, Callable
 from forestry.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
 from forestry.aggregate_utils import store_operation_aggregate, get_operation_aggregates, get_latest_operation_aggregate
 from forestryfunctions.harvest import thinning
+from forestryfunctions import forestry_utils as futil
 
 
 def evaluate_thinning_conditions(predicates):

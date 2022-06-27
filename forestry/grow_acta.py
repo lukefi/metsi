@@ -1,7 +1,7 @@
 from typing import Tuple, List
 import itertools
 import math
-import forestry.forestry_utils as futil
+from forestryfunctions import forestry_utils as futil
 from forestdatamodel.model import ForestStand, ReferenceTree
 
 

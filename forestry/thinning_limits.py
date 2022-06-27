@@ -10,7 +10,7 @@ from collections.abc import KeysView
 from bisect import bisect
 from forestdatamodel.model import ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
-import forestry.forestry_utils as futil
+from forestryfunctions import forestry_utils as futil
 
 
 class CountyKey(Enum):
