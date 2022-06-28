@@ -1,6 +1,6 @@
 import unittest
 from forestdatamodel.model import ForestStand, ReferenceTree
-from forestry.grow_acta import grow_acta, yearly_diameter_growth_by_species, yearly_height_growth_by_species
+from forestry.grow_acta import grow_acta
 
 
 class ForestryOperationsTest(unittest.TestCase):
@@ -32,51 +32,3 @@ class ForestryOperationsTest(unittest.TestCase):
         self.assertEqual(1.5, result_stand.reference_trees[5].height)
         self.assertEqual(1.0, result_stand.reference_trees[5].breast_height_diameter)
         self.assertEqual(False, result_stand.reference_trees[5].sapling)
-
-    def test_yearly_diameter_growth_by_species(self):
-        tree = ReferenceTree()
-        tree.breast_height_diameter = 10.0
-        tree.height = 12.0
-        biological_age_aggregate = 35.0
-        d13_aggregate = 34.0
-        height_aggregate = 33.0
-        dominant_height = 15.0
-        basal_area_total = 32.0
-        assertations_by_species = [
-            (1, 1.4766),
-            (2, 2.9096)
-        ]
-        for i in assertations_by_species:
-            tree.species = i[0]
-            result = yearly_diameter_growth_by_species(
-                tree,
-                biological_age_aggregate,
-                d13_aggregate,
-                height_aggregate,
-                dominant_height,
-                basal_area_total)
-            self.assertEqual(i[1], round(result, 4))
-
-    def test_yearly_height_growth_by_species(self):
-        tree = ReferenceTree()
-        tree.breast_height_diameter = 10.0
-        tree.height = 12.0
-        biological_age_aggregate = 35.0
-        d13_aggregate = 34.0
-        height_aggregate = 33.0
-        dominant_height = 15.0
-        basal_area_total = 32.0
-        assertations_by_species = [
-            (1, 3.9595),
-            (2, 1.5397)
-        ]
-        for i in assertations_by_species:
-            tree.species = i[0]
-            result = yearly_height_growth_by_species(
-                tree,
-                biological_age_aggregate,
-                d13_aggregate,
-                height_aggregate,
-                dominant_height,
-                basal_area_total)
-            self.assertEqual(i[1], round(result, 4))
