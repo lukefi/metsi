@@ -15,15 +15,6 @@ def spe2motti(spe: int) -> pymotti.Species:
     return pymotti.Species(spe if spe <= 6 else spe + 1)
 
 
-def _precompute_weather(stand: ForestStand):
-    if not hasattr(stand, "_weather"):
-        lat, lon, h, cs = stand.geo_location
-        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
-            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
-        p = pymotti.Predict(Y=lat, X=lon, Z=h)
-        setattr(stand, "_weather", {"sea": p.sea, "lake": p.lake})
-
-
 class MottiGrowthPredictor(pymotti.Predict):
 
     def __init__(self, stand: ForestStand):
@@ -59,13 +50,11 @@ class MottiGrowthPredictor(pymotti.Predict):
 
     @property
     def sea(self) -> float:
-        _precompute_weather(self.stand)
-        return getattr(self.stand, "_weather")["sea"]
+        return self.stand.sea_effect
 
     @property
     def lake(self) -> float:
-        _precompute_weather(self.stand)
-        return getattr(self.stand, "_weather")["lake"]
+        return self.stand.lake_effect
 
     @property
     def mal(self) -> pymotti.LandUseCategoryVMI:
