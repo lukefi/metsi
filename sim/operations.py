@@ -39,11 +39,8 @@ def processor(payload: OperationPayload, operation: typing.Callable, operation_t
     payload.aggregated_results['current_operation_tag'] = operation_tag
     try:
         new_state, new_aggregated_results = operation((payload.simulation_state, payload.aggregated_results))
-    except UserWarning:
-        print("Unable to perform operation {}, at time point {}"
-            .format(operation_tag, time_point))
-        new_state = payload.simulation_state
-        new_aggregated_results = payload.aggregated_results
+    except UserWarning as e:
+        raise UserWarning("Unable to perform operation {}, at time point {}; reason: {}".format(operation_tag, time_point, e))
 
     new_operation_run_history = {}
     new_operation_run_history['last_run_time_point'] = time_point
