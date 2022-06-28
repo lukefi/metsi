@@ -23,14 +23,17 @@ def _cross_cut(tree: ReferenceTree, r: robjects.R ) -> dict:
     result = convert_r_named_list_to_py_dict(result)
     return (result["volumes"], result["values"])
 
+cross_cut_loaded = False
 
 def cross_cut_stand(stand: ForestStand) -> tuple[List[float], List[float]]:
     """
     Calculates the total volume and value of cross cutting in the :stand:. 
     """
-    r = robjects.R() #initialise the singleton instance here so that the main function can be sourced only once and not for each tree
-    r.source("r/cross_cutting/cross_cutting_main.R")
-
+    global cross_cut_loaded
+    r = robjects.r
+    if not cross_cut_loaded:
+        r.source("r/cross_cutting/cross_cutting_main.R")
+        cross_cut_loaded = True
     # these buckets are of size (m, n) where:
         # m is the number of unique timber grades (puutavaralaji) and 
         # n is the count of reference trees in the stand.
