@@ -1,6 +1,8 @@
 from functools import cached_property
 from typing import List, Tuple
+from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand
+from forestdatamodel.conversion import internal2mela
 import pymotti
 
 
@@ -12,6 +14,7 @@ def spe2motti(spe: int) -> pymotti.Species:
     converts all alders to gray alder, but a proper implementation should
     store the Motti-coded species in :class:`ReferenceTree`
     so that we don't lose information on trees created by Motti."""
+    spe = internal2mela.species_map[TreeSpecies(spe)].value
     return pymotti.Species(spe if spe <= 6 else spe + 1)
 
 
