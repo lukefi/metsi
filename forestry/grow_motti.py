@@ -45,7 +45,7 @@ class MottiGrowthPredictor(pymotti.Predict):
 
     @property
     def Z(self) -> float:
-        return self.stand.geo_location[2]
+        return -1 if self.stand.geo_location[2] is None else self.stand.geo_location[2]
 
     @property
     def dd(self) -> float:
