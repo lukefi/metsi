@@ -29,19 +29,13 @@ class MottiGrowthPredictor(pymotti.Predict):
     def year(self) -> float:
         return self.stand.year
 
-    @cached_property
+    @property
     def Y(self) -> float:
-        lat, _, _, cs = self.stand.geo_location
-        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
-            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
-        return lat
+        return self.stand.geo_location[0]
 
-    @cached_property
+    @property
     def X(self) -> float:
-        _, lon, _, cs = self.stand.geo_location
-        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
-            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
-        return lon
+        return self.stand.geo_location[1]
 
     @property
     def Z(self) -> float:
