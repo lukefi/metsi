@@ -44,12 +44,12 @@ class TestFileReading(unittest.TestCase):
         os.remove('testpickle')
 
     def test_read_stands_from_pickle_file(self):
-        unpickled_stands = app.file_io.read_stands_from_file("tests/resources/two_ffc_stands.pickle")
+        unpickled_stands = app.file_io.read_stands_from_file("tests/resources/two_ffc_stands.pickle", "pickle")
         self.assertEqual(len(unpickled_stands), 2)
         self.assertEqual(type(unpickled_stands[0]), ForestStand)
 
     def test_read_stands_from_json_file(self):
-        stands_from_json = app.file_io.read_stands_from_file("tests/resources/vmi13_small.json")
+        stands_from_json = app.file_io.read_stands_from_file("tests/resources/vmi13_small.json", "json")
         self.assertEqual(len(stands_from_json), 5)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
 
