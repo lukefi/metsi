@@ -76,7 +76,7 @@ def main():
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     output_filename = app_arguments.output_file
     strategy_runner = resolve_strategy_runner(app_arguments.strategy)
-    stands = read_stands_from_file(app_arguments.input_file)
+    stands = read_stands_from_file(app_arguments.input_file, app_arguments.input_format)
     stands = preprocess_stands(stands, simulation_declaration)
 
     run_time = int(time.time_ns())

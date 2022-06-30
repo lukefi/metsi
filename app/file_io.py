@@ -1,7 +1,6 @@
 import json
-import pathlib
 import pickle
-from typing import List, Any, Callable
+from typing import List, Any
 import yaml
 from forestdatamodel.model import ForestStand, ReferenceTree
 
@@ -10,18 +9,14 @@ def file_contents(file_path: str) -> str:
     with open(file_path, 'r') as f:
         return f.read()
 
-def resolve_file_format(file_path: str) -> str:
-    fmt = pathlib.Path(file_path).suffix
-    return fmt
 
-def read_stands_from_file(file_path: str) -> List[ForestStand]:
-    fmt = resolve_file_format(file_path)
-    if fmt == ".pickle":
+def read_stands_from_file(file_path: str, input_format: str) -> List[ForestStand]:
+    if input_format == "pickle":
         return forest_stands_from_pickle(file_path)
-    elif fmt == ".json":
+    elif input_format == "json":
         return forest_stands_from_json_file(file_path)
     else:
-        raise Exception(f"the extension '{fmt}' of the input file is not valid.")
+        raise Exception(f"the extension '{input_format}' of the input file is not valid.")
 
 def forest_stands_from_pickle(file_path: str) -> List[ForestStand]:
     stands = pickle_reader(file_path)
