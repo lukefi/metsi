@@ -15,15 +15,17 @@ def exclude_zero_stem_trees(stands: List[ForestStand], **operation_params) -> Li
         stand.reference_trees = list(filter(lambda rt: rt.stems_per_ha > 0.0, stand.reference_trees))
     return stands
 
-def compute_weather_info(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
+def compute_location_metadata(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
     """
-    This operation sets in-place the temperature sum, sea effect, lake effect, monthly temperature and monthly
-    rainfall data where missing for each given ForestStand. Uses the Motti WeatherInfo calculation provided by the
-    pymotti library.
+    This operation sets in-place the location based metadata properties for each given ForestStand, where missing.
+    These properties are: height above sea level, temperature sum, sea effect, lake effect, monthly temperature and
+    monthly rainfall
     """
     # import constrained to here as pymotti is an optional dependency
     from pymotti.lasum import ilmanor
     from pymotti.coord import etrs_tm35_to_ykj as conv
+    from pymotti.kor import xkor
+
     for stand in stands:
         if stand.geo_location[3] == 'EPSG:3067':
             lat, lon = conv(stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
@@ -31,8 +33,16 @@ def compute_weather_info(stands: List[ForestStand], **operation_params) -> List[
             lat, lon = (stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
         else:
             raise Exception("Unsupported CRS {} for stand {}".format(stand.geo_location[3], stand.identifier))
-        height = -1 if stand.geo_location[2] is None else stand.geo_location[2]
-        wi = ilmanor(lon, lat, height)
+
+        if stand.geo_location[2] is None:
+            stand.geo_location = (
+                stand.geo_location[0],
+                stand.geo_location[1],
+                xkor(lat, lon),
+                stand.geo_location[3]
+            )
+        wi = ilmanor(lon, lat, stand.geo_location[2])
+
         if stand.degree_days is None:
             stand.degree_days = wi.dd
         if stand.sea_effect is None:
@@ -49,5 +59,5 @@ operation_lookup = {
     'exclude_sapling_trees': exclude_sapling_trees,
     'exclude_empty_stands': exclude_empty_stands,
     'exclude_zero_stem_trees': exclude_zero_stem_trees,
-    'compute_weather_info': compute_weather_info
+    'compute_location_metadata': compute_location_metadata
 }
