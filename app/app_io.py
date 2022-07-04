@@ -11,7 +11,8 @@ def sim_cli_arguments(args: List[str]):
                         type=str,
                         help='Simulation alternatives tree formation strategy: \'full\' (default), \'partial\'',
                         default='full')
-    parser.add_argument('-i','--input_format', 
+    parser.add_argument('-i','--input-format', 
+                        choices=['pickle', 'json'],
                         type=str,
                         help='Format of the input file: \'pickle\' (default) or \'json\'',
                         default='pickle')

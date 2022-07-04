@@ -16,7 +16,7 @@ def read_stands_from_file(file_path: str, input_format: str) -> List[ForestStand
     elif input_format == "json":
         return forest_stands_from_json_file(file_path)
     else:
-        raise Exception(f"the extension '{input_format}' of the input file is not valid.")
+        raise Exception(f"Unsupported input format '{input_format}'")
 
 def forest_stands_from_pickle(file_path: str) -> List[ForestStand]:
     stands = pickle_reader(file_path)
