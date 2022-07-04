@@ -22,7 +22,8 @@ def main():
     for identifier, schedules in input_data.items():
         result[identifier] = []
         for schedule in schedules:
-            processed_schedule = evaluate_sequence(schedule, *chain)
+            payload = (schedule.simulation_state, schedule.aggregated_results)
+            processed_schedule = evaluate_sequence(payload, *chain)
             result[identifier].append(processed_schedule)
 
     pickle_writer(app_arguments.output_file, result)

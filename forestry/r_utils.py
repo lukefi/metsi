@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from forestdatamodel.model import ForestStand
 try:
     import rpy2.robjects as robjects
@@ -36,3 +37,6 @@ def lmfor_volume(stand: ForestStand) -> float:
     volumes = list(robjects.r['compute_tree_volumes'](df))
     total_volume = sum(volumes)
     return total_volume
+
+def convert_r_named_list_to_py_dict(named_list) -> Dict[Any, Any]:
+    return dict(zip(named_list.names, [list(i) for i in named_list]))
