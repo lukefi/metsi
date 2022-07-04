@@ -11,6 +11,14 @@ from app.file_io import forest_stands_from_json_file, simulation_declaration_fro
 from app.app_io import sim_cli_arguments
 from forestry.aggregate_utils import get_latest_operation_aggregate, get_operation_aggregates
 
+start_time = time.time_ns()
+
+def runtime_now() -> float:
+    global start_time
+    return round((time.time_ns() - start_time) / 1000000000, 1)
+
+def print_logline(message: str):
+    print("{} {}".format(runtime_now(), message))
 
 def print_stand_result(stand: ForestStand):
     print("volume {}".format(forestry.operations.compute_volume(stand)))
@@ -18,9 +26,8 @@ def print_stand_result(stand: ForestStand):
 
 def print_run_result(results: dict):
     for id in results.keys():
-        print("Results for stand {}; obtained {} variants:".format(id, len(results[id])))
         for i, result in enumerate(results[id]):
-            print("variant {} result: ".format(i), end='')
+            print("{} variant {} result: ".format(id, i), end='')
             print_stand_result(result.simulation_state)
             last_volume_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_volume')
             last_removal_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_overall_removal')
@@ -43,6 +50,7 @@ def run_stands(
 
     retval = {}
     for stand in stands:
+        print_logline("Simulating stand {}".format(stand.identifier))
         payload = OperationPayload(
             simulation_state=stand,
             run_history={},
@@ -56,6 +64,7 @@ def run_stands(
         )
         result = run_strategy(payload, simulation_declaration, forestry.operations.operation_lookup)
         retval[stand.identifier] = result
+        print_logline("Produced {} variants for stand {}".format(len(result), stand.identifier))
     return retval
 
 
@@ -77,14 +86,14 @@ def main():
     output_filename = app_arguments.output_file
     strategy_runner = resolve_strategy_runner(app_arguments.strategy)
     stands = forest_stands_from_json_file(app_arguments.input_file)
+    print_logline("Preprocessing...")
     stands = preprocess_stands(stands, simulation_declaration)
 
-    run_time = int(time.time_ns())
+    print_logline("Simulating...")
     run_result = run_stands(stands, simulation_declaration, strategy_runner)
-    run_time = (int(time.time_ns()) - run_time) / 1000000000
     print_run_result(run_result)
+    print_logline("Writing output...")
     pickle_writer(output_filename, run_result)
-    print("Run in {}".format(run_time))
 
 
 if __name__ == "__main__":
