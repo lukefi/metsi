@@ -1,6 +1,8 @@
 from functools import cached_property
 from typing import List, Tuple
+from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand
+from forestdatamodel.conversion import internal2mela
 import pymotti
 
 
@@ -12,16 +14,8 @@ def spe2motti(spe: int) -> pymotti.Species:
     converts all alders to gray alder, but a proper implementation should
     store the Motti-coded species in :class:`ReferenceTree`
     so that we don't lose information on trees created by Motti."""
+    spe = internal2mela.species_map[TreeSpecies(spe)].value
     return pymotti.Species(spe if spe <= 6 else spe + 1)
-
-
-def _precompute_weather(stand: ForestStand):
-    if not hasattr(stand, "_weather"):
-        lat, lon, h, cs = stand.geo_location
-        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
-            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
-        p = pymotti.Predict(Y=lat, X=lon, Z=h)
-        setattr(stand, "_weather", {"sea": p.sea, "lake": p.lake})
 
 
 class MottiGrowthPredictor(pymotti.Predict):
@@ -35,19 +29,13 @@ class MottiGrowthPredictor(pymotti.Predict):
     def year(self) -> float:
         return self.stand.year
 
-    @cached_property
+    @property
     def Y(self) -> float:
-        lat, _, _, cs = self.stand.geo_location
-        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
-            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
-        return lat
+        return self.stand.geo_location[0]
 
-    @cached_property
+    @property
     def X(self) -> float:
-        _, lon, _, cs = self.stand.geo_location
-        if cs not in ("ERTS-TM35FIN", "EPSG:3067"):
-            raise NotImplementedError("Unsupported coordinate reference system {}".format(cs))
-        return lon
+        return self.stand.geo_location[1]
 
     @property
     def Z(self) -> float:
@@ -59,13 +47,11 @@ class MottiGrowthPredictor(pymotti.Predict):
 
     @property
     def sea(self) -> float:
-        _precompute_weather(self.stand)
-        return getattr(self.stand, "_weather")["sea"]
+        return self.stand.sea_effect
 
     @property
     def lake(self) -> float:
-        _precompute_weather(self.stand)
-        return getattr(self.stand, "_weather")["lake"]
+        return self.stand.lake_effect
 
     @property
     def mal(self) -> pymotti.LandUseCategoryVMI:
