@@ -45,10 +45,10 @@ pip install --user ./pymotti
 To run the simulator application, run in the project root
 
 ```
-python -m app.simulator input.json control.yaml output.pickle
+python -m app.simulator input.pickle control.yaml output.pickle
 ```
 
-* `input.json` is a forest data file used for forestry simulation. It is sourced from vmi-data-converter and adheres to MELA RSD specification for properties of forest stands and reference trees.
+* `input.pickle` is a forest data file used for forestry simulation. It is sourced from vmi-data-converter and adheres to MELA RSD specification for properties of forest stands and reference trees.
 * `control.yaml` is the declared structure for a simulation run.
 * `output.pickle` is the output file for computed results
 
@@ -69,6 +69,8 @@ options:
   -h, --help            show this help message and exit
   -s STRATEGY, --strategy STRATEGY
                         Simulation alternatives tree formation strategy: 'full' (default), 'partial'
+  -i INPUT_FORMAT, --input_format INPUT_FORMAT
+                        Format of the input file: 'pickle' (default) or 'json'
 
 ```
 

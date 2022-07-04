@@ -1,6 +1,6 @@
 import json
 import pickle
-from typing import List, Any, Callable
+from typing import List, Any
 import yaml
 from forestdatamodel.model import ForestStand, ReferenceTree
 
@@ -9,6 +9,18 @@ def file_contents(file_path: str) -> str:
     with open(file_path, 'r') as f:
         return f.read()
 
+
+def read_stands_from_file(file_path: str, input_format: str) -> List[ForestStand]:
+    if input_format == "pickle":
+        return forest_stands_from_pickle(file_path)
+    elif input_format == "json":
+        return forest_stands_from_json_file(file_path)
+    else:
+        raise Exception(f"Unsupported input format '{input_format}'")
+
+def forest_stands_from_pickle(file_path: str) -> List[ForestStand]:
+    stands = pickle_reader(file_path)
+    return stands
 
 def forest_stands_from_json_file(file_path: str) -> List[ForestStand]:
     # TODO: content validation
