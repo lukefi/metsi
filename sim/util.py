@@ -23,16 +23,10 @@ def read_operation_file_params(opreation_tag: str, operation_file_params: dict) 
             raise e
     return result
 
-def merge_operation_params(operation_params: dict, this_operation_file_params: dict) -> Dict:
-    try:
-        return join_two_dicts_no_overwrite(operation_params, this_operation_file_params)
-    except Exception as e:
-        print(f"parameter(s) {e.args[0]} were defined both in 'operation_param' and 'operation_file_param' sections in control.yaml. Please change the name of one of them.")
-
-def join_two_dicts_no_overwrite(dict1: dict, dict2: dict) -> Dict:
-    """Attempts to join :dict1: and :dict2:, but if the dictionaries contain any shared keys, Exception will be raised to avoid overwriting a key."""
-    common_keys = dict1.keys() & dict2.keys()
+def merge_operation_params(operation_params: dict, operation_file_params: dict) -> Dict:
+    """Attempts to join the two dicts supplied as arguments. Will throw an exception if the dicts share one or more common keys. This is to prevent overwriting an a parameter with another."""
+    common_keys = operation_params.keys() & operation_file_params.keys()
     if common_keys:
-        raise Exception(common_keys)
+        raise Exception(f"parameter(s) {common_keys} were defined both in 'operation_param' and 'operation_file_param' sections in control.yaml. Please change the name of one of them.")
     else:
-        return dict1 | dict2 # pipe  is the merge operator
+        return operation_params | operation_file_params # pipe  is the merge operator
