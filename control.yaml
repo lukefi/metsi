@@ -42,9 +42,9 @@ preprocessing_operations:
 
 operation_file_params:
   first_thinning:
-    thinning_limits: C:/menu/additional-content/sim12/Thin.txt
+    thinning_limits: data/parameter_files/Thin.txt
   cross_cutting:
-    timber_price_table: C:/menu/sim-workbench/r/cross_cutting/Puutavaralajimaarittelyt.txt
+    timber_price_table: data/parameter_files/Puutavaralajimaarittelyt.txt
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
