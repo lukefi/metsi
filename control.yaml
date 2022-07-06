@@ -40,6 +40,12 @@ preprocessing_operations:
   - exclude_empty_stands
   - exclude_zero_stem_trees
 
+operation_file_params:
+  first_thinning:
+    thinning_limits: C:/menu/additional-content/sim12/Thin.txt
+  cross_cutting:
+    timber_price_table: C:/menu/sim-workbench/r/cross_cutting/Puutavaralajimaarittelyt.txt
+
 simulation_events:
   # we describe here objects with schedule for which time points they are active
   - time_points: [0, 5, 10, 15, 20, 25, 30]

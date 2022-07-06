@@ -117,6 +117,17 @@ The structure will be expanded to allow parameters and constraints declaration f
       1. `sequence` a list of operations to be executed as a chain
       2. `alternatives` a list of operations which represent alternative branches
 5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional) arguments under `preprocessing_params` as key-value pairs. 
+6. Operation parameters that **exist in files** can be passed in `operation_file_params` as demonstated below: 
+
+```yaml 
+operation_file_params:
+  first_thinning:
+    thinning_limits: C:/path-to-file/thinning-limits.txt
+  cross_cutting:
+    timber_price_table: C:/path-to-file/timber-prices.csv
+```
+Note however, that the it is the user's responsibility to provide the file in a valid format. 
+
 
 The following example declares a simulation, which runs four event cycles at time points 0, 5, 10 and 15.
 Images below describe the simulation as a step tree, and further as the computation chains that are generated from the tree.
