@@ -11,3 +11,4 @@ class UtilTest(unittest.TestCase):
         self.assertRaises(Exception, util.merge_operation_params, [dict1, dict2])
         self.assertEqual(util.merge_operation_params(dict1, dict3), {"one": 1, "two": 2, "three": 3, "five":5})
 
+    
