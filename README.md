@@ -163,7 +163,7 @@ The structure will be expanded to allow parameters and constraints declaration f
    2. `step_time_interval` is the integer amount of time between each simulation cycle
    3. `final_step_time` is the integer point of time for the simulations's last cycle
 2. Operaton run constrains in the object `run_constraints`
-3. Operation parameters in the object `operation_params`
+3. Operation parameters in the object `operation_params`. Operation parameters may be declared as a list of 1 or more parameter sets (objects). Operations within an `alternatives` block are expanded as further alternatives for each parameter set. Multiple parameter sets may not be declared for operations within any `sequence` block.
 4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
    1. `time_points` is a list of integers which assign this set of operations to simulation time points
    2. `generators` is a list of chained generator functions (see section on step generators)
@@ -175,10 +175,9 @@ The following example declares a simulation, which runs four event cycles at tim
 Images below describe the simulation as a step tree, and further as the computation chains that are generated from the tree.
 
 * At time point 0, `reporting` of the simulation state is done.
-* At time point 5, the `grow` operation is done on the simulation state and the simulation is branched by 2.
-One branch does not modify the forest state data with `do_nothing`, the other performs a `thinning` operation on the forest state data.
-* At time point 10, the 2 branches from time point 5 are extended both with a `grow` operation, then branched again with `do_nothing` and `thinning` operations, resulting in 4 branches.
-* At time point 15, `reporting` is done on the 4 individual state branches.
+* At time point 5, the `grow` operation is done on the simulation state and the simulation is branched by 3. One branch does not modify the forest state data with `do_nothing`, another performs a `thinning` operation on the forest state data with parameter set 1, and another `thinning` operation with parameter set 2.
+* At time point 10, the 3 branches from time point 5 are extended separately with a `grow` operation, then branched again with `do_nothing` and `thinning` operations with two parameter sets, resulting in 9 branches.
+* At time point 15, `reporting` is done on the 9 individual state branches.
 
 ```yaml
 # simulation run control parameters
@@ -197,10 +196,16 @@ run_constraints:
     minimum_time_interval: 10
 
 # example of operation parameters
-# reporting operation gets parameter level with value 1
+# reporting operation gets one parameter set
+# thinning operation gets two parameter sets
 operation_params:
-   reporting:
-      level: 1
+  reporting:
+    - level: 1
+  thinning:
+    - thinning_factor: 0.7
+      e: 0.2
+    - thinning_factor: 0.9
+      e: 0.1
 
 # simulation_events are a collection of operations meant to be executed at
 # the specified time_points

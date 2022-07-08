@@ -64,3 +64,26 @@ class TestOperations(unittest.TestCase):
             run_full_tree_strategy(initial, declaration, {'inc': aggregating_increment})
         )
         self.assertEqual(9, results[0])
+
+    def test_parameters_branching(self):
+        declaration = load_yaml('parameters_branching.yaml')
+        initial = OperationPayload(
+            simulation_state=1,
+            run_history={},
+            aggregated_results={'operation_results': {}}
+        )
+
+        results = collect_results(
+            run_full_tree_strategy(initial, declaration, {'inc': aggregating_increment})
+        )
+        # do_nothing, do_nothing = 1
+        # do_nothing, inc#1      = 2
+        # do_nothing, inc#2      = 3
+        # inc#1, do_nothing      = 2
+        # inc#1, inc#1           = 3
+        # inc#1, inc#2           = 4
+        # inc#2, do_nothing      = 3
+        # inc#2, inc#1           = 4
+        # inc#2, inc#2           = 5
+        expected = [1, 2, 3, 2, 3, 4, 3, 4, 5]
+        self.assertEqual(expected, results)
