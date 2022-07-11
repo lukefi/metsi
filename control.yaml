@@ -45,6 +45,12 @@ preprocessing_operations:
   # requires pymotti dependency
   # - compute_location_metadata
 
+operation_file_params:
+  first_thinning:
+    thinning_limits: data/parameter_files/Thin.txt
+  cross_cutting:
+    timber_price_table: data/parameter_files/Puutavaralajimaarittelyt.txt
+
 simulation_events:
   # we describe here objects with schedule for which time points they are active
   - time_points: [0, 5, 10, 15, 20, 25, 30]
