@@ -56,6 +56,12 @@ def parametrized_operation(x, **kwargs):
     else:
         return x
 
+def parametrized_operation_using_file_parameter(x, **kwargs):
+    value_in_file = kwargs.get("dummy_file")
+    if value_in_file == "kissa123\n":
+        return value_in_file
+    else:
+        return x
 
 def collect_results(payloads: List[OperationPayload]) -> List:
     return list(map(lambda payload: payload.simulation_state, payloads))

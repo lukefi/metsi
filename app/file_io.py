@@ -1,6 +1,7 @@
 import json
 import pickle
 from typing import List, Any
+
 import yaml
 from forestdatamodel.model import ForestStand, ReferenceTree
 
