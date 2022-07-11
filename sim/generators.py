@@ -171,27 +171,28 @@ def partial_tree_generators_by_time_point(simulation_declaration: dict, operatio
 
 def prepare_step_generator(generator_declaration, generator_lookup, operation_lookup, operation_params, operation_file_params, run_constraints,
                            time_point):
+    """Return a prepared Step generator function based on simulation declaration and operation details. Operations
+    with multiple parameter sets are expanded within their alternatives generator block. Operations with multiple
+    parameter sets within a sequence generator block throw an Exception."""
     generator_tag = list(generator_declaration.keys())[0]
     operation_tags = generator_declaration[generator_tag]
     processors = []
     for operation_tag in operation_tags:
-        processor = generate_processor(operation_lookup, operation_params, operation_file_params, operation_tag, run_constraints, time_point)
-        processors.append(processor)
+        parameter_set_choices = get_or_default(operation_params.get(operation_tag), [{}])
+        operation_run_constraints = get_or_default(run_constraints.get(operation_tag), None)
+        this_operation_file_params = read_operation_file_params(operation_tag, operation_file_params)
+        if len(parameter_set_choices) > 1 and generator_tag == 'sequence':
+            raise Exception("Alternatives by operation parameters not supported in sequences. Use "
+                            "alternatives clause for operation {} in time point {} or reduce operation parameter "
+                            "set size to 0 or 1.".format(operation_tag, time_point))
+        for parameter_set in parameter_set_choices:
+            combined_params = merge_operation_params(parameter_set, this_operation_file_params)
+            processor = prepared_processor(
+                operation_tag,
+                operation_lookup,
+                time_point,
+                operation_run_constraints,
+                **combined_params)
+            processors.append(processor)
     generator = generator_function(generator_tag, generator_lookup, *processors)
     return generator
-
-
-def generate_processor(operation_lookup, operation_params, operation_file_params, operation_tag, run_constraints, time_point):
-    this_operation_params = get_or_default(operation_params.get(operation_tag), {})
-    this_operation_file_params = read_operation_file_params(operation_tag, operation_file_params)
-
-    #combine this_operation_params and this_operation_file_params into a single dict that can be passed on to the processor
-    this_operation_params = merge_operation_params(this_operation_params, this_operation_file_params)
-    this_run_constraints = get_or_default(run_constraints.get(operation_tag), None)
-    result = prepared_processor(
-        operation_tag,
-        operation_lookup,
-        time_point,
-        this_run_constraints,
-        **this_operation_params)
-    return result

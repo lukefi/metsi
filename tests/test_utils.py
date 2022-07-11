@@ -30,12 +30,13 @@ def none(x: Any) -> None:
     return None
 
 
-def aggregating_increment(input: Tuple[int, dict]) -> Tuple[int, dict]:
+def aggregating_increment(input: Tuple[int, dict], **operation_params) -> Tuple[int, dict]:
+    incrementation = operation_params.get('incrementation', 1)
     state, aggregates = input
     latest_aggregate = get_latest_operation_aggregate(aggregates, 'aggregating_increment')
     aggregate = {'run_count': 1} if latest_aggregate is None else {'run_count': latest_aggregate['run_count'] + 1}
     new_aggregates = store_operation_aggregate(aggregates, aggregate, 'aggregating_increment')
-    return state + 1, new_aggregates
+    return state + incrementation, new_aggregates
 
 
 def inc(x: int) -> int:

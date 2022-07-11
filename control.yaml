@@ -10,23 +10,25 @@ run_constraints:
 operation_params:
   report_volume:
     # Requires R dependency if true
-    lmfor_volume: false
+    - lmfor_volume: false
   first_thinning:
-    thinning_factor: 0.97
-    e: 0.2
-    dominant_height_lower_bound: 11
-    dominant_height_upper_bound: 16
+    - thinning_factor: 0.97
+      e: 0.2
+      dominant_height_lower_bound: 11
+      dominant_height_upper_bound: 16
   thinning_from_below:
-    thinning_factor: 0.97
-    e: 0.2
+    - thinning_factor: 0.97
+      e: 0.2
+    - thinning_factor: 0.8
+      e: 0.2
   thinning_from_above:
-    thinning_factor: 0.98
-    e: 0.2
+    - thinning_factor: 0.98
+      e: 0.2
   even_thinning:
-    thinning_factor: 0.9
-    e: 0.2
+    - thinning_factor: 0.9
+      e: 0.2
   report_overall_removal:
-    thinning_method:
+    - thinning_method:
       - thinning_from_below
       - thinning_from_above
       - first_thinning
