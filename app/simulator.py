@@ -7,9 +7,9 @@ from sim.core_types import OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evaluate_sequence
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
-from app.file_io import forest_stands_from_json_file, read_stands_from_file, simulation_declaration_from_yaml_file, pickle_writer
+from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, pickle_writer
 from app.app_io import sim_cli_arguments
-from forestry.aggregate_utils import get_latest_operation_aggregate, get_operation_aggregates
+from forestry.aggregate_utils import get_latest_operation_aggregate
 
 start_time = time.time_ns()
 
