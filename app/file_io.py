@@ -24,11 +24,6 @@ def forest_stands_from_pickle(file_path: str) -> List[ForestStand]:
     stands = pickle_reader(file_path)
     return stands
 
-def forest_stands_from_json_file(file_path: str) -> List[ForestStand]:
-    # TODO: content validation
-    return json.loads(file_contents(file_path),
-                      object_hook=lambda d: ReferenceTree(**d) if "tree" in d['identifier'] else ForestStand(**d))
-
 
 def forest_stands_from_jsonpickle(file_path: str) -> List[ForestStand]:
     stands = jsonpickle.decode(file_contents(file_path))
