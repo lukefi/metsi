@@ -1,5 +1,6 @@
 import json
 import pickle
+import jsonpickle
 from typing import List, Any
 
 import yaml
@@ -15,7 +16,7 @@ def read_stands_from_file(file_path: str, input_format: str) -> List[ForestStand
     if input_format == "pickle":
         return forest_stands_from_pickle(file_path)
     elif input_format == "json":
-        return forest_stands_from_json_file(file_path)
+        return forest_stands_from_jsonpickle(file_path)
     else:
         raise Exception(f"Unsupported input format '{input_format}'")
 
@@ -23,11 +24,10 @@ def forest_stands_from_pickle(file_path: str) -> List[ForestStand]:
     stands = pickle_reader(file_path)
     return stands
 
-def forest_stands_from_json_file(file_path: str) -> List[ForestStand]:
-    # TODO: content validation
-    return json.loads(file_contents(file_path),
-                      object_hook=lambda d: ReferenceTree(**d) if "tree" in d['identifier'] else ForestStand(**d))
 
+def forest_stands_from_jsonpickle(file_path: str) -> List[ForestStand]:
+    stands = jsonpickle.decode(file_contents(file_path))
+    return stands
 
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     # TODO: content validation
