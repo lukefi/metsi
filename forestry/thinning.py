@@ -1,9 +1,10 @@
-import forestry.forestry_utils as futil
 from collections import OrderedDict
 from forestdatamodel.model import ForestStand
 from typing import Tuple, Callable
 from forestry.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
 from forestry.aggregate_utils import store_operation_aggregate, get_operation_aggregates, get_latest_operation_aggregate
+from forestryfunctions.harvest import thinning
+from forestryfunctions import forestry_utils as futil
 
 
 def evaluate_thinning_conditions(predicates):
@@ -28,7 +29,8 @@ def first_thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> T
     if evaluate_thinning_conditions(predicates):
         stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
         stop_condition = lambda stand: (residue_stems + epsilon) <= futil.overall_stems_per_ha(stand)
-        new_stand, new_aggregate = thinning(stand, factor, stop_condition)
+        extra_factor_solver = lambda i, n, c: (1.0-c) * i/n
+        new_stand, new_aggregate = thinning.iterative_thinning(stand, factor, stop_condition, extra_factor_solver)
     else:
         raise UserWarning("Unable to perform first thinning")
     return new_stand, store_operation_aggregate(simulation_aggregates, new_aggregate, 'first_thinning')
@@ -47,9 +49,10 @@ def thinning_from_above(input: Tuple[ForestStand, dict], **operation_parameters)
 
     if evaluate_thinning_conditions(predicates):
         thin_condition = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand)
-        new_stand, new_aggregate = thinning(stand, factor, thin_condition)
+        extra_factor_solver = lambda i, n, c: (1.0-c) * i/n
+        new_stand, new_aggregate = thinning.iterative_thinning(stand, factor, thin_condition, extra_factor_solver)
     else:
-        raise UserWarning("Unable to perform thinning from below")
+        raise UserWarning("Unable to perform thinning from above")
     return new_stand,  store_operation_aggregate(simulation_aggregates, new_aggregate, 'thinning_from_above')
 
 
@@ -66,26 +69,29 @@ def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters)
 
     if evaluate_thinning_conditions(predicates):
         thin_condition = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand)
-        new_stand, new_aggregate = thinning(stand, factor, thin_condition)
+        extra_factor_solver = lambda i, n, c: (1.0-c) * i/n
+        new_stand, new_aggregate = thinning.iterative_thinning(stand, factor, thin_condition, extra_factor_solver)
     else:
         raise UserWarning("Unable to perform thinning from below")
     return new_stand,  store_operation_aggregate(simulation_aggregates, new_aggregate, 'thinning_from_below')
 
 
-def thinning(stand: ForestStand, thinning_factor: float, thin_predicate: Callable) -> Tuple[ForestStand, dict]:
-    n = len(stand.reference_trees)
-    c = thinning_factor
-    stems_removed = 0.0
-    while thin_predicate(stand):
-        # cut until lower bound reached
-        for i, rt in enumerate(stand.reference_trees):
-            thin_factor = (1.0-c)/n * i + c
-            thin_factor = 1.0 if thin_factor > 1.0 else thin_factor
-            new_stems_per_ha = rt.stems_per_ha * thin_factor
-            stems_removed += rt.stems_per_ha - new_stems_per_ha
-            rt.stems_per_ha = new_stems_per_ha
-    new_aggregate = { 'stems_removed': stems_removed }
-    return (stand, new_aggregate)
+def even_thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    stand, simulation_aggregates = input
+    epsilon = operation_parameters['e']
+    factor = operation_parameters['thinning_factor']
+
+    (lower_limit, upper_limit) = resolve_thinning_bounds(stand)
+    upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
+    predicates = [upper_limit_reached]
+
+    if evaluate_thinning_conditions(predicates):
+        thin_condition = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand)
+        extra_factor_solver = lambda i, n, c: 0
+        new_stand, new_aggregate = thinning.iterative_thinning(stand, factor, thin_condition, extra_factor_solver)
+    else:
+        raise UserWarning("Unable to perform even thinning")
+    return new_stand,  store_operation_aggregate(simulation_aggregates, new_aggregate, 'even_thinning')
 
 
 def report_overall_removal(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:

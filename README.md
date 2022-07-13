@@ -9,80 +9,160 @@ The branching model for simulator operations is declared in a human-readable YAM
 This declaration is used to generate a **step tree** describing the full branching possibilities for the simulation.
 Prepared **operation chains** are generated from the step tree and are run with the simulator engine.
 
-## Layout
+## Getting started
 
-This code project is divided into three python packages.
+To get started:
 
-| package  | description                                                                |
-|----------|----------------------------------------------------------------------------|
-| app      | Development application entry point. Side-effectful program logic.         |
-| sim      | Functionality for creating, preparing and executing a simulator run.       |
-| forestry | Operations and computational models for the forest development simulation. |
-
-## Requirements
-
-Python 3.9 is the current target platform.
-We aim to keep compatibility down to Python 3.7.
-The `pip` utility is assumed for dependency management.
-
-## Usage of the simulator
-
-Preliminarily, ensure that the project's library dependencies are installed and pytest is available for unit tests.
+* Install Python 3.10 for your platform. 
+* Install git for your platform.
+* Ensure that the commands `python`, `pip` and `git` are available in your command line interface (CLI). We assume a UNIX-like shell CLI such as Git Bash for Windows users.
+* Initialize the project with the commands below.
 
 ```
-pip install --user -r requirements.txt
-pip install --user pytest
+git clone https://github.com/menu-hanke/sim-workbench
+cd sim-workbench
+pip install -r requirements.txt
 ```
 
-To use Motti growth models, clone the pymotti repository to a location of your choosing and install the module with pip.
+To obtain latest changes use the command `git pull`.
+
+### Notes about proxy configuration for Luke users
+
+Both git and pip use a separate configuration for WWW proxy.
+Proxy is manadatory for Luke internal network.
+Software Center presets this for pip, but not for git.
+Depending on whether you are using Luke internal network (Ethernet, Reitti or FortiClient VPN) or another network, you need to adjust proxy configuration manually to be able to run internet-facing commands with these tools.
+
+In the following subsections, `~` denotes your home directory.
+This is your home directory in windows format is a path such as `C:\Users\12345678`.
+You can always re-enter your home directory by running the command `cd`, or explicitly `cd ~`.
+
+#### pip
+
+The pip configuration file can be found in `~/AppData/Roaming/pip/pip.ini`.
+It may be overridden with `~/pip/pip.ini`.
+To enable the proxy usage, the file should have a proxy configuration line in the global section such as
 
 ```
-# adjust the command below to your environment specifics about authentication and protocol
+[global]
+proxy = http://suoja-proxy.vyv.fi:8080
+```
+
+To disable the proxy, insert a `#` character in front of the proxy line to comment it out.
+
+#### git
+
+The git configuration file can be found in `~/.gitconfig`.
+By default this file does not exist.
+To enable the proxy usage, the file should have a proxy configuration line in the http section such as
+
+```
+[http]
+proxy = http://suoja-proxy.vyv.fi:8080
+```
+
+To disable the proxy, insert a `#` character in front of the proxy line to comment it out.
+
+### Development
+
+To partake in development and to get access to closed source projects of `menu-hanke`, create a GitHub account and request access.
+
+### R (optional)
+
+To be able to use forestry operations depending on R modules
+
+* Install R runtime version >=4.1 for your platform.
+* Ensure that the `R` command is available in CLI.
+* Install the `rpy2` Python module with the commands below.
+
+```
+pip install rpy2
+```
+
+### Motti (optional)
+
+To be able to use forestry operations depending on the `pymotti` library
+
+* Obtain GitHub access to https://github.com/menu-hanke/pymotti repository from menu-hanke organisation. Motti is not an open source implementation.
+* Clone and install the `pymotti` Python module as a locally sourced package with the commands below 
+
+```
 git clone https://github.com/menu-hanke/pymotti
-pip install --user ./pymotti
+pip install -e ./pymotti
 ```
 
-To run the simulator application, run in the project root
+## Project layout
+
+This code project is divided into following python packages.
+
+| package  | description                                             |
+|----------|---------------------------------------------------------|
+| app      | Application entry points. Side-effectful program logic. |
+| sim      | Simulator engine.                                       |
+| forestry | Operations for the forest development simulation.       |
+| tests    | Unit test suites for above packages.                    |
+
+The `forestry` package depends on external libraries maintained by this project. These are
+
+| package                                                 | description                                                               |
+|---------------------------------------------------------|---------------------------------------------------------------------------|
+| https://github.com/menu-hanke/forest-data-model         | Main data classes and related utilities for forestry domain operations    |
+| https://github.com/menu-hanke/forestry-function-library | Implementations of forest data state manipulation and related computation |
+| https://github.com/menu-hanke/pymotti (private)         | Python implementation of the Motti forest growth models                   |
+
+Other mandatory dependencies for this project are listed in `requirements.txt`.
+Optional dependencies are listed in `requirements-optional.txt`.
+The `requirements-test.txt` may list dependencies needed by the unit testing scope in `tests`
+Dependencies may be installed with the `pip` utility as follows
 
 ```
-python -m app.simulator input.json control.yaml output.pickle
+pip install -r requirements.txt
 ```
 
-* `input.json` is a forest data file used for forestry simulation. It is sourced from vmi-data-converter and adheres to MELA RSD specification for properties of forest stands and reference trees.
-* `control.yaml` is the declared structure for a simulation run.
-* `output.pickle` is the output file for computed results
+## Applications
+
+The project contains two application entry points. These are the `app/simulator.py` and the `app/post_processing.py`.
+The operational details about these applications are documented separately.
+
+## Usage of the simulator application
+
+The simulator application depends upon
+
+1. A source data file which contains a list of `ForestStand` entities according to the `forest-data-model` package. The file may currently be a JSON file or a Python native serialization file (pickle).
+These source files are typically produced from VMI or SMK (Finnish Forest Center) source data files with the [vmi-data-converter](https://github.com/menu-hanke/vmi-data-converter) application.
+2. A YAML file which is used as a configuration for a simulator run. See `control.yaml` for an example. See section about Simulation control for further information.
+
+There are several example input files in the project `data` directory.
+These are data files with a list of ForestStand objects containing a list of RefenceTree objects generated from TreeStratum objects with Weibull distribution.
+
+! Note that the JSON file input is currently unusable for enumeration types in the data model due to https://github.com/menu-hanke/forest-data-model/issues/30 so use the pickle file for the time being.
+
+See table below for a quick reference of forestry operations usable in control.yaml.
+
+| operation           | description                                                                                    | source                      | model library             |
+|---------------------|------------------------------------------------------------------------------------------------|-----------------------------|---------------------------|
+| do_nothing          | This operation is no-op utility operation to simulate rest                                     |                             | native                    |
+| grow_acta           | A simple ReferenceTree diameter and height growth operation                                    | Acta Forestalia Fennica 163 | forestry-function-library |
+| grow_motti          | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.              | Luke Motti group            | pymotti                   |
+| first_thinning      | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest        | Reijo Mykkänen              | native                    |
+| thinning_from_below | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees | Reijo Mykkänen              | native                    |
+| thinning_from_above | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees | Reijo Mykkänen              | native                    |
+| even_thinning       | An operation reducing the stem count of ReferenceTrees evenly regardless of tree size          | Reijo Mykkänen              | native                    |
+| report_volume       | Collect tree volume data from ForestStand state                                                |                             | native                    |
+| report_thinning     | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
+| cross_cut           | Perform cross cut operation to compute aggregated details                                      | Annika Kangas               | native (R)                |
+
+To run the simulator application, run the following command in the project root.
+The created output file contains all generated variants for all computation units (ForestStand) along with aggregated data.
+The output file is usable as input for the `app/post_processing.py` application.
+
+```
+python -m app.simulator data/VMI12_data.pickle control.yaml VMI12_simulated.pickle
+```
 
 Use the following command to output simulator application help menu
 ```
 python -m app.simulator --help
-```
-The command will output the following
-```
-Mela2.0 simulator
-
-positional arguments:
-  input_file            Simulator input file
-  control_file          Simulation control declaration file
-  output_file           Simulator output file for alternatives and aggregated data
-
-options:
-  -h, --help            show this help message and exit
-  -s STRATEGY, --strategy STRATEGY
-                        Simulation alternatives tree formation strategy: 'full' (default), 'partial'
-
-```
-
-
-To run unit test suites, run in the project root
-
-```
-python -m pytest
-```
-
-You can also use python internal module unittest
-
-```
-python -m unittest <test suite module.class path>
 ```
 
 ## Usage of the post processing application
@@ -97,6 +177,20 @@ python -m app.post_processing input.pickle pp_control.yaml output.pickle
 * `pp_control.yaml` is the declaration of post processing function chain.
 * `output.pickle` is the output file for post processed results
 
+## Testing
+
+To run unit test suites, run in the project root
+
+```
+python -m pytest
+```
+
+You can also use python internal module unittest
+
+```
+python -m unittest <test suite module.class path>
+```
+
 # Simulation control
 
 A simulation run is declared in the YAML file `control.yaml`.
@@ -108,22 +202,32 @@ The structure will be expanded to allow parameters and constraints declaration f
    2. `step_time_interval` is the integer amount of time between each simulation cycle
    3. `final_step_time` is the integer point of time for the simulations's last cycle
 2. Operaton run constrains in the object `run_constraints`
-3. Operation parameters in the object `operation_params`
+3. Operation parameters in the object `operation_params`. Operation parameters may be declared as a list of 1 or more parameter sets (objects). Operations within an `alternatives` block are expanded as further alternatives for each parameter set. Multiple parameter sets may not be declared for operations within any `sequence` block.
 4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
    1. `time_points` is a list of integers which assign this set of operations to simulation time points
    2. `generators` is a list of chained generator functions (see section on step generators)
       1. `sequence` a list of operations to be executed as a chain
       2. `alternatives` a list of operations which represent alternative branches
 5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional) arguments under `preprocessing_params` as key-value pairs. 
+6. Operation parameters that **exist in files** can be passed in `operation_file_params` as demonstated below: 
+
+```yaml 
+operation_file_params:
+  first_thinning:
+    thinning_limits: C:/path-to-file/thinning-limits.txt
+  cross_cutting:
+    timber_price_table: C:/path-to-file/timber-prices.csv
+```
+Note however, that the it is the user's responsibility to provide the file in a valid format. 
+
 
 The following example declares a simulation, which runs four event cycles at time points 0, 5, 10 and 15.
 Images below describe the simulation as a step tree, and further as the computation chains that are generated from the tree.
 
 * At time point 0, `reporting` of the simulation state is done.
-* At time point 5, the `grow` operation is done on the simulation state and the simulation is branched by 2.
-One branch does not modify the forest state data with `do_nothing`, the other performs a `thinning` operation on the forest state data.
-* At time point 10, the 2 branches from time point 5 are extended both with a `grow` operation, then branched again with `do_nothing` and `thinning` operations, resulting in 4 branches.
-* At time point 15, `reporting` is done on the 4 individual state branches.
+* At time point 5, the `grow` operation is done on the simulation state and the simulation is branched by 3. One branch does not modify the forest state data with `do_nothing`, another performs a `thinning` operation on the forest state data with parameter set 1, and another `thinning` operation with parameter set 2.
+* At time point 10, the 3 branches from time point 5 are extended separately with a `grow` operation, then branched again with `do_nothing` and `thinning` operations with two parameter sets, resulting in 9 branches.
+* At time point 15, `reporting` is done on the 9 individual state branches.
 
 ```yaml
 # simulation run control parameters
@@ -142,10 +246,16 @@ run_constraints:
     minimum_time_interval: 10
 
 # example of operation parameters
-# reporting operation gets parameter level with value 1
+# reporting operation gets one parameter set
+# thinning operation gets two parameter sets
 operation_params:
-   reporting:
-      level: 1
+  reporting:
+    - level: 1
+  thinning:
+    - thinning_factor: 0.7
+      e: 0.2
+    - thinning_factor: 0.9
+      e: 0.1
 
 # simulation_events are a collection of operations meant to be executed at
 # the specified time_points
@@ -173,22 +283,22 @@ Operation chains from step tree above
 
 ## Simulator
 
-The three important concepts in the `sim` package are **operations**, **operation processor**, **step tree** and **generators**.
+The three important concepts in the `sim` package are **operations**, **processor**, **step tree** and **generators**.
 
 ### Operation
 
-An operation is a function whose only responsibility is the simulation state manipulation.
-For the purposes of the simulator, the operation is a partially applied function from the domain package (forestry) such that it will take only one argument, the simulation state.
+An operation is a function whose responsiblities are 1) to trigger manipulation of simulation state and 2) to compute derived data about simulation state before and/or after state manipulation.
+For the purposes of the simulator, the operation is a partially applied function from the domain package (forestry) such that it will take only one argument.
 They are produced as lambda functions based on the `control.yaml` declaration.
 
 As an example, a single operation such as `grow` would receive a single argument of type `ForestStand` upon which it operates and finally returns a `ForestStand` for the modified/new state.
 
-### Operation processor
+### Processor
 
-A processor is a two parameter function which handles running prepared operations.
-The parameters are an `OperationPayload` instance and an operation function reference.
-The `OperationPayload` is primarily the container for simulation state data, along with a record of simulation run history and operation run constraints.
-Responsibilities of a processor function are as follows:
+The processor is a function wrapper which handles running a prepared operation (see above).
+The parameter is an `OperationPayload` instance.
+The `OperationPayload` object is the container for simulation state data, along with a record of simulation run history and operation run constraints.
+Responsibilities of the processor function are as follows:
 
 * Determine if run constraints apply to the operation to be run. Abort and raise an exception if so.
 * Execute the operation function with simulation state data.
@@ -205,7 +315,7 @@ It is generated based on the `control.yaml` declaration. Unique operation chains
 ### Generators
 
 `sequence` and `alternatives` are functions which produce `Step` instances for given input functions and as successors of previous `Step` instances.
-For the simulation purposes, these input functions are the prepared processors (see above), but the implementation literally does not care what these functions are.
+For the simulation purposes, these input functions are the prepared processors (see above), but the simulator implementation literally does not care what these functions are.
 Sequences are linear chains of steps.
 Alternatives are branching steps.
 The generators are chainable such that they can expand the step tree in formation based on the results of earlier generator results.
@@ -217,22 +327,23 @@ The `generators_from_declaration` function prepares the generator functions from
 
 ## The domain
 
-The `forestry` package contains the data structure and operations necessary to represent the simulation state data and operations acting upon that data.
+The `forestry` package contains the operations necessary to represent the simulation state data and operations acting upon that data.
 
 ### State data
 
-The class `ForestStand` and the `ReferenceTree` it refers to.
-A single `ForestStand` instance fully represents a simulation state.
+The class `ForestStand` and the `ReferenceTree` and `TreeStratum` instances it refers to.
+A single `ForestStand` instance fully represents a forestry simulation state.
 
 ### Operations
 
 Operations are functions which take two arguments
 
-* `ForestStand` instance
+* A tuple of a `ForestStand` instance and a `dict` containing aggregated data collected during the simulation run
 * Python `dict` containing parameters for this operation
 
 By convention (since Python as a language does not allow us to properly enforce this), these functions must remain pure and not trigger side-effectful program logic.
-As a design consideration, if it appears that a function needs parameters that can't be supplied by the `control.yaml` and parameters dict, this must be addressed by other development.
+Operations may do in-place mutation of the argument tuple.
+Operations may not mutate the operation parameter `dict`
 
 ## The engine
 

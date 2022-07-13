@@ -14,21 +14,27 @@
     "forest_management_category": 1,
     "forestry_centre_id": 0,
     "fra_category": "1",
-    "geo_location": [
-      6675.011,
-      118.967,
-      12.4,
-      "ERTS-TM35FIN"
-    ],
-    "identifier": "023-002-02-1",
+    "geo_location": {
+      "py/tuple": [
+        6675011.0,
+        3118967.0,
+        12.4,
+        "EPSG:2393"
+      ]
+    },
+    "identifier": "0-023-002-02-1",
+    "lake_effect": null,
     "land_use_category": 1,
     "land_use_category_detail": "0",
     "management_unit_id": 7,
     "method_of_last_cutting": 1,
+    "monthly_rainfall": null,
+    "monthly_temperatures": null,
     "municipality_id": 417,
     "natural_regeneration_feasibility": false,
     "owner_category": 0,
     "pruning_year": null,
+    "py/object": "forestdatamodel.model.ForestStand",
     "reference_trees": [
       {
         "age_when_10cm_diameter_at_breast_height": 0,
@@ -36,18 +42,36 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 12.36,
         "height": 16.4,
-        "identifier": "023-002-02-1-001-tree",
+        "identifier": "0-023-002-02-1-001-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/reduce": [
+            {
+              "py/type": "forestdatamodel.enums.internal.TreeSpecies"
+            },
+            {
+              "py/tuple": [
+                1
+              ]
+            }
+          ]
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 2.5,
         "tree_category": null,
         "tree_number": 1
@@ -58,18 +82,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 14.58,
         "height": 17.78,
-        "identifier": "023-002-02-1-002-tree",
+        "identifier": "0-023-002-02-1-002-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 17.22,
         "tree_category": null,
         "tree_number": 2
@@ -80,18 +113,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 16.8,
         "height": 18.92,
-        "identifier": "023-002-02-1-003-tree",
+        "identifier": "0-023-002-02-1-003-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 41.33,
         "tree_category": null,
         "tree_number": 3
@@ -102,18 +144,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 19.02,
         "height": 19.88,
-        "identifier": "023-002-02-1-004-tree",
+        "identifier": "0-023-002-02-1-004-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 65.68,
         "tree_category": null,
         "tree_number": 4
@@ -124,18 +175,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 21.24,
         "height": 20.69,
-        "identifier": "023-002-02-1-005-tree",
+        "identifier": "0-023-002-02-1-005-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 80.66,
         "tree_category": null,
         "tree_number": 5
@@ -146,18 +206,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 23.46,
         "height": 21.39,
-        "identifier": "023-002-02-1-006-tree",
+        "identifier": "0-023-002-02-1-006-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 79.53,
         "tree_category": null,
         "tree_number": 6
@@ -168,18 +237,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 25.68,
         "height": 22.0,
-        "identifier": "023-002-02-1-007-tree",
+        "identifier": "0-023-002-02-1-007-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 62.79,
         "tree_category": null,
         "tree_number": 7
@@ -190,18 +268,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 27.9,
         "height": 22.53,
-        "identifier": "023-002-02-1-008-tree",
+        "identifier": "0-023-002-02-1-008-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 38.84,
         "tree_category": null,
         "tree_number": 8
@@ -212,18 +299,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 30.12,
         "height": 23.0,
-        "identifier": "023-002-02-1-009-tree",
+        "identifier": "0-023-002-02-1-009-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 18.24,
         "tree_category": null,
         "tree_number": 9
@@ -234,18 +330,27 @@
         "breast_height_age": 46.0,
         "breast_height_diameter": 32.34,
         "height": 23.42,
-        "identifier": "023-002-02-1-010-tree",
+        "identifier": "0-023-002-02-1-010-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 6.26,
         "tree_category": null,
         "tree_number": 10
@@ -256,18 +361,36 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 11.18,
         "height": 10.93,
-        "identifier": "023-002-02-1-011-tree",
+        "identifier": "0-023-002-02-1-011-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/reduce": [
+            {
+              "py/type": "forestdatamodel.enums.internal.TreeSpecies"
+            },
+            {
+              "py/tuple": [
+                2
+              ]
+            }
+          ]
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 0.13,
         "tree_category": null,
         "tree_number": 1
@@ -278,18 +401,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 13.2,
         "height": 12.63,
-        "identifier": "023-002-02-1-012-tree",
+        "identifier": "0-023-002-02-1-012-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 1.01,
         "tree_category": null,
         "tree_number": 2
@@ -300,18 +432,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 15.21,
         "height": 14.14,
-        "identifier": "023-002-02-1-013-tree",
+        "identifier": "0-023-002-02-1-013-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 2.59,
         "tree_category": null,
         "tree_number": 3
@@ -322,18 +463,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 17.23,
         "height": 15.48,
-        "identifier": "023-002-02-1-014-tree",
+        "identifier": "0-023-002-02-1-014-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 4.34,
         "tree_category": null,
         "tree_number": 4
@@ -344,18 +494,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 19.25,
         "height": 16.68,
-        "identifier": "023-002-02-1-015-tree",
+        "identifier": "0-023-002-02-1-015-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 5.57,
         "tree_category": null,
         "tree_number": 5
@@ -366,18 +525,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 21.26,
         "height": 17.75,
-        "identifier": "023-002-02-1-016-tree",
+        "identifier": "0-023-002-02-1-016-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 5.72,
         "tree_category": null,
         "tree_number": 6
@@ -388,18 +556,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 23.28,
         "height": 18.72,
-        "identifier": "023-002-02-1-017-tree",
+        "identifier": "0-023-002-02-1-017-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 4.67,
         "tree_category": null,
         "tree_number": 7
@@ -410,18 +587,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 25.3,
         "height": 19.58,
-        "identifier": "023-002-02-1-018-tree",
+        "identifier": "0-023-002-02-1-018-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 2.96,
         "tree_category": null,
         "tree_number": 8
@@ -432,18 +618,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 27.32,
         "height": 20.37,
-        "identifier": "023-002-02-1-019-tree",
+        "identifier": "0-023-002-02-1-019-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 1.4,
         "tree_category": null,
         "tree_number": 9
@@ -454,18 +649,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 29.33,
         "height": 21.08,
-        "identifier": "023-002-02-1-020-tree",
+        "identifier": "0-023-002-02-1-020-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 0.47,
         "tree_category": null,
         "tree_number": 10
@@ -476,18 +680,36 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 8.97,
         "height": 9.84,
-        "identifier": "023-002-02-1-021-tree",
+        "identifier": "0-023-002-02-1-021-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/reduce": [
+            {
+              "py/type": "forestdatamodel.enums.internal.TreeSpecies"
+            },
+            {
+              "py/tuple": [
+                3
+              ]
+            }
+          ]
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 0.46,
         "tree_category": null,
         "tree_number": 1
@@ -498,18 +720,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 10.76,
         "height": 10.74,
-        "identifier": "023-002-02-1-022-tree",
+        "identifier": "0-023-002-02-1-022-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 2.56,
         "tree_category": null,
         "tree_number": 2
@@ -520,18 +751,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 12.55,
         "height": 11.47,
-        "identifier": "023-002-02-1-023-tree",
+        "identifier": "0-023-002-02-1-023-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 5.37,
         "tree_category": null,
         "tree_number": 3
@@ -542,18 +782,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 14.35,
         "height": 12.08,
-        "identifier": "023-002-02-1-024-tree",
+        "identifier": "0-023-002-02-1-024-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 7.68,
         "tree_category": null,
         "tree_number": 4
@@ -564,18 +813,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 16.14,
         "height": 12.59,
-        "identifier": "023-002-02-1-025-tree",
+        "identifier": "0-023-002-02-1-025-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 8.62,
         "tree_category": null,
         "tree_number": 5
@@ -586,18 +844,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 17.93,
         "height": 13.02,
-        "identifier": "023-002-02-1-026-tree",
+        "identifier": "0-023-002-02-1-026-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 7.86,
         "tree_category": null,
         "tree_number": 6
@@ -608,18 +875,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 19.73,
         "height": 13.4,
-        "identifier": "023-002-02-1-027-tree",
+        "identifier": "0-023-002-02-1-027-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 5.82,
         "tree_category": null,
         "tree_number": 7
@@ -630,18 +906,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 21.52,
         "height": 13.72,
-        "identifier": "023-002-02-1-028-tree",
+        "identifier": "0-023-002-02-1-028-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 3.44,
         "tree_category": null,
         "tree_number": 8
@@ -652,18 +937,27 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 23.31,
         "height": 14.01,
-        "identifier": "023-002-02-1-029-tree",
+        "identifier": "0-023-002-02-1-029-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 1.59,
         "tree_category": null,
         "tree_number": 9
@@ -674,34 +968,144 @@
         "breast_height_age": 40.0,
         "breast_height_diameter": 25.11,
         "height": 14.26,
-        "identifier": "023-002-02-1-030-tree",
+        "identifier": "0-023-002-02-1-030-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 3,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 0.55,
         "tree_category": null,
         "tree_number": 10
       }
     ],
     "regeneration_area_cleaning_year": null,
+    "sea_effect": null,
     "site_type_category": 3,
     "soil_peatland_category": 1.0,
     "soil_surface_preparation_year": 2018,
     "stand_id": 7,
-    "stems_per_ha_scaling_factors": [
-      1.0,
-      1.0
-    ],
+    "stems_per_ha_scaling_factors": {
+      "py/tuple": [
+        1.0,
+        1.0
+      ]
+    },
     "tax_class": 2,
     "tax_class_reduction": 0,
+    "tree_strata": [
+      {
+        "age_when_10cm_diameter_at_breast_height": 0,
+        "basal_area": 17.0,
+        "biological_age": 52.0,
+        "breast_height_age": 46.0,
+        "cutting_year": 0,
+        "identifier": "0-023-002-02-1-01-stratum",
+        "lowest_living_branch_height": 0.0,
+        "management_category": 1.0,
+        "mean_diameter": 24.0,
+        "mean_height": 19.0,
+        "origin": 0,
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "sapling_stems_per_ha": 0.0,
+        "sapling_stratum": false,
+        "saw_log_volume_reduction_factor": null,
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "stems_per_ha": 0.0,
+        "tree_number": 0
+      },
+      {
+        "age_when_10cm_diameter_at_breast_height": 0,
+        "basal_area": 1.0,
+        "biological_age": 50.0,
+        "breast_height_age": 40.0,
+        "cutting_year": 0,
+        "identifier": "0-023-002-02-1-02-stratum",
+        "lowest_living_branch_height": 0.0,
+        "management_category": 1.0,
+        "mean_diameter": 22.0,
+        "mean_height": 18.0,
+        "origin": 0,
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "sapling_stems_per_ha": 0.0,
+        "sapling_stratum": false,
+        "saw_log_volume_reduction_factor": null,
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "stems_per_ha": 0.0,
+        "tree_number": 0
+      },
+      {
+        "age_when_10cm_diameter_at_breast_height": 0,
+        "basal_area": 1.0,
+        "biological_age": 46.0,
+        "breast_height_age": 40.0,
+        "cutting_year": 0,
+        "identifier": "0-023-002-02-1-03-stratum",
+        "lowest_living_branch_height": 0.0,
+        "management_category": 1.0,
+        "mean_diameter": 18.0,
+        "mean_height": 17.5,
+        "origin": 0,
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "sapling_stems_per_ha": 0.0,
+        "sapling_stratum": false,
+        "saw_log_volume_reduction_factor": null,
+        "species": {
+          "py/id": 44
+        },
+        "stand": {
+          "py/id": 19
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "stems_per_ha": 0.0,
+        "tree_number": 0
+      }
+    ],
     "year": 2018,
     "young_stand_tending_year": null
   },
@@ -720,21 +1124,27 @@
     "forest_management_category": 1,
     "forestry_centre_id": 0,
     "fra_category": "1",
-    "geo_location": [
-      6675.211,
-      118.967,
-      12.4,
-      "ERTS-TM35FIN"
-    ],
-    "identifier": "023-002-03-1",
+    "geo_location": {
+      "py/tuple": [
+        6675211.0,
+        3118967.0,
+        12.4,
+        "EPSG:2393"
+      ]
+    },
+    "identifier": "0-023-002-03-1",
+    "lake_effect": null,
     "land_use_category": 1,
     "land_use_category_detail": "0",
     "management_unit_id": 8,
     "method_of_last_cutting": 3,
+    "monthly_rainfall": null,
+    "monthly_temperatures": null,
     "municipality_id": 417,
     "natural_regeneration_feasibility": false,
     "owner_category": 0,
     "pruning_year": null,
+    "py/object": "forestdatamodel.model.ForestStand",
     "reference_trees": [
       {
         "age_when_10cm_diameter_at_breast_height": 0,
@@ -742,18 +1152,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 10.11,
         "height": 14.68,
-        "identifier": "023-002-03-1-001-tree",
+        "identifier": "0-023-002-03-1-001-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 6.52,
         "tree_category": null,
         "tree_number": 1
@@ -764,18 +1183,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 12.11,
         "height": 16.23,
-        "identifier": "023-002-03-1-002-tree",
+        "identifier": "0-023-002-03-1-002-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 34.45,
         "tree_category": null,
         "tree_number": 2
@@ -786,18 +1214,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 14.11,
         "height": 17.51,
-        "identifier": "023-002-03-1-003-tree",
+        "identifier": "0-023-002-03-1-003-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 69.24,
         "tree_category": null,
         "tree_number": 3
@@ -808,18 +1245,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 16.1,
         "height": 18.58,
-        "identifier": "023-002-03-1-004-tree",
+        "identifier": "0-023-002-03-1-004-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 95.78,
         "tree_category": null,
         "tree_number": 4
@@ -830,18 +1276,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 18.1,
         "height": 19.5,
-        "identifier": "023-002-03-1-005-tree",
+        "identifier": "0-023-002-03-1-005-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 104.42,
         "tree_category": null,
         "tree_number": 5
@@ -852,18 +1307,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 20.1,
         "height": 20.29,
-        "identifier": "023-002-03-1-006-tree",
+        "identifier": "0-023-002-03-1-006-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 92.84,
         "tree_category": null,
         "tree_number": 6
@@ -874,18 +1338,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 22.1,
         "height": 20.97,
-        "identifier": "023-002-03-1-007-tree",
+        "identifier": "0-023-002-03-1-007-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 67.33,
         "tree_category": null,
         "tree_number": 7
@@ -896,18 +1369,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 24.1,
         "height": 21.57,
-        "identifier": "023-002-03-1-008-tree",
+        "identifier": "0-023-002-03-1-008-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 39.28,
         "tree_category": null,
         "tree_number": 8
@@ -918,18 +1400,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 26.1,
         "height": 22.1,
-        "identifier": "023-002-03-1-009-tree",
+        "identifier": "0-023-002-03-1-009-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 18.05,
         "tree_category": null,
         "tree_number": 9
@@ -940,18 +1431,27 @@
         "breast_height_age": 43.0,
         "breast_height_diameter": 28.09,
         "height": 22.57,
-        "identifier": "023-002-03-1-010-tree",
+        "identifier": "0-023-002-03-1-010-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 1,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 8.79,
         "tree_category": null,
         "tree_number": 10
@@ -962,18 +1462,36 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 8.97,
         "height": 9.84,
-        "identifier": "023-002-03-1-011-tree",
+        "identifier": "0-023-002-03-1-011-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/reduce": [
+            {
+              "py/type": "forestdatamodel.enums.internal.TreeSpecies"
+            },
+            {
+              "py/tuple": [
+                4
+              ]
+            }
+          ]
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 0.46,
         "tree_category": null,
         "tree_number": 1
@@ -984,18 +1502,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 10.76,
         "height": 10.74,
-        "identifier": "023-002-03-1-012-tree",
+        "identifier": "0-023-002-03-1-012-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 2.56,
         "tree_category": null,
         "tree_number": 2
@@ -1006,18 +1533,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 12.55,
         "height": 11.47,
-        "identifier": "023-002-03-1-013-tree",
+        "identifier": "0-023-002-03-1-013-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 5.37,
         "tree_category": null,
         "tree_number": 3
@@ -1028,18 +1564,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 14.35,
         "height": 12.08,
-        "identifier": "023-002-03-1-014-tree",
+        "identifier": "0-023-002-03-1-014-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 7.68,
         "tree_category": null,
         "tree_number": 4
@@ -1050,18 +1595,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 16.14,
         "height": 12.59,
-        "identifier": "023-002-03-1-015-tree",
+        "identifier": "0-023-002-03-1-015-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 8.62,
         "tree_category": null,
         "tree_number": 5
@@ -1072,18 +1626,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 17.93,
         "height": 13.02,
-        "identifier": "023-002-03-1-016-tree",
+        "identifier": "0-023-002-03-1-016-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 7.86,
         "tree_category": null,
         "tree_number": 6
@@ -1094,18 +1657,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 19.73,
         "height": 13.4,
-        "identifier": "023-002-03-1-017-tree",
+        "identifier": "0-023-002-03-1-017-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 5.82,
         "tree_category": null,
         "tree_number": 7
@@ -1116,18 +1688,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 21.52,
         "height": 13.72,
-        "identifier": "023-002-03-1-018-tree",
+        "identifier": "0-023-002-03-1-018-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 3.44,
         "tree_category": null,
         "tree_number": 8
@@ -1138,18 +1719,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 23.31,
         "height": 14.01,
-        "identifier": "023-002-03-1-019-tree",
+        "identifier": "0-023-002-03-1-019-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 1.59,
         "tree_category": null,
         "tree_number": 9
@@ -1160,18 +1750,27 @@
         "breast_height_age": 45.0,
         "breast_height_diameter": 25.11,
         "height": 14.26,
-        "identifier": "023-002-03-1-020-tree",
+        "identifier": "0-023-002-03-1-020-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 4,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 0.55,
         "tree_category": null,
         "tree_number": 10
@@ -1182,18 +1781,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 8.97,
         "height": 8.84,
-        "identifier": "023-002-03-1-021-tree",
+        "identifier": "0-023-002-03-1-021-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 0.46,
         "tree_category": null,
         "tree_number": 1
@@ -1204,18 +1812,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 10.76,
         "height": 10.55,
-        "identifier": "023-002-03-1-022-tree",
+        "identifier": "0-023-002-03-1-022-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 2.56,
         "tree_category": null,
         "tree_number": 2
@@ -1226,18 +1843,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 12.55,
         "height": 12.11,
-        "identifier": "023-002-03-1-023-tree",
+        "identifier": "0-023-002-03-1-023-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 5.37,
         "tree_category": null,
         "tree_number": 3
@@ -1248,18 +1874,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 14.35,
         "height": 13.52,
-        "identifier": "023-002-03-1-024-tree",
+        "identifier": "0-023-002-03-1-024-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 7.68,
         "tree_category": null,
         "tree_number": 4
@@ -1270,18 +1905,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 16.14,
         "height": 14.78,
-        "identifier": "023-002-03-1-025-tree",
+        "identifier": "0-023-002-03-1-025-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 8.62,
         "tree_category": null,
         "tree_number": 5
@@ -1292,18 +1936,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 17.93,
         "height": 15.92,
-        "identifier": "023-002-03-1-026-tree",
+        "identifier": "0-023-002-03-1-026-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 7.86,
         "tree_category": null,
         "tree_number": 6
@@ -1314,18 +1967,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 19.73,
         "height": 16.95,
-        "identifier": "023-002-03-1-027-tree",
+        "identifier": "0-023-002-03-1-027-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 5.82,
         "tree_category": null,
         "tree_number": 7
@@ -1336,18 +1998,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 21.52,
         "height": 17.88,
-        "identifier": "023-002-03-1-028-tree",
+        "identifier": "0-023-002-03-1-028-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 3.44,
         "tree_category": null,
         "tree_number": 8
@@ -1358,18 +2029,27 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 23.31,
         "height": 18.73,
-        "identifier": "023-002-03-1-029-tree",
+        "identifier": "0-023-002-03-1-029-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 1.59,
         "tree_category": null,
         "tree_number": 9
@@ -1380,34 +2060,144 @@
         "breast_height_age": 38.0,
         "breast_height_diameter": 25.11,
         "height": 19.51,
-        "identifier": "023-002-03-1-030-tree",
+        "identifier": "0-023-002-03-1-030-tree",
         "lowest_living_branch_height": null,
         "management_category": null,
         "origin": null,
         "pruning_year": 0,
+        "py/object": "forestdatamodel.model.ReferenceTree",
+        "sapling": false,
         "saw_log_volume_reduction_factor": null,
-        "species": 2,
-        "stand_origin_relative_position": [
-          0.0,
-          0.0,
-          0.0
-        ],
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
         "stems_per_ha": 0.55,
         "tree_category": null,
         "tree_number": 10
       }
     ],
     "regeneration_area_cleaning_year": null,
+    "sea_effect": null,
     "site_type_category": 3,
     "soil_peatland_category": 1.0,
     "soil_surface_preparation_year": 2018,
     "stand_id": 8,
-    "stems_per_ha_scaling_factors": [
-      1.0,
-      1.0
-    ],
+    "stems_per_ha_scaling_factors": {
+      "py/tuple": [
+        1.0,
+        1.0
+      ]
+    },
     "tax_class": 3,
     "tax_class_reduction": 1,
+    "tree_strata": [
+      {
+        "age_when_10cm_diameter_at_breast_height": 0,
+        "basal_area": 15.0,
+        "biological_age": 52.0,
+        "breast_height_age": 43.0,
+        "cutting_year": 0,
+        "identifier": "0-023-002-03-1-01-stratum",
+        "lowest_living_branch_height": 0.0,
+        "management_category": 1.0,
+        "mean_diameter": 20.0,
+        "mean_height": 16.5,
+        "origin": 0,
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "sapling_stems_per_ha": 0.0,
+        "sapling_stratum": false,
+        "saw_log_volume_reduction_factor": null,
+        "species": {
+          "py/id": 22
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "stems_per_ha": 0.0,
+        "tree_number": 0
+      },
+      {
+        "age_when_10cm_diameter_at_breast_height": 0,
+        "basal_area": 1.0,
+        "biological_age": 54.0,
+        "breast_height_age": 45.0,
+        "cutting_year": 0,
+        "identifier": "0-023-002-03-1-02-stratum",
+        "lowest_living_branch_height": 0.0,
+        "management_category": 1.0,
+        "mean_diameter": 18.0,
+        "mean_height": 16.0,
+        "origin": 0,
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "sapling_stems_per_ha": 0.0,
+        "sapling_stratum": false,
+        "saw_log_volume_reduction_factor": null,
+        "species": {
+          "py/id": 71
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "stems_per_ha": 0.0,
+        "tree_number": 0
+      },
+      {
+        "age_when_10cm_diameter_at_breast_height": 0,
+        "basal_area": 1.0,
+        "biological_age": 51.0,
+        "breast_height_age": 38.0,
+        "cutting_year": 0,
+        "identifier": "0-023-002-03-1-03-stratum",
+        "lowest_living_branch_height": 0.0,
+        "management_category": 1.0,
+        "mean_diameter": 18.0,
+        "mean_height": 15.0,
+        "origin": 0,
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "sapling_stems_per_ha": 0.0,
+        "sapling_stratum": false,
+        "saw_log_volume_reduction_factor": null,
+        "species": {
+          "py/id": 33
+        },
+        "stand": {
+          "py/id": 58
+        },
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "stems_per_ha": 0.0,
+        "tree_number": 0
+      }
+    ],
     "year": 2018,
     "young_stand_tending_year": null
   }

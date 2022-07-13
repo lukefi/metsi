@@ -11,13 +11,14 @@ def generate_stand_with_saplings(sapling_tree_count, reference_tree_count):
         is_sapling = i < sapling_tree_count
         stand.reference_trees.append(ReferenceTree(sapling=is_sapling))
     return stand
-    
+
+
 def generate_empty_stands(stand_count, empty_stand_count):
     stands = []
     for i in range(0, stand_count):
-        stand = ForestStand()  
+        stand = ForestStand()
         stand_is_empty = i < empty_stand_count
-        #if the stand is not meant to be empty, add one Reference tree. 
+        #if the stand is not meant to be empty, add one Reference tree.
         if not stand_is_empty:
             stand.reference_trees.append(ReferenceTree(species=TreeSpecies(1)))
         stands.append(stand)
@@ -42,3 +43,12 @@ class PreprocessingTest(unittest.TestCase):
         stands = generate_empty_stands(stand_count, empty_stand_count)
         excluded = preprocessing.exclude_empty_stands(stands)
         self.assertEqual(len(excluded), stand_count - empty_stand_count)
+
+    def test_exclude_zero_stem_trees(self):
+        fixture = ForestStand()
+        fixture.reference_trees = [
+            ReferenceTree(stems_per_ha=f)
+            for f in [1,2,0,3]
+        ]
+        result = preprocessing.exclude_zero_stem_trees([fixture])
+        self.assertEqual(3, len(result[0].reference_trees))

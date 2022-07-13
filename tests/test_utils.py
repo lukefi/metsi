@@ -30,12 +30,13 @@ def none(x: Any) -> None:
     return None
 
 
-def aggregating_increment(input: Tuple[int, dict]) -> Tuple[int, dict]:
+def aggregating_increment(input: Tuple[int, dict], **operation_params) -> Tuple[int, dict]:
+    incrementation = operation_params.get('incrementation', 1)
     state, aggregates = input
     latest_aggregate = get_latest_operation_aggregate(aggregates, 'aggregating_increment')
     aggregate = {'run_count': 1} if latest_aggregate is None else {'run_count': latest_aggregate['run_count'] + 1}
     new_aggregates = store_operation_aggregate(aggregates, aggregate, 'aggregating_increment')
-    return state + 1, new_aggregates
+    return state + incrementation, new_aggregates
 
 
 def inc(x: int) -> int:
@@ -56,6 +57,12 @@ def parametrized_operation(x, **kwargs):
     else:
         return x
 
+def parametrized_operation_using_file_parameter(x, **kwargs):
+    value_in_file = kwargs.get("dummy_file")
+    if value_in_file == "kissa123\n":
+        return value_in_file
+    else:
+        return x
 
 def collect_results(payloads: List[OperationPayload]) -> List:
     return list(map(lambda payload: payload.simulation_state, payloads))

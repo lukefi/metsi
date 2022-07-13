@@ -3,5 +3,5 @@ operation_params:
     param: value
 
 post_processing:
-  - do_nothing
+  - cross_cut
   - do_nothing

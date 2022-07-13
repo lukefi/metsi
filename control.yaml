@@ -9,22 +9,30 @@ run_constraints:
 
 operation_params:
   report_volume:
-    lmfor_volume: false
+    # Requires R dependency if true
+    - lmfor_volume: false
   first_thinning:
-    thinning_factor: 0.97
-    e: 0.2
-    dominant_height_lower_bound: 11
-    dominant_height_upper_bound: 16
+    - thinning_factor: 0.97
+      e: 0.2
+      dominant_height_lower_bound: 11
+      dominant_height_upper_bound: 16
   thinning_from_below:
-    thinning_factor: 0.97
-    e: 0.2
+    - thinning_factor: 0.97
+      e: 0.2
+    - thinning_factor: 0.8
+      e: 0.2
   thinning_from_above:
-    thinning_factor: 0.98
-    e: 0.2
+    - thinning_factor: 0.98
+      e: 0.2
+  even_thinning:
+    - thinning_factor: 0.9
+      e: 0.2
   report_overall_removal:
-    thinning_method:
+    - thinning_method:
       - thinning_from_below
       - thinning_from_above
+      - first_thinning
+      - even_thinning
 
 preprocessing_params:
   example_operation:
@@ -33,6 +41,15 @@ preprocessing_params:
 preprocessing_operations:
   - exclude_sapling_trees
   - exclude_empty_stands
+  - exclude_zero_stem_trees
+  # requires pymotti dependency
+  # - compute_location_metadata
+
+operation_file_params:
+  first_thinning:
+    thinning_limits: data/parameter_files/Thin.txt
+  cross_cutting:
+    timber_price_table: data/parameter_files/Puutavaralajimaarittelyt.txt
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
@@ -40,6 +57,8 @@ simulation_events:
     generators:
       - sequence:
         - grow_acta
+        # requires pymotti dependency
+        # - grow_motti
   - time_points: [5, 15, 25]
     generators:
       - alternatives:
@@ -47,7 +66,8 @@ simulation_events:
           - thinning_from_below
           - thinning_from_above
           - first_thinning
-  - time_points: [0, 10, 20, 30]
+          - even_thinning
+  - time_points: [0, 30]
     generators:
       - sequence:
           - report_volume

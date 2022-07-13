@@ -1,7 +1,7 @@
 from typing import Any, Callable, List, Optional, Dict
 from sim.core_types import Step, SimulationParams
 from sim.operations import prepared_processor, prepared_operation, resolve_operation
-from sim.util import get_or_default, dict_value
+from sim.util import get_or_default, dict_value, read_operation_file_params, merge_operation_params 
 
 
 def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
@@ -124,13 +124,14 @@ def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -
     simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
     simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
     operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
+    operation_file_params = get_or_default(dict_value(simulation_declaration, 'operation_file_params'), {})
     run_constraints = get_or_default(dict_value(simulation_declaration, 'run_constraints'), {})
 
     for time_point in simulation_params.simulation_time_series():
         generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
         for generator_declaration in generator_declarations:
             generator = prepare_step_generator(generator_declaration, generator_lookup, operation_lookup,
-                                               operation_params, run_constraints, time_point)
+                                               operation_params, operation_file_params, run_constraints, time_point)
             generator_series.append(generator)
     return generator_series
 
@@ -154,6 +155,7 @@ def partial_tree_generators_by_time_point(simulation_declaration: dict, operatio
     simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
     simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
     operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
+    operation_file_params = get_or_default(dict_value(simulation_declaration, 'operation_file_params'), {})
     run_constraints = get_or_default(dict_value(simulation_declaration, 'run_constraints'), {})
 
     for time_point in simulation_params.simulation_time_series():
@@ -161,31 +163,36 @@ def partial_tree_generators_by_time_point(simulation_declaration: dict, operatio
         generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
         for generator_declaration in generator_declarations:
             generator = prepare_step_generator(generator_declaration, generator_lookup, operation_lookup,
-                                               operation_params, run_constraints, time_point)
+                                               operation_params, operation_file_params, run_constraints, time_point)
             generator_series.append(generator)
         generators_by_time_point[time_point] = generator_series
     return generators_by_time_point
 
 
-def prepare_step_generator(generator_declaration, generator_lookup, operation_lookup, operation_params, run_constraints,
+def prepare_step_generator(generator_declaration, generator_lookup, operation_lookup, operation_params, operation_file_params, run_constraints,
                            time_point):
+    """Return a prepared Step generator function based on simulation declaration and operation details. Operations
+    with multiple parameter sets are expanded within their alternatives generator block. Operations with multiple
+    parameter sets within a sequence generator block throw an Exception."""
     generator_tag = list(generator_declaration.keys())[0]
     operation_tags = generator_declaration[generator_tag]
     processors = []
     for operation_tag in operation_tags:
-        processor = generate_processor(operation_lookup, operation_params, operation_tag, run_constraints, time_point)
-        processors.append(processor)
+        parameter_set_choices = get_or_default(operation_params.get(operation_tag), [{}])
+        operation_run_constraints = get_or_default(run_constraints.get(operation_tag), None)
+        this_operation_file_params = read_operation_file_params(operation_tag, operation_file_params)
+        if len(parameter_set_choices) > 1 and generator_tag == 'sequence':
+            raise Exception("Alternatives by operation parameters not supported in sequences. Use "
+                            "alternatives clause for operation {} in time point {} or reduce operation parameter "
+                            "set size to 0 or 1.".format(operation_tag, time_point))
+        for parameter_set in parameter_set_choices:
+            combined_params = merge_operation_params(parameter_set, this_operation_file_params)
+            processor = prepared_processor(
+                operation_tag,
+                operation_lookup,
+                time_point,
+                operation_run_constraints,
+                **combined_params)
+            processors.append(processor)
     generator = generator_function(generator_tag, generator_lookup, *processors)
     return generator
-
-
-def generate_processor(operation_lookup, operation_params, operation_tag, run_constraints, time_point):
-    this_operation_params = get_or_default(operation_params.get(operation_tag), {})
-    this_run_constraints = get_or_default(run_constraints.get(operation_tag), None)
-    result = prepared_processor(
-        operation_tag,
-        operation_lookup,
-        time_point,
-        this_run_constraints,
-        **this_operation_params)
-    return result

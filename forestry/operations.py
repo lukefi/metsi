@@ -1,12 +1,15 @@
-import forestry.forestry_utils as futil
+from forestryfunctions import forestry_utils as futil
 from functools import reduce
 from collections import OrderedDict
 from typing import Tuple
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
 from forestry.r_utils import lmfor_volume
-from forestry.thinning import thinning_from_above, thinning_from_below, report_overall_removal
+from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
+    even_thinning
 from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
+from forestry.cross_cutting import cross_cut_stand, calculate_cross_cut_aggregates
+from sim.core_types import OperationPayload
 
 
 def compute_volume(stand: ForestStand) -> float:
@@ -38,14 +41,38 @@ def report_volume(payload: Tuple[ForestStand, dict], **operation_parameters) -> 
     return stand, new_simulation_aggregates
 
 
+def cross_cut(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    """
+    This is the entry point for calculating cross cut (apteeraus) value and volume.
+    """
+
+    stand, simulation_aggregates = payload
+
+    volumes, values = cross_cut_stand(stand)
+
+    total_volume, total_value = calculate_cross_cut_aggregates(volumes, values)
+
+    new_aggregate = {
+        'cross_cut_volume': total_volume,
+        'cross_cut_value': total_value
+    }
+
+    new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, new_aggregate, 'report_cross_cutting')
+
+    result = (stand, new_simulation_aggregates)
+    return result
+
 
 operation_lookup = {
     'grow_acta': grow_acta,
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
     'thinning_from_below': thinning_from_below,
     'thinning_from_above': thinning_from_above,
+    'first_thinning': first_thinning,
+    'even_thinning': even_thinning,
     'report_volume': report_volume,
-    'report_overall_removal': report_overall_removal
+    'report_overall_removal': report_overall_removal,
+    'cross_cut': cross_cut
 }
 
 try:
