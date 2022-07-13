@@ -1,4 +1,5 @@
 import math
+from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
 
 
@@ -36,10 +37,10 @@ def stem_wood_biomass_vol_1(tree: ReferenceTree, stand: ForestStand, treevolume)
     """
     Returns list: stem wood, stem bark
     """
-    if tree.species == 1:
+    if tree.species == TreeSpecies.PINE:
         stem_with_bark_bm = treevolume * (
                     378.39 - 78.829 * tree.breast_height_diameter / tree.breast_height_age + 0.039 * stand.degree_days)
-    elif tree.species == 2:
+    elif tree.species == TreeSpecies.SPRUCE:
         stem_with_bark_bm = treevolume * (442.03 - 0.904 * stump_diameter(
             tree) - 82.695 * tree.breast_height_diameter / tree.breast_height_age)
     else:
@@ -56,10 +57,10 @@ def stem_wood_biomass_vol_2(tree: ReferenceTree, stand: ForestStand, treevolume,
     """
     Returns list: stem with bark, stem wood with bark, stem waste with bark
     """
-    if tree.species == 1:
+    if tree.species == TreeSpecies.PINE:
         stem_with_bark_bm = treevolume * (
                     378.39 - 78.829 * tree.breast_height_diameter / tree.breast_height_age + 0.039 * stand.degree_days)
-    elif tree.species == 2:
+    elif tree.species == TreeSpecies.SPRUCE:
         stem_with_bark_bm = treevolume * (442.03 - 0.904 * stump_diameter(
             tree) - 82.695 * tree.breast_height_diameter / tree.breast_height_age)
     else:
@@ -74,11 +75,11 @@ def stem_wood_biomass_1(tree: ReferenceTree) -> float:
     """
     Repola J. (2013). Modelling tree biomasses in Finland, p. 25
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -3.721 + 8.103 * (stump_diameter(tree) / (stump_diameter(tree) + 14)) + 5.066 * (
                     tree.height / (tree.height + 12)) + (0.002 + 0.009) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -3.555 + 8.042 * (stump_diameter(tree) / (stump_diameter(tree) + 14)) + 0.869 * math.log(
             tree.height) + 0.015 * tree.height + (0.009 + 0.009) / 2
         bm = math.exp(lnbm)
@@ -99,11 +100,11 @@ def stem_wood_biomass_2(tree: ReferenceTree) -> float:
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
     """
     cl = tree.height - tree.lowest_living_branch_height
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -4.018 + 8.358 * (stump_diameter(tree) / (stump_diameter(tree) + 14)) + 4.646 * (
                     tree.height / (tree.height + 10)) + 0.041 * math.log(tree.breast_height_age) + (0.001 + 0.008) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -4.000 + 8.881 * stump_diameter(tree) / (stump_diameter(tree) + 12) + 0.728 * math.log(
             tree.height) + 0.022 * tree.height - 0.273 * stump_diameter(tree) / tree.breast_height_age + (
                            0.003 + 0.008) / 2
@@ -124,11 +125,11 @@ def stem_bark_biomass_1(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -4.548 + 7.997 * (stump_diameter(tree) / (stump_diameter(tree) + 12)) + 0.357 * (
             math.log(tree.height)) + (0.015 + 0.061) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -4.548 + 9.448 * (stump_diameter(tree) / (stump_diameter(tree) + 18)) + 0.436 * (
             math.log(tree.height)) + (0.023 + 0.041) / 2
         bm = math.exp(lnbm)
@@ -148,11 +149,11 @@ def stem_bark_biomass_2(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 641-645
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -4.695 + 8.727 * (stump_diameter(tree) / (stump_diameter(tree) + 14)) + 0.357 * math.log(tree.height) + (
                     0.014 + 0.057) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -4.437 + 10.071 * (stump_diameter(tree) / (stump_diameter(tree) + 18)) + 0.261 * (
             math.log(tree.height)) + (0.019 + 0.039) / 2
         bm = math.exp(lnbm)
@@ -172,11 +173,11 @@ def living_branches_biomass_1(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -6.162 + 15.075 * (stump_diameter(tree) / (stump_diameter(tree) + 12)) - 2.618 * (
                     tree.height / (tree.height + 12)) + (0.041 + 0.089) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -4.214 + 14.508 * (stump_diameter(tree) / (stump_diameter(tree) + 13)) - 3.277 * (
                     tree.height / (tree.height + 5)) + (0.039 + 0.081) / 2
         bm = math.exp(lnbm)
@@ -197,11 +198,11 @@ def living_branches_biomass_2(tree: ReferenceTree) -> float:
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
     """
     cl = tree.height - tree.lowest_living_branch_height
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -5.224 + 13.022 * (stump_diameter(tree) / (stump_diameter(tree) + 12)) - 4.867 * (
                     tree.height / (tree.height + 8)) + 1.058 * math.log(cl) + (0.02 + 0.067) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -2.945 + 12.698 * (stump_diameter(tree) / (stump_diameter(tree) + 14)) - 6.183 * (
                     tree.height / (tree.height + 5)) + 0.959 * math.log(cl) + (0.013 + 0.072) / 2
         bm = math.exp(lnbm)
@@ -221,11 +222,11 @@ def dead_branches_biomass_1(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -5.201 + 10.574 * (stump_diameter(tree) / (stump_diameter(tree) + 16))
         bm = math.exp(lnbm)
         bm = bm * 0.911
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -4.850 + 7.702 * (stump_diameter(tree) / (stump_diameter(tree) + 18)) + 0.513 * (math.log(tree.height))
         bm = math.exp(lnbm)
         bm = bm * 1.343
@@ -245,10 +246,10 @@ def dead_branches_biomass_2(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 641-645
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -5.318 + 10.771 * (stump_diameter(tree) / (stump_diameter(tree) + 16))
         bm = math.exp(lnbm) * 0.913
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -5.317 + 6.384 * (stump_diameter(tree) / (stump_diameter(tree) + 18)) + 0.982 * math.log(tree.height)
         bm = math.exp(lnbm) * 1.208
     else:  # Others, model for Birch
@@ -262,10 +263,10 @@ def dead_branches_biomass_2(tree: ReferenceTree) -> float:
 
 # Dead branches biomass 2b f(d,h,cr)
 def dead_branches_biomass_2b(tree: ReferenceTree) -> float:
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -5.334 + 10.789 * (stump_diameter(tree) / (stump_diameter(tree) + 16))
         bm = math.exp(lnbm) * 1.242
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -5.467 + 6.252 * (stump_diameter(tree) / (stump_diameter(tree) + 18)) + 1.068 * math.log(tree.height)
         bm = math.exp(lnbm) * 1.181
     else:  # Others, model for Birch
@@ -283,11 +284,11 @@ def foliage_biomass_1(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -6.303 + 14.472 * (stump_diameter(tree) / (stump_diameter(tree) + 6)) - 3.976 * (
                     tree.height / (tree.height + 1)) + (0.109 + 0.118) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -2.994 + 12.251 * (stump_diameter(tree) / (stump_diameter(tree) + 10)) - 3.415 * (
                     tree.height / (tree.height + 1)) + (0.107 + 0.089) / 2
         bm = math.exp(lnbm)
@@ -308,11 +309,11 @@ def foliage_biomass_2(tree: ReferenceTree) -> float:
     """
     cl = tree.height - tree.lowest_living_branch_height
     cr = (tree.height - tree.lowest_living_branch_height) / tree.height
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -1.748 + 14.824 * (stump_diameter(tree) / (stump_diameter(tree) + 4)) - 12.684 * (
                     tree.height / (tree.height + 1)) + 1.209 * math.log(cl) + (0.032 + 0.093) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -0.085 + 15.222 * (stump_diameter(tree) / (stump_diameter(tree) + 4)) - 14.446 * (
                     tree.height / (tree.height + 1)) + 1.273 * math.log(cl) + (0.028 + 0.087) / 2
         bm = math.exp(lnbm)
@@ -329,11 +330,11 @@ def foliage_biomass_2(tree: ReferenceTree) -> float:
 def foliage_biomass_2b(tree: ReferenceTree) -> float:
     cl = tree.height - tree.lowest_living_branch_height
     cr = (tree.height - tree.lowest_living_branch_height) / tree.height
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -2.385 + 15.022 * (stump_diameter(tree) / (stump_diameter(tree) + 4)) - 11.979 * (
                     tree.height / (tree.height + 1)) + 1.116 * math.log(cl) + (0.034 + 0.095) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = 0.286 + 16.286 * (stump_diameter(tree) / (stump_diameter(tree) + 4)) - 15.576 * (
                     tree.height / (tree.height + 1)) + 1.17 * math.log(cl) + (0.021 + 0.09) / 2
         bm = math.exp(lnbm)
@@ -352,10 +353,10 @@ def stump_biomass_1(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -6.753 + 12.681 * (stump_diameter(tree) / (stump_diameter(tree) + 12)) + (0.010 + 0.044) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -3.964 + 11.730 * (stump_diameter(tree) / (stump_diameter(tree) + 26)) + (0.065 + 0.058) / 2
         bm = math.exp(lnbm)
     else:  # Others, model for Birch
@@ -369,10 +370,10 @@ def stump_biomass_1(tree: ReferenceTree) -> float:
 
 # Stump biomass 1b f(d,h)
 def stump_biomass_1b(tree: ReferenceTree) -> float:
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -6.739 + 12.658 * (stump_diameter(tree) / (stump_diameter(tree) + 12)) + (0.009 + 0.044) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -3.962 + 11.725 * (stump_diameter(tree) / (stump_diameter(tree) + 26)) + (0.065 + 0.058) / 2
         bm = math.exp(lnbm)
     else:  # Others, model for Birch
@@ -390,10 +391,10 @@ def roots_biomass_1(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 631-633
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 611-613
     """
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -5.550 + 13.408 * (stump_diameter(tree) / (stump_diameter(tree) + 15)) + (0.000 + 0.079) / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -2.294 + 10.646 * (stump_diameter(tree) / (stump_diameter(tree) + 24)) + (0.105 + 0.114) / 2
         bm = math.exp(lnbm)
     else:  # Others, model for Birch
@@ -408,10 +409,10 @@ def roots_biomass_1(tree: ReferenceTree) -> float:
 
 # Coarse roots (>1cm) 1b f(d,h)
 def roots_biomass_1b(tree: ReferenceTree) -> float:
-    if tree.species == 1:  # Scots Pine
+    if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -5.6 + 13.49 * (stump_diameter(tree) / (stump_diameter(tree) + 15)) + 0.077 / 2
         bm = math.exp(lnbm)
-    elif tree.species == 2:  # Norway Spruce
+    elif tree.species == TreeSpecies.SPRUCE:  # Norway Spruce
         lnbm = -2.295 + 10.649 * (stump_diameter(tree) / (stump_diameter(tree) + 24)) + (0.105 + 0.114) / 2
         bm = math.exp(lnbm)
     else:  # Others, model for Birch

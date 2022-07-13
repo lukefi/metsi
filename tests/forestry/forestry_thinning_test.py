@@ -24,7 +24,7 @@ class ThinningsTest(ConverterTestSuite):
             self.assertEqual(i[1], result)
 
     def test_first_thinning(self):
-        species = [1, 2, 2]
+        species = [TreeSpecies(i) for i in [1, 2, 2]]
         diameters = [12.0, 16.0, 12.0]
         stems = [300, 600, 200]
 
@@ -171,7 +171,7 @@ class ThinningLimitsTest(ConverterTestSuite):
     def test_get_first_thinning_residue(self):
         stand = ForestStand()
         stand.site_type_category = 1
-        species = [1, 2, 2]
+        species = [TreeSpecies(i) for i in [1, 2, 2]]
         diameters = [12.0, 16.0, 12.0]
         stems = [450.0, 600.0, 500.0]
         stand.reference_trees = [
@@ -248,17 +248,17 @@ class ThinningLimitsTest(ConverterTestSuite):
     def test_get_thinning_bounds(self):
         tree_variables = [
             {
-                'species': 2,
+                'species': TreeSpecies.SPRUCE,
                 'breast_height_diameter': 10.0,
                 'stems_per_ha': 100.0
             },
             {
-                'species': 1,
+                'species': TreeSpecies.PINE,
                 'breast_height_diameter': 10.0,
                 'stems_per_ha': 100.0
             },
             {
-                'species': 2,
+                'species': TreeSpecies.SPRUCE,
                 'breast_height_diameter': 10.0,
                 'stems_per_ha': 100.0
             }
