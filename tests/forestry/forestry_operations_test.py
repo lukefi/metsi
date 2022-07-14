@@ -1,4 +1,6 @@
 import unittest
+
+from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestry.grow_acta import grow_acta
 
@@ -9,7 +11,7 @@ class ForestryOperationsTest(unittest.TestCase):
         reference_trees = []
         for i in range(0, 5):
             reference_trees.append(ReferenceTree(
-                species=species[i],
+                species=TreeSpecies(species[i]),
                 breast_height_diameter=10.0+i,
                 stems_per_ha=50.0+i,
                 height=28.0+i,
