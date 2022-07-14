@@ -245,3 +245,99 @@ class ForestryOperationsTest(unittest.TestCase):
         stand = ForestStand(degree_days=1150)
         volume = 0.54
         self.assertAlmostEqual(round(sum(biomass.tree_biomass(tree, stand, volume, 0, 2)), 3), 0.380)
+
+    def test_biomasses_by_stand_model_set_1(self):
+        stand = ForestStand(
+            reference_trees=[
+                ReferenceTree(
+                    height=15.0,
+                    species=TreeSpecies.PINE,
+                    breast_height_diameter=20.0,
+                    breast_height_age=10,
+                    stems_per_ha=34.0
+                ),
+                ReferenceTree(
+                    height=1.0,
+                    species=TreeSpecies.PINE,
+                    breast_height_diameter=2.0,
+                    stems_per_ha=153.0
+                )
+            ]
+        )
+
+        # TODO: sanity of these values is unknown to yours truly, help needed
+        treevolumes = [100.0, 10.0]
+        wastevolumes = [10.0, 1.0]
+
+        result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 1)
+        self.assertEqual([
+            2.901904782670537,
+            0.2621029279780194,
+            0.6212887091887855,
+            0.1365537373913646,
+            0.24537681591884583,
+            0.26942696745250677,
+            0.7720028796388301,
+            0.0],
+            result)
+
+    def test_biomasses_by_stand_model_set_2(self):
+        stand = ForestStand(
+            reference_trees=[
+                ReferenceTree(
+                    height=15.0,
+                    species=TreeSpecies.PINE,
+                    breast_height_diameter=20.0,
+                    breast_height_age=10,
+                    stems_per_ha=34.0,
+                    lowest_living_branch_height=4.0
+                )
+            ]
+        )
+
+        # TODO: sanity of these values is unknown to yours truly, help needed
+        treevolumes = [100.0, 10.0]
+        wastevolumes = [10.0, 1.0]
+
+        result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 2)
+        self.assertEqual([
+            2.6943581559391907,
+            0.26525277171872336,
+            0.8320845495264283,
+            0.13170007427768654,
+            0.3173139669940983,
+            0.2649429105180369,
+            0.7614991804052376,
+            0.0],
+            result)
+
+    def test_biomasses_by_stand_model_set_3(self):
+        stand = ForestStand(
+            degree_days=890.0,
+            reference_trees=[
+                ReferenceTree(
+                    height=15.0,
+                    species=TreeSpecies.PINE,
+                    breast_height_diameter=20.0,
+                    breast_height_age=10,
+                    stems_per_ha=34.0,
+                    lowest_living_branch_height=4.0
+                )
+            ]
+        )
+
+        # TODO: sanity of these values is unknown to yours truly, help needed
+        treevolumes = [100.0, 10.0]
+        wastevolumes = [10.0, 1.0]
+
+        result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 3)
+        self.assertEqual([
+            868.5028,
+            781.65252,
+            86.85028,
+            0.8320845495264283,
+            0.1783186075300313,
+            0.3173139669940983,
+            0.26430171061769187,
+            0.7628057271488852],
+            result)

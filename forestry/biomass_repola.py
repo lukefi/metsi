@@ -497,6 +497,15 @@ def small_tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewa
 
 
 def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, models) -> list:
+    """
+    Compute total biomass tonnages for the given ForestStand.
+
+    :param stand: source data ForestStand
+    :param treevolumes: TODO: needs to be documented
+    :param wastevolumes: TODO: needs to be documented
+    :param models: pre-set integer value for a model set to use. See tree_biomass function for details.
+    :return: a list of values denoting biomass tonnages
+    """
     biomass_components = [0, 0, 0, 0, 0, 0, 0, 0]
     for i in range(0, len(stand.reference_trees)):
         tree = stand.reference_trees[i]
