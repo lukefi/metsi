@@ -206,7 +206,7 @@ class ForestryOperationsTest(unittest.TestCase):
                 df["runko kuorineen"][i] + df["runko aines"][i] + df["runko hukka"][i] + df["elävät oksat"][i] +
                 df["kuolleet oksat"][i] + df["lehdet"][i] + df["kannot"][i] + df["juuret_karkea"][i])
             biomass_totals_models.append(
-                sum(biomass.tree_biomass(stand.reference_trees[i], stand, df["Tilavuus"][i], df["Hukka"][i], 3)))
+                biomass.tree_biomass(stand.reference_trees[i], stand, df["Tilavuus"][i], df["Hukka"][i], 3).total())
         self.assertLess(abs(sum(biomass_totals_models) - sum(biomass_totals_OPEMOTTI)), 1.32)
 
     def test_tree_biomass_models4(self):
@@ -230,21 +230,21 @@ class ForestryOperationsTest(unittest.TestCase):
             biomass_totals_MELA.append(
                 df["runko"][i] + df["kuori"][i] + df["elavat oksat"][i] + df["kuolleet oksat"][i] + df["lehdet"][i] +
                 df["kanto"][i] + df["juuret 2 mm"][i])
-            biomass_totals_models.append(sum(biomass.tree_biomass(stand.reference_trees[i], stand, df["v"][i], 0, 4)))
+            biomass_totals_models.append(biomass.tree_biomass(stand.reference_trees[i], stand, df["v"][i], 0, 4).total())
         self.assertLess(abs(sum(biomass_totals_models) - sum(biomass_totals_MELA)), 0.03)
 
     def test_tree_biomass_models1(self):
         tree = ReferenceTree(breast_height_diameter=29.4, breast_height_age=31, height=18.1, species=TreeSpecies.SPRUCE)
         stand = ForestStand(degree_days=1150)
         volume = 0.54
-        self.assertAlmostEqual(round(sum(biomass.tree_biomass(tree, stand, volume, 0, 1)), 3), 0.409)
+        self.assertAlmostEqual(round(biomass.tree_biomass(tree, stand, volume, 0, 1).total(), 3), 0.409)
 
     def test_tree_biomass_models2(self):
         tree = ReferenceTree(breast_height_diameter=29.4, breast_height_age=31, height=18.1, species=TreeSpecies.SPRUCE,
                              lowest_living_branch_height=2.715)
         stand = ForestStand(degree_days=1150)
         volume = 0.54
-        self.assertAlmostEqual(round(sum(biomass.tree_biomass(tree, stand, volume, 0, 2)), 3), 0.380)
+        self.assertAlmostEqual(round(biomass.tree_biomass(tree, stand, volume, 0, 2).total(), 3), 0.380)
 
     def test_biomasses_by_stand_model_set_1(self):
         stand = ForestStand(
@@ -270,15 +270,15 @@ class ForestryOperationsTest(unittest.TestCase):
         wastevolumes = [10.0, 1.0]
 
         result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 1)
-        self.assertEqual([
-            2.901904782670537,
-            0.2621029279780194,
-            0.6212887091887855,
-            0.1365537373913646,
-            0.24537681591884583,
-            0.26942696745250677,
-            0.7720028796388301,
-            0.0],
+        self.assertEqual(biomass.BiomassData(
+            stem_wood=2.901904782670537,
+            stem_bark=0.2621029279780194,
+            stem_waste=0.0,
+            living_branches=0.6212887091887855,
+            dead_branches=0.1365537373913646,
+            foliage=0.24537681591884583,
+            stumps=0.26942696745250677,
+            roots=0.7720028796388301),
             result)
 
     def test_biomasses_by_stand_model_set_2(self):
@@ -300,15 +300,15 @@ class ForestryOperationsTest(unittest.TestCase):
         wastevolumes = [10.0, 1.0]
 
         result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 2)
-        self.assertEqual([
-            2.6943581559391907,
-            0.26525277171872336,
-            0.8320845495264283,
-            0.13170007427768654,
-            0.3173139669940983,
-            0.2649429105180369,
-            0.7614991804052376,
-            0.0],
+        self.assertEqual(biomass.BiomassData(
+            stem_wood=2.6943581559391907,
+            stem_bark=0.26525277171872336,
+            stem_waste=0.0,
+            living_branches=0.8320845495264283,
+            dead_branches=0.13170007427768654,
+            foliage=0.3173139669940983,
+            stumps=0.2649429105180369,
+            roots=0.7614991804052376),
             result)
 
     def test_biomasses_by_stand_model_set_3(self):
@@ -331,13 +331,13 @@ class ForestryOperationsTest(unittest.TestCase):
         wastevolumes = [10.0, 1.0]
 
         result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 3)
-        self.assertEqual([
-            868.5028,
-            781.65252,
-            86.85028,
-            0.8320845495264283,
-            0.1783186075300313,
-            0.3173139669940983,
-            0.26430171061769187,
-            0.7628057271488852],
+        self.assertEqual(biomass.BiomassData(
+            stem_wood=868.5028,
+            stem_bark=781.65252,
+            stem_waste=86.85028,
+            living_branches=0.8320845495264283,
+            dead_branches=0.1783186075300313,
+            foliage=0.3173139669940983,
+            stumps=0.26430171061769187,
+            roots=0.7628057271488852),
             result)
