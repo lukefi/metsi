@@ -453,26 +453,41 @@ class BiomassData:
     def __add__(self, other):
         return self.__radd__(other)
 
-    def __radd__(self, other: 'BiomassData'):
-        if type(other) != BiomassData:
-            return self
-        return BiomassData(
-            stem_wood=self.stem_wood + other.stem_wood,
-            stem_bark=self.stem_bark + other.stem_bark,
-            stem_waste=self.stem_waste + other.stem_waste,
-            living_branches=self.living_branches + other.living_branches,
-            dead_branches=self.dead_branches + other.dead_branches,
-            foliage=self.foliage + other.foliage,
-            stumps=self.stumps + other.stumps,
-            roots=self.roots + other.roots
-        )
+    def __radd__(self, other: 'BiomassData' or float or int):
+        if type(other) in (float, int):
+            return BiomassData(
+                stem_wood=self.stem_wood + other,
+                stem_bark=self.stem_bark + other,
+                stem_waste=self.stem_waste + other,
+                living_branches=self.living_branches + other,
+                dead_branches=self.dead_branches + other,
+                foliage=self.foliage + other,
+                stumps=self.stumps + other,
+                roots=self.roots + other
+            )
+        elif type(other) == BiomassData:
+            return BiomassData(
+                stem_wood=self.stem_wood + other.stem_wood,
+                stem_bark=self.stem_bark + other.stem_bark,
+                stem_waste=self.stem_waste + other.stem_waste,
+                living_branches=self.living_branches + other.living_branches,
+                dead_branches=self.dead_branches + other.dead_branches,
+                foliage=self.foliage + other.foliage,
+                stumps=self.stumps + other.stumps,
+                roots=self.roots + other.roots
+            )
+        else:
+            raise Exception("Can only do addition between numbers and BiomassData, not {}".format(type(other)))
+
+    def __sub__(self, other):
+        return self + (other * - 1)
 
     def __mul__(self, factor):
         return self.__rmul__(factor)
 
     def __rmul__(self, factor):
         if type(factor) not in (int, float):
-            raise Exception("Can multiply BiomassData only with a number.")
+            raise Exception("Can multiply BiomassData only with float or int, not {}".format(type(factor)))
         return BiomassData(
             stem_wood=self.stem_wood * factor,
             stem_bark=self.stem_bark * factor,
