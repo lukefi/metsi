@@ -1,15 +1,15 @@
+from itertools import repeat
 from forestryfunctions import forestry_utils as futil
 from functools import reduce
-from collections import OrderedDict
 from typing import Tuple
 from forestdatamodel.model import ForestStand
+from forestry.biomass_repola import biomasses_by_component_stand, BiomassData
 from forestry.grow_acta import grow_acta
 from forestry.r_utils import lmfor_volume
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
 from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
 from forestry.cross_cutting import cross_cut_stand, calculate_cross_cut_aggregates
-from sim.core_types import OperationPayload
 
 
 def compute_volume(stand: ForestStand) -> float:
@@ -63,6 +63,30 @@ def cross_cut(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tupl
     return result
 
 
+def report_biomass(input: tuple[ForestStand, dict], **operation_params) -> tuple[ForestStand, dict]:
+    """For the given ForestStand, this operation computes and stores the current biomass tonnage and difference to last
+    calculation into the aggregate structure."""
+    stand, aggregates = input
+    latest_result = get_latest_operation_aggregate(aggregates, 'report_biomass')
+    models = operation_params.get('model_set', 1)
+
+    # TODO: need proper functionality to find tree volumes, model_set 2 and 3 don't work properly otherwise
+    volumes = list(repeat(100.0, len(stand.reference_trees)))
+    # TODO: need proper functionality to find waste volumes, model_set 2 and 3 don't work properly otherwise
+    wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
+
+    biomass = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
+    if latest_result is None:
+        new_aggregate = {'difference': BiomassData(), 'current': biomass}
+    else:
+        new_aggregate = {
+            'difference': latest_result['difference'] + biomass - latest_result['current'],
+            'current': biomass
+        }
+
+    return stand, store_operation_aggregate(aggregates, new_aggregate, 'report_biomass')
+
+
 operation_lookup = {
     'grow_acta': grow_acta,
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
@@ -70,6 +94,7 @@ operation_lookup = {
     'thinning_from_above': thinning_from_above,
     'first_thinning': first_thinning,
     'even_thinning': even_thinning,
+    'report_biomass': report_biomass,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
     'cross_cut': cross_cut

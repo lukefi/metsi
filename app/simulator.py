@@ -30,8 +30,10 @@ def print_run_result(results: dict):
             print("{} variant {} result: ".format(id, i), end='')
             print_stand_result(result.simulation_state)
             last_volume_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_volume')
+            last_biomass_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_biomass')
             last_removal_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_overall_removal')
             print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
+            print("variant {} biomass report: {}".format(i, last_biomass_reporting_aggregate))
             print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
 
 def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -> List[ForestStand]:
