@@ -267,8 +267,12 @@ class ThinningLimitsTest(ConverterTestSuite):
         stand = ForestStand(**stand_variables)
         stand.reference_trees = [ReferenceTree(**tv) for tv in tree_variables]
 
+        thinning_limits = open('tests/resources/thinning_limits.txt', 'r').read()
+
         assertions = [
-            ([stand], (15.2, 24.0))
+            ([stand], (15.2, 24.0)),
+            ([stand, thinning_limits], (15.2, 24.0)) #uses thinning_limits.txt as the source for thinning limits
+
         ]
         self.run_with_test_assertions(assertions, resolve_thinning_bounds)
 
