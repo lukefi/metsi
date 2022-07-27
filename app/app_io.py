@@ -1,6 +1,9 @@
 import argparse
 from typing import List
 
+def function_arguments_to_argparse_namespace(args: dict):
+    ns = argparse.Namespace(**args)
+    return ns
 
 def sim_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 simulator')
