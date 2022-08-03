@@ -148,11 +148,20 @@ class ThinningsTest(ConverterTestSuite):
     def test_report_overall_removal(self):
         operation_results = {
             'thin1': OrderedDict({
-                0: {'stems_removed': 100}
+                0: {'thinning_output': {
+                    'tree-1': {'stems_removed_per_ha': 100}
+                }
+                    }
             }),
             'thin2': OrderedDict({
-                0: {'stems_removed': 200},
-                15: {'stems_removed': 300}
+                0: {'thinning_output': {
+                    'tree-1': {'stems_removed_per_ha': 200}
+                }
+                    },
+                15: {'thinning_output': {
+                    'tree-2': {'stems_removed_per_ha': 300}
+                }
+                    }
             })
         }
         simulation_aggregates = {
