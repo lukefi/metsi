@@ -1,7 +1,7 @@
 from typing import Any, Callable, List, Optional, Dict
 from sim.core_types import Step, SimulationParams
 from sim.operations import prepared_processor, prepared_operation, resolve_operation
-from sim.util import get_or_default, dict_value, read_operation_file_params, merge_operation_params 
+from sim.util import get_or_default, dict_value, read_operation_file_params, merge_operation_params
 
 
 def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
@@ -80,7 +80,7 @@ def simple_processable_chain(operation_tags: List[str], operation_params: dict, 
     tags and operation parameters"""
     result = []
     for tag in operation_tags:
-        params = operation_params.get(tag, {})
+        params = operation_params.get(tag, [{}])[0]
         result.append(prepared_operation(resolve_operation(tag, operation_lookup), **params))
     return result
 
