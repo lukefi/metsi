@@ -1,13 +1,13 @@
 from forestryfunctions import forestry_utils as futil
 from functools import reduce
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from typing import Tuple
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
 from forestry.r_utils import lmfor_volume
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
-from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
+from forestry.aggregate_utils import store_operation_aggregate, store_post_processing_aggregate, get_latest_operation_aggregate
 # from forestry.cross_cutting import cross_cut_stand, cross_cut_thinning_output, calculate_cross_cut_aggregates
 from sim.core_types import OperationPayload
 import forestry.cross_cutting as cross_cutting
@@ -69,11 +69,11 @@ def cross_cut_thinning_output(payload: Tuple[ForestStand, dict], **operation_par
     stand, simulation_aggregates = payload
     # proceed only if simulation_aggregates contains thinning output, although it doesn't feel ideal to rely on such a list of thinning operations as below..
     THINNING_OPERATIONS = ["thinning_from_above", "thinning_from_below", "even_thinning", "first_thinning"]
-    thinning_aggregates = {}
 
     if not any(thinning_operation in simulation_aggregates['operation_results'] for thinning_operation in THINNING_OPERATIONS):
         return stand, simulation_aggregates
     else:
+        thinning_aggregates = defaultdict(dict)
         #there's likely always only one thinning_operation in the current schedule, so this loop will only run once
         for thinning_operation in THINNING_OPERATIONS:
             if thinning_operation in simulation_aggregates['operation_results']:
@@ -86,14 +86,14 @@ def cross_cut_thinning_output(payload: Tuple[ForestStand, dict], **operation_par
 
                     total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
                     
-                    thinning_aggregates[thinning_operation] ={
+                    thinning_aggregates[thinning_operation][time_point] = {
                         'cross_cut_volume': total_volume,
                         'cross_cut_value': total_value
                     }
         
         # currently I don't know whether some of these aggregates can be written into again -- this may be the case especially if operation alternatives can be branched by parameters
         # furthermore, the time_point variable in the loop doesn't always match 'current_time_point' that is used in store_operation_aggregate. Where does the difference come from?
-        new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, thinning_aggregates, 'report_cross_cutting')
+        new_simulation_aggregates = store_post_processing_aggregate(simulation_aggregates, thinning_aggregates, 'thinning_stats')
 
         result = (stand, new_simulation_aggregates)
         return result
