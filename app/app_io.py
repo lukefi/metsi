@@ -1,7 +1,7 @@
 import argparse
 from typing import List
 
-def function_arguments_to_argparse_namespace(args: dict):
+def test_arguments_to_argparse_namespace(args: dict) -> argparse.Namespace:
     ns = argparse.Namespace(**args)
     return ns
 

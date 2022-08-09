@@ -8,7 +8,7 @@ from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evalu
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
 from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, pickle_writer
-from app.app_io import sim_cli_arguments, function_arguments_to_argparse_namespace
+from app.app_io import sim_cli_arguments, test_arguments_to_argparse_namespace
 from forestry.aggregate_utils import get_latest_operation_aggregate
 
 start_time = time.time_ns()
@@ -80,10 +80,9 @@ def resolve_strategy_runner(source: str) -> Callable:
         raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
 
 def main(test_automation_arguments: dict = None):
-    """:test_automation_arguments: are only passed in from a test that ensures the whole simulator remains runnable after feature changes."""
 
     if test_automation_arguments is not None:
-        app_arguments = function_arguments_to_argparse_namespace(test_automation_arguments)
+        app_arguments = test_arguments_to_argparse_namespace(test_automation_arguments)
     else:
         app_arguments = sim_cli_arguments(sys.argv[1:])
         
