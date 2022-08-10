@@ -47,12 +47,14 @@ class ThinningsTest(ConverterTestSuite):
             'dominant_height_upper_bound': 16
         }
         payload = (stand, simulation_aggregates)
-        result_stand, result_aggregates = thin.first_thinning(payload, **operation_parameters)
+        result_stand, collected_aggregates = thin.first_thinning(payload, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
         self.assertEqual(257.6202, round(result_stand.reference_trees[0].stems_per_ha, 4))
         self.assertEqual(180.7842, round(result_stand.reference_trees[1].stems_per_ha, 4))
         self.assertEqual(570.594, round(result_stand.reference_trees[2].stems_per_ha, 4))
-        self.assertEqual(91.0016, round(result_aggregates['operation_results'][operation_tag][0]['stems_removed'], 4))
+        self.assertEqual(91.0016, round(            
+            list(list(collected_aggregates['operation_results'][operation_tag].values())[-1]['thinning_output'].values())[-1]['stems_removed_per_ha'], 4))
+
 
     def test_thinning_from_above(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -83,7 +85,7 @@ class ThinningsTest(ConverterTestSuite):
         self.assertEqual(145.4833, round(result_stand.reference_trees[1].stems_per_ha, 4))
         self.assertEqual(170.2916, round(result_stand.reference_trees[2].stems_per_ha, 4))
         self.assertEqual(163.1459, round(
-            list(collected_aggregates['operation_results'][operation_tag].values())[-1]['stems_removed'], 4))
+            list(list(collected_aggregates['operation_results'][operation_tag].values())[-1]['thinning_output'].values())[-1]['stems_removed_per_ha'], 4))
 
     def test_thinning_from_below(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -113,7 +115,7 @@ class ThinningsTest(ConverterTestSuite):
         self.assertEqual(142.5737, round(result_stand.reference_trees[1].stems_per_ha, 4))
         self.assertEqual(170.2745, round(result_stand.reference_trees[2].stems_per_ha, 4))
         self.assertEqual(170.9866, round(
-            list(collected_aggregates['operation_results']['thinning_from_below'].values())[-1]['stems_removed'], 4))
+            list(list(collected_aggregates['operation_results']['thinning_from_below'].values())[-1]['thinning_output'].values())[-1]['stems_removed_per_ha'], 4))
 
     def test_even_thinning(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -143,7 +145,7 @@ class ThinningsTest(ConverterTestSuite):
         self.assertEqual(100.5, round(result_stand.reference_trees[1].stems_per_ha, 4))
         self.assertEqual(101.0, round(result_stand.reference_trees[2].stems_per_ha, 4))
         self.assertEqual(301.5, round(
-            list(collected_aggregates['operation_results']['even_thinning'].values())[-1]['stems_removed'], 4))
+            list(list(collected_aggregates['operation_results']['even_thinning'].values())[-1]['thinning_output'].values())[-1]['stems_removed_per_ha'], 4))
 
     def test_report_overall_removal(self):
         operation_results = {
@@ -164,6 +166,7 @@ class ThinningsTest(ConverterTestSuite):
                     }
             })
         }
+
         simulation_aggregates = {
             'operation_results': operation_results,
             'current_time_point': 30,
