@@ -1,6 +1,19 @@
 # Tämä ohjelma esittää, miten R-aliohjelmia käytetään
 # tehty 28.02.2022 Annika Kangas
-# Esimerkki runkokäyrien soveltamiseen
+
+source("./r/cross_cutting/ApteerausNasberg.R")
+source("./r/cross_cutting/Runkokayraennusteet.R")
+source("./r/cross_cutting/Tilavuus.R")
+source("./r/cross_cutting/Runkokayran korjausmalli.R")
+source("./r/cross_cutting/Korjauskertoimet.R")
+
+
+taper_curve_list <- list("birch" = readRDS(file.path("./r/cross_cutting/taper_curves/birch.rds")),
+                         "pine" = readRDS(file.path("./r/cross_cutting/taper_curves/pine.rds")),
+                         "spruce" = readRDS(file.path("./r/cross_cutting/taper_curves/spruce.rds")))
+
+timber_grades_table <- read.table("./r/cross_cutting/Puutavaralajimaarittelyt.txt")
+
 
 # species_string can be one of "pine", "spruce" or "birch".
 # dbh is breast height diameter
@@ -9,16 +22,12 @@
 # Div is the segment height in cm (default 10cm)
 cross_cut <- function(species_string, dbh, height, hkanto=0.1, div=10) {
 
-    # taper_curve_list should be initialised in r/cross_cutting/source_cross_cutting_dependencies.R
-    # this is to prevent reading it from file for every tree
     taper_curve <- taper_curve_list[[species_string]]
 
     # josta ne voi lukea tavalliseksi vektoriksi
     # Laasasenahon malli "climbed", VAPU-aineistosta malli "felled"
     # TLS aineistosta malli "scanned"
 
-    # timber_grades_table should be initialised by sourcing r/cross_cutting/source_cross_cutting_dependencies.R
-    # this is to prevent reading it from file for every tree
     P <- timber_grades_table
 
     ##################################

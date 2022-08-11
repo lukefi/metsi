@@ -18,7 +18,6 @@ def _get_r_with_sourced_scripts():
     global cross_cut_loaded
     r = robjects.r
     if not cross_cut_loaded:
-        r.source("r/cross_cutting/source_cross_cutting_dependencies.R")
         r.source("r/cross_cutting/cross_cutting_main.R")
         cross_cut_loaded = True
     return r
