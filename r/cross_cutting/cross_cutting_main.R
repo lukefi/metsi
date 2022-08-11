@@ -1,7 +1,6 @@
 # Tämä ohjelma esittää, miten R-aliohjelmia käytetään
 # tehty 28.02.2022 Annika Kangas
 # Esimerkki runkokäyrien soveltamiseen
-# Tarvittavat aliohjelmat
 
 # species_string can be one of "pine", "spruce" or "birch".
 # dbh is breast height diameter
@@ -10,21 +9,17 @@
 # Div is the segment height in cm (default 10cm)
 cross_cut <- function(species_string, dbh, height, hkanto=0.1, div=10) {
 
-    source("./r/cross_cutting/ApteerausNasberg.R")
-    source("./r/cross_cutting/Runkokayraennusteet.R")
-    source("./r/cross_cutting/Tilavuus.R")
-    source("./r/cross_cutting/Runkokayran korjausmalli.R")
-    source("./r/cross_cutting/Korjauskertoimet.R")
+    # taper_curve_list should be initialised in r/cross_cutting/source_cross_cutting_dependencies.R
+    # this is to prevent reading it from file for every tree
+    taper_curve <- taper_curve_list[[species_string]]
 
-    # read taper curves
-    taper_curve_file <- file.path("./r/cross_cutting/taper_curves", paste(species_string,".rds", sep=''))
-    taper_curve <- readRDS(taper_curve_file) #"./r/cross_cutting/taper_curves/pine taper curve.rds")#
     # josta ne voi lukea tavalliseksi vektoriksi
     # Laasasenahon malli "climbed", VAPU-aineistosta malli "felled"
     # TLS aineistosta malli "scanned"
 
-    # puutavaralajien määrittelyt apteerausta varten taulukko
-    P <- read.table("./r/cross_cutting/Puutavaralajimaarittelyt.txt")
+    # timber_grades_table should be initialised by sourcing r/cross_cutting/source_cross_cutting_dependencies.R
+    # this is to prevent reading it from file for every tree
+    P <- timber_grades_table
 
     ##################################
 
@@ -72,7 +67,6 @@ cross_cut <- function(species_string, dbh, height, hkanto=0.1, div=10) {
     # vaihe 3. lasketaan tilavuus integroimalla runkokäyrää
 
     vhat <- volume(hkanto, dbh, height, coefnew)
-    vhat$v
 
     # vaihe 4. muodostetaan puutason lähtötiedot apteeraukseen
     # n -- number of tree segments, integer
@@ -86,8 +80,6 @@ cross_cut <- function(species_string, dbh, height, hkanto=0.1, div=10) {
 
     # Apteerausaliohjelman kutsu
     Apt <- apt(height, T, P, m, n, div)
-    Apt$volumes
-    Apt$values
 
     return(Apt)
 }

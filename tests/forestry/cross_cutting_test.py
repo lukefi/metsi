@@ -1,9 +1,10 @@
+from email import iterators
+import time
 import unittest
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 import rpy2.robjects as robjects
 from forestry import r_utils, cross_cutting
-
 
 class CrossCuttingTest(unittest.TestCase):
 
@@ -82,4 +83,20 @@ class CrossCuttingTest(unittest.TestCase):
         self.assertEqual(values[2], [7.930482660974712e-05, 2.357056089393987e-05])
 
 
+
+    def test_benchmark_cross_cut_execution(self):
+        
+        #add sourcing the deps to the "factory" function in the cross_cutting module
+        robjects.r.source("r/cross_cutting/source_cross_cutting_dependencies.R")
+        robjects.r.source("r/cross_cutting/cross_cutting_main.R")
+
+        iterations = 30
+        for x in range(0,5):
+            start = time.time()
+            for _ in range(0,iterations):
+                result = robjects.r["cross_cut"]("pine", 30, 25)
+            
+            finish = time.time()
+            print(f"Cross cutting of {iterations} trees took {finish - start} seconds.")
+        self.assertTrue(True)
 
