@@ -67,36 +67,27 @@ def cross_cut_whole_stand(payload: Tuple[ForestStand, dict], **operation_paramet
 def cross_cut_thinning_output(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
     
     stand, simulation_aggregates = payload
-    # proceed only if simulation_aggregates contains thinning output, although it doesn't feel ideal to rely on such a list of thinning operations as below..
-    THINNING_OPERATIONS = ["thinning_from_above", "thinning_from_below", "even_thinning", "first_thinning"]
+    thinning_aggregates = defaultdict(dict)
 
-    if not any(thinning_operation in simulation_aggregates['operation_results'] for thinning_operation in THINNING_OPERATIONS):
-        return stand, simulation_aggregates
-    else:
-        thinning_aggregates = defaultdict(dict)
-        #there's likely always only one thinning_operation in the current schedule, so this loop will only run once
-        for thinning_operation in THINNING_OPERATIONS:
-            if thinning_operation in simulation_aggregates['operation_results']:
-                thinning_results_per_time_point = simulation_aggregates["operation_results"][thinning_operation].items()
-                #is it so that a 'schedule' represents an operation in a given time point? 
-                #if so, then there's only one time point per schedule, so this loop will run only once
-                for time_point, thinning_results in thinning_results_per_time_point:
-                    thinned_trees = thinning_results["thinning_output"]
+    for operation_name, operation_results in simulation_aggregates['operation_results'].items():
+        if operation_name not in ['report_volume', 'report_overall_removal']: #do not search for thinning_output in operations we know for sure are not related to thinning
+            for time_point, aggregate in operation_results.items():
+                if 'thinning_output' in aggregate.keys():
+                    thinned_trees = aggregate['thinning_output']
+                    
                     volumes, values = cross_cutting.cross_cut_thinning_output(thinned_trees)
 
                     total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
                     
-                    thinning_aggregates[thinning_operation][time_point] = {
+                    thinning_aggregates[operation_name][time_point] = {
                         'cross_cut_volume': total_volume,
                         'cross_cut_value': total_value
                     }
-        
-        # currently I don't know whether some of these aggregates can be written into again -- this may be the case especially if operation alternatives can be branched by parameters
-        # furthermore, the time_point variable in the loop doesn't always match 'current_time_point' that is used in store_operation_aggregate. Where does the difference come from?
-        new_simulation_aggregates = store_post_processing_aggregate(simulation_aggregates, thinning_aggregates, 'thinning_stats')
 
-        result = (stand, new_simulation_aggregates)
-        return result
+    new_simulation_aggregates = store_post_processing_aggregate(simulation_aggregates, thinning_aggregates, 'thinning_stats')
+
+    result = (stand, new_simulation_aggregates)
+    return result
 
 
 operation_lookup = {
