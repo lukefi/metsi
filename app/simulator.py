@@ -7,7 +7,7 @@ from sim.core_types import OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evaluate_sequence
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
-from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, pickle_writer
+from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, write_result_to_file
 from app.app_io import sim_cli_arguments
 from forestry.aggregate_utils import get_latest_operation_aggregate
 
@@ -93,7 +93,7 @@ def main():
     run_result = run_stands(stands, simulation_declaration, strategy_runner)
     print_run_result(run_result)
     print_logline("Writing output...")
-    pickle_writer(output_filename, run_result)
+    write_result_to_file(run_result, output_filename, app_arguments.output_format) 
 
 
 if __name__ == "__main__":
