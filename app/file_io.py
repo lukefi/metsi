@@ -54,8 +54,7 @@ def pickle_reader(file_path: str) -> Any:
         return pickle.load(f)
 
 def json_writer(file_path: str, data: Any):
-    #NOTE: sort_keys must be set False to avoid a bug in jsonpickle decoder
-    jsonpickle.set_encoder_options("json", sort_keys=False, indent=2)
+    jsonpickle.set_encoder_options("json", indent=2)
     with open(file_path, 'w', newline='\n') as f:
         f.write(jsonpickle.encode(data))
 
