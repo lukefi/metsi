@@ -80,7 +80,9 @@ def resolve_strategy_runner(source: str) -> Callable:
         raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
 
 def main():
+
     app_arguments = sim_cli_arguments(sys.argv[1:])
+        
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     output_filename = app_arguments.output_file
     strategy_runner = resolve_strategy_runner(app_arguments.strategy)

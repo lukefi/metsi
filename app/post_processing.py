@@ -10,7 +10,9 @@ from sim.runners import evaluate_sequence
 
 
 def main():
+
     app_arguments = post_processing_cli_arguments(sys.argv[1:])
+
     input_data: Dict[str, List[OperationPayload]] = pickle_reader(app_arguments.input_file)
     control_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     chain = simple_processable_chain(
