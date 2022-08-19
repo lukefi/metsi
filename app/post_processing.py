@@ -2,7 +2,7 @@ import sys
 from typing import List, Dict
 
 from app.app_io import post_processing_cli_arguments
-from app.file_io import simulation_declaration_from_yaml_file, pickle_reader, pickle_writer
+from app.file_io import simulation_declaration_from_yaml_file, read_input_file, write_result_to_file
 from forestry.operations import operation_lookup
 from sim.core_types import OperationPayload
 from sim.generators import simple_processable_chain
@@ -12,8 +12,8 @@ from sim.runners import evaluate_sequence
 def main():
 
     app_arguments = post_processing_cli_arguments(sys.argv[1:])
+    input_data: Dict[str, List[OperationPayload]] = read_input_file(app_arguments.input_file, app_arguments.input_format)
 
-    input_data: Dict[str, List[OperationPayload]] = pickle_reader(app_arguments.input_file)
     control_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     chain = simple_processable_chain(
         control_declaration.get('post_processing', []),
@@ -28,7 +28,7 @@ def main():
             processed_schedule = evaluate_sequence(payload, *chain)
             result[identifier].append(processed_schedule)
 
-    pickle_writer(app_arguments.output_file, result)
+    write_result_to_file(result, app_arguments.output_file, app_arguments.output_format) 
 
 
 if __name__ == '__main__':
