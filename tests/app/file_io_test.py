@@ -61,3 +61,29 @@ class TestFileReading(unittest.TestCase):
             "input_format": "pickle"
         }
         self.assertRaises(Exception, app.file_io.read_input_file, **kwargs)
+
+    def test_write_stands_to_file(self):
+        stands = [
+            ForestStand(
+                reference_trees=[
+                    ReferenceTree(identifier=1)
+                ]
+            ),
+            ForestStand(
+                reference_trees=[
+                    ReferenceTree(identifier=2)
+                ]
+            )
+        ]
+        app.file_io.write_result_to_file(stands, "tests/resources/temp_two_stands.pickle", "pickle")
+        self.assertTrue(os.path.isfile("tests/resources/temp_two_stands.pickle"))
+        os.remove("tests/resources/temp_two_stands.pickle")
+
+        app.file_io.write_result_to_file(stands, "tests/resources/temp_two_stands.json", "json")
+        self.assertTrue(os.path.isfile("tests/resources/temp_two_stands.json"))
+        os.remove("tests/resources/temp_two_stands.json")
+
+        #write_result_to_file should raise an Exception if the given output_format is not supported
+        self.assertRaises(Exception, app.file_io.write_result_to_file, stands, "tests/resources/temp_two_stands.txt", "txt")
+
+        
