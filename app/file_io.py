@@ -27,15 +27,6 @@ def write_result_to_file(result: Any, file_path: str, output_format: str):
         raise Exception(f"Unsupported output format '{output_format}'")
 
 
-def read_result_from_file(file_path: str, input_format: str) -> Any:
-    if input_format == "pickle":
-        return pickle_reader(file_path)
-    elif input_format == "json":
-        return json_reader(file_path)
-    else:
-        raise Exception(f"Unsupported input format '{input_format}'")
-
-
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     # TODO: content validation
     return yaml.load(file_contents(file_path), Loader=yaml.CLoader)
