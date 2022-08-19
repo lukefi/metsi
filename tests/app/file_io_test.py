@@ -34,6 +34,16 @@ class TestFileReading(unittest.TestCase):
         self.assertListEqual(data, result)
         os.remove('testpickle')
 
+    def test_json(self):
+        data = [
+            Test(a=1),
+            Test(a=2)
+        ]
+        app.file_io.json_writer('testjson', data)
+        result = app.file_io.json_reader('testjson')
+        self.assertListEqual(data, result)
+        os.remove('testjson')
+
     def test_read_stands_from_pickle_file(self):
         unpickled_stands = app.file_io.read_stands_from_file("tests/resources/two_ffc_stands.pickle", "pickle")
         self.assertEqual(len(unpickled_stands), 2)
@@ -44,7 +54,7 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(len(stands_from_json), 2)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
         self.assertEqual(type(stands_from_json[0].reference_trees[0]), ReferenceTree)
-
+        
 
     def test_read_stands_from_nonexisting_file(self):
         failingFile = "nonexisting_file.txt"
