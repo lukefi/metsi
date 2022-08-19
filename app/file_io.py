@@ -13,7 +13,7 @@ def file_contents(file_path: str) -> str:
 
 def read_stands_from_file(file_path: str, input_format: str) -> List[ForestStand]:
     if input_format == "pickle":
-        return forest_stands_from_pickle(file_path)
+        return pickle_reader(file_path)
     elif input_format == "json":
         return json_reader(file_path)
     else:
@@ -34,10 +34,6 @@ def read_result_from_file(file_path: str, input_format: str) -> Any:
         return json_reader(file_path)
     else:
         raise Exception(f"Unsupported input format '{input_format}'")
-
-def forest_stands_from_pickle(file_path: str) -> List[ForestStand]:
-    stands = pickle_reader(file_path)
-    return stands
 
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     # TODO: content validation
