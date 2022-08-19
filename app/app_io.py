@@ -1,7 +1,6 @@
 import argparse
 from typing import List
 
-
 def sim_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 simulator')
     parser.add_argument('input_file', help='Simulator input file')

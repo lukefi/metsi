@@ -10,6 +10,7 @@ from sim.runners import evaluate_sequence
 
 
 def main():
+
     app_arguments = post_processing_cli_arguments(sys.argv[1:])
     input_data: Dict[str, List[OperationPayload]] = read_result_from_file(app_arguments.input_file, app_arguments.input_format)
 
