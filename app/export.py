@@ -1,7 +1,7 @@
 import bisect
 from functools import cache
 import sys
-from typing import IO, Any, Generic, Iterator, TypeVar
+from typing import IO, Any, Generic, Iterator, TypeVar, Union
 from app.app_io import export_cli_arguments
 from app.file_io import pickle_reader, simulation_declaration_from_yaml_file
 from sim.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
@@ -16,7 +16,7 @@ class CollectiveSeries(Generic[T]):
         self.data = data
         self.idx = index
 
-    def __getitem__(self, idx: Any) -> T|"CollectiveSeries[T]":
+    def __getitem__(self, idx: Any) -> Union[T, "CollectiveSeries[T]"]:
         if isinstance(idx, slice):
             if not self.idx:
                 return CollectiveSeries([], [])
