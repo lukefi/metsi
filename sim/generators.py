@@ -80,8 +80,11 @@ def simple_processable_chain(operation_tags: List[str], operation_params: dict, 
     tags and operation parameters"""
     result = []
     for tag in operation_tags:
-        params = operation_params.get(tag, [{}])[0]
-        result.append(prepared_operation(resolve_operation(tag, operation_lookup), **params))
+        params = operation_params.get(tag, [{}])
+        if len(params) > 1:
+            raise Exception("Trying to apply multiple parameter set for preprocessing operation \'{}\'. "
+                "Defining multiple parameter sets is only supported for alternative clause generators.".format(tag))
+        result.append(prepared_operation(resolve_operation(tag, operation_lookup), **params[0]))
     return result
 
 

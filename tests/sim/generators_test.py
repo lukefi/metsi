@@ -4,7 +4,7 @@ import yaml
 from sim.core_types import Step, OperationPayload
 from sim.generators import sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
-from tests.test_utils import inc, dec, aggregating_increment
+from tests.test_utils import inc, dec, aggregating_increment, parametrized_operation
 
 
 class TestGenerators(unittest.TestCase):
@@ -201,11 +201,17 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(3, len(chain_two[0]))
 
     def test_simple_processable_chain(self):
-        operation_tags = ['inc', 'inc', 'inc']
-        operation_params = {}
-        operation_lookup = {'inc': inc}
+        operation_tags = ['inc', 'inc', 'inc', 'param_oper']
+        operation_params = {'param_oper': [{'amplify': True}]}
+        operation_lookup = {'inc': inc, 'param_oper': parametrized_operation}
         chain = sim.generators.simple_processable_chain(operation_tags, operation_params, operation_lookup)
         self.assertEqual(len(operation_tags), len(chain))
         result = evaluate_sequence(1, *chain)
-        self.assertEqual(4, result)
+        self.assertEqual(4000, result)
 
+
+    def test_simple_processable_chain_multiparameter_exception(self):
+        operation_tags = ['param_oper']
+        operation_params = {'param_oper': [{'amplify': True}, {'kissa123': 123}]}
+        operation_lookup = {'param_oper': parametrized_operation}
+        self.assertRaises(Exception, sim.generators.simple_processable_chain, operation_tags, operation_params, operation_lookup)
