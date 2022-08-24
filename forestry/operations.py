@@ -1,15 +1,16 @@
 from forestryfunctions import forestry_utils as futil
 from functools import reduce
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from typing import Tuple
 from forestdatamodel.model import ForestStand
 from forestry.grow_acta import grow_acta
 from forestry.r_utils import lmfor_volume
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
-from forestry.aggregate_utils import store_operation_aggregate, get_latest_operation_aggregate
-from forestry.cross_cutting import cross_cut_stand, calculate_cross_cut_aggregates
+from forestry.aggregate_utils import store_operation_aggregate, store_post_processing_aggregate, get_latest_operation_aggregate
+# from forestry.cross_cutting import cross_cut_stand, cross_cut_thinning_output, calculate_cross_cut_aggregates
 from sim.core_types import OperationPayload
+import forestry.cross_cutting as cross_cutting
 
 
 def compute_volume(stand: ForestStand) -> float:
@@ -41,16 +42,16 @@ def report_volume(payload: Tuple[ForestStand, dict], **operation_parameters) -> 
     return stand, new_simulation_aggregates
 
 
-def cross_cut(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+def cross_cut_whole_stand(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
     """
-    This is the entry point for calculating cross cut (apteeraus) value and volume.
+    This is the entry point for calculating cross cut (apteeraus) value and volume for a whole stand.
     """
 
     stand, simulation_aggregates = payload
 
-    volumes, values = cross_cut_stand(stand)
+    volumes, values = cross_cutting.cross_cut_stand(stand)
 
-    total_volume, total_value = calculate_cross_cut_aggregates(volumes, values)
+    total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
 
     new_aggregate = {
         'cross_cut_volume': total_volume,
@@ -58,6 +59,32 @@ def cross_cut(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tupl
     }
 
     new_simulation_aggregates = store_operation_aggregate(simulation_aggregates, new_aggregate, 'report_cross_cutting')
+
+    result = (stand, new_simulation_aggregates)
+    return result
+
+
+def cross_cut_thinning_output(payload: Tuple[ForestStand, dict], **operation_parameters) -> Tuple[ForestStand, dict]:
+    
+    stand, simulation_aggregates = payload
+    thinning_aggregates = defaultdict(dict)
+
+    for operation_name, operation_results in simulation_aggregates['operation_results'].items():
+        if operation_name not in ['report_volume', 'report_overall_removal']: #do not search for thinning_output in operations we know for sure are not related to thinning
+            for time_point, aggregate in operation_results.items():
+                if 'thinning_output' in aggregate.keys():
+                    thinned_trees = aggregate['thinning_output']
+                    
+                    volumes, values = cross_cutting.cross_cut_thinning_output(thinned_trees)
+
+                    total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
+                    
+                    thinning_aggregates[operation_name][time_point] = {
+                        'cross_cut_volume': total_volume,
+                        'cross_cut_value': total_value
+                    }
+
+    new_simulation_aggregates = store_post_processing_aggregate(simulation_aggregates, thinning_aggregates, 'thinning_stats')
 
     result = (stand, new_simulation_aggregates)
     return result
@@ -72,7 +99,8 @@ operation_lookup = {
     'even_thinning': even_thinning,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
-    'cross_cut': cross_cut
+    'cross_cut_whole_stand': cross_cut_whole_stand,
+    'cross_cut_thinning_output': cross_cut_thinning_output
 }
 
 try:
