@@ -108,7 +108,8 @@ def report_overall_removal(payload: Tuple[ForestStand, dict], **operation_parame
         if thinning_aggregates is None:
             new_aggregate = 0.0
         else:
-            s = sum( x['stems_removed'] for x in thinning_aggregates.values() )
+            #getting pretty ugly below
+            s = sum(sum( v['stems_removed_per_ha'] for k,v in y['thinning_output'].items()) for y in thinning_aggregates.values() )
             new_aggregate = s
         report_removal_collection[tag] = new_aggregate
 
