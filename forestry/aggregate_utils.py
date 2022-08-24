@@ -23,3 +23,13 @@ def store_operation_aggregate(simulation_aggregates: dict, new_aggregate: Any, o
     operation_results[operation_tag] = operation_aggregates
     return simulation_aggregates
 
+def store_post_processing_aggregate(simulation_aggregates: dict, new_aggregate: Any, operation_tag: str) -> dict:
+    """stores :new_aggregate: under an :operation_tag: that is on the top level in the :simulation_aggregates: dict."""
+    current_results = simulation_aggregates.get(operation_tag, {})
+    current_results.update(new_aggregate)
+    simulation_aggregates[operation_tag] = current_results
+    return simulation_aggregates
+
+
+
+

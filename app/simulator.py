@@ -57,8 +57,7 @@ def run_stands(
             aggregated_results={
                 'operation_results': {},
                 'current_time_point': None,
-                 # NOTE: two lines under is just for reminder of how the new aggregating of values could work
-                'thinning_stats': None,
+                'thinning_stats': {},
                 'biomass_stats': None
             }
         )
