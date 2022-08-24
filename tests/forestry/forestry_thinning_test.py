@@ -1,4 +1,3 @@
-import pytest
 from collections import OrderedDict
 from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ForestStand, ReferenceTree
