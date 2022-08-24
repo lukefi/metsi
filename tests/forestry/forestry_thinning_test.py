@@ -1,4 +1,4 @@
-import unittest
+import pytest
 from collections import OrderedDict
 from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ForestStand, ReferenceTree
@@ -242,6 +242,41 @@ class ThinningLimitsTest(ConverterTestSuite):
             result = solve_hdom_key(i[0], hdoms.keys())
             self.assertEqual(i[1], result)
 
+    def read_thinning_limits_file(self):
+        return open('tests/resources/thinning_limits.txt', 'r').read()
+
+    def test_create_thinning_limits_table(self):
+        # thinning_limits = open('tests/resources/thinning_limits.txt', 'r').read()
+        table = create_thinning_limits_table(self.read_thinning_limits_file())
+        self.assertEqual(len(table), 64)
+        self.assertEqual(len(table[0]), 9)
+
+    def test_get_thinning_limits_from_parameter_file_contents(self):
+        thinning_limits = self.read_thinning_limits_file()
+
+        kwarg_dicts = [
+            {
+             "thinning_limits": thinning_limits,
+             "county": CountyKey.EASTERN_FINLAND,
+             "sp_category": SoilPeatlandKey.MINERAL_SOIL,
+             "site_type": SiteTypeKey.OMT,
+             "species": SpeciesKey.PINE
+            },
+            {
+             "thinning_limits": thinning_limits,
+             "county": CountyKey.EASTERN_FINLAND,
+             "sp_category": SoilPeatlandKey.PEATLAND,
+             "site_type": SiteTypeKey.MT,
+             "species": SpeciesKey.DOWNY_BIRCH
+            }
+        ]
+
+        limits0 = get_thinning_limits_from_parameter_file_contents(**kwarg_dicts[0])
+        self.assertEqual(limits0[10], (15.3, 24.0))
+
+        limits1 = get_thinning_limits_from_parameter_file_contents(**kwarg_dicts[1])
+        self.assertEqual(limits1[10], (10.4, 14.0))
+
     def test_get_thinning_bounds(self):
         tree_variables = [
             {
@@ -267,7 +302,7 @@ class ThinningLimitsTest(ConverterTestSuite):
         stand = ForestStand(**stand_variables)
         stand.reference_trees = [ReferenceTree(**tv) for tv in tree_variables]
 
-        thinning_limits = open('tests/resources/thinning_limits.txt', 'r').read()
+        thinning_limits = self.read_thinning_limits_file()
 
         assertions = [
             ([stand], (15.2, 24.0)),
