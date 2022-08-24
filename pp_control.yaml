@@ -1,6 +1,6 @@
 operation_params:
   do_nothing:
-    param: value
+    - param: value
 
 post_processing:
   - cross_cut_thinning_output
