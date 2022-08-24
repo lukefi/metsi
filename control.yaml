@@ -47,7 +47,7 @@ preprocessing_operations:
   # - compute_location_metadata
 
 operation_file_params:
-  first_thinning:
+  thinning_from_above:
     thinning_limits: data/parameter_files/Thin.txt
   cross_cutting:
     timber_price_table: data/parameter_files/Puutavaralajimaarittelyt.txt

@@ -40,10 +40,11 @@ def thinning_from_above(input: Tuple[ForestStand, dict], **operation_parameters)
     stand, simulation_aggregates = input
     epsilon = operation_parameters['e']
     factor = operation_parameters['thinning_factor']
+    thinning_limits = operation_parameters.get('thinning_limits', None)
 
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter, reverse=True)
 
-    (lower_limit, upper_limit) = resolve_thinning_bounds(stand)
+    (lower_limit, upper_limit) = resolve_thinning_bounds(stand, thinning_limits)
     upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
     predicates = [upper_limit_reached]
 
@@ -60,10 +61,11 @@ def thinning_from_below(input: Tuple[ForestStand, dict], **operation_parameters)
     stand, simulation_aggregates = input
     epsilon = operation_parameters['e']
     factor = operation_parameters['thinning_factor']
+    thinning_limits = operation_parameters.get('thinning_limits', None)
 
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
 
-    (lower_limit, upper_limit) = resolve_thinning_bounds(stand)
+    (lower_limit, upper_limit) = resolve_thinning_bounds(stand, thinning_limits)
     upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
     predicates = [upper_limit_reached]
 
@@ -80,8 +82,10 @@ def even_thinning(input: Tuple[ForestStand, dict], **operation_parameters) -> Tu
     stand, simulation_aggregates = input
     epsilon = operation_parameters['e']
     factor = operation_parameters['thinning_factor']
+    thinning_limits = operation_parameters.get('thinning_limits', None)
 
-    (lower_limit, upper_limit) = resolve_thinning_bounds(stand)
+
+    (lower_limit, upper_limit) = resolve_thinning_bounds(stand, thinning_limits)
     upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
     predicates = [upper_limit_reached]
 

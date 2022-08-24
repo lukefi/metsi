@@ -24,9 +24,9 @@ def read_operation_file_params(opreation_tag: str, operation_file_params: dict) 
     return result
 
 def merge_operation_params(operation_params: dict, operation_file_params: dict) -> Dict:
-    """Attempts to join the two dicts supplied as arguments. Will throw an exception if the dicts share one or more common keys. This is to prevent overwriting an a parameter with another."""
+    """Attempts to join the two dicts supplied as arguments. Will throw an exception if the dicts share one or more common keys. This is to prevent overwriting a parameter with another."""
     common_keys = operation_params.keys() & operation_file_params.keys()
     if common_keys:
         raise Exception(f"parameter(s) {common_keys} were defined both in 'operation_param' and 'operation_file_param' sections in control.yaml. Please change the name of one of them.")
     else:
-        return operation_params | operation_file_params # pipe  is the merge operator
+        return operation_params | operation_file_params # pipe is the merge operator
