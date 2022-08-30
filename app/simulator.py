@@ -81,20 +81,22 @@ def resolve_strategy_runner(source: str) -> Callable:
 def main():
 
     app_arguments = sim_cli_arguments(sys.argv[1:])
-        
+
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     output_filename = app_arguments.output_file
-    strategy_runner = resolve_strategy_runner(app_arguments.strategy)
 
     stands = read_input_file(app_arguments.input_file, app_arguments.input_format)
     print_logline("Preprocessing...")
-    stands = preprocess_stands(stands, simulation_declaration)
+    result = preprocess_stands(stands, simulation_declaration)
 
-    print_logline("Simulating...")
-    run_result = run_stands(stands, simulation_declaration, strategy_runner)
-    print_run_result(run_result)
+    if app_arguments.strategy != "skip":
+        print_logline("Simulating...")
+        strategy_runner = resolve_strategy_runner(app_arguments.strategy)
+        result = run_stands(result, simulation_declaration, strategy_runner)
+        print_run_result(result)
+
     print_logline("Writing output...")
-    write_result_to_file(run_result, output_filename, app_arguments.output_format) 
+    write_result_to_file(result, output_filename, app_arguments.output_format)
 
 
 if __name__ == "__main__":
