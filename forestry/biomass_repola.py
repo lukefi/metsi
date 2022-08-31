@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import math
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
@@ -425,7 +427,80 @@ def roots_biomass_1b(tree: ReferenceTree) -> float:
     return bm
 
 
-def tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> list:
+@dataclass
+class BiomassData:
+    stem_wood: float = 0.0
+    stem_bark: float = 0.0
+    stem_waste: float = 0.0
+    living_branches: float = 0.0
+    dead_branches: float = 0.0
+    foliage: float = 0.0
+    stumps: float = 0.0
+    roots: float = 0.0
+
+    def total(self):
+        return sum([
+            self.stem_wood,
+            self.stem_bark,
+            self.stem_waste,
+            self.living_branches,
+            self.dead_branches,
+            self.foliage,
+            self.stumps,
+            self.roots
+        ])
+
+    def __add__(self, other):
+        return self.__radd__(other)
+
+    def __radd__(self, other: 'BiomassData' or float or int):
+        if type(other) in (float, int):
+            return BiomassData(
+                stem_wood=self.stem_wood + other,
+                stem_bark=self.stem_bark + other,
+                stem_waste=self.stem_waste + other,
+                living_branches=self.living_branches + other,
+                dead_branches=self.dead_branches + other,
+                foliage=self.foliage + other,
+                stumps=self.stumps + other,
+                roots=self.roots + other
+            )
+        elif type(other) == BiomassData:
+            return BiomassData(
+                stem_wood=self.stem_wood + other.stem_wood,
+                stem_bark=self.stem_bark + other.stem_bark,
+                stem_waste=self.stem_waste + other.stem_waste,
+                living_branches=self.living_branches + other.living_branches,
+                dead_branches=self.dead_branches + other.dead_branches,
+                foliage=self.foliage + other.foliage,
+                stumps=self.stumps + other.stumps,
+                roots=self.roots + other.roots
+            )
+        else:
+            raise Exception("Can only do addition between numbers and BiomassData, not {}".format(type(other)))
+
+    def __sub__(self, other):
+        return self + (other * - 1)
+
+    def __mul__(self, factor):
+        return self.__rmul__(factor)
+
+    def __rmul__(self, factor):
+        if type(factor) not in (int, float):
+            raise Exception("Can multiply BiomassData only with float or int, not {}".format(type(factor)))
+        return BiomassData(
+            stem_wood=self.stem_wood * factor,
+            stem_bark=self.stem_bark * factor,
+            stem_waste=self.stem_waste * factor,
+            living_branches=self.living_branches * factor,
+            dead_branches=self.dead_branches * factor,
+            foliage=self.foliage * factor,
+            stumps=self.stumps * factor,
+            roots=self.roots * factor
+        )
+
+
+def tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> BiomassData:
     """
     list of tree biomass weights in tons by biomass component
     Models: 1: Repola f(d,h), 2: Repola f(d,h,cr), 
@@ -435,46 +510,52 @@ def tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, m
     MODELS=4: stem w bark, stem merchantable wood, stem waste, living branches, dead branches, foliage, stump roots 
     input vol used only if MODELS=3|4, input volwaste used only if MODELS=3
     """
-    biomass_components = [0, 0, 0, 0, 0, 0, 0, 0]
     if models == 1:
-        biomass_components[0] = stem_wood_biomass_1(tree)
-        biomass_components[1] = stem_bark_biomass_1(tree)
-        biomass_components[2] = living_branches_biomass_1(tree)
-        biomass_components[3] = dead_branches_biomass_1(tree)
-        biomass_components[4] = foliage_biomass_1(tree)
-        biomass_components[5] = stump_biomass_1(tree)
-        biomass_components[6] = roots_biomass_1(tree)
+        return BiomassData(
+            stem_wood=stem_wood_biomass_1(tree),
+            stem_bark=stem_bark_biomass_1(tree),
+            living_branches=living_branches_biomass_1(tree),
+            dead_branches=dead_branches_biomass_1(tree),
+            foliage=foliage_biomass_1(tree),
+            stumps=stump_biomass_1(tree),
+            roots=roots_biomass_1(tree)
+        )
     elif models == 2:
-        biomass_components[0] = stem_wood_biomass_2(tree)
-        biomass_components[1] = stem_bark_biomass_2(tree)
-        biomass_components[2] = living_branches_biomass_2(tree)
-        biomass_components[3] = dead_branches_biomass_2(tree)
-        biomass_components[4] = foliage_biomass_2(tree)
-        biomass_components[5] = stump_biomass_1(tree)
-        biomass_components[6] = roots_biomass_1(tree)
+        return BiomassData(
+            stem_wood=stem_wood_biomass_2(tree),
+            stem_bark=stem_bark_biomass_2(tree),
+            living_branches=living_branches_biomass_2(tree),
+            dead_branches=dead_branches_biomass_2(tree),
+            foliage=foliage_biomass_2(tree),
+            stumps=stump_biomass_1(tree),
+            roots=roots_biomass_1(tree)
+        )
     elif models == 3:
         stem = stem_wood_biomass_vol_2(tree, stand, volume, volumewaste)
-        biomass_components[0] = stem[0]
-        biomass_components[1] = stem[1]
-        biomass_components[2] = stem[2]
-        biomass_components[3] = living_branches_biomass_2(tree)
-        biomass_components[4] = dead_branches_biomass_2b(tree)
-        biomass_components[5] = foliage_biomass_2(tree)
-        biomass_components[6] = stump_biomass_1b(tree)
-        biomass_components[7] = roots_biomass_1b(tree)
+        return BiomassData(
+            stem_wood=stem[0],
+            stem_bark=stem[1],
+            stem_waste=stem[2],
+            living_branches=living_branches_biomass_2(tree),
+            dead_branches=dead_branches_biomass_2b(tree),
+            foliage=foliage_biomass_2(tree),
+            stumps=stump_biomass_1b(tree),
+            roots=roots_biomass_1b(tree)
+        )
     else:
         stem = stem_wood_biomass_vol_1(tree, stand, volume)
-        biomass_components[0] = stem[0]
-        biomass_components[1] = stem[1]
-        biomass_components[2] = living_branches_biomass_2(tree)
-        biomass_components[3] = dead_branches_biomass_1(tree)
-        biomass_components[4] = foliage_biomass_2b(tree)
-        biomass_components[5] = stump_biomass_1(tree)
-        biomass_components[6] = roots_biomass_1(tree)
-    return biomass_components
+        return BiomassData(
+            stem_wood=stem[0],
+            stem_bark=stem[1],
+            living_branches=living_branches_biomass_2(tree),
+            dead_branches=dead_branches_biomass_1(tree),
+            foliage=foliage_biomass_2b(tree),
+            stumps=stump_biomass_1(tree),
+            roots=roots_biomass_1(tree)
+        )
 
 
-def small_tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> list:
+def small_tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> BiomassData:
     """
     list of tree biomass weights in tons by biomass component
     Models: 1: Repola f(d,h), 2: Repola f(d,h,cr), 
@@ -484,28 +565,29 @@ def small_tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewa
     MODELS=4: stem w bark, stem merchantable wood, stem waste, living branches, dead branches, foliage, stump roots 
     input vol used only if MODELS=3|4, input volwaste used only if MODELS=3
     """
-    reference_tree = ReferenceTree()
-    reference_tree.species = tree.species
-    reference_tree.breast_height_diameter = tree.breast_height_diameter
-    if reference_tree.breast_height_diameter == 0:
-        reference_tree.breast_height_diameter = 0.1
-    reference_tree.height = 1.3
-    minimum_model_tree_biomass = tree_biomass(reference_tree, stand, volume, volumewaste, models)
-    coef = tree.height / reference_tree.height
-    small_tree_bm = [x * coef for x in minimum_model_tree_biomass]
+    minimum_model_tree = ReferenceTree(
+        species=tree.species,
+        breast_height_diameter=tree.breast_height_diameter if tree.breast_height_diameter > 0 else 0.1,
+        height=1.3
+    )
+    minimum_model_tree_biomass = tree_biomass(minimum_model_tree, stand, volume, volumewaste, models)
+    coef = tree.height / minimum_model_tree.height
+    small_tree_bm = minimum_model_tree_biomass * coef
     return small_tree_bm
 
 
-def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, models) -> list:
-    biomass_components = [0, 0, 0, 0, 0, 0, 0, 0]
-    for i in range(0, len(stand.reference_trees)):
-        tree = stand.reference_trees[i]
-        if tree.height >= 1.3:
-            tree_biomasses = tree_biomass(tree, stand, treevolumes[i], wastevolumes[i], models)
-            tree_x_stemcount = [x * tree.stems_per_ha for x in tree_biomasses]
-            biomass_components = [x1 + x2 for x1, x2 in zip(biomass_components, tree_x_stemcount)]
-        else:
-            tree_biomasses = small_tree_biomass(tree, stand, treevolumes[i], wastevolumes[i], models)
-            tree_x_stemcount = [x * tree.stems_per_ha for x in tree_biomasses]
-            biomass_components = [x1 + x2 for x1, x2 in zip(biomass_components, tree_x_stemcount)]
-    return biomass_components
+def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, models) -> BiomassData:
+    """
+    Compute total biomass tonnages for the given ForestStand.
+
+    :param stand: source data ForestStand
+    :param treevolumes: TODO: needs to be documented
+    :param wastevolumes: TODO: needs to be documented
+    :param models: pre-set integer value for a model set to use. See tree_biomass function for details.
+    :return: a BiomassData object for biomass tonnages
+    """
+    biomasses = []
+    for i, tree in enumerate(stand.reference_trees):
+        fn = tree_biomass if tree.height >= 1.3 else small_tree_biomass
+        biomasses.append(fn(tree, stand, treevolumes[i], wastevolumes[i], models) * tree.stems_per_ha)
+    return sum(biomasses)
