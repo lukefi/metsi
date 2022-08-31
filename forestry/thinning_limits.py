@@ -4,7 +4,7 @@ The module is basicly a utility file for thinning operations that are basal area
 Thinning limits lookup table is used for solving lower (y0) and upper (y1) bound
 of basal area thinnings.
 """
-from typing import Tuple
+from typing import Dict, List, Tuple
 from enum import Enum
 from collections.abc import KeysView
 from bisect import bisect
@@ -12,9 +12,9 @@ from forestdatamodel.model import ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
 from forestryfunctions import forestry_utils as futil
 
-
 class CountyKey(Enum):
     EASTERN_FINLAND = 'eastern_finland'
+    SOUTHERN_FINLAND = 'southern_finland'
 
 
 class SiteTypeKey(Enum):
@@ -484,8 +484,97 @@ def solve_hdom_key(hdom_x: int, hdoms: KeysView[int]) -> int:
     key_idx = min(i, len(hdoms)-1)
     return hdoms[key_idx]
 
-def resolve_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
-    """ Resolves lower and upper bound for thinning. Values are in meters (m). """
+
+LIMITS_SLICE_LOOKUP = {
+    CountyKey.EASTERN_FINLAND :{
+        "before_thinning":{
+            SoilPeatlandKey.MINERAL_SOIL: {
+                SiteTypeKey.OMT: slice(0,4),
+                SiteTypeKey.MT: slice(4,8),
+                SiteTypeKey.VT: slice(8,12),
+                SiteTypeKey.CT: slice(12,16),
+            },
+            SoilPeatlandKey.PEATLAND: {
+                SiteTypeKey.OMT: slice(16,20),
+                SiteTypeKey.MT: slice(20,24),
+                SiteTypeKey.VT: slice(24,28),
+                SiteTypeKey.CT: slice(28,32)
+            }
+        },
+        "after_thinning":{
+                SoilPeatlandKey.MINERAL_SOIL: {
+                    SiteTypeKey.OMT: slice(32,36),
+                    SiteTypeKey.MT: slice(36,40),
+                    SiteTypeKey.VT: slice(40,44),
+                    SiteTypeKey.CT: slice(44,48),
+            },
+                SoilPeatlandKey.PEATLAND: {
+                    SiteTypeKey.OMT: slice(48,52),
+                    SiteTypeKey.MT: slice(52,56),
+                    SiteTypeKey.VT: slice(56,60),
+                    SiteTypeKey.CT: slice(60,64)
+            }
+        }
+    }
+}
+
+
+def create_thinning_limits_table(input_data: str) -> List:
+    # read thinning_limits into a list of lists
+    table = input_data.split('\n')
+    table = [row.split() for row in table]
+
+    # this function is based on the structure in data/parameter_files/Thin.txt.
+    # for now, to catch a file with a differing structure, raise an error if the row and column numbers do not match.
+    if len(table) != 64 or len(table[0]) != 9:
+        raise Exception('Thinning limits file has unexpected structure. Expected 64 rows and 9 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
+    else:
+        return table
+
+def get_thinning_limits_from_parameter_file_contents(
+    thinning_limits: str, 
+    county: CountyKey, 
+    sp_category: SoilPeatlandKey, 
+    site_type: SiteTypeKey, 
+    species: SpeciesKey
+    ) -> Dict[int, Tuple]:
+    """
+    Creates a table from :thinning_limits: and uses it to return a dict that contains tuples of lower and upper limits for each height bracket 
+    for the given stand parameters (:county:, :sp_category:, :site_type:, :species:).
+    """
+    limits_table = create_thinning_limits_table(thinning_limits)
+    upper_limits_slice = LIMITS_SLICE_LOOKUP[county]["before_thinning"][sp_category][site_type]
+    lower_limits_slice = LIMITS_SLICE_LOOKUP[county]["after_thinning"][sp_category][site_type]
+    upper_limits = limits_table[upper_limits_slice]
+    lower_limits = limits_table[lower_limits_slice]
+
+    if species == SpeciesKey.PINE:
+        upper_limits_for_species = upper_limits[0]
+        lower_limits_for_species = lower_limits[0]
+
+    elif species == SpeciesKey.SPRUCE:
+        upper_limits_for_species = upper_limits[1]
+        lower_limits_for_species = lower_limits[1]
+
+    elif species == SpeciesKey.SILVER_BIRCH:
+        upper_limits_for_species = upper_limits[2]
+        lower_limits_for_species = lower_limits[2]
+
+    elif species == SpeciesKey.DOWNY_BIRCH:
+        upper_limits_for_species = upper_limits[3]
+        lower_limits_for_species = lower_limits[3]
+    
+    limit_brackets = [10, 12, 14, 16, 18, 20, 22, 24, 26]
+    limits_for_species = {limit_brackets[i]: (float(lower_limits_for_species[i]), float(upper_limits_for_species[i])) for i in range(len(limit_brackets))}
+
+    return limits_for_species
+
+
+def resolve_thinning_bounds(stand: ForestStand, thinning_limits: str = None) -> Tuple[float, float]:
+    """ Resolves lower and upper bound for thinning. Values are in meters (m).
+    :thinning_limits: thinning limits from a file parameter defined in control. yaml. It is user's responsibility to provide it in correct format. 
+    Parsing failure will raise an exception. 
+    If file not provided in control.yaml, the hardcoded THINNING_LIMITS structure will be used."""
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
@@ -493,7 +582,16 @@ def resolve_thinning_bounds(stand: ForestStand) -> Tuple[float, float]:
     species_key = species_to_key(sdom)
     hdom = futil.solve_dominant_height_c_largest(stand)
 
-    spe_limits = THINNING_LIMITS[county_key][sp_category_key][site_type_key][species_key]
+    if thinning_limits is not None:
+        spe_limits = get_thinning_limits_from_parameter_file_contents(
+            thinning_limits,
+            county_key,
+            sp_category_key,
+            site_type_key,
+            species_key
+        )
+    else:
+        spe_limits = THINNING_LIMITS[county_key][sp_category_key][site_type_key][species_key]
 
     hdom_key = solve_hdom_key(hdom, spe_limits.keys())
     return spe_limits[hdom_key]

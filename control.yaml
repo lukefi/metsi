@@ -37,10 +37,11 @@ operation_params:
     - model_set: 1
 
 preprocessing_params:
-  example_operation:
-    example_param: "example_value"
+  generate_reference_trees:
+    - n_trees: 10
 
 preprocessing_operations:
+  - generate_reference_trees # comment out if input data contains direct trees (vmi12 or vmi13)
   - exclude_sapling_trees
   - exclude_empty_stands
   - exclude_zero_stem_trees
@@ -48,7 +49,7 @@ preprocessing_operations:
   # - compute_location_metadata
 
 operation_file_params:
-  first_thinning:
+  thinning_from_above:
     thinning_limits: data/parameter_files/Thin.txt
   cross_cutting:
     timber_price_table: data/parameter_files/Puutavaralajimaarittelyt.txt

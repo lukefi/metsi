@@ -160,7 +160,17 @@ The output file is usable as input for the `app/post_processing.py` application.
 python -m app.simulator data/VMI12_data.pickle control.yaml VMI12_simulated.pickle
 ```
 
-Use the following command to output simulator application help menu
+In case you want to use JSON as the input and/or output file format, run:
+```
+python -m app.simulator data/VMI12_data.json control.yaml VMI12_simulated.json -i json -o json
+```
+
+To only run the preprocessor, run:
+```
+python -m app.simulator -s skip ...
+```
+
+Use the following command to output simulator application help menu.
 ```
 python -m app.simulator --help
 ```
@@ -176,6 +186,11 @@ python -m app.post_processing input.pickle pp_control.yaml output.pickle
 * `input.pickle` The result file of a simulator run.
 * `pp_control.yaml` is the declaration of post processing function chain.
 * `output.pickle` is the output file for post processed results
+
+To learn more about the available post processing commands (and how to input/output a JSON file), run:
+```
+python -m app.post_processing --help
+```
 
 ## Testing
 

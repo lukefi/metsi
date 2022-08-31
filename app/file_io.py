@@ -1,10 +1,7 @@
-import json
 import pickle
 import jsonpickle
-from typing import List, Any
-
+from typing import Any
 import yaml
-from forestdatamodel.model import ForestStand, ReferenceTree
 
 
 def file_contents(file_path: str) -> str:
@@ -12,22 +9,23 @@ def file_contents(file_path: str) -> str:
         return f.read()
 
 
-def read_stands_from_file(file_path: str, input_format: str) -> List[ForestStand]:
+def read_input_file(file_path: str, input_format: str) -> Any:
     if input_format == "pickle":
-        return forest_stands_from_pickle(file_path)
+        return pickle_reader(file_path)
     elif input_format == "json":
-        return forest_stands_from_jsonpickle(file_path)
+        return json_reader(file_path)
     else:
         raise Exception(f"Unsupported input format '{input_format}'")
 
-def forest_stands_from_pickle(file_path: str) -> List[ForestStand]:
-    stands = pickle_reader(file_path)
-    return stands
 
+def write_result_to_file(result: Any, file_path: str, output_format: str):
+    if output_format == "pickle":
+        pickle_writer(file_path, result)
+    elif output_format == "json":
+        json_writer(file_path, result)
+    else:
+        raise Exception(f"Unsupported output format '{output_format}'")
 
-def forest_stands_from_jsonpickle(file_path: str) -> List[ForestStand]:
-    stands = jsonpickle.decode(file_contents(file_path))
-    return stands
 
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     # TODO: content validation
@@ -42,3 +40,15 @@ def pickle_writer(file_path: str, data: Any):
 def pickle_reader(file_path: str) -> Any:
     with open(file_path, 'rb') as f:
         return pickle.load(f)
+
+def json_writer(file_path: str, data: Any):
+    jsonpickle.set_encoder_options("json", indent=2)
+    with open(file_path, 'w', newline='\n') as f:
+        f.write(jsonpickle.encode(data))
+
+
+def json_reader(file_path: str) -> Any:
+    res = jsonpickle.decode(file_contents(file_path))
+    return res
+
+

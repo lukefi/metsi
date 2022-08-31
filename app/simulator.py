@@ -7,7 +7,7 @@ from sim.core_types import OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evaluate_sequence
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
-from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, pickle_writer
+from app.file_io import read_input_file, simulation_declaration_from_yaml_file, write_result_to_file
 from app.app_io import sim_cli_arguments
 from forestry.aggregate_utils import get_latest_operation_aggregate
 
@@ -59,8 +59,7 @@ def run_stands(
             aggregated_results={
                 'operation_results': {},
                 'current_time_point': None,
-                 # NOTE: two lines under is just for reminder of how the new aggregating of values could work
-                'thinning_stats': None,
+                'thinning_stats': {},
                 'biomass_stats': None
             }
         )
@@ -82,20 +81,24 @@ def resolve_strategy_runner(source: str) -> Callable:
         raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
 
 def main():
+
     app_arguments = sim_cli_arguments(sys.argv[1:])
+
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     output_filename = app_arguments.output_file
-    strategy_runner = resolve_strategy_runner(app_arguments.strategy)
 
-    stands = read_stands_from_file(app_arguments.input_file, app_arguments.input_format)
+    stands = read_input_file(app_arguments.input_file, app_arguments.input_format)
     print_logline("Preprocessing...")
-    stands = preprocess_stands(stands, simulation_declaration)
+    result = preprocess_stands(stands, simulation_declaration)
 
-    print_logline("Simulating...")
-    run_result = run_stands(stands, simulation_declaration, strategy_runner)
-    print_run_result(run_result)
+    if app_arguments.strategy != "skip":
+        print_logline("Simulating...")
+        strategy_runner = resolve_strategy_runner(app_arguments.strategy)
+        result = run_stands(result, simulation_declaration, strategy_runner)
+        print_run_result(result)
+
     print_logline("Writing output...")
-    pickle_writer(output_filename, run_result)
+    write_result_to_file(result, output_filename, app_arguments.output_format)
 
 
 if __name__ == "__main__":
