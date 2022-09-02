@@ -30,8 +30,10 @@ def print_run_result(results: dict):
             print("{} variant {} result: ".format(id, i), end='')
             print_stand_result(result.simulation_state)
             last_volume_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_volume')
+            last_biomass_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_biomass')
             last_removal_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_overall_removal')
             print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
+            print("variant {} biomass report: {}".format(i, last_biomass_reporting_aggregate))
             print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
 
 def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -> List[ForestStand]:
@@ -57,8 +59,7 @@ def run_stands(
             aggregated_results={
                 'operation_results': {},
                 'current_time_point': None,
-                 # NOTE: two lines under is just for reminder of how the new aggregating of values could work
-                'thinning_stats': None,
+                'thinning_stats': {},
                 'biomass_stats': None
             }
         )
@@ -82,20 +83,22 @@ def resolve_strategy_runner(source: str) -> Callable:
 def main():
 
     app_arguments = sim_cli_arguments(sys.argv[1:])
-        
+
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     output_filename = app_arguments.output_file
-    strategy_runner = resolve_strategy_runner(app_arguments.strategy)
 
     stands = read_input_file(app_arguments.input_file, app_arguments.input_format)
     print_logline("Preprocessing...")
-    stands = preprocess_stands(stands, simulation_declaration)
+    result = preprocess_stands(stands, simulation_declaration)
 
-    print_logline("Simulating...")
-    run_result = run_stands(stands, simulation_declaration, strategy_runner)
-    print_run_result(run_result)
+    if app_arguments.strategy != "skip":
+        print_logline("Simulating...")
+        strategy_runner = resolve_strategy_runner(app_arguments.strategy)
+        result = run_stands(result, simulation_declaration, strategy_runner)
+        print_run_result(result)
+
     print_logline("Writing output...")
-    write_result_to_file(run_result, output_filename, app_arguments.output_format) 
+    write_result_to_file(result, output_filename, app_arguments.output_format)
 
 
 if __name__ == "__main__":

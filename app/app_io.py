@@ -8,7 +8,7 @@ def sim_cli_arguments(args: List[str]):
     parser.add_argument('output_file', help='Simulator output file for alternatives and aggregated data')
     parser.add_argument('-s', '--strategy',
                         type=str,
-                        help='Simulation alternatives tree formation strategy: \'full\' (default), \'partial\'',
+                        help='Simulation alternatives tree formation strategy: \'full\' (default), \'partial\', \'skip\'',
                         default='full')
     parser.add_argument('-i','--input-format', 
                         choices=['pickle', 'json'],

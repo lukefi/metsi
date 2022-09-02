@@ -166,6 +166,11 @@ In case you want to use JSON as the input and/or output file format, run:
 python -m app.simulator data/VMI12_data.json control.yaml VMI12_simulated.json -i json -o json
 ```
 
+To only run the preprocessor, run:
+```
+python -m app.simulator -s skip ...
+```
+
 Use the following command to output simulator application help menu.
 ```
 python -m app.simulator --help
