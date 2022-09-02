@@ -4,12 +4,26 @@ from typing import Any, Callable, Iterator, Optional
 import numpy as np
 
 GetVarFn = Callable[[str], Any]
-CollectFn = Callable[[Any], Any]
+"""A function that returns the value of a global variable given its name."""
+
+CollectFn = Callable[[GetVarFn], Any]
+"""A function that returns the value of a collective expression given the values of global variables."""
 
 #---- collector functions ----------------------------------------
 
-# only reason this inherits dict is because the global namespace for eval() must be a dict.
 class Globals(dict):
+    """Global namespace for collective functions.
+    This class is a hack to work around the restriction that `eval` second parameter must be a dict.
+
+    What happens when a global variable is referenced in a collective expression is:
+      1. Python looks up the global in the `globals` dict given to `eval`, which in our case
+         is a `Globals` instance.
+      2. The `Globals` dict is empty, so `__missing__` is called.
+      3. `__missing__` calls the proxied `GetVarFn`, returning the actual value of the global
+         variable.
+
+    This way we don't need to populate the global variable dict ahead of time, and instead
+    we can just dynamically populate the few variables that the expression references."""
 
     __slots__ = "delegate",
 
@@ -22,7 +36,10 @@ class Globals(dict):
 
 @lru_cache
 def compile(expr: str) -> CollectFn:
-    """Compile a Python expression `expr` into a collector function."""
+    """Compile a Python expression `expr` into a collector function.
+
+    :param expr: A python expression that evaluates to the value of the collected variable.
+    :return: A collector function for the expression."""
     globals = Globals()
     e = eval(f"lambda: {expr}", globals)
     def fn(getvar: GetVarFn) -> Any:
@@ -35,7 +52,11 @@ def compile(expr: str) -> CollectFn:
 
 
 def collect_all(collectives: dict[str, str], getvar: GetVarFn) -> dict[str, Any]:
-    """Collect variables from a state defined by `getvar`."""
+    """Collect variables from a state defined by `getvar`.
+
+    :param collective: Collective expressions keyed by name.
+    :param getvar: Values of global variables.
+    :return: Values of the collective variables keyed by name."""
     return {k: compile(v)(getvar) for k,v in collectives.items()}
 
 
