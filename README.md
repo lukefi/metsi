@@ -290,11 +290,11 @@ simulation_events:
 
 Step tree from declaration above
 
-![Step tree](doc/20220221_sim-tree.drawio.png)
+![Step tree](doc/drawio/20220221_sim-tree.drawio.png)
 
 Operation chains from step tree above
 
-![Operation chains](doc/20220221_sim-chains.drawio.png)
+![Operation chains](doc/drawio/20220221_sim-chains.drawio.png)
 
 ## Simulator
 
