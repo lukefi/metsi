@@ -51,12 +51,12 @@ GENERATOR_LOOKUP = {
 def compose(*generator_series: Callable) -> Step:
     """
     Generate a simulation Step tree using the given list of generator functions
-    :param step_generators: generator functions which produce sequences and branches of Step function wrappers
+    :param generator_series: generator functions which produce sequences and branches ('alternatives') of Step function wrappers
     :return: The root node of the generated tree
     """
     root = Step()
     previous = [root]
-    for generator in step_generators:
+    for generator in generator_series:
         current = generator(previous)
         previous = current
     return root
