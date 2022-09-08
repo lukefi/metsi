@@ -454,7 +454,7 @@ class BiomassData:
         return self.__radd__(other)
 
     def __radd__(self, other: 'BiomassData' or float or int):
-        if type(other) in (float, int):
+        if isinstance(other, (float, int)):
             return BiomassData(
                 stem_wood=self.stem_wood + other,
                 stem_bark=self.stem_bark + other,
@@ -486,7 +486,7 @@ class BiomassData:
         return self.__rmul__(factor)
 
     def __rmul__(self, factor):
-        if type(factor) not in (int, float):
+        if not isinstance(factor, (int, float)):
             raise Exception("Can multiply BiomassData only with float or int, not {}".format(type(factor)))
         return BiomassData(
             stem_wood=self.stem_wood * factor,
