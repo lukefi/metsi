@@ -26,7 +26,7 @@ def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> Lis
 
 def alternatives(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
     """
-    Generate a branches for an optional list of steps, out of a *args list of given operations
+    Generate branches for an optional list of steps, out of an *args list of given operations
     :param parents:
     :param operations:
     :return: a list of leaf steps now under the given parent steps
@@ -94,7 +94,7 @@ def simple_processable_chain(operation_tags: List[str], operation_params: dict, 
     return result
 
 
-def generator_declarations_for_time_point(simulation_steps: List[dict], time: int) -> List[dict]:
+def generator_declarations_for_time_point(simulation_events: List[dict], time: int) -> List[dict]:
     """
     From simulation_steps, find the step generators declared for the given time point. Upon no match,
     a sequence of a single do_nothing operation is supplanted.
@@ -104,16 +104,16 @@ def generator_declarations_for_time_point(simulation_steps: List[dict], time: in
     :return: list of generator declarations for the desired point of time
     """
     generator_declarations = []
-    for generator_candidate in simulation_steps:
+    for generator_candidate in simulation_events:
         if time in generator_candidate['time_points']:
             generator_declarations.extend(generator_candidate['generators'])
     return generator_declarations
 
 
-def generator_function(key, generator_lookup: dict, *operations: Callable) -> Callable[[Any], List[Step]]:
+def generator_function(key, generator_lookup: dict, *processors: Callable) -> Callable[[Any], List[Step]]:
     """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
-    argument list of operations with the generator."""
-    return lambda payload: generator_lookup[key](payload, *operations)
+    argument list of processors with the generator."""
+    return lambda parent_steps: generator_lookup[key](parent_steps, *processors)
 
 
 def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
@@ -150,7 +150,7 @@ def get_configuration_from_simulation_declaration(simulation_declaration):
 def partial_tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> Dict[
     int, List[Callable]]:
     """
-    Creat a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
+    Create a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
     partial step trees of the simulation.
 
     :param simulation_declaration: a dict matching the simulation declaration structure. See README.
