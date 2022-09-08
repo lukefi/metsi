@@ -55,13 +55,14 @@ def run_stands(
         print_logline("Simulating stand {}".format(stand.identifier))
         payload = OperationPayload(
             simulation_state=stand,
-            run_history={},
+            operations_last_run={},
             aggregated_results={
                 'operation_results': {},
                 'current_time_point': None,
                 'thinning_stats': {},
                 'biomass_stats': None
-            }
+            },
+            operation_history=[]
         )
         result = run_strategy(payload, simulation_declaration, forestry.operations.operation_lookup)
         retval[stand.identifier] = result
