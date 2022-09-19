@@ -1,7 +1,7 @@
 import unittest
 from sim.util import merge_operation_params, read_operation_file_params
 import tests.test_utils
-from sim.operations import prepared_operation, prepared_processor
+from sim.operations import prepared_operation, prepared_processor, _get_operation_last_run
 
 
 class OperationsTest(unittest.TestCase):
@@ -28,4 +28,23 @@ class OperationsTest(unittest.TestCase):
         )
 
         self.assertEqual(operation("foo"), "kissa123\n")
+
+    def test_operation_last_run(self):
+        operation_history = [
+            (1, "operation1"),
+            (2, "operation2"),
+            (3, "operation1"),
+            (4, "operation3"),
+            (5, "operation1"),
+            (6, "operation2"),
+            (7, "operation1"),
+            (8, "operation3"),
+            (9, "operation1")
+        ]
+
+        self.assertEqual(_get_operation_last_run(operation_history, "operation1"), 9)
+        self.assertEqual(_get_operation_last_run(operation_history, "operation2"), 6)
+        self.assertEqual(_get_operation_last_run(operation_history, "operation3"), 8)
+        self.assertEqual(_get_operation_last_run(operation_history, "operationX"), None)
+
 

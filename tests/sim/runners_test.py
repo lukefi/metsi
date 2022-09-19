@@ -28,7 +28,6 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('branching.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            operations_last_run={},
             aggregated_results={'operation_results': {}},
             operation_history=[]
         )
@@ -44,7 +43,6 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('no_parameters.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            operations_last_run={},
             aggregated_results={'operation_results': {}},
             operation_history=[]
         )
@@ -58,7 +56,6 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('parameters.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            operations_last_run={},
             aggregated_results={'operation_results': {}},
             operation_history=[]
         )
@@ -72,7 +69,6 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('parameters_branching.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            operations_last_run={},
             aggregated_results={'operation_results': {}},
             operation_history=[]
         )

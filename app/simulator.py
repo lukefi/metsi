@@ -55,7 +55,6 @@ def run_stands(
         print_logline("Simulating stand {}".format(stand.identifier))
         payload = OperationPayload(
             simulation_state=stand,
-            operations_last_run={},
             aggregated_results={
                 'operation_results': {},
                 'current_time_point': None,

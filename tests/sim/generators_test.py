@@ -115,7 +115,6 @@ class TestGenerators(unittest.TestCase):
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             simulation_state=0, 
-            operations_last_run={}, 
             aggregated_results={ 'operation_results': {} },
             operation_history=[]
             )
@@ -144,7 +143,6 @@ class TestGenerators(unittest.TestCase):
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             simulation_state=0, 
-            operations_last_run={}, 
             aggregated_results={ 'operation_results': {} },
             operation_history=[]
             )

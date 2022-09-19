@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from typing import Callable, List, Optional, Any, OrderedDict, Dict
+from typing import Callable, List, Optional, Any, OrderedDict, Dict, Tuple
 
 
 def identity(x):
@@ -69,6 +69,5 @@ class OperationPayload(SimpleNamespace):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
     simulation_state: Any
-    operations_last_run: dict or None 
     aggregated_results: Dict[str, OrderedDict[int, Any]]
-    operation_history: List[Dict[int, str]]
+    operation_history: List[Tuple[int, str]]
