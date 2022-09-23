@@ -40,3 +40,10 @@ def post_processing_cli_arguments(args: List[str]):
                         help='Format of the output file: \'pickle\' (default) or \'json\'',
                         default='pickle')
     return parser.parse_args(args)
+
+
+def export_cli_arguments(args: List[str]):
+    parser = argparse.ArgumentParser(description='Mela2.0 data export')
+    parser.add_argument('input_file', help='Input file (simulator or post processing output)')
+    parser.add_argument('control_file', help='Export control declaration file', default='export_control.yaml')
+    return parser.parse_args(args)

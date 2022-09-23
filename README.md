@@ -150,6 +150,7 @@ See table below for a quick reference of forestry operations usable in control.y
 | even_thinning       | An operation reducing the stem count of ReferenceTrees evenly regardless of tree size          | Reijo Mykkänen              | native                    |
 | report_volume       | Collect tree volume data from ForestStand state                                                |                             | native                    |
 | report_thinning     | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
+| report_collectives  | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
 | cross_cut           | Perform cross cut operation to compute aggregated details                                      | Annika Kangas               | native (R)                |
 
 To run the simulator application, run the following command in the project root.
@@ -191,6 +192,15 @@ To learn more about the available post processing commands (and how to input/out
 ```
 python -m app.post_processing --help
 ```
+## Usage of the data export application
+
+Run
+```
+python -m app.export input.pickle export_control.yaml
+```
+where
+* `input.pickle` is simulator or post-processor output,
+* `export_control.yaml` is the export declaration file.
 
 ## Testing
 
@@ -295,6 +305,20 @@ Step tree from declaration above
 Operation chains from step tree above
 
 ![Operation chains](doc/20220221_sim-chains.drawio.png)
+
+## Collective variables
+
+The `report_collectives` operation and data export make use of *collective variables*.
+A collective variable is a python expression that is evaluated on a `ForestStand`.
+For example the expression `year` will collect `ForestStand.year`.
+You can collect tree variables by typing `reference_trees.variable_name`.
+You can also slice the variable, eg. `reference_trees.volume[reference_trees.species==1]`
+will collect the total volume of pine.
+The collective arrays are just numpy arrays, so all numpy slicing operations are supported.
+
+For export data collection you can index the collection array by collection **year**,
+so `Vpine` would export the collective `Vpine` from all periods, and `Vpine[0,5]` would
+export it from **years** 0 and 5.
 
 ## Simulator
 

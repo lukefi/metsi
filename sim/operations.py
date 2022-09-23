@@ -1,5 +1,8 @@
+from functools import cache
 import typing
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, TypeVar
+from forestry.aggregate_utils import store_operation_aggregate
+from sim.collectives import collect_all, autocollective, getvarfn
 from sim.core_types import OperationPayload
 from sim.util import get_or_default, dict_value
 
@@ -10,6 +13,14 @@ def _get_operation_last_run(operation_history: List[Tuple[int, str]], operation_
 
 def do_nothing(data: Any, **kwargs) -> Any:
     return data
+
+
+T = TypeVar("T")
+def report_collectives(input: Tuple[T, dict], /, **collectives: str) -> Tuple[T, dict]:
+    state, aggr = input
+    getvar = cache(getvarfn(lambda name: autocollective(getattr(state, name)), state=state, aggr=aggr))
+    result = collect_all(collectives, getvar=getvar)
+    return state, store_operation_aggregate(aggr, result, 'report_collectives')
 
 
 def prepared_operation(operation_entrypoint: typing.Callable, **operation_parameters):
@@ -65,5 +76,6 @@ def resolve_operation(tag: str, external_operation_lookup: dict) -> typing.Calla
 
 
 internal_operation_lookup = {
-    'do_nothing': do_nothing
+    'do_nothing': do_nothing,
+    'report_collectives': report_collectives
 }

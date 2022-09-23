@@ -35,6 +35,10 @@ operation_params:
       - even_thinning
   report_biomass:
     - model_set: 1
+  report_collectives:
+    - Ftot: reference_trees.stems_per_ha
+      Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
+      Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
 
 preprocessing_params:
   generate_reference_trees:

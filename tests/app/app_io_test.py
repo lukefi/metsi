@@ -19,3 +19,10 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual('input.json', result.input_file)
         self.assertEqual('control.yaml', result.control_file)
         self.assertEqual('output.pickle', result.output_file)
+
+    def test_export_cli_arguments(self):
+        args = ['input.pickle', 'control.yaml']
+        result = aio.export_cli_arguments(args)
+        self.assertEqual(2, len(result.__dict__.keys()))
+        self.assertEqual('input.pickle', result.input_file)
+        self.assertEqual('control.yaml', result.control_file)
