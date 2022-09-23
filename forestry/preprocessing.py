@@ -1,6 +1,8 @@
 from typing import List
 from forestdatamodel.model import ForestStand
 from forestryfunctions.preprocessing import tree_generation, pre_util
+from forestryfunctions.preprocessing.age_supplementing import supplement_age_for_reference_trees
+from forestryfunctions.preprocessing.naslund import naslund_height
 
 
 def exclude_sapling_trees(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
@@ -79,10 +81,28 @@ def generate_reference_trees(stands: List[ForestStand], **operation_params) -> L
     return stands
 
 
+def determine_tree_height(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
+    """ Fill in missing (None or nonpositive) tree heights from Näslund height curve """
+    for stand in stands:
+        for tree in stand.reference_trees:
+            if (tree.height or 0) <= 0:
+                tree.height = naslund_height(tree.breast_height_diameter, tree.species)
+    return stands
+
+
+def determine_tree_age(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
+    """ Supplement missing age for reference trees """
+    for stand in stands:
+        supplement_age_for_reference_trees(stand.reference_trees, stand.tree_strata)
+    return stands
+
+
 operation_lookup = {
     'exclude_sapling_trees': exclude_sapling_trees,
     'exclude_empty_stands': exclude_empty_stands,
     'exclude_zero_stem_trees': exclude_zero_stem_trees,
     'compute_location_metadata': compute_location_metadata,
-    'generate_reference_trees': generate_reference_trees
+    'generate_reference_trees': generate_reference_trees,
+    'determine_tree_height': determine_tree_height,
+    'determine_tree_age': determine_tree_age
 }
