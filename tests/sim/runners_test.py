@@ -28,8 +28,8 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('branching.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            run_history={},
-            aggregated_results={'operation_results': {}}
+            aggregated_results={'operation_results': {}},
+            operation_history=[]
         )
         results_full = collect_results(
             run_full_tree_strategy(initial, declaration, {'inc': aggregating_increment}))
@@ -43,8 +43,8 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('no_parameters.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            run_history={},
-            aggregated_results={'operation_results': {}}
+            aggregated_results={'operation_results': {}},
+            operation_history=[]
         )
 
         results = collect_results(
@@ -56,8 +56,8 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('parameters.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            run_history={},
-            aggregated_results={'operation_results': {}}
+            aggregated_results={'operation_results': {}},
+            operation_history=[]
         )
 
         results = collect_results(
@@ -69,8 +69,8 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('parameters_branching.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            run_history={},
-            aggregated_results={'operation_results': {}}
+            aggregated_results={'operation_results': {}},
+            operation_history=[]
         )
 
         results = collect_results(

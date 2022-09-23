@@ -1,11 +1,14 @@
 from functools import cache
 import typing
-from copy import deepcopy
-from typing import Any, Optional, Tuple, TypeVar
+from typing import Any, List, Optional, Tuple, TypeVar
 from forestry.aggregate_utils import store_operation_aggregate
 from sim.collectives import collect_all, autocollective, getvarfn
 from sim.core_types import OperationPayload
 from sim.util import get_or_default, dict_value
+
+
+def _get_operation_last_run(operation_history: List[Tuple[int, str]], operation_tag: str) -> Optional[int]:
+    return next((t for t, o in reversed(operation_history) if o == operation_tag), None)
 
 
 def do_nothing(data: Any, **kwargs) -> Any:
@@ -35,15 +38,9 @@ def prepared_processor(operation_tag, processor_lookup, time_point: int, operati
 def processor(payload: OperationPayload, operation: typing.Callable, operation_tag, time_point: int,
               operation_run_constraints: Optional[dict]):
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
-    run_history = deepcopy(payload.run_history)
-    operation_run_history = get_or_default(run_history.get(operation_tag), {})
+    current_operation_last_run_time_point = _get_operation_last_run(payload.operation_history, operation_tag)
     if operation_run_constraints is not None:
-        # check operation constrains
-        last_run_time_point = operation_run_history.get('last_run_time_point')
-        minimum_time_interval = operation_run_constraints.get('minimum_time_interval')
-        if last_run_time_point is not None and minimum_time_interval > (time_point - last_run_time_point):
-            raise UserWarning("{} aborted - last run at {}, time now {}, minimum time interval {}"
-                              .format(operation_tag, last_run_time_point, time_point, minimum_time_interval))
+        check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_constraints, current_operation_last_run_time_point)
 
     payload.aggregated_results['current_time_point'] = time_point
     payload.aggregated_results['current_operation_tag'] = operation_tag
@@ -52,15 +49,20 @@ def processor(payload: OperationPayload, operation: typing.Callable, operation_t
     except UserWarning as e:
         raise UserWarning("Unable to perform operation {}, at time point {}; reason: {}".format(operation_tag, time_point, e))
 
-    new_operation_run_history = {}
-    new_operation_run_history['last_run_time_point'] = time_point
-    run_history[operation_tag] = new_operation_run_history
+    payload.operation_history.append((time_point, operation_tag))
+
     newpayload = OperationPayload(
         simulation_state=new_state,
-        run_history=run_history,
-        aggregated_results=payload.aggregated_results if new_aggregated_results is None else new_aggregated_results
+        aggregated_results=payload.aggregated_results if new_aggregated_results is None else new_aggregated_results,
+        operation_history=payload.operation_history
     )
     return newpayload
+
+def check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_constraints, operation_last_run_time_point):
+    minimum_time_interval = operation_run_constraints.get('minimum_time_interval')
+    if operation_last_run_time_point is not None and minimum_time_interval > (time_point - operation_last_run_time_point):
+        raise UserWarning("{} aborted - last run at {}, time now {}, minimum time interval {}"
+                              .format(operation_tag, operation_last_run_time_point, time_point, minimum_time_interval))
 
 
 def resolve_operation(tag: str, external_operation_lookup: dict) -> typing.Callable:
