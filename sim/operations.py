@@ -38,8 +38,8 @@ def prepared_processor(operation_tag, processor_lookup, time_point: int, operati
 def processor(payload: OperationPayload, operation: typing.Callable, operation_tag, time_point: int,
               operation_run_constraints: Optional[dict]):
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
-    current_operation_last_run_time_point = _get_operation_last_run(payload.operation_history, operation_tag)
     if operation_run_constraints is not None:
+        current_operation_last_run_time_point = _get_operation_last_run(payload.operation_history, operation_tag)
         check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_constraints, current_operation_last_run_time_point)
 
     payload.aggregated_results['current_time_point'] = time_point
