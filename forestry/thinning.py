@@ -1,8 +1,7 @@
-from collections import OrderedDict
 from forestdatamodel.model import ForestStand
-from typing import Tuple, Callable
+from typing import Tuple
 from forestry.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
-from forestry.aggregate_utils import store_operation_aggregate, get_operation_aggregates, get_latest_operation_aggregate
+from forestry.aggregate_utils import store_operation_aggregate, get_operation_aggregates
 from forestryfunctions.harvest import thinning
 from forestryfunctions import forestry_utils as futil
 
@@ -108,8 +107,7 @@ def report_overall_removal(payload: Tuple[ForestStand, dict], **operation_parame
         if thinning_aggregates is None:
             new_aggregate = 0.0
         else:
-            #getting pretty ugly below
-            s = sum(sum( v['stems_removed_per_ha'] for k,v in y['thinning_output'].items()) for y in thinning_aggregates.values() )
+            s = sum(y["cross_cut_result"]["volume"] for y in thinning_aggregates.values())
             new_aggregate = s
         report_removal_collection[tag] = new_aggregate
 
