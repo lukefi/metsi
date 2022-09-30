@@ -1,3 +1,5 @@
+import os
+import queue
 from typing import Optional, Callable, List
 from copy import deepcopy
 from sim.core_types import OperationPayload, SimulationParams
@@ -39,7 +41,7 @@ def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
     return results
 
 
-def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict) -> List[
+def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict, queue: queue.Queue = None) -> List[
     OperationPayload]:
     """Process the given operation payload using a simulation state tree created from the declaration. Full simulation
     tree and operation chains are pre-generated for the run. This tree strategy creates the full theoretical branching
@@ -55,10 +57,14 @@ def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: di
     tree = compose(*generator_series)
     chains = tree.operation_chains()
     result = run_chains_iteratively(payload, chains)
-    return result
+
+    if queue != None:
+        queue.put(result)
+    else:
+        return result
 
 
-def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict) -> List[
+def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict, queue: queue.Queue = None) -> List[
     OperationPayload]:
     """Process the given operation payload using a simulation state tree created from the declaration. The simulation
     tree and operation chains are generated and executed in order per simulation time point. This reduces the amount of
@@ -83,4 +89,9 @@ def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration:
             payload_results = run_chains_iteratively(payload, chains_by_time_point[time_point])
             time_point_results.extend(payload_results)
         results = time_point_results
-    return results
+        
+    if queue != None:
+        queue.put(results)
+    else:
+        return results
+

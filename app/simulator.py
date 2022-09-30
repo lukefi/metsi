@@ -1,6 +1,8 @@
+import os
 import time
 from typing import List, Callable, Dict
 import sys
+import multiprocessing
 import forestry.operations
 import forestry.preprocessing as preprocessing
 from sim.core_types import AggregatedResults, OperationPayload
@@ -44,24 +46,53 @@ def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -
 
 def run_stands(
         stands: List[ForestStand], simulation_declaration: dict,
-        run_strategy: Callable[[OperationPayload, dict, dict], List[OperationPayload]]
+        run_strategy: Callable[[OperationPayload, dict, dict], List[OperationPayload]],
+        using_multiprocessing: bool
 ) -> Dict[str, List[OperationPayload]]:
     """Run the simulation for all given stands, from the given declaration, using the given run strategy. Return the
     results organized into a dict keyed with stand identifiers."""
 
     retval = {}
-    for stand in stands:
-        print_logline("Simulating stand {}".format(stand.identifier))
-        payload = OperationPayload(
+    args = [
+     (
+        OperationPayload(
             simulation_state=stand,
             aggregated_results=AggregatedResults(),
             operation_history=[],
-        )
-        result = run_strategy(payload, simulation_declaration, forestry.operations.operation_lookup)
-        retval[stand.identifier] = result
-        print_logline("Produced {} variants for stand {}".format(len(result), stand.identifier))
-    return retval
+        ),
+        simulation_declaration,
+        forestry.operations.operation_lookup
+     )
+        for stand in stands
+    ]
 
+    # Each stand can be simulated independently from each other, therefore they can be run in parallel in separate processes.
+    # pool.starmap() will allocate simulation work to available processes. 
+    if using_multiprocessing:
+        #manager is used to create a shared Queue into which each process can put their result.
+        manager = multiprocessing.Manager()
+        queue = manager.Queue()
+
+
+        for arg in args:
+            arg = arg + (queue,)
+
+        processes = os.cpu_count()
+        with multiprocessing.Pool(processes=processes) as pool:
+            pool.starmap(run_strategy, args)
+
+        #collect results from the queue into which the simulation results are put into.
+        while not queue.empty():
+            result = queue.get()
+            retval[result[0].simulation_state.identifier] = result
+        
+        return retval
+
+    else:
+        for arg in args:
+            result = run_strategy(*arg)
+            retval[result[0].simulation_state.identifier] = result
+        return retval
 
 def resolve_strategy_runner(source: str) -> Callable:
     strategy_map = {
@@ -93,8 +124,7 @@ def main():
     if app_arguments.strategy != "skip":
         print_logline("Simulating...")
         strategy_runner = resolve_strategy_runner(app_arguments.strategy)
-        result = run_stands(result, simulation_declaration, strategy_runner)
-        print_run_result(result)
+        result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
 
     print_logline("Writing output...")
     write_result_to_file(result, output_filename, app_arguments.output_format)
