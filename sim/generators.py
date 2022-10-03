@@ -26,7 +26,7 @@ def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> Lis
 
 def alternatives(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
     """
-    Generate a branches for an optional list of steps, out of a *args list of given operations
+    Generate branches for an optional list of steps, out of an *args list of given operations
     :param parents:
     :param operations:
     :return: a list of leaf steps now under the given parent steps
@@ -42,15 +42,21 @@ def alternatives(parents: Optional[List[Step]] = None, *operations: Callable) ->
     return result
 
 
-def compose(*step_generators: Callable) -> Step:
+GENERATOR_LOOKUP = {
+    'sequence': sequence,
+    'alternatives': alternatives,
+    }
+
+
+def compose(*generator_series: Callable) -> Step:
     """
     Generate a simulation Step tree using the given list of generator functions
-    :param step_generators: generator functions which produce sequences and branches of Step function wrappers
+    :param generator_series: generator functions which produce sequences and branches ('alternatives') of Step function wrappers
     :return: The root node of the generated tree
     """
     root = Step()
     previous = [root]
-    for generator in step_generators:
+    for generator in generator_series:
         current = generator(previous)
         previous = current
     return root
@@ -88,7 +94,7 @@ def simple_processable_chain(operation_tags: List[str], operation_params: dict, 
     return result
 
 
-def generator_declarations_for_time_point(simulation_steps: List[dict], time: int) -> List[dict]:
+def generator_declarations_for_time_point(simulation_events: List[dict], time: int) -> List[dict]:
     """
     From simulation_steps, find the step generators declared for the given time point. Upon no match,
     a sequence of a single do_nothing operation is supplanted.
@@ -98,78 +104,25 @@ def generator_declarations_for_time_point(simulation_steps: List[dict], time: in
     :return: list of generator declarations for the desired point of time
     """
     generator_declarations = []
-    for generator_candidate in simulation_steps:
+    for generator_candidate in simulation_events:
         if time in generator_candidate['time_points']:
             generator_declarations.extend(generator_candidate['generators'])
     return generator_declarations
 
 
-def generator_function(key, generator_lookup: dict, *operations: Callable) -> Callable[[Any], List[Step]]:
+def generator_function(key, generator_lookup: dict, *processors: Callable) -> Callable[[Any], List[Step]]:
     """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
-    argument list of operations with the generator."""
-    return lambda payload: generator_lookup[key](payload, *operations)
+    argument list of processors with the generator."""
+    return lambda parent_steps: generator_lookup[key](parent_steps, *processors)
 
 
-def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
-    """
-    Creat a list of step generator functions describing a single simulator run.
-
-    :param simulation_declaration: a dict matching the simulation declaration structure. See README.
-    :param operation_lookup: lookup table binding a declared operation name to a Python function reference
-    :return: a list of prepared generator functions
-    """
-
-    generator_lookup = {
-        'sequence': sequence,
-        'alternatives': alternatives,
-    }
-    generator_series = []
+def get_configuration_from_simulation_declaration(simulation_declaration):
     simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
     simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
     operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
     operation_file_params = get_or_default(dict_value(simulation_declaration, 'operation_file_params'), {})
     run_constraints = get_or_default(dict_value(simulation_declaration, 'run_constraints'), {})
-
-    for time_point in simulation_params.simulation_time_series():
-        generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
-        for generator_declaration in generator_declarations:
-            generator = prepare_step_generator(generator_declaration, generator_lookup, operation_lookup,
-                                               operation_params, operation_file_params, run_constraints, time_point)
-            generator_series.append(generator)
-    return generator_series
-
-
-def partial_tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> Dict[
-    int, List[Callable]]:
-    """
-    Creat a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
-    partial step trees of the simulation.
-
-    :param simulation_declaration: a dict matching the simulation declaration structure. See README.
-    :param operation_lookup: lookup table binding a declared operation name to a Python function reference
-    :return: a list of prepared generator functions
-    """
-
-    generator_lookup = {
-        'sequence': sequence,
-        'alternatives': alternatives,
-    }
-    generators_by_time_point = {}
-    simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
-    simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
-    operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
-    operation_file_params = get_or_default(dict_value(simulation_declaration, 'operation_file_params'), {})
-    run_constraints = get_or_default(dict_value(simulation_declaration, 'run_constraints'), {})
-
-    for time_point in simulation_params.simulation_time_series():
-        generator_series = []
-        generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
-        for generator_declaration in generator_declarations:
-            generator = prepare_step_generator(generator_declaration, generator_lookup, operation_lookup,
-                                               operation_params, operation_file_params, run_constraints, time_point)
-            generator_series.append(generator)
-        generators_by_time_point[time_point] = generator_series
-    return generators_by_time_point
+    return simulation_params,simulation_events,operation_params,operation_file_params,run_constraints
 
 
 def prepare_step_generator(generator_declaration, generator_lookup, operation_lookup, operation_params, operation_file_params, run_constraints,
@@ -199,3 +152,51 @@ def prepare_step_generator(generator_declaration, generator_lookup, operation_lo
             processors.append(processor)
     generator = generator_function(generator_tag, generator_lookup, *processors)
     return generator
+
+
+def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
+    """
+    Creat a list of step generator functions describing a single simulator run.
+
+    :param simulation_declaration: a dict matching the simulation declaration structure. See README.
+    :param operation_lookup: lookup table binding a declared operation name to a Python function reference
+    :return: a list of prepared generator functions
+    """
+    generator_series = []
+
+    simulation_params, simulation_events, operation_params, operation_file_params, run_constraints = get_configuration_from_simulation_declaration(simulation_declaration)
+
+    for time_point in simulation_params.simulation_time_series():
+        generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
+        for generator_declaration in generator_declarations:
+            generator = prepare_step_generator(generator_declaration, GENERATOR_LOOKUP, operation_lookup,
+                                               operation_params, operation_file_params, run_constraints, time_point)
+            generator_series.append(generator)
+    return generator_series
+
+
+def partial_tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> Dict[
+    int, List[Callable]]:
+    """
+    Create a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
+    partial step trees of the simulation.
+
+    :param simulation_declaration: a dict matching the simulation declaration structure. See README.
+    :param operation_lookup: lookup table binding a declared operation name to a Python function reference
+    :return: a list of prepared generator functions
+    """
+
+    generators_by_time_point = {}
+
+    simulation_params, simulation_events, operation_params, operation_file_params, run_constraints = get_configuration_from_simulation_declaration(simulation_declaration)
+
+    for time_point in simulation_params.simulation_time_series():
+        generator_series = []
+        generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
+        for generator_declaration in generator_declarations:
+            generator = prepare_step_generator(generator_declaration, GENERATOR_LOOKUP, operation_lookup,
+                                               operation_params, operation_file_params, run_constraints, time_point)
+            generator_series.append(generator)
+        generators_by_time_point[time_point] = generator_series
+    return generators_by_time_point
+

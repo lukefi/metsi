@@ -50,8 +50,9 @@ def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: di
     :param operation_lookup: a dictionary of operation tags mapped to a python function capable of processing a simulation state
     :return: a list of resulting simulation state payloads
     """
-    full_generators = full_tree_generators(simulation_declaration, operation_lookup)
-    tree = compose(*full_generators)
+
+    generator_series = full_tree_generators(simulation_declaration, operation_lookup)
+    tree = compose(*generator_series)
     chains = tree.operation_chains()
     result = run_chains_iteratively(payload, chains)
     return result
@@ -71,8 +72,10 @@ def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration:
     generators_by_time_point = partial_tree_generators_by_time_point(simulation_declaration, operation_lookup)
     chains_by_time_point = {}
     results = [payload]
-    for k, v in generators_by_time_point.items():
-        chains_by_time_point[k] = compose(*v).operation_chains()
+
+    #build chains_by_time_point, which is a dict of chains
+    for time_point, generator_series in generators_by_time_point.items():
+        chains_by_time_point[time_point] = compose(*generator_series).operation_chains()
 
     for time_point in SimulationParams(**simulation_declaration['simulation_params']).simulation_time_series():
         time_point_results: list[OperationPayload] = []
