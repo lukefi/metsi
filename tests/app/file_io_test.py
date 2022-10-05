@@ -45,22 +45,27 @@ class TestFileReading(unittest.TestCase):
         os.remove('testjson')
 
     def test_read_stands_from_pickle_file(self):
-        unpickled_stands = app.file_io.read_input_file("tests/resources/two_ffc_stands.pickle", "pickle")
+        unpickled_stands = app.file_io.read_payload_input_file("tests/resources/two_ffc_stands.pickle", "pickle")
         self.assertEqual(len(unpickled_stands), 2)
         self.assertEqual(type(unpickled_stands[0]), ForestStand)
 
     def test_read_stands_from_json_file(self):
-        stands_from_json = app.file_io.read_input_file("tests/resources/two_vmi12_stands_as_jsonpickle.json", "json")
+        stands_from_json = app.file_io.read_payload_input_file("tests/resources/two_vmi12_stands_as_jsonpickle.json", "json")
         self.assertEqual(len(stands_from_json), 2)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
         self.assertEqual(type(stands_from_json[1].reference_trees[0]), ReferenceTree)
+
+    def test_read_operation_payloads_from_pickle_file(self):
+        data: dict = app.file_io.read_simulation_results_input_file("tests/resources/post_processing_input_one_vmi12_stand_nine_schedules.pickle", "pickle")
+        self.assertFalse(data.get('0-023-002-02-1') is None)
+        self.assertEqual(len(data.get('0-023-002-02-1')), 9)
 
     def test_read_stands_from_nonexisting_file(self):
         kwargs = {
             "file_path": "tests/resources/nonexisting_file.pickle",
             "input_format": "pickle"
         }
-        self.assertRaises(Exception, app.file_io.read_input_file, **kwargs)
+        self.assertRaises(Exception, app.file_io.read_payload_input_file, **kwargs)
 
     def test_write_stands_to_file(self):
         stands = [

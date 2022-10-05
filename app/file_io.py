@@ -2,6 +2,9 @@ import pickle
 import jsonpickle
 from typing import Any
 import yaml
+from forestdatamodel.model import ForestStand
+
+from sim.core_types import OperationPayload
 
 
 def file_contents(file_path: str) -> str:
@@ -9,7 +12,16 @@ def file_contents(file_path: str) -> str:
         return f.read()
 
 
-def read_input_file(file_path: str, input_format: str) -> Any:
+def read_payload_input_file(file_path: str, input_format: str) -> list[ForestStand]:
+    if input_format == "pickle":
+        return pickle_reader(file_path)
+    elif input_format == "json":
+        return json_reader(file_path)
+    else:
+        raise Exception(f"Unsupported input format '{input_format}'")
+
+
+def read_simulation_results_input_file(file_path: str, input_format: str) -> dict[str, list[OperationPayload]]:
     if input_format == "pickle":
         return pickle_reader(file_path)
     elif input_format == "json":
