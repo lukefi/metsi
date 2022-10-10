@@ -1,10 +1,9 @@
-from email import iterators
-import time
 import unittest
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 import rpy2.robjects as robjects
 from forestry import r_utils, cross_cutting
+from forestry.aggregates import ThinningOutput, TreeThinData
 
 class CrossCuttingTest(unittest.TestCase):
 
@@ -45,39 +44,33 @@ class CrossCuttingTest(unittest.TestCase):
 
     def test_cross_cut_thinning_output(self):
 
-        thinned_trees = {
-            '001-tree': {
-                         'stems_removed_per_ha': 0.006261167484111818,
-                         'species': TreeSpecies.UNKNOWN_CONIFEROUS,
-                         'breast_height_diameter': 15.57254199723247,
-                         'height': 18.293846547993535,
-                         'stems_per_ha': 0.2024444153196156,
-                         'stand_area': 1.93
-                         },
-            '002-tree': {
-                        'stems_removed_per_ha':0.003917869416142222,
-                        'species':TreeSpecies.PINE,
-                        'breast_height_diameter':16.071397406682646,
-                        'height':23.617432525999664,
-                        'stems_per_ha':0.131181075968072,
-                        'stand_area':1.93
-                        },
-            '003-tree': {
-                        'stems_removed_per_ha': 0.008092431491823593,
-                        'species': TreeSpecies.SPRUCE,
-                        'breast_height_diameter':17.721245087039236,
-                        'height':16.353742669109522,
-                        'stems_per_ha':0.2809229789304476,
-                        'stand_area':1.93
-                        },
-        }
+        thinned_trees = ThinningOutput([
+            TreeThinData(
+                stems_removed_per_ha = 0.006261167484111818,
+                species = TreeSpecies.UNKNOWN_CONIFEROUS,
+                breast_height_diameter = 15.57254199723247,
+                height = 18.293846547993535,
+            ),
+            TreeThinData(
+                stems_removed_per_ha = 0.003917869416142222,
+                species = TreeSpecies.PINE,
+                breast_height_diameter = 16.071397406682646,
+                height = 23.617432525999664,
+            ),
+            TreeThinData(
+                stems_removed_per_ha = 0.008092431491823593,
+                species = TreeSpecies.SPRUCE,
+                breast_height_diameter = 17.721245087039236,
+                height = 16.353742669109522,
+            )
+        ])
 
-        volumes, values = cross_cutting.cross_cut_thinning_output(thinned_trees)
+        volumes, values = cross_cutting.cross_cut_thinning_output(thinned_trees, stand_area=1.93)
 
-        self.assertEqual(volumes[0], [0.0, 1.8820884719657113e-06])
+        self.assertEqual(volumes[0], [0.0, 1.8820884719657115e-06])
         self.assertEqual(volumes[1], [0.0, 1.566128712970515e-06])
         self.assertEqual(volumes[2], [1.4419059383590385e-06, 1.3865035819964635e-06])
 
-        self.assertEqual(values[0], [0.0, 3.199550402341709e-05])
+        self.assertEqual(values[0], [0.0, 3.19955040234171e-05])
         self.assertEqual(values[1], [0.0, 2.662418812049875e-05])
         self.assertEqual(values[2], [7.930482660974712e-05, 2.357056089393987e-05])

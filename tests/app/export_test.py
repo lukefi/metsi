@@ -2,10 +2,8 @@ import io
 from types import SimpleNamespace
 from typing import OrderedDict
 import unittest
-from forestdatamodel.enums.internal import TreeSpecies
-from forestdatamodel.model import ForestStand, ReferenceTree
 from app.export import j_cda, j_xda
-from sim.core_types import OperationPayload
+from sim.core_types import AggregatedResults, OperationPayload
 
 
 class TestExport(unittest.TestCase):
@@ -19,41 +17,41 @@ class TestExport(unittest.TestCase):
             "1": [
                 OperationPayload(
                     simulation_state = SimpleNamespace(a=1, b=2),
-                    aggregated_results = {
-                        "operation_results": {
+                    aggregated_results = AggregatedResults(
+                        operation_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": 1, "y": 2, "z": 3 },
                                 5: { "x": 4, "y": 5, "z": 6 },
                                 10: { "x": 7, "y": 8, "z": 9 }
                             })
                         }
-                    }
+                    )
                 )
             ],
             "2": [
                 OperationPayload(
                     simulation_state = SimpleNamespace(a=-1, b=-2),
-                    aggregated_results = {
-                        "operation_results": {
+                    aggregated_results = AggregatedResults(
+                        operation_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": 10, "y": 20, "z": 30 },
                                 5: { "x": 40, "y": 50, "z": 60 },
                                 10: { "x": 70, "y": 80, "z": 90 }
                             })
                         }
-                    }
+                    )
                 ),
                 OperationPayload(
                     simulation_state = SimpleNamespace(a=-1, b=-2),
-                    aggregated_results = {
-                        "operation_results": {
+                    aggregated_results = AggregatedResults(
+                        operation_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": -1, "y": -2, "z": -3 },
                                 5: { "x": 4, "y": 5, "z": 6 },
                                 10: { "x": 7, "y": 8, "z": 9 }
                             })
                         }
-                    }
+                    )
                 )
             ]
         }

@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Tuple
 from forestdatamodel.model import ReferenceTree, ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
 import rpy2.robjects as robjects
+from forestry.aggregates import ThinningOutput
 from forestry.r_utils import convert_r_named_list_to_py_dict
 
 _cross_cut_species_mapper = {
@@ -41,7 +42,7 @@ def _cross_cut(
     return (result["volumes"], result["values"])
 
 
-def cross_cut_thinning_output(thinned_trees: List[Dict[str, Dict]]) -> Tuple[List, List]:
+def cross_cut_thinning_output(thinned_trees: ThinningOutput, stand_area: float) -> Tuple[List, List]:
     #TODO: pass in each tree to the cross_cut function and collect aggregates to be returned.
     
     r = _get_r_with_sourced_scripts()
@@ -54,18 +55,18 @@ def cross_cut_thinning_output(thinned_trees: List[Dict[str, Dict]]) -> Tuple[Lis
     volumes_bucket = []
     values_bucket = []
 
-    for tree_id, thinning_data in thinned_trees.items():
+    for thinning_data in thinned_trees.removed:
         volumes, values = _cross_cut(
-                            thinning_data['species'],
-                            thinning_data['breast_height_diameter'],
-                            thinning_data['height'],
+                            thinning_data.species,
+                            thinning_data.breast_height_diameter,
+                            thinning_data.height,
                             r
                             )
 
         #NOTE: the above 'volumes' and 'values' are calculated for a single reference tree. 
         # To report absolute (i.e. not in per hectare terms) numbers, they must be multiplied by the reference tree's stems_removed_per_ha and the stand area (in hectares)
         
-        multiplier = thinning_data['stems_removed_per_ha'] * (thinning_data['stand_area']/1000)
+        multiplier = thinning_data.stems_removed_per_ha * stand_area/1000
         volumes = [vol*multiplier for vol in volumes]
         values = [val*multiplier for val in values]
 
