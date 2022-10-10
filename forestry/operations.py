@@ -5,13 +5,14 @@ from typing import Tuple
 from forestdatamodel.model import ForestStand
 from forestryfunctions import forestry_utils as futil
 from forestry.biomass_repola import biomasses_by_component_stand, BiomassData
+from forestry.clearcut import clearcutting, report_overall_removal_clearcut_assortments
 from forestry.grow_acta import grow_acta
 from forestry.r_utils import lmfor_volume
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
 from forestry.aggregate_utils import store_operation_aggregate, store_post_processing_aggregate, \
-    get_latest_operation_aggregate
-from forestry import cross_cutting
+    get_latest_operation_aggregate,get_operation_aggregates
+from forestry import cross_cutting as cross_cut
 
 def compute_volume(stand: ForestStand) -> float:
     """Debug level function. Does not reflect any real usable model computation.
@@ -49,9 +50,9 @@ def cross_cut_whole_stand(payload: Tuple[ForestStand, dict], **operation_paramet
 
     stand, simulation_aggregates = payload
 
-    volumes, values = cross_cutting.cross_cut_stand(stand)
+    volumes, values = cross_cut.cross_cutting.cross_cut_stand(stand)
 
-    total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
+    total_volume, total_value = cross_cut.cross_cutting.calculate_cross_cut_aggregates(volumes, values)
 
     new_aggregate = {
         'cross_cut_volume': total_volume,
@@ -99,9 +100,9 @@ def cross_cut_thinning_output(payload: Tuple[ForestStand, dict], **operation_par
                 if 'thinning_output' in aggregate.keys():
                     thinned_trees = aggregate['thinning_output']
 
-                    volumes, values = cross_cutting.cross_cut_thinning_output(thinned_trees)
+                    volumes, values = cross_cut.cross_cutting.cross_cut_thinning_output(thinned_trees)
 
-                    total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
+                    total_volume, total_value = cross_cut.cross_cutting.calculate_cross_cut_aggregates(volumes, values)
 
                     thinning_aggregates[operation_name][time_point] = {
                         'cross_cut_volume': total_volume,
@@ -124,8 +125,10 @@ operation_lookup = {
     'report_biomass': report_biomass,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
+    'report_overall_removal_clearcut_assortments': report_overall_removal_clearcut_assortments, #Laura
     'cross_cut_whole_stand': cross_cut_whole_stand,
-    'cross_cut_thinning_output': cross_cut_thinning_output
+    'cross_cut_thinning_output': cross_cut_thinning_output,
+    'clearcutting': clearcutting
 }
 
 try:
