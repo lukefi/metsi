@@ -55,6 +55,18 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(type(stands_from_json[0]), ForestStand)
         self.assertEqual(type(stands_from_json[1].reference_trees[0]), ReferenceTree)
 
+    def test_read_stands_from_vmi12_file(self):
+        stands = app.file_io.read_payload_input_file("tests/resources/VMI12_source_mini.dat", "vmi12")
+        self.assertEqual(len(stands), 7)
+
+    def test_read_stands_from_vmi13_file(self):
+        stands = app.file_io.read_payload_input_file("tests/resources/VMI13_source_mini.dat", "vmi13")
+        self.assertEqual(len(stands), 3)
+
+    def test_read_stands_from_xml_file(self):
+        stands = app.file_io.read_payload_input_file("tests/resources/SMK_source.xml", "forest_centre")
+        self.assertEqual(len(stands), 3)
+
     def test_read_operation_payloads_from_pickle_file(self):
         data: dict = app.file_io.read_simulation_results_input_file("tests/resources/post_processing_input_one_vmi12_stand_nine_schedules.pickle", "pickle")
         self.assertFalse(data.get('0-023-002-02-1') is None)
