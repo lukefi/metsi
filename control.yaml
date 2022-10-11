@@ -55,8 +55,14 @@ preprocessing_operations:
 operation_file_params:
   thinning_from_above:
     thinning_limits: data/parameter_files/Thin.txt
-  cross_cutting:
-    timber_price_table: data/parameter_files/Puutavaralajimaarittelyt.txt
+  thinning_from_below:
+    timber_price_table: data/parameter_files/timber_price_table.csv
+  thinning_from_above:
+    timber_price_table: data/parameter_files/timber_price_table.csv
+  first_thinning:
+    timber_price_table: data/parameter_files/timber_price_table.csv
+  even_thinning:
+    timber_price_table: data/parameter_files/timber_price_table.csv
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
