@@ -11,7 +11,7 @@ def evaluate_thinning_conditions(predicates):
     return all(f() for f in predicates)
 
 
-def thinning_aux(
+def iterative_thinning_with_output(
     stand: ForestStand,
     aggr: AggregatedResults,
     thinning_factor: float,
@@ -19,6 +19,8 @@ def thinning_aux(
     extra_factor_solver: Callable[[int, int, float], float],
     tag: str
 ) -> OpTuple[ForestStand]:
+    """Run iterative thinning and save output for trees that had their stem count reduced.
+    No output is written for unchanged trees."""
     f0 = [t.stems_per_ha for t in stand.reference_trees]
     stand = thinning.iterative_thinning(stand, thinning_factor, thin_predicate, extra_factor_solver)
     aggr.store(
@@ -48,7 +50,7 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
 
     if evaluate_thinning_conditions(predicates):
         stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
-        return thinning_aux(
+        return iterative_thinning_with_output(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -72,7 +74,7 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
-        return thinning_aux(
+        return iterative_thinning_with_output(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -96,7 +98,7 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
-        return thinning_aux(
+        return iterative_thinning_with_output(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -119,7 +121,7 @@ def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTupl
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
-        return thinning_aux(
+        return iterative_thinning_with_output(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
