@@ -1,9 +1,10 @@
 from collections import OrderedDict
 from tests.test_utils import ConverterTestSuite, get_default_timber_price_table
+from forestry.aggregates import ThinningOutput, TreeThinData
 from forestdatamodel.model import ReferenceTree
 from forestry.thinning_limits import *
+from sim.core_types import AggregatedResults
 import forestry.thinning as thin
-import forestry.aggregate_utils as aggutil
 import numpy as np
 
 class ThinningsTest(ConverterTestSuite):
@@ -36,11 +37,7 @@ class ThinningsTest(ConverterTestSuite):
             for spe, d, f, h in zip(species, diameters, stems, heights)
         ]
         operation_tag = 'first_thinning'
-        simulation_aggregates = {
-            'operation_results': {},
-            'current_time_point': 0,
-            'current_operation_tag': operation_tag
-        }
+        simulation_aggregates = AggregatedResults()
         operation_parameters = {
             'thinning_factor': 0.97,
             'e': 10,
@@ -51,12 +48,10 @@ class ThinningsTest(ConverterTestSuite):
         payload = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.first_thinning(payload, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
-        self.assertEqual(257.6202, round(result_stand.reference_trees[0].stems_per_ha, 4))
-        self.assertEqual(180.7842, round(result_stand.reference_trees[1].stems_per_ha, 4))
-        self.assertEqual(570.594, round(result_stand.reference_trees[2].stems_per_ha, 4))
-
-        stems_per_ha_after_thinning = [rt.stems_per_ha for rt in result_stand.reference_trees]
-        self.assertEqual(91.0016, round(sum(stems)-sum(stems_per_ha_after_thinning), 4))
+        self.assertAlmostEqual(257.6202, result_stand.reference_trees[0].stems_per_ha, places=4)
+        self.assertAlmostEqual(180.7842, result_stand.reference_trees[1].stems_per_ha, places=4)
+        self.assertAlmostEqual(570.594, result_stand.reference_trees[2].stems_per_ha, places=4)
+        self.assertAlmostEqual(600-570.594, collected_aggregates.prev(operation_tag).removed[-1].stems_removed_per_ha, places=4)
 
 
     def test_thinning_from_above(self):
@@ -74,28 +69,17 @@ class ThinningsTest(ConverterTestSuite):
         ]
 
         operation_tag = 'thinning_from_above'
-        simulation_aggregates = {
-            'operation_results': {},
-            'current_time_point': 0,
-            'current_operation_tag': operation_tag
-        }
-        operation_parameters = {
-            'thinning_factor': 0.97, 
-            'e': 0.2,
-            'timber_price_table': get_default_timber_price_table()
-            }
+        simulation_aggregates = AggregatedResults()
+        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.thinning_from_above(oper_input, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
         self.assertEqual([22.0, 21.0, 20.0], [rt.breast_height_diameter for rt in stand.reference_trees])
-        self.assertEqual(124.0792, round(result_stand.reference_trees[0].stems_per_ha, 4))
-        self.assertEqual(145.4833, round(result_stand.reference_trees[1].stems_per_ha, 4))
-        self.assertEqual(170.2916, round(result_stand.reference_trees[2].stems_per_ha, 4))
-
-        stems_per_ha_after_thinning = [rt.stems_per_ha for rt in result_stand.reference_trees]
-
-        self.assertEqual(163.1459, round(sum(stems)-sum(stems_per_ha_after_thinning), 4))
+        self.assertAlmostEqual(124.0792, result_stand.reference_trees[0].stems_per_ha, places=4)
+        self.assertAlmostEqual(145.4833, result_stand.reference_trees[1].stems_per_ha, places=4)
+        self.assertAlmostEqual(170.2916, result_stand.reference_trees[2].stems_per_ha, places=4)
+        self.assertAlmostEqual(200-170.2916, collected_aggregates.prev(operation_tag).removed[-1].stems_removed_per_ha, places=4)
 
     def test_thinning_from_below(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -111,28 +95,17 @@ class ThinningsTest(ConverterTestSuite):
             for s, d, f, h in zip(species, diameters, stems, heights)
         ]
 
-        simulation_aggregates = {
-            'operation_results': {},
-            'current_time_point': 0,
-            'current_operation_tag': 'thinning_from_below'
-        }
-        operation_parameters = {
-            'thinning_factor': 0.97, 
-            'e': 0.2,
-            'timber_price_table': get_default_timber_price_table()
-            }
+        simulation_aggregates = AggregatedResults()
+        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.thinning_from_below(oper_input, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
         self.assertEqual([20.0, 21.0, 22.0], [rt.breast_height_diameter for rt in stand.reference_trees])
-        self.assertEqual(119.1652, round(result_stand.reference_trees[0].stems_per_ha, 4))
-        self.assertEqual(142.5737, round(result_stand.reference_trees[1].stems_per_ha, 4))
-        self.assertEqual(170.2745, round(result_stand.reference_trees[2].stems_per_ha, 4))
-
-        stems_per_ha_after_thinning = [rt.stems_per_ha for rt in result_stand.reference_trees]
-        self.assertEqual(170.9866, round(sum(stems)-sum(stems_per_ha_after_thinning), 4))
-
+        self.assertAlmostEqual(119.1652, result_stand.reference_trees[0].stems_per_ha, places=4)
+        self.assertAlmostEqual(142.5737, result_stand.reference_trees[1].stems_per_ha, places=4)
+        self.assertAlmostEqual(170.2745, result_stand.reference_trees[2].stems_per_ha, places=4)
+        self.assertAlmostEqual(202-170.2745, collected_aggregates.prev('thinning_from_below').removed[-1].stems_removed_per_ha, places=4)
 
     def test_even_thinning(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -148,60 +121,58 @@ class ThinningsTest(ConverterTestSuite):
             for s, d, f, h in zip(species, diameters, stems, heights)
         ]
 
-        simulation_aggregates = {
-            'operation_results': {},
-            'current_time_point': 0,
-            'current_operation_tag': 'even_thinning'
-        }
-        operation_parameters = {
-            'thinning_factor': 0.50, 
-            'e': 0.2,
-            'timber_price_table': get_default_timber_price_table()
-            }
+        simulation_aggregates = AggregatedResults()
+        operation_parameters = {'thinning_factor': 0.50, 'e': 0.2}
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.even_thinning(oper_input, **operation_parameters)
         self.assertEqual(3, len(result_stand.reference_trees))
         self.assertEqual([20.0, 21.0, 22.0], [rt.breast_height_diameter for rt in stand.reference_trees])
-        self.assertEqual(100.0, round(result_stand.reference_trees[0].stems_per_ha, 4))
-        self.assertEqual(100.5, round(result_stand.reference_trees[1].stems_per_ha, 4))
-        self.assertEqual(101.0, round(result_stand.reference_trees[2].stems_per_ha, 4))
-
-        stems_per_ha_after_thinning = [rt.stems_per_ha for rt in result_stand.reference_trees]
-        self.assertEqual(301.5, round(sum(stems)-sum(stems_per_ha_after_thinning), 4))
-
+        self.assertAlmostEqual(100.0, result_stand.reference_trees[0].stems_per_ha, places=4)
+        self.assertAlmostEqual(100.5, result_stand.reference_trees[1].stems_per_ha, places=4)
+        self.assertAlmostEqual(101.0, result_stand.reference_trees[2].stems_per_ha, places=4)
+        self.assertAlmostEqual(202-101.0, collected_aggregates.prev('even_thinning').removed[-1].stems_removed_per_ha, places=4)
 
     def test_report_overall_removal(self):
         operation_results = {
 
             'thin1': OrderedDict({
-                0: {
-                    'cross_cut_result': {
-                    'volume': 0.0, 'value': 0.0
-                    }
-                }
+                0: ThinningOutput([
+                    TreeThinData(
+                        stems_removed_per_ha=100,
+                        species=TreeSpecies.PINE,
+                        breast_height_diameter=0,
+                        height=0
+                    )
+                ])
             }),
             'thin2': OrderedDict({
-                0: {
-                    'cross_cut_result': {
-                    'volume': 2.0, 'value': 3.0
-                    }
-                },
-                15: {
-                    'cross_cut_result': {
-                    'volume': 4.5, 'value': 5.5
-                    }
-                }
+                0: ThinningOutput([
+                    TreeThinData(
+                        stems_removed_per_ha=200,
+                        species=TreeSpecies.PINE,
+                        breast_height_diameter=0,
+                        height=0
+                    )
+                ]),
+                15: ThinningOutput([
+                    TreeThinData(
+                        stems_removed_per_ha=300,
+                        species=TreeSpecies.PINE,
+                        breast_height_diameter=0,
+                        height=0
+                    )
+                ])
             })
         }
 
-        simulation_aggregates = {
-            'operation_results': operation_results,
-            'current_time_point': 30,
-        }
+        simulation_aggregates = AggregatedResults(
+            operation_results = operation_results,
+            current_time_point = 30
+        )
         payload = (None, simulation_aggregates)
         (_, result) = thin.report_overall_removal(payload, thinning_method=['thin1', 'thin2'])
-        overall_removals = aggutil.get_latest_operation_aggregate(result, 'report_overall_removal')
+        overall_removals = result.prev('report_overall_removal')
         overall_removal = sum(x for x in overall_removals.values())
         self.assertEqual(6.5, overall_removal)
 

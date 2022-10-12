@@ -4,11 +4,10 @@ This module contains a collection of util functions and dummy payload functions 
 import os
 import unittest
 from typing import Any, List, Optional, Tuple, Callable
-from forestry.aggregate_utils import get_latest_operation_aggregate, store_operation_aggregate
 
 import yaml
 
-from sim.core_types import OperationPayload
+from sim.core_types import OpTuple, OperationPayload
 
 
 class ConverterTestSuite(unittest.TestCase):
@@ -30,13 +29,13 @@ def none(x: Any) -> None:
     return None
 
 
-def aggregating_increment(input: Tuple[int, dict], **operation_params) -> Tuple[int, dict]:
+def aggregating_increment(input: OpTuple[int], **operation_params) -> OpTuple[int]:
     incrementation = operation_params.get('incrementation', 1)
     state, aggregates = input
-    latest_aggregate = get_latest_operation_aggregate(aggregates, 'aggregating_increment')
+    latest_aggregate = aggregates.prev('aggregating_increment')
     aggregate = {'run_count': 1} if latest_aggregate is None else {'run_count': latest_aggregate['run_count'] + 1}
-    new_aggregates = store_operation_aggregate(aggregates, aggregate, 'aggregating_increment')
-    return state + incrementation, new_aggregates
+    aggregates.store('aggregating_increment', aggregate)
+    return state + incrementation, aggregates
 
 
 def inc(x: int) -> int:

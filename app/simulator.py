@@ -3,13 +3,12 @@ from typing import List, Callable, Dict
 import sys
 import forestry.operations
 import forestry.preprocessing as preprocessing
-from sim.core_types import OperationPayload
+from sim.core_types import AggregatedResults, OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evaluate_sequence
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
 from app.file_io import read_input_file, simulation_declaration_from_yaml_file, write_result_to_file
 from app.app_io import sim_cli_arguments
-from forestry.aggregate_utils import get_latest_operation_aggregate
 
 start_time = time.time_ns()
 
@@ -29,9 +28,9 @@ def print_run_result(results: dict):
         for i, result in enumerate(results[id]):
             print("{} variant {} result: ".format(id, i), end='')
             print_stand_result(result.simulation_state)
-            last_volume_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_volume')
-            last_biomass_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_biomass')
-            last_removal_reporting_aggregate = get_latest_operation_aggregate(result.aggregated_results, 'report_overall_removal')
+            last_volume_reporting_aggregate = result.aggregated_results.prev('report_volume')
+            last_biomass_reporting_aggregate = result.aggregated_results.prev('report_biomass')
+            last_removal_reporting_aggregate = result.aggregated_results.prev('report_overall_removal')
             print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
             print("variant {} biomass report: {}".format(i, last_biomass_reporting_aggregate))
             print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
@@ -55,13 +54,8 @@ def run_stands(
         print_logline("Simulating stand {}".format(stand.identifier))
         payload = OperationPayload(
             simulation_state=stand,
-            aggregated_results={
-                'operation_results': {},
-                'current_time_point': None,
-                'thinning_stats': {},
-                'biomass_stats': None
-            },
-            operation_history=[]
+            aggregated_results=AggregatedResults(),
+            operation_history=[],
         )
         result = run_strategy(payload, simulation_declaration, forestry.operations.operation_lookup)
         retval[stand.identifier] = result
