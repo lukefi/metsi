@@ -18,9 +18,9 @@ def thinning_aux(
     thin_predicate: Callable[[ForestStand], bool],
     extra_factor_solver: Callable[[int, int, float], float],
     tag: str
-):
+) -> OpTuple[ForestStand]:
     f0 = [t.stems_per_ha for t in stand.reference_trees]
-    thinning.iterative_thinning(stand, thinning_factor, thin_predicate, extra_factor_solver)
+    stand = thinning.iterative_thinning(stand, thinning_factor, thin_predicate, extra_factor_solver)
     aggr.store(
         tag,
         ThinningOutput([
@@ -29,6 +29,7 @@ def thinning_aux(
             if f > t.stems_per_ha
         ])
     )
+    return stand, aggr
 
 
 def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
@@ -47,7 +48,7 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
 
     if evaluate_thinning_conditions(predicates):
         stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
-        thinning_aux(
+        return thinning_aux(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -57,7 +58,6 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
         )
     else:
         raise UserWarning("Unable to perform first thinning")
-    return input
 
 
 def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
@@ -72,7 +72,7 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
-        thinning_aux(
+        return thinning_aux(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -82,7 +82,6 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
         )
     else:
         raise UserWarning("Unable to perform thinning from above")
-    return input
 
 
 def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
@@ -97,7 +96,7 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
-        thinning_aux(
+        return thinning_aux(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -107,7 +106,6 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
         )
     else:
         raise UserWarning("Unable to perform thinning from below")
-    return input
 
 
 def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
@@ -121,7 +119,7 @@ def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTupl
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
-        thinning_aux(
+        return thinning_aux(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -131,7 +129,6 @@ def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTupl
         )
     else:
         raise UserWarning("Unable to perform even thinning")
-    return input
 
 
 def report_overall_removal(payload: OpTuple[Any], **operation_parameters) -> OpTuple[Any]:
