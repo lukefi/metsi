@@ -185,7 +185,7 @@ class ThinningsTest(ConverterTestSuite):
         (_, result) = thin.report_overall_removal(payload, thinning_method=['thin1', 'thin2'])
         overall_removals = result.prev('report_overall_removal')
         overall_removal = sum(x for x in overall_removals.values())
-        self.assertEqual(6.5, overall_removal)
+        self.assertEqual(600, overall_removal)
 
 
 class ThinningLimitsTest(ConverterTestSuite):

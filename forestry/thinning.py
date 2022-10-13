@@ -42,8 +42,7 @@ def iterative_thinning_with_output(
     if cross_cut:
         volumes, values = cross_cutting.cross_cut_thinning_output(thinning_output, stand.area, timber_price_table)
         volumes_sum, values_sum = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
-        cc_aggr = CrossCutAggregate(volumes_sum, values_sum)
-        thinning_output.cross_cut_result = cc_aggr
+        thinning_output.cross_cut_result = CrossCutAggregate(volumes_sum, values_sum)
         aggr.store(tag, thinning_output)
     else:
         aggr.store(tag, thinning_output)
