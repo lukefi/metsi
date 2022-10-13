@@ -70,7 +70,10 @@ class ThinningsTest(ConverterTestSuite):
 
         operation_tag = 'thinning_from_above'
         simulation_aggregates = AggregatedResults()
-        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
+        operation_parameters = {
+            'thinning_factor': 0.97, 
+            'e': 0.2,
+            'timber_price_table': get_default_timber_price_table()}
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.thinning_from_above(oper_input, **operation_parameters)
@@ -96,7 +99,11 @@ class ThinningsTest(ConverterTestSuite):
         ]
 
         simulation_aggregates = AggregatedResults()
-        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
+        operation_parameters = {
+            'thinning_factor': 0.97, 
+            'e': 0.2,
+            'timber_price_table': get_default_timber_price_table()
+            }
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.thinning_from_below(oper_input, **operation_parameters)
@@ -122,7 +129,11 @@ class ThinningsTest(ConverterTestSuite):
         ]
 
         simulation_aggregates = AggregatedResults()
-        operation_parameters = {'thinning_factor': 0.50, 'e': 0.2}
+        operation_parameters = {
+            'thinning_factor': 0.50, 
+            'e': 0.2,
+            'timber_price_table': get_default_timber_price_table()
+            }
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.even_thinning(oper_input, **operation_parameters)
