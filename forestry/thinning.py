@@ -18,8 +18,8 @@ def get_timber_price_table(csv_string: str) -> np.ndarray:
     table = np.genfromtxt(StringIO(csv_string), delimiter=';', skip_header=1)
     return table
     
-
-def thinning_aux(
+    
+def iterative_thinning_with_output(
     stand: ForestStand,
     aggr: AggregatedResults,
     thinning_factor: float,
@@ -29,6 +29,8 @@ def thinning_aux(
     timber_price_table: np.ndarray,
     cross_cut: bool
 ) -> OpTuple[ForestStand]:
+    """Run iterative thinning and save output for trees that had their stem count reduced.
+    No output is written for unchanged trees."""
     f0 = [t.stems_per_ha for t in stand.reference_trees]
     stand = thinning.iterative_thinning(stand, thinning_factor, thin_predicate, extra_factor_solver)
     thinning_output = ThinningOutput(removed=[
@@ -67,7 +69,7 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
     if evaluate_thinning_conditions(predicates):
         timber_price_table = get_timber_price_table(operation_parameters["timber_price_table"])
         stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
-        return thinning_aux(
+        return iterative_thinning_with_output(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -95,7 +97,7 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
 
     if evaluate_thinning_conditions(predicates):
         timber_price_table = get_timber_price_table(operation_parameters["timber_price_table"])
-        return thinning_aux(
+        return iterative_thinning_with_output(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -123,7 +125,7 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
 
     if evaluate_thinning_conditions(predicates):
         timber_price_table = get_timber_price_table(operation_parameters["timber_price_table"])
-        return thinning_aux(
+        return iterative_thinning_with_output(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
@@ -149,7 +151,7 @@ def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTupl
 
     if evaluate_thinning_conditions(predicates):
         timber_price_table = get_timber_price_table(operation_parameters["timber_price_table"])
-        return thinning_aux(
+        return iterative_thinning_with_output(
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
