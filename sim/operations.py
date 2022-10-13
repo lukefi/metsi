@@ -1,26 +1,32 @@
 from functools import cache
 import typing
-from typing import Any, List, Optional, Tuple, TypeVar
-from forestry.aggregate_utils import store_operation_aggregate
+from typing import List, Optional, Tuple, TypeVar
 from sim.collectives import collect_all, autocollective, getvarfn
-from sim.core_types import OperationPayload
+from sim.core_types import OpTuple, OperationPayload
 from sim.util import get_or_default, dict_value
+
+
+T = TypeVar("T")
 
 
 def _get_operation_last_run(operation_history: List[Tuple[int, str]], operation_tag: str) -> Optional[int]:
     return next((t for t, o in reversed(operation_history) if o == operation_tag), None)
 
 
-def do_nothing(data: Any, **kwargs) -> Any:
+def do_nothing(data: T, **kwargs) -> T:
     return data
 
 
-T = TypeVar("T")
-def report_collectives(input: Tuple[T, dict], /, **collectives: str) -> Tuple[T, dict]:
+def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
     state, aggr = input
-    getvar = cache(getvarfn(lambda name: autocollective(getattr(state, name)), state=state, aggr=aggr))
-    result = collect_all(collectives, getvar=getvar)
-    return state, store_operation_aggregate(aggr, result, 'report_collectives')
+    getvar = cache(getvarfn(
+        lambda name: autocollective(getattr(state, name)),
+        state = state,
+        aggr = aggr.operation_results,
+        time = aggr.current_time_point
+    ))
+    aggr.store('report_collectives', collect_all(collectives, getvar=getvar))
+    return input
 
 
 def prepared_operation(operation_entrypoint: typing.Callable, **operation_parameters):
@@ -42,8 +48,7 @@ def processor(payload: OperationPayload, operation: typing.Callable, operation_t
     if operation_run_constraints is not None:
         check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_constraints, current_operation_last_run_time_point)
 
-    payload.aggregated_results['current_time_point'] = time_point
-    payload.aggregated_results['current_operation_tag'] = operation_tag
+    payload.aggregated_results.current_time_point = time_point
     try:
         new_state, new_aggregated_results = operation((payload.simulation_state, payload.aggregated_results))
     except UserWarning as e:

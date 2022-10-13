@@ -1,5 +1,6 @@
+from collections import OrderedDict
 from types import SimpleNamespace
-from typing import Callable, List, Optional, Any, OrderedDict, Dict, Tuple
+from typing import Callable, List, Optional, Any, Dict, Tuple, TypeVar
 
 
 def identity(x):
@@ -65,9 +66,39 @@ class SimulationParams(SimpleNamespace):
         )
 
 
+class AggregatedResults:
+
+    def __init__(
+        self,
+        operation_results: Optional[dict[str, OrderedDict[int, Any]]] = None,
+        current_time_point: Optional[int] = None
+    ):
+        self.operation_results: dict[str, OrderedDict[int, Any]] = operation_results or {}
+        self.current_time_point: int = current_time_point or 0
+
+    def prev(self, tag: str) -> Any:
+        try:
+            return next(reversed(self.operation_results[tag].values()))
+        except (KeyError, StopIteration):
+            return None
+
+    def get(self, tag: str) -> OrderedDict[int, Any]:
+        try:
+            return self.operation_results[tag]
+        except KeyError:
+            self.operation_results[tag] = OrderedDict()
+            return self.operation_results[tag]
+
+    def store(self, tag: str, aggr: Any):
+        self.get(tag)[self.current_time_point] = aggr
+
+
 class OperationPayload(SimpleNamespace):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
     simulation_state: Any
-    aggregated_results: Dict[str, OrderedDict[int, Any]]
+    aggregated_results: AggregatedResults
     operation_history: List[Tuple[int, str]]
+
+T = TypeVar("T")
+OpTuple = Tuple[T, AggregatedResults]

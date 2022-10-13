@@ -1,7 +1,7 @@
 import unittest
 import sim.generators
 import yaml
-from sim.core_types import Step, OperationPayload
+from sim.core_types import AggregatedResults, Step, OperationPayload
 from sim.generators import sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from tests.test_utils import inc, dec, aggregating_increment, parametrized_operation
@@ -115,7 +115,7 @@ class TestGenerators(unittest.TestCase):
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             simulation_state=0, 
-            aggregated_results={ 'operation_results': {} },
+            aggregated_results=AggregatedResults(),
             operation_history=[]
             )
         computation_result = run_sequence(payload, *chain)
@@ -143,7 +143,7 @@ class TestGenerators(unittest.TestCase):
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             simulation_state=0, 
-            aggregated_results={ 'operation_results': {} },
+            aggregated_results=AggregatedResults(),
             operation_history=[]
             )
         computation_result = run_sequence(payload, *chain)
@@ -170,7 +170,7 @@ class TestGenerators(unittest.TestCase):
             yaml.safe_load(declaration), {'inc': inc})
         result = compose(*generators)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results={})
+        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results=AggregatedResults())
         self.assertRaises(Exception, run_sequence, payload, *chain)
 
     def test_tree_generators_by_time_point(self):
