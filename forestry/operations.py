@@ -5,11 +5,11 @@ from forestdatamodel.model import ForestStand
 from forestry.aggregates import BiomassAggregate, CrossCutAggregate, ThinningOutput, VolumeAggregate
 from forestryfunctions import forestry_utils as futil
 from forestryfunctions.r_utils import lmfor_volume
+from forestryfunctions.cross_cutting import cross_cutting
 from forestry.biomass_repola import biomasses_by_component_stand, BiomassData
 from forestry.grow_acta import grow_acta
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
-from forestry import cross_cutting
 from sim.core_types import OpTuple
 
 def compute_volume(stand: ForestStand) -> float:

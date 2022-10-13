@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.biomass_repola import BiomassData
 
@@ -48,3 +49,4 @@ class TreeThinData:
 @dataclass
 class ThinningOutput:
     removed: list[TreeThinData]
+    cross_cut_result: Optional[CrossCutAggregate] = None

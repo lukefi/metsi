@@ -16,17 +16,22 @@ operation_params:
       e: 0.2
       dominant_height_lower_bound: 11
       dominant_height_upper_bound: 16
+      cross_cut: true
   thinning_from_below:
     - thinning_factor: 0.97
       e: 0.2
+      cross_cut: true
     - thinning_factor: 0.8
       e: 0.2
+      cross_cut: true
   thinning_from_above:
     - thinning_factor: 0.98
       e: 0.2
+      cross_cut: true
   even_thinning:
     - thinning_factor: 0.9
       e: 0.2
+      cross_cut: true
   report_overall_removal:
     - thinning_method:
       - thinning_from_below
