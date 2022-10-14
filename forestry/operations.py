@@ -72,20 +72,6 @@ def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[F
     return input
 
 
-def cross_cut_thinning_output(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = payload
-    thinning_aggregates = defaultdict(dict)
-    for tag, res in simulation_aggregates.operation_results.items():
-        for tp, aggr in res.items():
-            if not isinstance(aggr, ThinningOutput):
-                continue
-            volumes, values = cross_cutting.cross_cut_thinning_output(aggr, stand_area=stand.area)
-            total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
-            thinning_aggregates[tag][tp] = CrossCutAggregate(total_volume, total_value)
-    simulation_aggregates.get("thinning_stats").update(thinning_aggregates)
-    return payload
-
-
 operation_lookup = {
     'grow_acta': grow_acta,
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
