@@ -12,7 +12,7 @@ from forestry.thinning import first_thinning, thinning_from_above, thinning_from
     even_thinning
 from forestry.aggregate_utils import store_operation_aggregate, store_post_processing_aggregate, \
     get_latest_operation_aggregate,get_operation_aggregates
-from forestry import cross_cutting as cross_cut
+from forestry import cross_cutting
 
 def compute_volume(stand: ForestStand) -> float:
     """Debug level function. Does not reflect any real usable model computation.
@@ -50,9 +50,9 @@ def cross_cut_whole_stand(payload: Tuple[ForestStand, dict], **operation_paramet
 
     stand, simulation_aggregates = payload
 
-    volumes, values = cross_cut.cross_cutting.cross_cut_stand(stand)
+    volumes, values = cross_cutting.cross_cut_stand(stand)
 
-    total_volume, total_value = cross_cut.cross_cutting.calculate_cross_cut_aggregates(volumes, values)
+    total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
 
     new_aggregate = {
         'cross_cut_volume': total_volume,
@@ -100,9 +100,9 @@ def cross_cut_thinning_output(payload: Tuple[ForestStand, dict], **operation_par
                 if 'thinning_output' in aggregate.keys():
                     thinned_trees = aggregate['thinning_output']
 
-                    volumes, values = cross_cut.cross_cutting.cross_cut_thinning_output(thinned_trees)
+                    volumes, values = cross_cutting.cross_cut_thinning_output(thinned_trees)
 
-                    total_volume, total_value = cross_cut.cross_cutting.calculate_cross_cut_aggregates(volumes, values)
+                    total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
 
                     thinning_aggregates[operation_name][time_point] = {
                         'cross_cut_volume': total_volume,
