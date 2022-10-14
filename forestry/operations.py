@@ -37,14 +37,14 @@ def report_volume(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
 def cross_cut_whole_stand(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
     This is the entry point for calculating cross cut (apteeraus) value and volume for a whole stand.
+    The results are stored in simulation_aggregates.
     """
 
     stand, simulation_aggregates = payload
 
-    volumes, values = cross_cutting.cross_cut_stand(stand)
-
+    timber_price_table = operation_parameters['timber_price_table']
+    volumes, values = cross_cutting.cross_cut_stand(stand, timber_price_table)
     total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
-
     simulation_aggregates.store('report_cross_cutting', CrossCutAggregate(total_volume, total_value))
 
     return payload
