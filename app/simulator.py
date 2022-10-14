@@ -1,12 +1,13 @@
 import os
 import time
+import queue
 from typing import List, Callable, Dict
 import sys
 import multiprocessing
 import forestry.operations
 import forestry.preprocessing as preprocessing
-from sim.core_types import AggregatedResults, OperationPayload
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evaluate_sequence
+from sim.core_types import AggregatedResults, OperationPayload
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
 from app.file_io import read_payload_input_file, simulation_declaration_from_yaml_file, write_result_to_file
@@ -44,6 +45,11 @@ def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -
     stands = evaluate_sequence(stands, *preprocessing_funcs)
     return stands
 
+def run_strategy_multiprocessing_wrapper(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict, run_strategy: Callable,  queue: queue.Queue) -> None:
+    """Wrapper function for running a simulation strategy in a multiprocessing context. The result is placed in the given queue"""
+    result = run_strategy(payload, simulation_declaration, operation_lookup)
+    queue.put(result)
+
 def run_stands(
         stands: List[ForestStand], simulation_declaration: dict,
         run_strategy: Callable[[OperationPayload, dict, dict], List[OperationPayload]],
@@ -73,13 +79,13 @@ def run_stands(
         manager = multiprocessing.Manager()
         queue = manager.Queue()
 
-
+        mp_args = []
         for arg in args:
-            arg = arg + (queue,)
+            mp_args.append(arg + (run_strategy, queue,))
 
         processes = os.cpu_count()
         with multiprocessing.Pool(processes=processes) as pool:
-            pool.starmap(run_strategy, args)
+            pool.starmap(run_strategy_multiprocessing_wrapper, mp_args)
 
         #collect results from the queue into which the simulation results are put into.
         while not queue.empty():
