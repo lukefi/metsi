@@ -2,7 +2,7 @@ import unittest
 import sim.generators
 import yaml
 from sim.core_types import AggregatedResults, Step, OperationPayload
-from sim.generators import sequence, compose, alternatives, repeat
+from sim.generators import sequence, compose, alternatives, repeat, generate_time_series
 from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from tests.test_utils import inc, dec, aggregating_increment, parametrized_operation
 
@@ -98,10 +98,6 @@ class TestGenerators(unittest.TestCase):
 
     def test_yaml_declaration(self):
         declaration = """
-        simulation_params:
-          initial_step_time: 0
-          step_time_interval: 1
-          final_step_time: 1
         simulation_events:
           - time_points: [0, 1]
             generators:
@@ -124,10 +120,6 @@ class TestGenerators(unittest.TestCase):
 
     def test_operation_run_constraints_success(self):
         declaration = """
-        simulation_params:
-            initial_step_time: 0
-            step_time_interval: 1
-            final_step_time: 3
         run_constraints:
             inc:
                 minimum_time_interval: 2
@@ -152,10 +144,6 @@ class TestGenerators(unittest.TestCase):
 
     def test_operation_run_constraints_fail(self):
         declaration = """
-        simulation_params:
-            initial_step_time: 0
-            step_time_interval: 1
-            final_step_time: 3
         run_constraints:
             inc:
                 minimum_time_interval: 2
@@ -175,10 +163,6 @@ class TestGenerators(unittest.TestCase):
 
     def test_tree_generators_by_time_point(self):
         declaration = """
-        simulation_params:
-          initial_step_time: 0
-          step_time_interval: 1
-          final_step_time: 1
         simulation_events:
           - time_points: [0, 1]
             generators:
@@ -223,3 +207,26 @@ class TestGenerators(unittest.TestCase):
         operation_params = {'param_oper': [{'amplify': True}, {'kissa123': 123}]}
         operation_lookup = {'param_oper': parametrized_operation}
         self.assertRaises(Exception, sim.generators.simple_processable_chain, operation_tags, operation_params, operation_lookup)
+
+    def test_generate_time_series(self):
+        declaration = """
+        simulation_events:
+          - time_points: [0, 1]
+            generators:
+              - sequence:
+                - inc
+                - inc
+                
+          - time_points: [9, 8]
+            generators:
+              - sequence:
+                - inc
+                - inc
+          - time_points: [4, 6]
+            generators:
+              - sequence:
+                - inc
+                - inc
+        """
+        result = generate_time_series(yaml.safe_load(declaration)['simulation_events'])
+        self.assertEqual([0, 1, 4, 6, 8, 9], result)
