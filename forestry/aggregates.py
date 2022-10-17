@@ -1,6 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
-from forestdatamodel.enums.internal import TreeSpecies
 from forestry.biomass_repola import BiomassData
 
 
@@ -30,6 +28,3 @@ class BiomassAggregate:
     @classmethod
     def from_prev(cls, prev: "BiomassAggregate", bm: BiomassData) -> "BiomassAggregate":
         return cls(prev.difference+bm-prev.current, bm)
-
-
-

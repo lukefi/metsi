@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from types import SimpleNamespace
-from typing import Callable, List, Optional, Any, Dict, Tuple, TypeVar
+from typing import Callable, List, Optional, Any, Tuple, TypeVar
 
 
 def identity(x):

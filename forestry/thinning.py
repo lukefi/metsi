@@ -1,6 +1,6 @@
 from forestdatamodel.model import ForestStand
 from typing import Any, Callable
-from forestry.aggregates import CrossCutAggregate, ThinningOutput, TreeThinData
+from forestryfunctions.cross_cutting.model import  CrossCutAggregate, ThinningOutput, TreeThinData
 from forestry.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
 from forestryfunctions.harvest import thinning
 from forestryfunctions.cross_cutting import cross_cutting

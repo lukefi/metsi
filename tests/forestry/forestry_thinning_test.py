@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from tests.test_utils import ConverterTestSuite, get_default_timber_price_table
-from forestry.aggregates import ThinningOutput, TreeThinData
+from forestryfunctions.cross_cutting.model import ThinningOutput, TreeThinData
 from forestdatamodel.model import ReferenceTree
 from forestry.thinning_limits import *
 from sim.core_types import AggregatedResults
