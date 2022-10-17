@@ -128,14 +128,14 @@ The operational details about these applications are documented separately.
 
 The simulator application depends upon
 
-1. A source data file which contains a list of `ForestStand` entities according to the `forest-data-model` package. The file may currently be a JSON file or a Python native serialization file (pickle).
-These source files are typically produced from VMI or SMK (Finnish Forest Center) source data files with the [vmi-data-converter](https://github.com/menu-hanke/vmi-data-converter) application.
+1. A source data file which contains forest stand, reference tree and tree stratum information
+   1. a .json file or .pickle file containing Forest Data Model type source data.
+   2. a .dat file containing VMI12 or VMI13 type source data
+   3. a .xml file containing Forest Centre type source data
 2. A YAML file which is used as a configuration for a simulator run. See `control.yaml` for an example. See section about Simulation control for further information.
 
 There are several example input files in the project `data` directory.
 These are data files with a list of ForestStand objects containing a list of RefenceTree objects generated from TreeStratum objects with Weibull distribution.
-
-! Note that the JSON file input is currently unusable for enumeration types in the data model due to https://github.com/menu-hanke/forest-data-model/issues/30 so use the pickle file for the time being.
 
 See table below for a quick reference of forestry operations usable in control.yaml.
 
