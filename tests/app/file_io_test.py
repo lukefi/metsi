@@ -22,7 +22,7 @@ class TestFileReading(unittest.TestCase):
     def test_simulation_declaration_from_yaml_file(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "control.yaml")
         result = app.file_io.simulation_declaration_from_yaml_file(input_file_path)
-        self.assertEqual(2, len(result.keys()))
+        self.assertEqual(1, len(result.keys()))
 
     def test_pickle(self):
         data = [

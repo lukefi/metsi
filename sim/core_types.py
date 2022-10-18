@@ -52,20 +52,6 @@ class Step:
         self.add_branch(Step(operation, self))
 
 
-class SimulationParams(SimpleNamespace):
-    """Control parameter set for simulation time progressing"""
-    initial_step_time: int
-    step_time_interval: int
-    final_step_time: int
-
-    def simulation_time_series(self) -> range:
-        return range(
-            self.initial_step_time,
-            self.final_step_time + 1,
-            self.step_time_interval
-        )
-
-
 class AggregatedResults:
 
     def __init__(
