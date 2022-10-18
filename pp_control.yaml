@@ -3,5 +3,4 @@ operation_params:
     - param: value
 
 post_processing:
-  - cross_cut_thinning_output
   - do_nothing

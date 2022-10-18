@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from forestdatamodel.enums.internal import TreeSpecies
 from forestry.biomass_repola import BiomassData
 
 
@@ -18,12 +17,6 @@ class VolumeAggregate:
 
 
 @dataclass
-class CrossCutAggregate:
-    volume: float
-    value: float
-
-
-@dataclass
 class BiomassAggregate:
     difference: BiomassData
     current: BiomassData
@@ -35,16 +28,3 @@ class BiomassAggregate:
     @classmethod
     def from_prev(cls, prev: "BiomassAggregate", bm: BiomassData) -> "BiomassAggregate":
         return cls(prev.difference+bm-prev.current, bm)
-
-
-@dataclass
-class TreeThinData:
-    stems_removed_per_ha: float
-    species: TreeSpecies
-    breast_height_diameter: float
-    height: float
-
-
-@dataclass
-class ThinningOutput:
-    removed: list[TreeThinData]

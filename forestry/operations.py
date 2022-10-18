@@ -1,15 +1,15 @@
 from itertools import repeat
 from functools import reduce
-from collections import defaultdict
 from forestdatamodel.model import ForestStand
-from forestry.aggregates import BiomassAggregate, CrossCutAggregate, ThinningOutput, VolumeAggregate
+from forestry.aggregates import BiomassAggregate, VolumeAggregate
+from forestryfunctions.cross_cutting.model import CrossCutAggregate
 from forestryfunctions import forestry_utils as futil
+from forestryfunctions.r_utils import lmfor_volume
+from forestryfunctions.cross_cutting import cross_cutting
 from forestry.biomass_repola import biomasses_by_component_stand
 from forestry.grow_acta import grow_acta
-from forestry.r_utils import lmfor_volume
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
-from forestry import cross_cutting
 from sim.core_types import OpTuple
 
 def compute_volume(stand: ForestStand) -> float:
@@ -37,14 +37,14 @@ def report_volume(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
 def cross_cut_whole_stand(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
     This is the entry point for calculating cross cut (apteeraus) value and volume for a whole stand.
+    The results are stored in simulation_aggregates.
     """
 
     stand, simulation_aggregates = payload
 
-    volumes, values = cross_cutting.cross_cut_stand(stand)
-
+    timber_price_table = operation_parameters['timber_price_table']
+    volumes, values = cross_cutting.cross_cut_stand(stand, timber_price_table)
     total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
-
     simulation_aggregates.store('report_cross_cutting', CrossCutAggregate(total_volume, total_value))
 
     return payload
@@ -72,20 +72,6 @@ def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[F
     return input
 
 
-def cross_cut_thinning_output(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = payload
-    thinning_aggregates = defaultdict(dict)
-    for tag, res in simulation_aggregates.operation_results.items():
-        for tp, aggr in res.items():
-            if not isinstance(aggr, ThinningOutput):
-                continue
-            volumes, values = cross_cutting.cross_cut_thinning_output(aggr, stand_area=stand.area)
-            total_volume, total_value = cross_cutting.calculate_cross_cut_aggregates(volumes, values)
-            thinning_aggregates[tag][tp] = CrossCutAggregate(total_volume, total_value)
-    simulation_aggregates.get("thinning_stats").update(thinning_aggregates)
-    return payload
-
-
 operation_lookup = {
     'grow_acta': grow_acta,
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
@@ -96,8 +82,6 @@ operation_lookup = {
     'report_biomass': report_biomass,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
-    'cross_cut_whole_stand': cross_cut_whole_stand,
-    'cross_cut_thinning_output': cross_cut_thinning_output
 }
 
 try:
