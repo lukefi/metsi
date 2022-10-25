@@ -43,7 +43,7 @@ class CollectiveSeries(Generic[T]):
 def getseries(schedule: OperationPayload, name: str) -> CollectiveSeries:
     """Get a `CollectiveSeries` for the collective `name` from an `OperationPayload`."""
     data, index = [], []
-    for t,c in schedule.aggregated_results["operation_results"]["report_collectives"].items(): # type: ignore
+    for t,c in schedule.aggregated_results.operation_results["report_collectives"].items(): # type: ignore
         if name in c:
             data.append(c[name])
             index.append(t)
@@ -79,7 +79,7 @@ def j_xda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
     collectives = {
         k for schedules in data.values()
         for payload in schedules
-        for c in payload.aggregated_results["operation_results"]["report_collectives"].values() # type: ignore
+        for c in payload.aggregated_results.operation_results["report_collectives"].values() # type: ignore
         for k in c
     }
     xvars = list(map(compile, decl.get("xvariables", collectives)))

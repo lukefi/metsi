@@ -1,6 +1,7 @@
 import argparse
 from typing import List
 
+
 def sim_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 simulator')
     parser.add_argument('input_file', help='Simulator input file')
@@ -10,16 +11,25 @@ def sim_cli_arguments(args: List[str]):
                         type=str,
                         help='Simulation alternatives tree formation strategy: \'full\' (default), \'partial\', \'skip\'',
                         default='full')
-    parser.add_argument('-i','--input-format', 
-                        choices=['pickle', 'json'],
+    parser.add_argument('-i', '--input-format',
+                        choices=['pickle', 'json', 'vmi12', 'vmi13', 'forest_centre'],
                         type=str,
-                        help='Format of the input file: \'pickle\' (default) or \'json\'',
+                        help='Format of the input file: FDM \'pickle\' (default), FDM \'json\', \'vmi12\' dat, \'vmi13\' dat or \'forest_centre\' xml',
                         default='pickle')
-    parser.add_argument('-o','--output-format',
+    parser.add_argument('-o', '--output-format',
                         choices=['pickle', 'json'],
                         type=str,
                         help='Format of the output file: \'pickle\' (default) or \'json\'',
                         default='pickle')
+    parser.add_argument('--reference-trees',
+                        default=False,
+                        action=argparse.BooleanOptionalAction,
+                        help="Include reference trees from VMI data source.")
+    parser.add_argument('--strata-origin',
+                        default='1',
+                        choices=['1', '2', '3'],
+                        type=str,
+                        help='Stratum origin type selector for Forest Centre data. Default \'1\'.')
 
     return parser.parse_args(args)
 

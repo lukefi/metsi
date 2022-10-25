@@ -1,5 +1,5 @@
 import unittest
-from sim.core_types import OperationPayload
+from sim.core_types import AggregatedResults, OperationPayload
 from sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy
 from tests.test_utils import raises, identity, none, collect_results, load_yaml, aggregating_increment
 
@@ -28,7 +28,7 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('branching.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            aggregated_results={'operation_results': {}},
+            aggregated_results=AggregatedResults(),
             operation_history=[]
         )
         results_full = collect_results(
@@ -43,7 +43,7 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('no_parameters.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            aggregated_results={'operation_results': {}},
+            aggregated_results=AggregatedResults(),
             operation_history=[]
         )
 
@@ -56,7 +56,7 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('parameters.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            aggregated_results={'operation_results': {}},
+            aggregated_results=AggregatedResults(),
             operation_history=[]
         )
 
@@ -69,7 +69,7 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('parameters_branching.yaml')
         initial = OperationPayload(
             simulation_state=1,
-            aggregated_results={'operation_results': {}},
+            aggregated_results=AggregatedResults(),
             operation_history=[]
         )
 

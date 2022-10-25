@@ -128,14 +128,14 @@ The operational details about these applications are documented separately.
 
 The simulator application depends upon
 
-1. A source data file which contains a list of `ForestStand` entities according to the `forest-data-model` package. The file may currently be a JSON file or a Python native serialization file (pickle).
-These source files are typically produced from VMI or SMK (Finnish Forest Center) source data files with the [vmi-data-converter](https://github.com/menu-hanke/vmi-data-converter) application.
+1. A source data file which contains forest stand, reference tree and tree stratum information
+   1. a .json file or .pickle file containing Forest Data Model type source data.
+   2. a .dat file containing VMI12 or VMI13 type source data
+   3. a .xml file containing Forest Centre type source data
 2. A YAML file which is used as a configuration for a simulator run. See `control.yaml` for an example. See section about Simulation control for further information.
 
 There are several example input files in the project `data` directory.
 These are data files with a list of ForestStand objects containing a list of RefenceTree objects generated from TreeStratum objects with Weibull distribution.
-
-! Note that the JSON file input is currently unusable for enumeration types in the data model due to https://github.com/menu-hanke/forest-data-model/issues/30 so use the pickle file for the time being.
 
 See table below for a quick reference of forestry operations usable in control.yaml.
 
@@ -300,11 +300,11 @@ simulation_events:
 
 Step tree from declaration above
 
-![Step tree](doc/20220221_sim-tree.drawio.png)
+![Step tree](doc/drawio/20220221_sim-tree.drawio.png)
 
-Operation chains from step tree above
+Operation chains from step tree above, as produced by the __full tree strategy__ (see below for partial tree strategy)
 
-![Operation chains](doc/20220221_sim-chains.drawio.png)
+![Operation chains](doc/drawio/20220221_sim-chains.drawio.png)
 
 ## Collective variables
 
@@ -394,6 +394,12 @@ Operations may not mutate the operation parameter `dict`
 Note that this package is a simple run-testing implementation.
 In the future we wish to expand upon this to allow for distributed run scenarios using Dask.
 
+## Strategies
+The simulator strategies determine how the program traverses down the simulation tree. The _full_ strategy executes `run_full_tree_strategy`, whereas the _partial_ strategy executes `run_partial_tree_strategy`.
+
+It should be noted that while the full strategy is simpler to understand conceptually, it carries a significant memory and runtime overhead for large simulation trees, and therefore the `partial` strategy should be focused on as the performant solution.
+
+
 # Additional information
 
 ## Notes for domain developers
@@ -460,7 +466,41 @@ if(!all(library_requirements %in% installed.packages()[, "Package"]))
 library(lmfor)
 ```
 
+### A Thought exercise on the partial tree strategy
 
+To understand the partial tree strategy better, consider a simulator instruction such as:
+
+```yaml
+simulation_events:
+  - time_points: [0,5]
+    generators:
+      - sequence:
+        - grow
+      - alternatives:
+        - do_nothing
+        - thinning
+```
+ which will produce a simulator tree as below:
+
+![Simple simulation tree](doc/drawio/simple-sim-tree.drawio.png)
+
+the `full` strategy would create operation chains (one for each possible path in the tree) and run them independently from one another. In this case, we would have four separate chains, each chain having four operations.
+
+On the other hand, the `partial` strategy would proceed as follows:
+
+1. create operation chains from the nodes in the first time point, and run them:
+
+![Partial strategy first period example](doc/drawio/partial_strat_first_period.drawio.png)
+
+Here you'll notice that the first period's `grow` operation is executed twice, whereas the ``full`` tree strategy would have executed it four times.
+
+2. For all successful results from the first period, create operation chains from the nodes in the second period:
+
+![Partial strategy second period example](doc/drawio/partial_strat_second_period.drawio.png)
+
+Now, let's assume that the second chain from time point 0 would not complete successfully, e.g. due to a constraint set on the thinning operation. At time point 5, The partial tree strategy would then only create operation chains for `output 1`, i.e. the two chains on the left in the above diagram. This logic reduces the unnecessary computation the simulator has to make, compared to the full strategy, and this is true especially for large simulation trees.
+
+"Partial" in the strategy name refers to the fact that the strategy creates trees from only the nodes (`Step`s) in one time point at a time (i.e. partial trees/subtrees) and traverses those partial trees (with the same post-order traversal algorithm) to create partial (or sub-) chains of operations. __Therefore, the strategy can be thought to operate depth-first within time points, but breadth-first across time points.__
 ## Notes for simulation creators
 
 Use the control.yaml structure declaration to control the simulation structure, domain operations and parameters that are to be used.
