@@ -1,11 +1,11 @@
 from collections import OrderedDict
-from forestry.aggregates import ThinningOutput, TreeThinData
-from tests.test_utils import ConverterTestSuite
+from tests.test_utils import ConverterTestSuite, get_default_timber_price_table
+from forestryfunctions.cross_cutting.model import ThinningOutput, TreeThinData
 from forestdatamodel.model import ReferenceTree
 from forestry.thinning_limits import *
 from sim.core_types import AggregatedResults
 import forestry.thinning as thin
-
+import numpy as np
 
 class ThinningsTest(ConverterTestSuite):
 
@@ -28,12 +28,13 @@ class ThinningsTest(ConverterTestSuite):
         species = [TreeSpecies(i) for i in [1, 2, 2]]
         diameters = [12.0, 16.0, 12.0]
         stems = [300, 600, 200]
+        heights = [10.0, 15.0, 10.0]
 
         stand = ForestStand()
         stand.site_type_category = 1
         stand.reference_trees = [
-            ReferenceTree(species=spe, breast_height_diameter=d, stems_per_ha=f)
-            for spe, d, f in zip(species, diameters, stems)
+            ReferenceTree(species=spe, breast_height_diameter=d, stems_per_ha=f, height=h)
+            for spe, d, f, h in zip(species, diameters, stems, heights)
         ]
         operation_tag = 'first_thinning'
         simulation_aggregates = AggregatedResults()
@@ -41,7 +42,8 @@ class ThinningsTest(ConverterTestSuite):
             'thinning_factor': 0.97,
             'e': 10,
             'dominant_height_lower_bound': 11,
-            'dominant_height_upper_bound': 16
+            'dominant_height_upper_bound': 16,
+            'timber_price_table': get_default_timber_price_table()
         }
         payload = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.first_thinning(payload, **operation_parameters)
@@ -56,18 +58,22 @@ class ThinningsTest(ConverterTestSuite):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
         diameters = [20.0 + i for i in range(0, 3)]
         stems = [200.0 + i for i in range(0, 3)]
+        heights = [20.0 + i for i in range(0, 3)]
 
         stand = ForestStand()
         stand.site_type_category = 1
         stand.soil_peatland_category = 1
         stand.reference_trees = [
-            ReferenceTree(species=s, breast_height_diameter=d, stems_per_ha=f)
-            for s, d, f in zip(species, diameters, stems)
+            ReferenceTree(species=s, breast_height_diameter=d, stems_per_ha=f, height=h)
+            for s, d, f, h in zip(species, diameters, stems, heights)
         ]
 
         operation_tag = 'thinning_from_above'
         simulation_aggregates = AggregatedResults()
-        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
+        operation_parameters = {
+            'thinning_factor': 0.97, 
+            'e': 0.2,
+            'timber_price_table': get_default_timber_price_table()}
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.thinning_from_above(oper_input, **operation_parameters)
@@ -82,17 +88,22 @@ class ThinningsTest(ConverterTestSuite):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
         diameters = [20.0 + i for i in range(0, 3)]
         stems = [200.0 + i for i in range(0, 3)]
+        heights = [20.0 + i for i in range(0, 3)]
 
         stand = ForestStand()
         stand.site_type_category = 1
         stand.soil_peatland_category = 1
         stand.reference_trees = [
-            ReferenceTree(species=s, breast_height_diameter=d, stems_per_ha=f)
-            for s, d, f in zip(species, diameters, stems)
+            ReferenceTree(species=s, breast_height_diameter=d, stems_per_ha=f, height=h)
+            for s, d, f, h in zip(species, diameters, stems, heights)
         ]
 
         simulation_aggregates = AggregatedResults()
-        operation_parameters = {'thinning_factor': 0.97, 'e': 0.2}
+        operation_parameters = {
+            'thinning_factor': 0.97, 
+            'e': 0.2,
+            'timber_price_table': get_default_timber_price_table()
+            }
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.thinning_from_below(oper_input, **operation_parameters)
@@ -107,17 +118,22 @@ class ThinningsTest(ConverterTestSuite):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
         diameters = [20.0 + i for i in range(0, 3)]
         stems = [200.0 + i for i in range(0, 3)]
+        heights = [20.0 + i for i in range(0, 3)]
 
         stand = ForestStand()
         stand.site_type_category = 1
         stand.soil_peatland_category = 1
         stand.reference_trees = [
-            ReferenceTree(species=s, breast_height_diameter=d, stems_per_ha=f)
-            for s, d, f in zip(species, diameters, stems)
+            ReferenceTree(species=s, breast_height_diameter=d, stems_per_ha=f, height=h)
+            for s, d, f, h in zip(species, diameters, stems, heights)
         ]
 
         simulation_aggregates = AggregatedResults()
-        operation_parameters = {'thinning_factor': 0.50, 'e': 0.2}
+        operation_parameters = {
+            'thinning_factor': 0.50, 
+            'e': 0.2,
+            'timber_price_table': get_default_timber_price_table()
+            }
 
         oper_input = (stand, simulation_aggregates)
         result_stand, collected_aggregates = thin.even_thinning(oper_input, **operation_parameters)
@@ -130,6 +146,7 @@ class ThinningsTest(ConverterTestSuite):
 
     def test_report_overall_removal(self):
         operation_results = {
+
             'thin1': OrderedDict({
                 0: ThinningOutput([
                     TreeThinData(
@@ -318,3 +335,16 @@ class ThinningLimitsTest(ConverterTestSuite):
 
         ]
         self.run_with_test_assertions(assertions, resolve_thinning_bounds)
+
+    def test_get_timber_price_table(self):
+        csv_string = open('tests/resources/timber_price_table.csv', 'r').read()
+        actual = thin.get_timber_price_table(csv_string)
+
+        expected = np.array(
+                           [[  1., 160., 370.,  55.],
+                            [  1., 160., 400.,  57.],
+                            [  1., 160., 430.,  59.],
+                            [  1., 160., 460.,  59.],
+                            [  2.,  70., 300.,  17.]])
+
+        self.assertTrue(np.array_equal(expected, actual))

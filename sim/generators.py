@@ -1,5 +1,5 @@
 from typing import Any, Callable, List, Optional, Dict
-from sim.core_types import Step, SimulationParams
+from sim.core_types import Step
 from sim.operations import prepared_processor, prepared_operation, resolve_operation
 from sim.util import get_or_default, dict_value, read_operation_file_params, merge_operation_params
 
@@ -116,13 +116,21 @@ def generator_function(key, generator_lookup: dict, *processors: Callable) -> Ca
     return lambda parent_steps: generator_lookup[key](parent_steps, *processors)
 
 
+def generate_time_series(simulation_events: list) -> list[int]:
+    """Scan simulation_events for all unique time points and return them as an ascending ordered list. """
+    time_points = set()
+    for event_set in simulation_events:
+        time_points.update(event_set['time_points'])
+    return list(time_points)
+
+
 def get_configuration_from_simulation_declaration(simulation_declaration):
-    simulation_params = SimulationParams(**simulation_declaration['simulation_params'])
     simulation_events = get_or_default(dict_value(simulation_declaration, 'simulation_events'), [])
     operation_params = get_or_default(dict_value(simulation_declaration, 'operation_params'), {})
     operation_file_params = get_or_default(dict_value(simulation_declaration, 'operation_file_params'), {})
     run_constraints = get_or_default(dict_value(simulation_declaration, 'run_constraints'), {})
-    return simulation_params,simulation_events,operation_params,operation_file_params,run_constraints
+    time_points = generate_time_series(simulation_events)
+    return simulation_events, operation_params, operation_file_params, run_constraints, time_points
 
 
 def prepare_step_generator(generator_declaration, generator_lookup, operation_lookup, operation_params, operation_file_params, run_constraints,
@@ -163,10 +171,10 @@ def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -
     :return: a list of prepared generator functions
     """
     generator_series = []
+    simulation_events, operation_params, operation_file_params, run_constraints, time_points = \
+        get_configuration_from_simulation_declaration(simulation_declaration)
 
-    simulation_params, simulation_events, operation_params, operation_file_params, run_constraints = get_configuration_from_simulation_declaration(simulation_declaration)
-
-    for time_point in simulation_params.simulation_time_series():
+    for time_point in time_points:
         generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
         for generator_declaration in generator_declarations:
             generator = prepare_step_generator(generator_declaration, GENERATOR_LOOKUP, operation_lookup,
@@ -187,10 +195,10 @@ def partial_tree_generators_by_time_point(simulation_declaration: dict, operatio
     """
 
     generators_by_time_point = {}
+    simulation_events, operation_params, operation_file_params, run_constraints, time_points = \
+        get_configuration_from_simulation_declaration(simulation_declaration)
 
-    simulation_params, simulation_events, operation_params, operation_file_params, run_constraints = get_configuration_from_simulation_declaration(simulation_declaration)
-
-    for time_point in simulation_params.simulation_time_series():
+    for time_point in time_points:
         generator_series = []
         generator_declarations = generator_declarations_for_time_point(simulation_events, time_point)
         for generator_declaration in generator_declarations:

@@ -1,7 +1,0 @@
-#puutavaralajitaulukko
-# muuttujat puutavaralaji, pölkyn yläläpimitta (mm), pölkyn pituus (cm), hinta (€/m3) 
-1 160 370 55
-1 160 400 57
-1 160 430 59
-1 160 460 59
-2  70 300 17

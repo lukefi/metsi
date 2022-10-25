@@ -1,6 +1,6 @@
 from collections import OrderedDict
 from types import SimpleNamespace
-from typing import Callable, List, Optional, Any, Dict, Tuple, TypeVar
+from typing import Callable, List, Optional, Any, Tuple, TypeVar
 
 
 def identity(x):
@@ -50,20 +50,6 @@ class Step:
 
     def add_branch_from_operation(self, operation: Callable):
         self.add_branch(Step(operation, self))
-
-
-class SimulationParams(SimpleNamespace):
-    """Control parameter set for simulation time progressing"""
-    initial_step_time: int
-    step_time_interval: int
-    final_step_time: int
-
-    def simulation_time_series(self) -> range:
-        return range(
-            self.initial_step_time,
-            self.final_step_time + 1,
-            self.step_time_interval
-        )
 
 
 class AggregatedResults:

@@ -1,7 +1,7 @@
 from typing import Optional, Callable, List
 from copy import deepcopy
-from sim.core_types import OperationPayload, SimulationParams
-from sim.generators import full_tree_generators, compose, partial_tree_generators_by_time_point
+from sim.core_types import OperationPayload
+from sim.generators import full_tree_generators, compose, partial_tree_generators_by_time_point, generate_time_series
 
 
 def evaluate_sequence(payload, *operations: Callable) -> Optional:
@@ -77,7 +77,7 @@ def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration:
     for time_point, generator_series in generators_by_time_point.items():
         chains_by_time_point[time_point] = compose(*generator_series).operation_chains()
 
-    for time_point in SimulationParams(**simulation_declaration['simulation_params']).simulation_time_series():
+    for time_point in generate_time_series(simulation_declaration['simulation_events']):
         time_point_results: list[OperationPayload] = []
         for payload in results:
             payload_results = run_chains_iteratively(payload, chains_by_time_point[time_point])
