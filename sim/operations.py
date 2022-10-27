@@ -10,7 +10,7 @@ T = TypeVar("T")
 
 
 def _get_operation_last_run(operation_history: List[Tuple[int, str]], operation_tag: str) -> Optional[int]:
-    return next((t for t, o in reversed(operation_history) if o == operation_tag), None)
+    return next((t for t, o, p in reversed(operation_history) if o == operation_tag), None)
 
 
 def do_nothing(data: T, **kwargs) -> T:
@@ -38,11 +38,11 @@ def prepared_processor(operation_tag, processor_lookup, time_point: int, operati
                        **operation_parameters: dict):
     """prepares a processor function with an operation entrypoint"""
     operation = prepared_operation(resolve_operation(operation_tag, processor_lookup), **operation_parameters)
-    return lambda payload: processor(payload, operation, operation_tag, time_point, operation_run_constraints)
+    return lambda payload: processor(payload, operation, operation_tag, time_point, operation_run_constraints, **operation_parameters)
 
 
 def processor(payload: OperationPayload, operation: typing.Callable, operation_tag, time_point: int,
-              operation_run_constraints: Optional[dict]):
+              operation_run_constraints: Optional[dict], **operation_parameters: dict) -> OperationPayload:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     if operation_run_constraints is not None:
         current_operation_last_run_time_point = _get_operation_last_run(payload.operation_history, operation_tag)
@@ -54,7 +54,7 @@ def processor(payload: OperationPayload, operation: typing.Callable, operation_t
     except UserWarning as e:
         raise UserWarning("Unable to perform operation {}, at time point {}; reason: {}".format(operation_tag, time_point, e))
 
-    payload.operation_history.append((time_point, operation_tag))
+    payload.operation_history.append((time_point, operation_tag, operation_parameters))
 
     newpayload = OperationPayload(
         simulation_state=new_state,
