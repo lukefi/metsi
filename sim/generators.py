@@ -1,7 +1,7 @@
 from typing import Any, Callable, List, Optional, Dict
 from sim.core_types import Step
 from sim.operations import prepared_processor, prepared_operation, resolve_operation
-from sim.util import get_or_default, dict_value, read_operation_file_params, merge_operation_params
+from sim.util import get_or_default, dict_value, get_operation_file_params, merge_operation_params
 
 
 def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
@@ -144,7 +144,7 @@ def prepare_step_generator(generator_declaration, generator_lookup, operation_lo
     for operation_tag in operation_tags:
         parameter_set_choices = get_or_default(operation_params.get(operation_tag), [{}])
         operation_run_constraints = get_or_default(run_constraints.get(operation_tag), None)
-        this_operation_file_params = read_operation_file_params(operation_tag, operation_file_params)
+        this_operation_file_params = get_operation_file_params(operation_tag, operation_file_params)
         if len(parameter_set_choices) > 1 and generator_tag == 'sequence':
             raise Exception("Alternatives by operation parameters not supported in sequences. Use "
                             "alternatives clause for operation {} in time point {} or reduce operation parameter "

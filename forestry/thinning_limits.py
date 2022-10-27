@@ -520,9 +520,12 @@ LIMITS_SLICE_LOOKUP = {
 }
 
 @cache
-def create_thinning_limits_table(input_data: str) -> List:
+def create_thinning_limits_table(file_path: str) -> List:
+    contents = None
+    with open(file_path, "r") as f:
+        contents = f.read()
     # read thinning_limits into a list of lists
-    table = input_data.split('\n')
+    table = contents.split('\n')
     table = [row.split() for row in table]
 
     # this function is based on the structure in data/parameter_files/Thin.txt.
@@ -534,7 +537,7 @@ def create_thinning_limits_table(input_data: str) -> List:
 
 @lru_cache
 def get_thinning_limits_from_parameter_file_contents(
-    thinning_limits: str, 
+    thinning_limits_file: str, 
     county: CountyKey, 
     sp_category: SoilPeatlandKey, 
     site_type: SiteTypeKey, 
@@ -544,7 +547,7 @@ def get_thinning_limits_from_parameter_file_contents(
     Creates a table from :thinning_limits: and uses it to return a dict that contains tuples of lower and upper limits for each height bracket 
     for the given stand parameters (:county:, :sp_category:, :site_type:, :species:).
     """
-    limits_table = create_thinning_limits_table(thinning_limits)
+    limits_table = create_thinning_limits_table(thinning_limits_file)
     upper_limits_slice = LIMITS_SLICE_LOOKUP[county]["before_thinning"][sp_category][site_type]
     lower_limits_slice = LIMITS_SLICE_LOOKUP[county]["after_thinning"][sp_category][site_type]
     upper_limits = limits_table[upper_limits_slice]
@@ -572,7 +575,7 @@ def get_thinning_limits_from_parameter_file_contents(
     return limits_for_species
 
 
-def resolve_thinning_bounds(stand: ForestStand, thinning_limits: str = None) -> Tuple[float, float]:
+def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None) -> Tuple[float, float]:
     """ Resolves lower and upper bound for thinning. Values are in meters (m).
     :thinning_limits: thinning limits from a file parameter defined in control. yaml. It is user's responsibility to provide it in correct format. 
     Parsing failure will raise an exception. 
@@ -584,9 +587,9 @@ def resolve_thinning_bounds(stand: ForestStand, thinning_limits: str = None) -> 
     species_key = species_to_key(sdom)
     hdom = futil.solve_dominant_height_c_largest(stand)
 
-    if thinning_limits is not None:
+    if thinning_limits_file is not None:
         spe_limits = get_thinning_limits_from_parameter_file_contents(
-            thinning_limits,
+            thinning_limits_file,
             county_key,
             sp_category_key,
             site_type_key,
