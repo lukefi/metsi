@@ -11,9 +11,9 @@ from forestdatamodel.model import ForestStand
 from sim.core_types import OperationPayload
 
 
-def prepare_target_directory(path_descriptor: str, require_empty: bool = True) -> Path:
+def prepare_target_directory(path_descriptor: str) -> Path:
     if os.path.exists(path_descriptor):
-        if os.path.isdir(path_descriptor) and os.access(path_descriptor, os.W_OK) and (len(os.listdir(path_descriptor)) == 0 or require_empty is False):
+        if os.path.isdir(path_descriptor) and os.access(path_descriptor, os.W_OK):
             return Path(path_descriptor)
         else:
             raise Exception("Output directory {} not available. Ensure it is a writable and empty, or a non-existing directory.".format(path_descriptor))
@@ -57,7 +57,7 @@ def read_simulation_results_input_file(file_path: str, input_format: str) -> dic
 
 
 def write_preprocessing_result_to_file(result: Any, path: str, output_format: str):
-    dirpath = prepare_target_directory(path, False)
+    dirpath = prepare_target_directory(path)
     if output_format == "pickle":
         pickle_writer(dirpath, f"preprocessing_result.{output_format}", result)
     elif output_format == "json":
@@ -67,7 +67,7 @@ def write_preprocessing_result_to_file(result: Any, path: str, output_format: st
 
 
 def write_result_to_file(result: Any, path: str, output_format: str):
-    dirpath = prepare_target_directory(path, False)
+    dirpath = prepare_target_directory(path)
     if output_format == "pickle":
         pickle_writer(dirpath, f"output.{output_format}", result)
     elif output_format == "json":
@@ -77,7 +77,7 @@ def write_result_to_file(result: Any, path: str, output_format: str):
 
 
 def write_post_processing_result_to_file(result: Any, path: str, output_format: str):
-    dirpath = prepare_target_directory(path, False)
+    dirpath = prepare_target_directory(path)
     if output_format == "pickle":
         pickle_writer(dirpath, f"pp_result.{output_format}", result)
     elif output_format == "json":
