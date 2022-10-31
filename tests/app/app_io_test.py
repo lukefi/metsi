@@ -6,7 +6,7 @@ class TestAppIO(unittest.TestCase):
     def test_sim_cli_arguments(self):
         args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
         result = aio.sim_cli_arguments(args)
-        self.assertEqual(10, len(result.__dict__.keys()))
+        self.assertEqual(11, len(result.__dict__.keys()))
         self.assertEqual('input.pickle', result.input_file)
         self.assertEqual('control.yaml', result.control_file)
         self.assertEqual('output2', result.target_directory)

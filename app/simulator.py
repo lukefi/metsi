@@ -10,7 +10,8 @@ from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evalu
 from sim.core_types import AggregatedResults, OperationPayload
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
-from app.file_io import read_payload_input_file, simulation_declaration_from_yaml_file, write_result_to_file
+from app.file_io import read_payload_input_file, simulation_declaration_from_yaml_file, write_result_to_file, \
+    write_preprocessing_result_to_file
 from app.app_io import sim_cli_arguments
 
 start_time = time.time_ns()
@@ -127,6 +128,8 @@ def main():
     )
     print_logline("Preprocessing...")
     result = preprocess_stands(stands, simulation_declaration)
+    if app_arguments.preprocessing_output_container != "none":
+        write_preprocessing_result_to_file(result, target_directory, app_arguments.preprocessing_output_container)
 
     if app_arguments.strategy != "skip":
         print_logline("Simulating...")

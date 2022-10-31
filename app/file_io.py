@@ -56,8 +56,18 @@ def read_simulation_results_input_file(file_path: str, input_format: str) -> dic
         raise Exception(f"Unsupported input format '{input_format}'")
 
 
+def write_preprocessing_result_to_file(result: Any, path: str, output_format: str):
+    dirpath = prepare_target_directory(path, False)
+    if output_format == "pickle":
+        pickle_writer(dirpath, f"preprocessing_result.{output_format}", result)
+    elif output_format == "json":
+        json_writer(dirpath, f"preprocessing_result.{output_format}", result)
+    else:
+        raise Exception(f"Unsupported output format '{output_format}'")
+
+
 def write_result_to_file(result: Any, path: str, output_format: str):
-    dirpath = prepare_target_directory(path)
+    dirpath = prepare_target_directory(path, False)
     if output_format == "pickle":
         pickle_writer(dirpath, f"output.{output_format}", result)
     elif output_format == "json":

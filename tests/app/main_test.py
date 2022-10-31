@@ -44,6 +44,8 @@ def run_simulator(state_input_files: List[str], state_output_containers: List[st
             'fdm',
             '--state-input-container',
             state_output_container,
+            '--preprocessing-output-container',
+            'pickle',
             '--state-output-container',
             state_output_container,
             input_file,
@@ -70,9 +72,11 @@ class MainTest(unittest.TestCase):
         sim_results = run_simulator(self.input_files, self.input_containers)
         for output_dir, output_file, _ in sim_results:
             filepath = Path(output_dir, output_file)
-            print(filepath)
+            preprocessing_filepath = Path(output_dir, 'preprocessing_result.pickle')
             self.assertTrue(os.path.exists(filepath))
+            self.assertTrue(os.path.exists(preprocessing_filepath))
             os.remove(filepath)
+            os.remove(preprocessing_filepath)
             os.rmdir(output_dir)
 
     def test_post_processing_main(self):
@@ -94,7 +98,9 @@ class MainTest(unittest.TestCase):
             pp.main()
 
             pp_result_path = Path(sim_dir, pp_result_file)
+            preprocessing_result_path = Path(sim_dir, 'preprocessing_result.pickle')
             self.assertTrue(os.path.exists(pp_result_path))
             os.remove(pp_result_path)
             os.remove(pp_input_file)
+            os.remove(preprocessing_result_path)
             os.rmdir(sim_dir)
