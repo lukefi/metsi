@@ -7,77 +7,94 @@ NOTE: the tests use the control.yaml and pp_control.yaml files from the project 
 import os
 import sys
 import unittest
+from pathlib import Path
 import app.simulator as simulator
 import app.post_processing as pp
 from typing import List
 
 
-SIM_OUTS = []
-
-
-def run_simulator(input_files: List[str], input_formats: List[str]):
+def run_simulator(state_input_files: List[str], state_output_containers: List[str]):
 
     strategies = ['full', 'partial']
     control_file = 'control.yaml'
-    output_files = []
-    for i in input_files:
-        file_split = i.split('.')
-        output_files.append(file_split[0]+'.sim.out.'+file_split[-1])
-    abs_paths = []
-    for i in input_files:
-        abs_paths.append(os.path.join(os.getcwd(), 'tests', 'resources', i))
+    run_details = []
+    output_details = []
 
-    for input_file, input_format, output_file in zip(abs_paths, input_formats, output_files):
+    for i, (container, file) in enumerate(zip(state_output_containers, state_input_files)):
         for strategy in strategies:
-            sys.argv = [
-                'foo',
-                '-s',
-                strategy,
-                '-i',
-                input_format,
-                input_file,
-                control_file,
-                output_file
-            ]
-            simulator.main()
-    return output_files
+            run_details.append((
+                os.path.join(os.getcwd(), file),
+                container,
+                f"outdir{i}-{strategy}",
+                f"output.{container}",
+                strategy
+            ))
+            output_details.append((
+                f"outdir{i}-{strategy}",
+                f"output.{container}",
+                container
+            ))
+
+    for input_file, state_output_container, output_dir, _, strategy in run_details:
+        sys.argv = [
+            'foo',
+            '-s',
+            strategy,
+            '--state-format',
+            'fdm',
+            '--state-input-container',
+            state_output_container,
+            '--state-output-container',
+            state_output_container,
+            input_file,
+            control_file,
+            output_dir
+        ]
+        print(sys.argv)
+        simulator.main()
+    return output_details
 
 
 class MainTest(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        input_files = [
-            'two_ffc_stands.pickle',
-            'two_vmi12_stands_as_jsonpickle.json'
-        ]
-        input_formats = [
-            'pickle',
-            'json'
-        ]
-        global SIM_OUTS
-        SIM_OUTS = run_simulator(input_files, input_formats)
+    input_files = [
+        'tests/resources/two_ffc_stands.pickle',
+        'tests/resources/two_vmi12_stands_as_jsonpickle.json'
+    ]
+    input_containers = [
+        'pickle',
+        'json'
+    ]
 
     def test_sim_main(self):
-        for output_file in SIM_OUTS:
-            self.assertTrue(os.path.exists(output_file))
-            os.remove(output_file)
+        sim_results = run_simulator(self.input_files, self.input_containers)
+        for output_dir, output_file, _ in sim_results:
+            filepath = Path(output_dir, output_file)
+            print(filepath)
+            self.assertTrue(os.path.exists(filepath))
+            os.remove(filepath)
+            os.rmdir(output_dir)
 
     def test_post_processing_main(self):
-        for output_file in SIM_OUTS:
-            pp_input_file = output_file
+        sim_results = run_simulator(self.input_files, self.input_containers)
+        for i, (sim_dir, sim_file, container) in enumerate(sim_results):
+            pp_input_file = os.path.join(os.getcwd(), sim_dir, sim_file)
             pp_control_file = 'pp_control.yaml'
-            pp_output_file = 'tests/resources/temp_output_pp.pickle'
+            pp_result_file = 'pp_result.pickle'
 
             sys.argv = [
                 'foo',
+                '--input-format',
+                container,
                 pp_input_file,
                 pp_control_file,
-                pp_output_file
+                sim_dir
             ]
 
             pp.main()
 
-            self.assertTrue(os.path.exists(output_file))
-
-            os.remove('tests/resources/temp_output_pp.pickle')
+            pp_result_path = Path(sim_dir, pp_result_file)
+            self.assertTrue(os.path.exists(pp_result_path))
+            os.remove(pp_result_path)
+            os.remove(pp_input_file)
+            os.rmdir(sim_dir)

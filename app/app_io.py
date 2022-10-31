@@ -5,21 +5,26 @@ from typing import List
 def sim_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 simulator')
     parser.add_argument('input_file', help='Simulator input file')
-    parser.add_argument('control_file', help='Simulation control declaration file', default='sim_control.yaml')
-    parser.add_argument('output_file', help='Simulator output file for alternatives and aggregated data')
+    parser.add_argument('control_file', help='Simulation control declaration file', default='control.yaml')
+    parser.add_argument('target_directory', help='Directory path for program output', default='output')
     parser.add_argument('-s', '--strategy',
                         type=str,
                         help='Simulation alternatives tree formation strategy: \'full\' (default), \'partial\', \'skip\'',
                         default='full')
-    parser.add_argument('-i', '--input-format',
-                        choices=['pickle', 'json', 'vmi12', 'vmi13', 'forest_centre'],
+    parser.add_argument('--state-format',
+                        choices=['fdm', 'vmi12', 'vmi13', 'forest_centre'],
                         type=str,
-                        help='Format of the input file: FDM \'pickle\' (default), FDM \'json\', \'vmi12\' dat, \'vmi13\' dat or \'forest_centre\' xml',
-                        default='pickle')
-    parser.add_argument('-o', '--output-format',
+                        help='Format of the input file: fdm (default), vmi12, vmi13, forest_centre',
+                        default='fdm')
+    parser.add_argument('--state-input-container',
                         choices=['pickle', 'json'],
                         type=str,
-                        help='Format of the output file: \'pickle\' (default) or \'json\'',
+                        help='Container format of state output files: \'pickle\' (default), \'json\'',
+                        default='pickle')
+    parser.add_argument('--state-output-container',
+                        choices=['pickle', 'json'],
+                        type=str,
+                        help='Container format of state output files: \'pickle\' (default), \'json\', csv',
                         default='pickle')
     parser.add_argument('--reference-trees',
                         default=False,
@@ -43,7 +48,7 @@ def post_processing_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 post processing')
     parser.add_argument('input_file', help='Post processing input file (simulator output)')
     parser.add_argument('control_file', help='Post processing control declaration file', default='pp_control.yaml')
-    parser.add_argument('output_file', help='Post processing output file')
+    parser.add_argument('target_directory', help='Directory path for program output')
     parser.add_argument('-i','--input-format',
                         choices=['pickle', 'json'],
                         type=str,

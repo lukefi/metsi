@@ -116,11 +116,12 @@ def main():
     app_arguments = sim_cli_arguments(sys.argv[1:])
 
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
-    output_filename = app_arguments.output_file
+    target_directory = app_arguments.target_directory
 
     stands = read_payload_input_file(
         app_arguments.input_file,
-        app_arguments.input_format,
+        app_arguments.state_format,
+        app_arguments.state_input_container,
         reference_trees=app_arguments.reference_trees,
         strata_origin=app_arguments.strata_origin
     )
@@ -133,7 +134,7 @@ def main():
         result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
 
     print_logline("Writing output...")
-    write_result_to_file(result, output_filename, app_arguments.output_format)
+    write_result_to_file(result, target_directory, app_arguments.state_output_container)
 
 
 if __name__ == "__main__":
