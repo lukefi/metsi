@@ -2,6 +2,20 @@ import argparse
 from typing import List
 
 
+def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> argparse.Namespace:
+    """If args Namespace has its given member as None, in-place replace it with value from defaults"""
+    for member in [
+        'state_format',
+        'state_input_container',
+        'state_output_container',
+        'preprocessing_output_container',
+        'derived_data_output_container'
+    ]:
+        if cli_args.__dict__.get(member) is None:
+            cli_args.__dict__[member] = default_args.get(member)
+    return cli_args
+
+
 def sim_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 simulator')
     parser.add_argument('input_file', help='Simulator input file')
@@ -14,23 +28,19 @@ def sim_cli_arguments(args: List[str]):
     parser.add_argument('--state-format',
                         choices=['fdm', 'vmi12', 'vmi13', 'forest_centre'],
                         type=str,
-                        help='Format of the input file: fdm (default), vmi12, vmi13, forest_centre',
-                        default='fdm')
+                        help='Format of the input file: fdm (default), vmi12, vmi13, forest_centre')
     parser.add_argument('--state-input-container',
                         choices=['pickle', 'json'],
                         type=str,
-                        help='Container format of state output files: \'pickle\' (default), \'json\'',
-                        default='pickle')
+                        help='Container format of state output files: \'pickle\' (default), \'json\'')
     parser.add_argument('--state-output-container',
                         choices=['pickle', 'json'],
                         type=str,
-                        help='Container format of state output files: \'pickle\' (default), \'json\', csv',
-                        default='pickle')
+                        help='Container format of state output files: \'pickle\' (default), \'json\', csv')
     parser.add_argument('--preprocessing-output-container',
                         choices=['pickle', 'json'],
                         type=str,
-                        help='Container format of preprocessing result file: \'pickle\' (default), \'json\', csv',
-                        default='none')
+                        help='Container format of preprocessing result file: \'pickle\' (default), \'json\', csv')
     parser.add_argument('--reference-trees',
                         default=False,
                         action=argparse.BooleanOptionalAction,
