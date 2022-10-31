@@ -3,7 +3,6 @@ Clearcuttings are simulated if the treestock's mean age
 or mean diameter at breast height exceeds the renewal limit
 given in separate files (renewal_ages_southernFI.txt, 
 renewal_diameters_southernFI.txt ...).
-
 Values in files are based on Tapio's Best practices for sustainable
 forest management in Finland: https://metsanhoidonsuositukset.fi/en. 
 There are separate files for different regions(Southern, Central, Northern),
@@ -232,13 +231,11 @@ def get_clearcutting_limits(stand: ForestStand, clearcutting_limits_ages: str = 
         age_limit = age_limits[site_type_key][species_key]
     else:
         age_limit = RENEWAL_AGES[site_type_key][species_key]
-
     if clearcutting_limits_diameters is not None:
         diameter_limits = get_clearcutting_diameterlimits_from_parameter_file_contents(clearcutting_limits_diameters)
         diameter_limit = diameter_limits[site_type_key][species_key]
     else:
         diameter_limit = RENEWAL_DIAMETERS[site_type_key][species_key]
-
     return (age_limit,diameter_limit)
 
 def get_clearcutting_instructions(stand: ForestStand,clearcutting_instructions: str = None) -> dict:
@@ -249,24 +246,6 @@ def get_clearcutting_instructions(stand: ForestStand,clearcutting_instructions: 
     else:
          regen = INSTRUCTIONS[site_type_key]
     return (regen)
-
-def mean_age_stand(stand: ForestStand) -> float:
-    stems = futil.overall_stems_per_ha(stand)
-    if stems > 0:
-        agesum = sum(rt.stems_per_ha * rt.biological_age for rt in stand.reference_trees)
-        mean_age = agesum/stems
-    else:
-        mean_age = 0
-    return mean_age
-
-def mean_diameter_stand(stand: ForestStand) -> float:
-    stems = futil.overall_stems_per_ha(stand)
-    if stems > 0:
-        diametersum = sum(rt.stems_per_ha * rt.breast_height_diameter for rt in stand.reference_trees)
-        mean_diameter = diametersum/stems
-    else:
-        mean_diameter = 0
-    return mean_diameter
 
 def species_to_key_clearcut(stand:ForestStand) -> str:
     """ converts tree species to into a key for clearcut lookup table """
@@ -293,10 +272,4 @@ def species_to_key_clearcut(stand:ForestStand) -> str:
         return SpeciesKey.DOWNY_BIRCH
     else:
         raise UserWarning("Unable to spesify tree species value {} as key for the thinning limits lookup table".format(value))
-
-
-
-
-
-
 

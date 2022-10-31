@@ -63,6 +63,10 @@ operation_file_params:
     timber_price_table: data/parameter_files/timber_price_table.csv
   even_thinning:
     timber_price_table: data/parameter_files/timber_price_table.csv
+  clearcutting:
+    clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt  
+    clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt 
+    clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
@@ -85,6 +89,7 @@ simulation_events:
           - thinning_from_above
           - first_thinning
           - even_thinning
+          - clearcutting
   - time_points: [30]
     generators:
       - sequence:
