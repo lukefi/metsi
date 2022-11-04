@@ -1,3 +1,4 @@
+from importlib import import_module
 from itertools import repeat
 from functools import reduce
 from forestdatamodel.model import ForestStand
@@ -70,11 +71,14 @@ operation_lookup = {
     'cross_cut_whole_stand': cross_cut_whole_stand,
 }
 
-try:
-    from forestry.grow_motti import grow_motti
-except ImportError:
-    # just don't register it when pymotti isn't found.
-    # we don't want to make pymotti a required dependency until it's public.
-    pass
-else:
-    operation_lookup['grow_motti'] = grow_motti
+def try_register(mod: str, func: str):
+    try:
+        operation_lookup[func] = getattr(import_module(mod), func)
+    except ImportError:
+        pass
+
+# only register grow_motti when pymotti is installed
+try_register("forestry.grow_motti", "grow_motti")
+
+# only register grow_fhk when fhk is installed
+try_register("forestry.grow_fhk", "grow_fhk")
