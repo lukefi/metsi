@@ -1,26 +1,42 @@
 import unittest
 from app import app_io as aio
+from app.app_io import set_default_arguments
 
 
 class TestAppIO(unittest.TestCase):
+    def test_set_default_io_arguments(self):
+        default_io_arguments = {
+            'state_format': 'vmi12',
+            'state_output_container': 'pickle'
+        }
+        args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
+        result = set_default_arguments(aio.sim_cli_arguments(args), default_io_arguments)
+        self.assertEqual(None, result.preprocessing_output_container)
+        self.assertEqual(None, result.state_input_container)
+        self.assertEqual('pickle', result.state_output_container)
+        self.assertEqual('fdm', result.state_format)
+
     def test_sim_cli_arguments(self):
-        args = ['input.pickle', 'control.yaml', 'output.pickle', '-s', 'partial', '-i', 'pickle', '--reference-trees', '--strata-origin', '2']
+        args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
         result = aio.sim_cli_arguments(args)
-        self.assertEqual(9, len(result.__dict__.keys()))
+        self.assertEqual(11, len(result.__dict__.keys()))
         self.assertEqual('input.pickle', result.input_file)
         self.assertEqual('control.yaml', result.control_file)
-        self.assertEqual('output.pickle', result.output_file)
+        self.assertEqual('output2', result.target_directory)
         self.assertEqual('partial', result.strategy)
+        self.assertEqual('fdm', result.state_format)
+        self.assertEqual(None, result.state_input_container)
+        self.assertEqual(None, result.state_output_container)
         self.assertEqual(True, result.reference_trees)
         self.assertEqual("2", result.strata_origin)
 
     def test_post_rocessing_cli_arguments(self):
-        args = ['input.json', 'control.yaml', 'output.pickle']
+        args = ['input.json', 'control.yaml', 'outdir']
         result = aio.post_processing_cli_arguments(args)
         self.assertEqual(5, len(result.__dict__.keys()))
         self.assertEqual('input.json', result.input_file)
         self.assertEqual('control.yaml', result.control_file)
-        self.assertEqual('output.pickle', result.output_file)
+        self.assertEqual('outdir', result.target_directory)
 
     def test_export_cli_arguments(self):
         args = ['input.pickle', 'control.yaml']
