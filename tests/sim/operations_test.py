@@ -31,15 +31,15 @@ class OperationsTest(unittest.TestCase):
 
     def test_operation_last_run(self):
         operation_history = [
-            (1, "operation1"),
-            (2, "operation2"),
-            (3, "operation1"),
-            (4, "operation3"),
-            (5, "operation1"),
-            (6, "operation2"),
-            (7, "operation1"),
-            (8, "operation3"),
-            (9, "operation1")
+            (1, "operation1", {}),
+            (2, "operation2", {}),
+            (3, "operation1", {}),
+            (4, "operation3", {}),
+            (5, "operation1", {}),
+            (6, "operation2", {}),
+            (7, "operation1", {}),
+            (8, "operation3", {}),
+            (9, "operation1", {})
         ]
 
         self.assertEqual(_get_operation_last_run(operation_history, "operation1"), 9)
