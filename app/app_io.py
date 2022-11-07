@@ -31,6 +31,11 @@ def sim_cli_arguments(args: List[str]):
                         type=str,
                         help='Stratum origin type selector for Forest Centre data. Default \'1\'.')
 
+    parser.add_argument('-m', '--multiprocessing', 
+                        action=argparse.BooleanOptionalAction,
+                        help="Enable parallel simulation of computational units over the amount of CPU cores available.",
+                        default=False)
+
     return parser.parse_args(args)
 
 
