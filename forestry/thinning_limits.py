@@ -4,6 +4,7 @@ The module is basicly a utility file for thinning operations that are basal area
 Thinning limits lookup table is used for solving lower (y0) and upper (y1) bound
 of basal area thinnings.
 """
+from functools import cache, lru_cache
 from typing import Dict, List, Tuple
 from enum import Enum
 from collections.abc import KeysView
@@ -518,7 +519,7 @@ LIMITS_SLICE_LOOKUP = {
     }
 }
 
-
+@cache
 def create_thinning_limits_table(input_data: str) -> List:
     # read thinning_limits into a list of lists
     table = input_data.split('\n')
@@ -531,6 +532,7 @@ def create_thinning_limits_table(input_data: str) -> List:
     else:
         return table
 
+@lru_cache
 def get_thinning_limits_from_parameter_file_contents(
     thinning_limits: str, 
     county: CountyKey, 

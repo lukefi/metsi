@@ -2,7 +2,7 @@ import sys
 from typing import List, Dict
 
 from app.app_io import post_processing_cli_arguments
-from app.file_io import simulation_declaration_from_yaml_file, read_simulation_results_input_file, write_result_to_file
+from app.file_io import simulation_declaration_from_yaml_file, read_simulation_results_input_file, write_post_processing_result_to_file
 from forestry.operations import operation_lookup
 from sim.core_types import OperationPayload
 from sim.generators import simple_processable_chain
@@ -28,7 +28,7 @@ def main():
             processed_schedule = evaluate_sequence(payload, *chain)
             result[identifier].append(processed_schedule)
 
-    write_result_to_file(result, app_arguments.output_file, app_arguments.output_format) 
+    write_post_processing_result_to_file(result, app_arguments.target_directory, app_arguments.output_format)
 
 
 if __name__ == '__main__':

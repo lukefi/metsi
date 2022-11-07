@@ -1,5 +1,7 @@
 import unittest
 import os
+from pathlib import Path
+
 import app.file_io
 from dataclasses import dataclass
 from forestdatamodel.model import ForestStand, ReferenceTree
@@ -29,42 +31,46 @@ class TestFileReading(unittest.TestCase):
             Test(a=1),
             Test(a=2)
         ]
-        app.file_io.pickle_writer('testpickle', data)
-        result = app.file_io.pickle_reader('testpickle')
+        app.file_io.prepare_target_directory('outdir')
+        app.file_io.pickle_writer(Path('outdir'), 'output.pickle', data)
+        result = app.file_io.pickle_reader('outdir/output.pickle')
         self.assertListEqual(data, result)
-        os.remove('testpickle')
+        os.remove('outdir/output.pickle')
+        os.rmdir('outdir')
 
     def test_json(self):
         data = [
             Test(a=1),
             Test(a=2)
         ]
-        app.file_io.json_writer('testjson', data)
-        result = app.file_io.json_reader('testjson')
+        app.file_io.prepare_target_directory('outdir')
+        app.file_io.json_writer(Path('outdir'), 'output.json', data)
+        result = app.file_io.json_reader('outdir/output.json')
         self.assertListEqual(data, result)
-        os.remove('testjson')
+        os.remove('outdir/output.json')
+        os.rmdir('outdir')
 
     def test_read_stands_from_pickle_file(self):
-        unpickled_stands = app.file_io.read_payload_input_file("tests/resources/two_ffc_stands.pickle", "pickle")
+        unpickled_stands = app.file_io.read_payload_input_file("tests/resources/two_ffc_stands.pickle", "fdm", "pickle")
         self.assertEqual(len(unpickled_stands), 2)
         self.assertEqual(type(unpickled_stands[0]), ForestStand)
 
     def test_read_stands_from_json_file(self):
-        stands_from_json = app.file_io.read_payload_input_file("tests/resources/two_vmi12_stands_as_jsonpickle.json", "json")
+        stands_from_json = app.file_io.read_payload_input_file("tests/resources/two_vmi12_stands_as_jsonpickle.json", "fdm", "json")
         self.assertEqual(len(stands_from_json), 2)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
         self.assertEqual(type(stands_from_json[1].reference_trees[0]), ReferenceTree)
 
     def test_read_stands_from_vmi12_file(self):
-        stands = app.file_io.read_payload_input_file("tests/resources/VMI12_source_mini.dat", "vmi12")
+        stands = app.file_io.read_payload_input_file("tests/resources/VMI12_source_mini.dat", "vmi12", "")
         self.assertEqual(len(stands), 7)
 
     def test_read_stands_from_vmi13_file(self):
-        stands = app.file_io.read_payload_input_file("tests/resources/VMI13_source_mini.dat", "vmi13")
+        stands = app.file_io.read_payload_input_file("tests/resources/VMI13_source_mini.dat", "vmi13", "")
         self.assertEqual(len(stands), 3)
 
     def test_read_stands_from_xml_file(self):
-        stands = app.file_io.read_payload_input_file("tests/resources/SMK_source.xml", "forest_centre")
+        stands = app.file_io.read_payload_input_file("tests/resources/SMK_source.xml", "forest_centre", "")
         self.assertEqual(len(stands), 3)
 
     def test_read_operation_payloads_from_pickle_file(self):
@@ -75,7 +81,8 @@ class TestFileReading(unittest.TestCase):
     def test_read_stands_from_nonexisting_file(self):
         kwargs = {
             "file_path": "tests/resources/nonexisting_file.pickle",
-            "input_format": "pickle"
+            "state_format": "fdm",
+            "state_input_container": "pickle"
         }
         self.assertRaises(Exception, app.file_io.read_payload_input_file, **kwargs)
 
@@ -92,15 +99,18 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
-        app.file_io.write_result_to_file(stands, "tests/resources/temp_two_stands.pickle", "pickle")
-        self.assertTrue(os.path.isfile("tests/resources/temp_two_stands.pickle"))
-        os.remove("tests/resources/temp_two_stands.pickle")
+        app.file_io.write_result_to_file(stands, "tests/resources/outdir", "pickle")
+        self.assertTrue(os.path.isfile("tests/resources/outdir/output.pickle"))
+        os.remove("tests/resources/outdir/output.pickle")
+        os.rmdir("tests/resources/outdir")
 
-        app.file_io.write_result_to_file(stands, "tests/resources/temp_two_stands.json", "json")
-        self.assertTrue(os.path.isfile("tests/resources/temp_two_stands.json"))
-        os.remove("tests/resources/temp_two_stands.json")
+        app.file_io.write_result_to_file(stands, "tests/resources/outdir", "json")
+        self.assertTrue(os.path.isfile("tests/resources/outdir/output.json"))
+        os.remove("tests/resources/outdir/output.json")
+        os.rmdir("tests/resources/outdir")
 
         #write_result_to_file should raise an Exception if the given output_format is not supported
-        self.assertRaises(Exception, app.file_io.write_result_to_file, stands, "tests/resources/temp_two_stands.txt", "txt")
+        self.assertRaises(Exception, app.file_io.write_result_to_file, stands, "tests/resources/outdir", "txt")
+        os.rmdir("tests/resources/outdir")
 
         

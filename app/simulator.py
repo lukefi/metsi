@@ -10,8 +10,9 @@ from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evalu
 from sim.core_types import AggregatedResults, OperationPayload
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
-from app.file_io import read_payload_input_file, simulation_declaration_from_yaml_file, write_result_to_file
-from app.app_io import sim_cli_arguments
+from app.file_io import read_payload_input_file, simulation_declaration_from_yaml_file, write_result_to_file, \
+    write_preprocessing_result_to_file
+from app.app_io import sim_cli_arguments, set_default_arguments
 
 start_time = time.time_ns()
 
@@ -111,21 +112,23 @@ def resolve_strategy_runner(source: str) -> Callable:
     except Exception:
         raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
 
+
 def main():
-
     app_arguments = sim_cli_arguments(sys.argv[1:])
-
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
-    output_filename = app_arguments.output_file
+    app_arguments = set_default_arguments(app_arguments, simulation_declaration['io_configuration'])
 
     stands = read_payload_input_file(
         app_arguments.input_file,
-        app_arguments.input_format,
+        app_arguments.state_format,
+        app_arguments.state_input_container,
         reference_trees=app_arguments.reference_trees,
         strata_origin=app_arguments.strata_origin
     )
     print_logline("Preprocessing...")
     result = preprocess_stands(stands, simulation_declaration)
+    if app_arguments.preprocessing_output_container is not None:
+        write_preprocessing_result_to_file(result, app_arguments.target_directory, app_arguments.preprocessing_output_container)
 
     if app_arguments.strategy != "skip":
         print_logline("Simulating...")
@@ -133,7 +136,8 @@ def main():
         result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
 
     print_logline("Writing output...")
-    write_result_to_file(result, output_filename, app_arguments.output_format)
+    if app_arguments.state_output_container is not None:
+        write_result_to_file(result, app_arguments.target_directory, app_arguments.state_output_container)
 
 
 if __name__ == "__main__":
