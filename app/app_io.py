@@ -28,19 +28,19 @@ def sim_cli_arguments(args: List[str]):
     parser.add_argument('--state-format',
                         choices=['fdm', 'vmi12', 'vmi13', 'forest_centre'],
                         type=str,
-                        help='Format of the input file: fdm (default), vmi12, vmi13, forest_centre')
+                        help='Data format of the state input file: fdm (default), vmi12, vmi13, forest_centre')
     parser.add_argument('--state-input-container',
                         choices=['pickle', 'json'],
                         type=str,
-                        help='Container format of state output files: \'pickle\' (default), \'json\'')
+                        help='Container format of the state input file: \'pickle\' (default), \'json\'')
     parser.add_argument('--state-output-container',
                         choices=['pickle', 'json'],
                         type=str,
-                        help='Container format of state output files: \'pickle\' (default), \'json\', csv')
+                        help='Container format of state output files: \'pickle\' (default), \'json\'')
     parser.add_argument('--preprocessing-output-container',
                         choices=['pickle', 'json'],
                         type=str,
-                        help='Container format of preprocessing result file: \'pickle\' (default), \'json\', csv')
+                        help='Container format of preprocessing result file: \'pickle\' (default), \'json\'')
     parser.add_argument('--reference-trees',
                         default=False,
                         action=argparse.BooleanOptionalAction,

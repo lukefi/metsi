@@ -2,8 +2,8 @@
 io_configuration:
   state_format: fdm #options: fdm, vmi12, vmi13, forest_centre
   state_input_container: pickle #Only relevant with fdm state_format. Options: pickle, json
-  preprocessing_output_container: pickle #options: pickle, json, "None"
-  state_output_container: pickle #options: pickle, json, "None"
+  preprocessing_output_container: pickle #options: pickle, json
+  state_output_container: pickle #options: pickle, json
   derived_data_output_container: pickle #options: pickle, json
 
 run_constraints:
