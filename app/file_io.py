@@ -3,7 +3,7 @@ import os
 import pickle
 from pathlib import Path
 import jsonpickle
-from typing import Any
+from typing import Any, Callable
 import yaml
 from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
 from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands
@@ -21,6 +21,26 @@ def prepare_target_directory(path_descriptor: str) -> Path:
     else:
         os.makedirs(path_descriptor)
         return Path(path_descriptor)
+
+
+def get_stands_writer(type: str) -> Callable[[Path, str, list[ForestStand]], None]:
+    if type == "pickle":
+        return pickle_writer
+    elif type == "json":
+        return json_writer
+    elif type == "csv":
+        return csv_writer
+    else:
+        raise Exception(f"Unsupported container format '{type}'")
+
+
+def get_object_writer(type: str) -> Callable[[Path, str, Any], None]:
+    if type == "pickle":
+        return pickle_writer
+    elif type == "json":
+        return json_writer
+    else:
+        raise Exception(f"Unsupported container format '{type}'")
 
 
 def file_contents(file_path: str) -> str:
@@ -61,56 +81,35 @@ def read_full_simulation_result_input_file(file_path: str, input_format: str) ->
 
 def write_preprocessing_result_to_file(result: list[ForestStand], path: str, output_format: str):
     dirpath = prepare_target_directory(path)
-    if output_format == "pickle":
-        pickle_writer(dirpath, f"preprocessing_result.{output_format}", result)
-    elif output_format == "json":
-        json_writer(dirpath, f"preprocessing_result.{output_format}", result)
-    elif output_format == "csv":
-        csv_writer(dirpath, f"preprocessing_result.{output_format}", result)
-    else:
-        raise Exception(f"Unsupported output format '{output_format}'")
+    writer = get_stands_writer(output_format)
+    writer(dirpath, f"preprocessing_result.{output_format}", result)
 
 
 def write_full_simulation_result_to_file(result: Any, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
-    if output_format == "pickle":
-        pickle_writer(dirpath, f"output.{output_format}", result)
-    elif output_format in ("json", "csv"):
-        json_writer(dirpath, f"output.json", result)
-    else:
-        raise Exception(f"Unsupported output format '{output_format}'")
+    override_format = "json" if output_format == "csv" else output_format
+    writer = get_object_writer(override_format)
+    writer(dirpath, f"output.{override_format}", result)
 
 
 def write_stands_to_file(result: list[ForestStand], path: str, output_format: str):
     dirpath = prepare_target_directory(path)
-    if output_format == "pickle":
-        pickle_writer(dirpath, f"output.{output_format}", result)
-    elif output_format == "json":
-        json_writer(dirpath, f"output.{output_format}", result)
-    elif output_format == "csv":
-        csv_writer(dirpath, f"output.{output_format}", result)
-    else:
-        raise Exception(f"Unsupported output format '{output_format}'")
+    writer = get_stands_writer(output_format)
+    writer(dirpath, f"unit_state.{output_format}", result)
 
 
 def write_derived_data_to_file(result: AggregatedResults, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
-    if output_format == "pickle":
-        pickle_writer(dirpath, f"derived_data.{output_format}", result)
-    elif output_format == "json":
-        json_writer(dirpath, f"derived_data.{output_format}", result)
-    else:
-        raise Exception(f"Unsupported output format '{output_format}'")
+    override_format = "json" if output_format == "csv" else output_format
+    writer = get_object_writer(override_format)
+    writer(dirpath, f"derived_data.{override_format}", result)
 
 
 def write_post_processing_result_to_file(result: Any, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
-    if output_format == "pickle":
-        pickle_writer(dirpath, f"pp_result.{output_format}", result)
-    elif output_format == "json":
-        json_writer(dirpath, f"pp_result.{output_format}", result)
-    else:
-        raise Exception(f"Unsupported output format '{output_format}'")
+    override_format = "json" if output_format == "csv" else output_format
+    writer = get_object_writer(override_format)
+    writer(dirpath, f"pp_result.{override_format}", result)
 
 
 def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
