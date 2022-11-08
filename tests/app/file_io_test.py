@@ -33,7 +33,7 @@ class TestFileReading(unittest.TestCase):
             Test(a=2)
         ]
         app.file_io.prepare_target_directory('outdir')
-        app.file_io.pickle_writer(Path('outdir'), 'output.pickle', data)
+        app.file_io.pickle_writer(Path('outdir', 'output.pickle'), data)
         result = app.file_io.pickle_reader('outdir/output.pickle')
         self.assertListEqual(data, result)
         os.remove('outdir/output.pickle')
@@ -45,7 +45,7 @@ class TestFileReading(unittest.TestCase):
             Test(a=2)
         ]
         app.file_io.prepare_target_directory('outdir')
-        app.file_io.json_writer(Path('outdir'), 'output.json', data)
+        app.file_io.json_writer(Path('outdir', 'output.json'), data)
         result = app.file_io.json_reader('outdir/output.json')
         self.assertListEqual(data, result)
         os.remove('outdir/output.json')

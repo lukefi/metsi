@@ -23,7 +23,7 @@ def prepare_target_directory(path_descriptor: str) -> Path:
         return Path(path_descriptor)
 
 
-def get_stands_writer(type: str) -> Callable[[Path, str, list[ForestStand]], None]:
+def get_stands_writer(type: str) -> Callable[[Path, list[ForestStand]], None]:
     if type == "pickle":
         return pickle_writer
     elif type == "json":
@@ -34,13 +34,17 @@ def get_stands_writer(type: str) -> Callable[[Path, str, list[ForestStand]], Non
         raise Exception(f"Unsupported container format '{type}'")
 
 
-def get_object_writer(type: str) -> Callable[[Path, str, Any], None]:
+def get_object_writer(type: str) -> Callable[[Path, Any], None]:
     if type == "pickle":
         return pickle_writer
     elif type == "json":
         return json_writer
     else:
         raise Exception(f"Unsupported container format '{type}'")
+
+
+def determine_file_path(dir: Path, filename: str) -> Path:
+    return Path(dir, filename)
 
 
 def file_contents(file_path: str) -> str:
@@ -82,34 +86,39 @@ def read_full_simulation_result_input_file(file_path: str, input_format: str) ->
 def write_preprocessing_result_to_file(result: list[ForestStand], path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     writer = get_stands_writer(output_format)
-    writer(dirpath, f"preprocessing_result.{output_format}", result)
+    filepath = determine_file_path(dirpath, f"preprocessing_result.{output_format}")
+    writer(filepath, result)
 
 
 def write_full_simulation_result_to_file(result: Any, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     override_format = "json" if output_format == "csv" else output_format
     writer = get_object_writer(override_format)
-    writer(dirpath, f"output.{override_format}", result)
+    filepath = determine_file_path(dirpath, f"output.{override_format}")
+    writer(filepath, result)
 
 
 def write_stands_to_file(result: list[ForestStand], path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     writer = get_stands_writer(output_format)
-    writer(dirpath, f"unit_state.{output_format}", result)
+    filepath = determine_file_path(dirpath, f"unit_state.{output_format}")
+    writer(filepath, result)
 
 
 def write_derived_data_to_file(result: AggregatedResults, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     override_format = "json" if output_format == "csv" else output_format
     writer = get_object_writer(override_format)
-    writer(dirpath, f"derived_data.{override_format}", result)
+    filepath = determine_file_path(dirpath, f"derived_data.{override_format}")
+    writer(filepath, result)
 
 
 def write_post_processing_result_to_file(result: Any, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     override_format = "json" if output_format == "csv" else output_format
     writer = get_object_writer(override_format)
-    writer(dirpath, f"pp_result.{override_format}", result)
+    filepath = determine_file_path(dirpath, f"pp_result.{override_format}")
+    writer(filepath, result)
 
 
 def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
@@ -126,8 +135,8 @@ def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     return yaml.load(file_contents(file_path), Loader=yaml.CLoader)
 
 
-def pickle_writer(dir: Path, filename: str, data: Any):
-    with open(Path(dir, filename), 'wb') as f:
+def pickle_writer(filepath: Path, data: Any):
+    with open(filepath, 'wb') as f:
         pickle.dump(data, f, protocol=5)
 
 
@@ -136,14 +145,14 @@ def pickle_reader(file_path: str) -> Any:
         return pickle.load(f)
 
 
-def json_writer(dir: Path, filename: str, data: Any):
+def json_writer(filepath: Path, data: Any):
     jsonpickle.set_encoder_options("json", indent=2)
-    with open(Path(dir, filename), 'w', newline='\n') as f:
+    with open(filepath, 'w', newline='\n') as f:
         f.write(jsonpickle.encode(data))
 
 
-def csv_writer(dir: Path, filename: str, data: list[ForestStand]):
-    with open(Path(dir, filename), 'w', newline='\n') as file:
+def csv_writer(filepath: Path, data: Any):
+    with open(filepath, 'w', newline='\n') as file:
         file.writelines('\n'.join(stands_to_csv(data, ';')))
 
 
