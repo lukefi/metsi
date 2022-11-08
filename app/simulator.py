@@ -10,8 +10,8 @@ from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evalu
 from sim.core_types import AggregatedResults, OperationPayload
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
-from app.file_io import read_payload_input_file, simulation_declaration_from_yaml_file, write_result_to_file, \
-    write_preprocessing_result_to_file, write_result_dirtree
+from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, write_full_simulation_result_to_file, \
+    write_preprocessing_result_to_file, write_full_simulation_result_dirtree
 from app.app_io import sim_cli_arguments, set_default_arguments
 
 start_time = time.time_ns()
@@ -125,7 +125,7 @@ def main():
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     app_arguments = set_default_arguments(app_arguments, simulation_declaration['io_configuration'])
 
-    stands = read_payload_input_file(
+    stands = read_stands_from_file(
         app_arguments.input_file,
         app_arguments.state_format,
         app_arguments.state_input_container,
@@ -143,10 +143,10 @@ def main():
         result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
 
     print_logline("Writing output...")
-    write_result_dirtree(result, app_arguments)
+    write_full_simulation_result_dirtree(result, app_arguments)
     if app_arguments.state_output_container is not None:
         # TODO: Retained old output for post_processing backwards compatibility. Should go away with program flow redesign.
-        write_result_to_file(result, app_arguments.target_directory, app_arguments.state_output_container)
+        write_full_simulation_result_to_file(result, app_arguments.target_directory, app_arguments.state_output_container)
 
 
 if __name__ == "__main__":

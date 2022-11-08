@@ -28,7 +28,7 @@ def file_contents(file_path: str) -> str:
         return f.read()
 
 
-def read_payload_input_file(file_path: str, state_format: str, container_format: str, **builder_flags) -> list[ForestStand]:
+def read_stands_from_file(file_path: str, state_format: str, container_format: str, **builder_flags) -> list[ForestStand]:
     builder_flags = {"reference_trees": False, "strata_origin": "1"} if builder_flags == {} else builder_flags
     if state_format == "fdm":
         if container_format == "pickle":
@@ -50,7 +50,7 @@ def read_payload_input_file(file_path: str, state_format: str, container_format:
     return Builder(builder_flags, read(file_path)).build()
 
 
-def read_simulation_results_input_file(file_path: str, input_format: str) -> dict[str, list[OperationPayload]]:
+def read_full_simulation_result_input_file(file_path: str, input_format: str) -> dict[str, list[OperationPayload]]:
     if input_format == "pickle":
         return pickle_reader(file_path)
     elif input_format == "json":
@@ -71,7 +71,7 @@ def write_preprocessing_result_to_file(result: list[ForestStand], path: str, out
         raise Exception(f"Unsupported output format '{output_format}'")
 
 
-def write_result_to_file(result: Any, path: str, output_format: str):
+def write_full_simulation_result_to_file(result: Any, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     if output_format == "pickle":
         pickle_writer(dirpath, f"output.{output_format}", result)
@@ -81,7 +81,7 @@ def write_result_to_file(result: Any, path: str, output_format: str):
         raise Exception(f"Unsupported output format '{output_format}'")
 
 
-def write_state_to_file(result: list[ForestStand], path: str, output_format: str):
+def write_stands_to_file(result: list[ForestStand], path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     if output_format == "pickle":
         pickle_writer(dirpath, f"output.{output_format}", result)
@@ -113,11 +113,11 @@ def write_post_processing_result_to_file(result: Any, path: str, output_format: 
         raise Exception(f"Unsupported output format '{output_format}'")
 
 
-def write_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
+def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
     for stand_id, schedules in result.items():
         for i, schedule in enumerate(schedules):
             if app_arguments.state_output_container is not None:
-                write_state_to_file([schedule.simulation_state], f"{app_arguments.target_directory}/{stand_id}/{i}", app_arguments.state_output_container)
+                write_stands_to_file([schedule.simulation_state], f"{app_arguments.target_directory}/{stand_id}/{i}", app_arguments.state_output_container)
             if app_arguments.derived_data_output_container is not None:
                 write_derived_data_to_file(schedule.aggregated_results, f"{app_arguments.target_directory}/{stand_id}/{i}", app_arguments.derived_data_output_container)
 

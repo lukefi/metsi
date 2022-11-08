@@ -2,7 +2,7 @@ import sys
 from typing import List, Dict
 
 from app.app_io import post_processing_cli_arguments
-from app.file_io import simulation_declaration_from_yaml_file, read_simulation_results_input_file, write_post_processing_result_to_file
+from app.file_io import simulation_declaration_from_yaml_file, read_full_simulation_result_input_file, write_post_processing_result_to_file
 from forestry.operations import operation_lookup
 from sim.core_types import OperationPayload
 from sim.generators import simple_processable_chain
@@ -12,7 +12,7 @@ from sim.runners import evaluate_sequence
 def main():
 
     app_arguments = post_processing_cli_arguments(sys.argv[1:])
-    input_data: Dict[str, List[OperationPayload]] = read_simulation_results_input_file(app_arguments.input_file, app_arguments.input_format)
+    input_data: Dict[str, List[OperationPayload]] = read_full_simulation_result_input_file(app_arguments.input_file, app_arguments.input_format)
 
     control_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     chain = simple_processable_chain(
