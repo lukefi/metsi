@@ -10,8 +10,9 @@ from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evalu
 from sim.core_types import AggregatedResults, OperationPayload
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
-from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, write_full_simulation_result_to_file, \
-    write_preprocessing_result_to_file, write_full_simulation_result_dirtree
+from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, \
+    write_full_simulation_result_to_file, \
+    write_preprocessing_result_to_file, write_full_simulation_result_dirtree, prepare_target_directory
 from app.app_io import sim_cli_arguments, set_default_arguments
 
 start_time = time.time_ns()
@@ -132,10 +133,13 @@ def main():
         reference_trees=app_arguments.reference_trees,
         strata_origin=app_arguments.strata_origin
     )
+    print_logline("Preparing run...")
+    outdir = prepare_target_directory(app_arguments.target_directory)
+
     print_logline("Preprocessing...")
     result = preprocess_stands(stands, simulation_declaration)
     if app_arguments.preprocessing_output_container is not None:
-        write_preprocessing_result_to_file(result, app_arguments.target_directory, app_arguments.preprocessing_output_container)
+        write_preprocessing_result_to_file(result, outdir, app_arguments.preprocessing_output_container)
 
     if app_arguments.strategy != "skip":
         print_logline("Simulating...")
@@ -146,7 +150,7 @@ def main():
     write_full_simulation_result_dirtree(result, app_arguments)
     if app_arguments.state_output_container is not None:
         # TODO: Retained old output for post_processing backwards compatibility. Should go away with program flow redesign.
-        write_full_simulation_result_to_file(result, app_arguments.target_directory, app_arguments.state_output_container)
+        write_full_simulation_result_to_file(result, outdir, app_arguments.state_output_container)
 
 
 if __name__ == "__main__":

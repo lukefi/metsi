@@ -83,51 +83,47 @@ def read_full_simulation_result_input_file(file_path: str, input_format: str) ->
         raise Exception(f"Unsupported input format '{input_format}'")
 
 
-def write_preprocessing_result_to_file(result: list[ForestStand], path: str, output_format: str):
-    dirpath = prepare_target_directory(path)
+def write_preprocessing_result_to_file(result: list[ForestStand], directory: Path, output_format: str):
     writer = get_stands_writer(output_format)
-    filepath = determine_file_path(dirpath, f"preprocessing_result.{output_format}")
+    filepath = determine_file_path(directory, f"preprocessing_result.{output_format}")
     writer(filepath, result)
 
 
-def write_full_simulation_result_to_file(result: Any, path: str, output_format: str):
-    dirpath = prepare_target_directory(path)
+def write_full_simulation_result_to_file(result: Any, directory: Path, output_format: str):
     override_format = "json" if output_format == "csv" else output_format
     writer = get_object_writer(override_format)
-    filepath = determine_file_path(dirpath, f"output.{override_format}")
+    filepath = determine_file_path(directory, f"output.{override_format}")
     writer(filepath, result)
 
 
-def write_stands_to_file(result: list[ForestStand], path: str, output_format: str):
-    dirpath = prepare_target_directory(path)
+def write_stands_to_file(result: list[ForestStand], directory: Path, output_format: str):
     writer = get_stands_writer(output_format)
-    filepath = determine_file_path(dirpath, f"unit_state.{output_format}")
+    filepath = determine_file_path(directory, f"unit_state.{output_format}")
     writer(filepath, result)
 
 
-def write_derived_data_to_file(result: AggregatedResults, path: str, output_format: str):
-    dirpath = prepare_target_directory(path)
+def write_derived_data_to_file(result: AggregatedResults, directory: Path, output_format: str):
     override_format = "json" if output_format == "csv" else output_format
     writer = get_object_writer(override_format)
-    filepath = determine_file_path(dirpath, f"derived_data.{override_format}")
+    filepath = determine_file_path(directory, f"derived_data.{override_format}")
     writer(filepath, result)
 
 
-def write_post_processing_result_to_file(result: Any, path: str, output_format: str):
-    dirpath = prepare_target_directory(path)
+def write_post_processing_result_to_file(result: Any, directory: Path, output_format: str):
     override_format = "json" if output_format == "csv" else output_format
     writer = get_object_writer(override_format)
-    filepath = determine_file_path(dirpath, f"pp_result.{override_format}")
+    filepath = determine_file_path(directory, f"pp_result.{override_format}")
     writer(filepath, result)
 
 
 def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
     for stand_id, schedules in result.items():
         for i, schedule in enumerate(schedules):
+            schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
             if app_arguments.state_output_container is not None:
-                write_stands_to_file([schedule.simulation_state], f"{app_arguments.target_directory}/{stand_id}/{i}", app_arguments.state_output_container)
+                write_stands_to_file([schedule.simulation_state], schedule_dir, app_arguments.state_output_container)
             if app_arguments.derived_data_output_container is not None:
-                write_derived_data_to_file(schedule.aggregated_results, f"{app_arguments.target_directory}/{stand_id}/{i}", app_arguments.derived_data_output_container)
+                write_derived_data_to_file(schedule.aggregated_results, schedule_dir, app_arguments.derived_data_output_container)
 
 
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:

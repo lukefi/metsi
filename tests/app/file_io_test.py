@@ -115,20 +115,19 @@ class TestFileReading(unittest.TestCase):
                 )
             ]
         }
-        app.file_io.write_full_simulation_result_to_file(data, "outdir", "pickle")
+        outdir = app.file_io.prepare_target_directory("outdir")
+
+        app.file_io.write_full_simulation_result_to_file(data, outdir, "pickle")
         self.assertTrue(os.path.isfile("outdir/output.pickle"))
-        shutil.rmtree("outdir")
 
-        app.file_io.write_full_simulation_result_to_file(data, "outdir", "json")
+        app.file_io.write_full_simulation_result_to_file(data, outdir, "json")
         self.assertTrue(os.path.isfile("outdir/output.json"))
-        shutil.rmtree("outdir")
 
-        app.file_io.write_full_simulation_result_to_file(data, "outdir", "csv")
+        app.file_io.write_full_simulation_result_to_file(data, outdir, "csv")
         self.assertTrue(os.path.isfile("outdir/output.json"))
-        shutil.rmtree("outdir")
 
         #write_result_to_file should raise an Exception if the given output_format is not supported
-        self.assertRaises(Exception, app.file_io.write_full_simulation_result_to_file, stands, "outdir", "txt")
+        self.assertRaises(Exception, app.file_io.write_full_simulation_result_to_file, stands, outdir, "txt")
         shutil.rmtree("outdir")
 
         
