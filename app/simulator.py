@@ -11,17 +11,20 @@ from sim.core_types import AggregatedResults, OperationPayload
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
 from app.file_io import read_payload_input_file, simulation_declaration_from_yaml_file, write_result_to_file, \
-    write_preprocessing_result_to_file
+    write_preprocessing_result_to_file, write_result_dirtree
 from app.app_io import sim_cli_arguments, set_default_arguments
 
 start_time = time.time_ns()
+
 
 def runtime_now() -> float:
     global start_time
     return round((time.time_ns() - start_time) / 1000000000, 1)
 
+
 def print_logline(message: str):
     print("{} {}".format(runtime_now(), message))
+
 
 def print_stand_result(stand: ForestStand):
     print("volume {}".format(forestry.operations.compute_volume(stand)))
@@ -39,6 +42,7 @@ def print_run_result(results: dict):
             print("variant {} biomass report: {}".format(i, last_biomass_reporting_aggregate))
             print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
 
+
 def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -> List[ForestStand]:
     preprocessing_operations = simulation_declaration.get('preprocessing_operations', {})
     preprocessing_params = simulation_declaration.get('preprocessing_params', {})
@@ -46,10 +50,12 @@ def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -
     stands = evaluate_sequence(stands, *preprocessing_funcs)
     return stands
 
+
 def run_strategy_multiprocessing_wrapper(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict, run_strategy: Callable,  queue: queue.Queue) -> None:
     """Wrapper function for running a simulation strategy in a multiprocessing context. The result is placed in the given queue"""
     result = run_strategy(payload, simulation_declaration, operation_lookup)
     queue.put(result)
+
 
 def run_stands(
         stands: List[ForestStand], simulation_declaration: dict,
@@ -101,6 +107,7 @@ def run_stands(
             retval[result[0].simulation_state.identifier] = result
         return retval
 
+
 def resolve_strategy_runner(source: str) -> Callable:
     strategy_map = {
         'full': run_full_tree_strategy,
@@ -136,7 +143,9 @@ def main():
         result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
 
     print_logline("Writing output...")
+    write_result_dirtree(result, app_arguments)
     if app_arguments.state_output_container is not None:
+        # TODO: Retained old output for post_processing backwards compatibility. Should go away with program flow redesign.
         write_result_to_file(result, app_arguments.target_directory, app_arguments.state_output_container)
 
 

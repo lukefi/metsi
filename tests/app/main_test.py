@@ -6,6 +6,7 @@ NOTE: the tests use the control.yaml and pp_control.yaml files from the project 
 
 import os
 import sys
+import shutil
 import unittest
 from pathlib import Path
 import app.simulator as simulator
@@ -75,9 +76,7 @@ class MainTest(unittest.TestCase):
             preprocessing_filepath = Path(output_dir, 'preprocessing_result.pickle')
             self.assertTrue(os.path.exists(filepath))
             self.assertTrue(os.path.exists(preprocessing_filepath))
-            os.remove(filepath)
-            os.remove(preprocessing_filepath)
-            os.rmdir(output_dir)
+            shutil.rmtree(output_dir)
 
     def test_post_processing_main(self):
         sim_results = run_simulator(self.input_files, self.input_containers)
@@ -98,9 +97,5 @@ class MainTest(unittest.TestCase):
             pp.main()
 
             pp_result_path = Path(sim_dir, pp_result_file)
-            preprocessing_result_path = Path(sim_dir, 'preprocessing_result.pickle')
             self.assertTrue(os.path.exists(pp_result_path))
-            os.remove(pp_result_path)
-            os.remove(pp_input_file)
-            os.remove(preprocessing_result_path)
-            os.rmdir(sim_dir)
+            shutil.rmtree(sim_dir)

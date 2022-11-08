@@ -1,3 +1,4 @@
+import argparse
 import os
 import pickle
 from pathlib import Path
@@ -8,7 +9,7 @@ from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, Fo
 from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader
 from forestdatamodel.model import ForestStand
 
-from sim.core_types import OperationPayload
+from sim.core_types import OperationPayload, AggregatedResults
 
 
 def prepare_target_directory(path_descriptor: str) -> Path:
@@ -18,7 +19,7 @@ def prepare_target_directory(path_descriptor: str) -> Path:
         else:
             raise Exception("Output directory {} not available. Ensure it is a writable and empty, or a non-existing directory.".format(path_descriptor))
     else:
-        os.mkdir(path_descriptor)
+        os.makedirs(path_descriptor)
         return Path(path_descriptor)
 
 
@@ -56,7 +57,7 @@ def read_simulation_results_input_file(file_path: str, input_format: str) -> dic
         raise Exception(f"Unsupported input format '{input_format}'")
 
 
-def write_preprocessing_result_to_file(result: Any, path: str, output_format: str):
+def write_preprocessing_result_to_file(result: list[ForestStand], path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     if output_format == "pickle":
         pickle_writer(dirpath, f"preprocessing_result.{output_format}", result)
@@ -76,6 +77,26 @@ def write_result_to_file(result: Any, path: str, output_format: str):
         raise Exception(f"Unsupported output format '{output_format}'")
 
 
+def write_state_to_file(result: list[ForestStand], path: str, output_format: str):
+    dirpath = prepare_target_directory(path)
+    if output_format == "pickle":
+        pickle_writer(dirpath, f"output.{output_format}", result)
+    elif output_format == "json":
+        json_writer(dirpath, f"output.{output_format}", result)
+    else:
+        raise Exception(f"Unsupported output format '{output_format}'")
+
+
+def write_derived_data_to_file(result: AggregatedResults, path: str, output_format: str):
+    dirpath = prepare_target_directory(path)
+    if output_format == "pickle":
+        pickle_writer(dirpath, f"derived_data.{output_format}", result)
+    elif output_format == "json":
+        json_writer(dirpath, f"derived_data.{output_format}", result)
+    else:
+        raise Exception(f"Unsupported output format '{output_format}'")
+
+
 def write_post_processing_result_to_file(result: Any, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     if output_format == "pickle":
@@ -84,6 +105,15 @@ def write_post_processing_result_to_file(result: Any, path: str, output_format: 
         json_writer(dirpath, f"pp_result.{output_format}", result)
     else:
         raise Exception(f"Unsupported output format '{output_format}'")
+
+
+def write_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
+    for stand_id, schedules in result.items():
+        for i, schedule in enumerate(schedules):
+            if app_arguments.state_output_container is not None:
+                write_state_to_file([schedule.simulation_state], f"{app_arguments.target_directory}/{stand_id}/{i}", app_arguments.state_output_container)
+            if app_arguments.derived_data_output_container is not None:
+                write_derived_data_to_file(schedule.aggregated_results, f"{app_arguments.target_directory}/{stand_id}/{i}", app_arguments.derived_data_output_container)
 
 
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:
