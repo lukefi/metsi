@@ -30,9 +30,9 @@ def sim_cli_arguments(args: List[str]):
                         type=str,
                         help='Data format of the state input file: fdm (default), vmi12, vmi13, forest_centre')
     parser.add_argument('--state-input-container',
-                        choices=['pickle', 'json'],
+                        choices=['pickle', 'json', 'csv'],
                         type=str,
-                        help='Container format of the state input file: \'pickle\' (default), \'json\'')
+                        help='Container format of the state input file: \'pickle\' (default), \'json\', \'csv\'')
     parser.add_argument('--state-output-container',
                         choices=['pickle', 'json', 'csv'],
                         type=str,

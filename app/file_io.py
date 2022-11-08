@@ -6,7 +6,7 @@ import jsonpickle
 from typing import Any
 import yaml
 from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
-from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv
+from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands
 from forestdatamodel.model import ForestStand
 
 from sim.core_types import OperationPayload, AggregatedResults
@@ -35,6 +35,8 @@ def read_payload_input_file(file_path: str, state_format: str, container_format:
             return pickle_reader(file_path)
         elif container_format == "json":
             return json_reader(file_path)
+        elif container_format == "csv":
+            return csv_to_stands(file_path, ';')
         else:
             raise Exception(f"Unsupported container format '{container_format}'")
     elif state_format == "vmi13":
