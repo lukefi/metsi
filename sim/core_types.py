@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from copy import deepcopy
 from types import SimpleNamespace
 from typing import Callable, List, Optional, Any, Tuple, TypeVar
 
@@ -62,6 +63,12 @@ class AggregatedResults:
         self.operation_results: dict[str, OrderedDict[int, Any]] = operation_results or {}
         self.current_time_point: int = current_time_point or 0
 
+    def __deepcopy__(self, memo: dict) -> "AggregatedResults":
+        return AggregatedResults(
+            operation_results = {k: OrderedDict(v.items()) for k,v in self.operation_results.items()},
+            current_time_point = self.current_time_point
+        )
+
     def prev(self, tag: str) -> Any:
         try:
             return next(reversed(self.operation_results[tag].values()))
@@ -85,6 +92,13 @@ class OperationPayload(SimpleNamespace):
     simulation_state: Any
     aggregated_results: AggregatedResults
     operation_history: List[Tuple[int, str]]
+
+    def __deepcopy__(self, memo: dict) -> "OperationPayload":
+        return OperationPayload(
+            simulation_state = deepcopy(self.simulation_state, memo),
+            aggregated_results = deepcopy(self.aggregated_results, memo),
+            operation_history = list(self.operation_history)
+        )
 
 T = TypeVar("T")
 OpTuple = Tuple[T, AggregatedResults]
