@@ -93,7 +93,7 @@ class TestFileReading(unittest.TestCase):
         }
         self.assertRaises(Exception, app.file_io.read_stands_from_file, **kwargs)
 
-    def test_write_stands_to_file(self):
+    def test_write_full_simulation_results_to_file(self):
         stands = [
             ForestStand(
                 reference_trees=[
@@ -118,20 +118,19 @@ class TestFileReading(unittest.TestCase):
         app.file_io.write_full_simulation_result_to_file(data, "tests/resources/outdir", "pickle")
         self.assertTrue(os.path.isfile("tests/resources/outdir/output.pickle"))
         os.remove("tests/resources/outdir/output.pickle")
-        os.rmdir("tests/resources/outdir")
+        shutil.rmtree("tests/resources/outdir")
 
         app.file_io.write_full_simulation_result_to_file(data, "tests/resources/outdir", "json")
         self.assertTrue(os.path.isfile("tests/resources/outdir/output.json"))
         os.remove("tests/resources/outdir/output.json")
-        os.rmdir("tests/resources/outdir")
+        shutil.rmtree("tests/resources/outdir")
 
         app.file_io.write_full_simulation_result_to_file(data, "tests/resources/outdir", "csv")
         self.assertTrue(os.path.isfile("tests/resources/outdir/output.json"))
         os.remove("tests/resources/outdir/output.json")
-        os.rmdir("tests/resources/outdir")
+        shutil.rmtree("tests/resources/outdir")
 
         #write_result_to_file should raise an Exception if the given output_format is not supported
         self.assertRaises(Exception, app.file_io.write_full_simulation_result_to_file, stands, "tests/resources/outdir", "txt")
-        os.rmdir("tests/resources/outdir")
 
         

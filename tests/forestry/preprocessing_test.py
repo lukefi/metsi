@@ -66,7 +66,7 @@ class PreprocessingTest(unittest.TestCase):
             for d, h, a, f in zip(diameters, heights, areas, stems)
         ]
         stand.tree_strata.append(
-            TreeStratum(sapling_stratum=True, mean_height=1.3, sapling_stems_per_ha=600.0)
+            TreeStratum(sapling_stratum=True, mean_height=1.3, sapling_stems_per_ha=600.0, mean_diameter=0.0)
         )
         result = preprocessing.generate_reference_trees([stand], n_trees=10)
         self.assertEqual(31, len(result[0].reference_trees))
