@@ -1,5 +1,4 @@
 import unittest
-from copy import deepcopy
 from sim.core_types import AggregatedResults, OperationPayload
 from sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy
 from tests.test_utils import raises, identity, none, collect_results, load_yaml, aggregating_increment
@@ -33,7 +32,7 @@ class TestOperations(unittest.TestCase):
             operation_history=[]
         )
         results_full = collect_results(
-            run_full_tree_strategy(deepcopy(initial), declaration, {'inc': aggregating_increment}))
+            run_full_tree_strategy(initial, declaration, {'inc': aggregating_increment}))
         results_partial = collect_results(
             run_partial_tree_strategy(initial, declaration, {'inc': aggregating_increment}))
         self.assertEqual(8, len(results_full))

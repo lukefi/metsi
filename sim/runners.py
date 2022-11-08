@@ -22,7 +22,7 @@ def evaluate_sequence(payload, *operations: Callable) -> Optional:
     return current
 
 
-def run_chains_iteratively(payload: OperationPayload, chains: List[List[Callable]]) -> List:
+def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
     """Execute all given operation chains for the given state payload. Return the collection of success results from
     all chains.
 
@@ -30,18 +30,12 @@ def run_chains_iteratively(payload: OperationPayload, chains: List[List[Callable
     :param chains: list of a list of functions usable to process the payload
     :return: list of success results of applying the function chains on the payload"""
     results = []
-    if not chains:
-        return results
-    for chain in chains[:-1]:
+    for chain in chains:
         try:
             results.append(evaluate_sequence(deepcopy(payload), *chain))
         except UserWarning as e:
             ...
             # TODO aborted run reporting
-    try:
-        results.append(evaluate_sequence(payload, *chains[-1]))
-    except UserWarning as e:
-        ...
     return results
 
 
