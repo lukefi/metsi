@@ -34,13 +34,13 @@ def sim_cli_arguments(args: List[str]):
                         type=str,
                         help='Container format of the state input file: \'pickle\' (default), \'json\'')
     parser.add_argument('--state-output-container',
-                        choices=['pickle', 'json'],
+                        choices=['pickle', 'json', 'csv'],
                         type=str,
-                        help='Container format of state output files: \'pickle\' (default), \'json\'')
+                        help='Container format of state output files: \'pickle\' (default), \'json\', \'csv\'')
     parser.add_argument('--preprocessing-output-container',
-                        choices=['pickle', 'json'],
+                        choices=['pickle', 'json', 'csv'],
                         type=str,
-                        help='Container format of preprocessing result file: \'pickle\' (default), \'json\'')
+                        help='Container format of preprocessing result file: \'pickle\' (default), \'json\', \'csv\'')
     parser.add_argument('--reference-trees',
                         default=False,
                         action=argparse.BooleanOptionalAction,

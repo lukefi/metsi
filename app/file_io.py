@@ -6,7 +6,7 @@ import jsonpickle
 from typing import Any
 import yaml
 from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
-from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader
+from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv
 from forestdatamodel.model import ForestStand
 
 from sim.core_types import OperationPayload, AggregatedResults
@@ -63,6 +63,8 @@ def write_preprocessing_result_to_file(result: list[ForestStand], path: str, out
         pickle_writer(dirpath, f"preprocessing_result.{output_format}", result)
     elif output_format == "json":
         json_writer(dirpath, f"preprocessing_result.{output_format}", result)
+    elif output_format == "csv":
+        csv_writer(dirpath, f"preprocessing_result.{output_format}", result)
     else:
         raise Exception(f"Unsupported output format '{output_format}'")
 
@@ -71,8 +73,8 @@ def write_result_to_file(result: Any, path: str, output_format: str):
     dirpath = prepare_target_directory(path)
     if output_format == "pickle":
         pickle_writer(dirpath, f"output.{output_format}", result)
-    elif output_format == "json":
-        json_writer(dirpath, f"output.{output_format}", result)
+    elif output_format in ("json", "csv"):
+        json_writer(dirpath, f"output.json", result)
     else:
         raise Exception(f"Unsupported output format '{output_format}'")
 
@@ -83,6 +85,8 @@ def write_state_to_file(result: list[ForestStand], path: str, output_format: str
         pickle_writer(dirpath, f"output.{output_format}", result)
     elif output_format == "json":
         json_writer(dirpath, f"output.{output_format}", result)
+    elif output_format == "csv":
+        csv_writer(dirpath, f"output.{output_format}", result)
     else:
         raise Exception(f"Unsupported output format '{output_format}'")
 
@@ -135,6 +139,11 @@ def json_writer(dir: Path, filename: str, data: Any):
     jsonpickle.set_encoder_options("json", indent=2)
     with open(Path(dir, filename), 'w', newline='\n') as f:
         f.write(jsonpickle.encode(data))
+
+
+def csv_writer(dir: Path, filename: str, data: list[ForestStand]):
+    with open(Path(dir, filename), 'w', newline='\n') as file:
+        file.writelines('\n'.join(stands_to_csv(data, ';')))
 
 
 def json_reader(file_path: str) -> Any:
