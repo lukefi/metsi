@@ -124,11 +124,12 @@ def write_post_processing_result_to_file(result: Any, directory: Path, output_fo
 def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
     for stand_id, schedules in result.items():
         for i, schedule in enumerate(schedules):
-            schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
             if app_arguments.state_output_container is not None:
+                schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
                 filepath = determine_file_path(schedule_dir, f"unit_state.{app_arguments.state_output_container}")
                 write_stands_to_file([schedule.simulation_state], filepath, app_arguments.state_output_container)
             if app_arguments.derived_data_output_container is not None:
+                schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
                 filepath = determine_file_path(schedule_dir, f"derived_data.{app_arguments.derived_data_output_container}")
                 write_derived_data_to_file(schedule.aggregated_results, filepath, app_arguments.derived_data_output_container)
 
