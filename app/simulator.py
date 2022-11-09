@@ -105,7 +105,9 @@ def run_stands(
     else:
         for arg in args:
             result = run_strategy(*arg)
-            retval[result[0].simulation_state.identifier] = result
+            id = arg[0].simulation_state.identifier
+            print_logline(f"Alternatives for stand {id}: {len(result)}")
+            retval[id] = result
         return retval
 
 
@@ -126,6 +128,7 @@ def main():
     simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     app_arguments = set_default_arguments(app_arguments, simulation_declaration['io_configuration'])
 
+    print_logline("Preparing run...")
     stands = read_stands_from_file(
         app_arguments.input_file,
         app_arguments.state_format,
@@ -133,10 +136,9 @@ def main():
         reference_trees=app_arguments.reference_trees,
         strata_origin=app_arguments.strata_origin
     )
-    print_logline("Preparing run...")
     outdir = prepare_target_directory(app_arguments.target_directory)
 
-    print_logline("Preprocessing...")
+    print_logline("Preprocessing computational units...")
     result = preprocess_stands(stands, simulation_declaration)
 
     if app_arguments.preprocessing_output_container is not None:
@@ -144,7 +146,7 @@ def main():
         write_stands_to_file(result, filepath, app_arguments.preprocessing_output_container)
 
     if app_arguments.strategy != "skip":
-        print_logline("Simulating...")
+        print_logline("Simulating alternatives...")
         strategy_runner = resolve_strategy_runner(app_arguments.strategy)
         result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
 
@@ -154,6 +156,7 @@ def main():
         # TODO: Retained old output for post_processing backwards compatibility. Should go away with program flow redesign.
         write_full_simulation_result_to_file(result, outdir, app_arguments.state_output_container)
 
+    print_logline("Done. Exiting.")
 
 if __name__ == "__main__":
     main()
