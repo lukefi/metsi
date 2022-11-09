@@ -12,6 +12,9 @@ from sim.core_types import OperationPayload, AggregatedResults
 
 
 StandReader = Callable[[str], list[ForestStand]]
+StandWriter = Callable[[Path, list[ForestStand]], None]
+ObjectWriter = Callable[[Path, Any], None]
+
 
 def prepare_target_directory(path_descriptor: str) -> Path:
     if os.path.exists(path_descriptor):
@@ -24,24 +27,26 @@ def prepare_target_directory(path_descriptor: str) -> Path:
         return Path(path_descriptor)
 
 
-def get_stands_writer(type: str) -> Callable[[Path, list[ForestStand]], None]:
-    if type == "pickle":
+def stand_writer(container_format: str) -> StandWriter:
+    """Return a serialization file writer function for a list[ForestStand]"""
+    if container_format == "pickle":
         return pickle_writer
-    elif type == "json":
+    elif container_format == "json":
         return json_writer
-    elif type == "csv":
+    elif container_format == "csv":
         return csv_writer
     else:
-        raise Exception(f"Unsupported container format '{type}'")
+        raise Exception(f"Unsupported container format '{container_format}'")
 
 
-def get_object_writer(type: str) -> Callable[[Path, Any], None]:
-    if type == "pickle":
+def object_writer(container_format: str) -> ObjectWriter:
+    """Return a serialization file writer function for arbitrary data"""
+    if container_format == "pickle":
         return pickle_writer
-    elif type == "json":
+    elif container_format == "json":
         return json_writer
     else:
-        raise Exception(f"Unsupported container format '{type}'")
+        raise Exception(f"Unsupported container format '{container_format}'")
 
 
 def determine_file_path(dir: Path, filename: str) -> Path:
@@ -94,24 +99,24 @@ def read_full_simulation_result_input_file(file_path: str, input_format: str) ->
 
 def write_full_simulation_result_to_file(result: Any, directory: Path, output_format: str):
     override_format = "json" if output_format == "csv" else output_format
-    writer = get_object_writer(override_format)
+    writer = object_writer(override_format)
     filepath = determine_file_path(directory, f"output.{override_format}")
     writer(filepath, result)
 
 
 def write_stands_to_file(result: list[ForestStand], filepath: Path, state_output_container: str):
-    writer = get_stands_writer(state_output_container)
+    writer = stand_writer(state_output_container)
     writer(filepath, result)
 
 
 def write_derived_data_to_file(result: AggregatedResults, filepath: Path, derived_data_output_container: str):
-    writer = get_object_writer(derived_data_output_container)
+    writer = object_writer(derived_data_output_container)
     writer(filepath, result)
 
 
 def write_post_processing_result_to_file(result: Any, directory: Path, output_format: str):
     override_format = "json" if output_format == "csv" else output_format
-    writer = get_object_writer(override_format)
+    writer = object_writer(override_format)
     filepath = determine_file_path(directory, f"pp_result.{override_format}")
     writer(filepath, result)
 
