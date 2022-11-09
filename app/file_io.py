@@ -5,12 +5,13 @@ from pathlib import Path
 import jsonpickle
 from typing import Any, Callable
 import yaml
-from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
+from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder, ForestBuilder
 from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands
 from forestdatamodel.model import ForestStand
-
 from sim.core_types import OperationPayload, AggregatedResults
 
+
+StandReader = Callable[[str], list[ForestStand]]
 
 def prepare_target_directory(path_descriptor: str) -> Path:
     if os.path.exists(path_descriptor):
@@ -52,26 +53,34 @@ def file_contents(file_path: str) -> str:
         return f.read()
 
 
+def fdm_reader(container_format: str) -> StandReader:
+    if container_format == "pickle":
+        return pickle_reader
+    elif container_format == "json":
+        return json_reader
+    elif container_format == "csv":
+        return lambda path: csv_to_stands(path, ';')
+    else:
+        raise Exception(f"Unsupported container format '{container_format}'")
+
+
+def external_reader(state_format: str, **builder_flags) -> StandReader:
+    if state_format == "vmi13":
+        return lambda path: VMI13Builder(builder_flags, vmi_file_reader(path)).build()
+    elif state_format == "vmi12":
+        return lambda path: VMI12Builder(builder_flags, vmi_file_reader(path)).build()
+    elif state_format == "forest_centre":
+        return lambda path: ForestCentreBuilder(builder_flags, xml_file_reader(path)).build()
+
+
 def read_stands_from_file(file_path: str, state_format: str, container_format: str, **builder_flags) -> list[ForestStand]:
     builder_flags = {"reference_trees": False, "strata_origin": "1"} if builder_flags == {} else builder_flags
     if state_format == "fdm":
-        if container_format == "pickle":
-            return pickle_reader(file_path)
-        elif container_format == "json":
-            return json_reader(file_path)
-        elif container_format == "csv":
-            return csv_to_stands(file_path, ';')
-        else:
-            raise Exception(f"Unsupported container format '{container_format}'")
-    elif state_format == "vmi13":
-        Builder, read = VMI13Builder, vmi_file_reader
-    elif state_format == "vmi12":
-        Builder, read = VMI12Builder, vmi_file_reader
-    elif state_format == "forest_centre":
-        Builder, read = ForestCentreBuilder, xml_file_reader
+        return fdm_reader(container_format)(file_path)
+    elif state_format in ("vmi13", "vmi12", "forest_centre"):
+        return external_reader(state_format, **builder_flags)(file_path)
     else:
         raise Exception(f"Unsupported state format '{state_format}'")
-    return Builder(builder_flags, read(file_path)).build()
 
 
 def read_full_simulation_result_input_file(file_path: str, input_format: str) -> dict[str, list[OperationPayload]]:
