@@ -41,8 +41,7 @@ class CrossCuttingTest(unittest.TestCase):
             )
         )
 
-        timber_price_table_str = get_default_timber_price_table()
-        operation_parameters = {'timber_price_table': timber_price_table_str}
+        operation_parameters = {'timber_price_table': "tests/resources/timber_price_table.csv"}
 
         _, aggrs = cross_cut_thinning_output(payload, **operation_parameters)
         res = aggrs.get("thinned_trees_cross_cut")["thinning_from_below"]
@@ -78,8 +77,7 @@ class CrossCuttingTest(unittest.TestCase):
         )
         payload = (stand, AggregatedResults())
 
-        timber_price_table_str = get_default_timber_price_table()
-        operation_parameters = {'timber_price_table': timber_price_table_str}
+        operation_parameters = {'timber_price_table': 'tests/resources/timber_price_table.csv'}
 
         _, aggrs = cross_cut_whole_stand(payload, **operation_parameters)
         res = aggrs.get("standing_trees_cross_cut")
