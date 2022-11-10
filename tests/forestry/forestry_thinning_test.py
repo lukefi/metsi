@@ -268,28 +268,28 @@ class ThinningLimitsTest(ConverterTestSuite):
             result = solve_hdom_key(i[0], hdoms.keys())
             self.assertEqual(i[1], result)
 
-    def read_thinning_limits_file(self):
-        return open('tests/resources/thinning_limits.txt', 'r').read()
+    # def read_thinning_limits_file(self):
+    #     return open('tests/resources/thinning_limits.txt', 'r').read()
 
     def test_create_thinning_limits_table(self):
         # thinning_limits = open('tests/resources/thinning_limits.txt', 'r').read()
-        table = create_thinning_limits_table(self.read_thinning_limits_file())
+        table = create_thinning_limits_table('tests/resources/thinning_limits.txt')
         self.assertEqual(len(table), 64)
         self.assertEqual(len(table[0]), 9)
 
     def test_get_thinning_limits_from_parameter_file_contents(self):
-        thinning_limits = self.read_thinning_limits_file()
+        thinning_limits = 'tests/resources/thinning_limits.txt'
 
         kwarg_dicts = [
             {
-             "thinning_limits": thinning_limits,
+             "thinning_limits_file": thinning_limits,
              "county": CountyKey.EASTERN_FINLAND,
              "sp_category": SoilPeatlandKey.MINERAL_SOIL,
              "site_type": SiteTypeKey.OMT,
              "species": SpeciesKey.PINE
             },
             {
-             "thinning_limits": thinning_limits,
+             "thinning_limits_file": thinning_limits,
              "county": CountyKey.EASTERN_FINLAND,
              "sp_category": SoilPeatlandKey.PEATLAND,
              "site_type": SiteTypeKey.MT,
@@ -328,7 +328,7 @@ class ThinningLimitsTest(ConverterTestSuite):
         stand = ForestStand(**stand_variables)
         stand.reference_trees = [ReferenceTree(**tv) for tv in tree_variables]
 
-        thinning_limits = self.read_thinning_limits_file()
+        thinning_limits = 'tests/resources/thinning_limits.txt'
 
         assertions = [
             ([stand], (15.2, 24.0)),
@@ -338,8 +338,8 @@ class ThinningLimitsTest(ConverterTestSuite):
         self.run_with_test_assertions(assertions, resolve_thinning_bounds)
 
     def test_get_timber_price_table(self):
-        csv_string = open('tests/resources/timber_price_table.csv', 'r').read()
-        actual = get_timber_price_table(csv_string)
+        thinning_limits_file = 'tests/resources/timber_price_table.csv'
+        actual = get_timber_price_table(thinning_limits_file)
 
         expected = np.array(
                            [[  1., 160., 370.,  55.],

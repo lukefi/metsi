@@ -22,7 +22,6 @@ operation_params:
   thinning_from_below:
     - thinning_factor: 0.97
       e: 0.2
-      cross_cut: false
     - thinning_factor: 0.8
       e: 0.2
   thinning_from_above:

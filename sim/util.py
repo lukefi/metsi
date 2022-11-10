@@ -1,3 +1,4 @@
+import os
 from typing import Optional, Any, Dict
 
 def get_or_default(maybe_value: Optional[Any], default: Any) -> Any:
@@ -10,17 +11,20 @@ def dict_value(source: dict, key: str) -> Optional[Any]:
     except:
         return None
 
-def read_operation_file_params(opreation_tag: str, operation_file_params: dict) -> Dict:
+def get_operation_file_params(opreation_tag: str, operation_file_params: dict) -> Dict:
+    """
+    Checks whether the given parameter file(s) exist and returns the paths as a dict.
+    This check ensures that the simulator will not crash later on when it tries to read the files.
+    """
     result = {}
     operation_param_file_paths = get_or_default(operation_file_params.get(opreation_tag), {})
 
     for name, path in operation_param_file_paths.items():
-        try:
-            with open(path, 'r', encoding="utf-8") as f:
-                result[name] = f.read()
-        except FileNotFoundError as e:
-            print(f"file {path} defined in operation_file_params was not found")
-            raise e
+        file_exists = os.path.isfile(path)
+        if file_exists:
+            result[name] = path
+        else:
+            raise FileNotFoundError(f"file {path} defined in operation_file_params was not found")
     return result
 
 def merge_operation_params(operation_params: dict, operation_file_params: dict) -> Dict:
