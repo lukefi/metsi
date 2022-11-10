@@ -139,31 +139,32 @@ These are data files with a list of ForestStand objects containing a list of Ref
 
 See table below for a quick reference of forestry operations usable in control.yaml.
 
-| operation           | description                                                                                    | source                      | model library             |
-|---------------------|------------------------------------------------------------------------------------------------|-----------------------------|---------------------------|
-| do_nothing          | This operation is no-op utility operation to simulate rest                                     |                             | native                    |
-| grow_acta           | A simple ReferenceTree diameter and height growth operation                                    | Acta Forestalia Fennica 163 | forestry-function-library |
-| grow_motti          | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.              | Luke Motti group            | pymotti                   |
-| first_thinning      | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest        | Reijo Mykkänen              | native                    |
-| thinning_from_below | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees | Reijo Mykkänen              | native                    |
-| thinning_from_above | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees | Reijo Mykkänen              | native                    |
-| even_thinning       | An operation reducing the stem count of ReferenceTrees evenly regardless of tree size          | Reijo Mykkänen              | native                    |
-| report_volume       | Collect tree volume data from ForestStand state                                                |                             | native                    |
-| report_thinning     | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
-| report_collectives  | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
-| cross_cut           | Perform cross cut operation to compute aggregated details                                      | Annika Kangas               | native (R)                |
+| operation                 | description                                                                                    | source                      | model library             |
+|---------------------------|------------------------------------------------------------------------------------------------|-----------------------------|---------------------------|
+| do_nothing                | This operation is no-op utility operation to simulate rest                                     |                             | native                    |
+| grow_acta                 | A simple ReferenceTree diameter and height growth operation                                    | Acta Forestalia Fennica 163 | forestry-function-library |
+| grow_motti                | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.              | Luke Motti group            | pymotti                   |
+| first_thinning            | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest        | Reijo Mykkänen              | forestry-function-library |
+| thinning_from_below       | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees | Reijo Mykkänen              | forestry-function-library |
+| thinning_from_above       | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees | Reijo Mykkänen              | forestry-function-library |
+| even_thinning             | An operation reducing the stem count of ReferenceTrees evenly regardless of tree size          | Reijo Mykkänen              | forestry-function-library |
+| report_volume             | Collect tree volume data from ForestStand state                                                |                             | native                    |
+| report_thinning           | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
+| report_collectives        | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
+| cross_cut_thinning_output | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
+| cross_cut_whole_stand     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 
 To run the simulator application, run the following command in the project root.
-The created output file contains all generated variants for all computation units (ForestStand) along with aggregated data.
-The output file is usable as input for the `app/post_processing.py` application.
+The created output diretory contains all generated variants for all computation units (ForestStand) along with derived data.
+The output directory container output is usable as input for the `app/post_processing.py` application.
 
 ```
-python -m app.simulator data/VMI12_data.pickle control.yaml VMI12_simulated.pickle
+python -m app.simulator --state-input-container pickle data/VMI12_data.pickle control.yaml outdir
 ```
 
 In case you want to use JSON as the input and/or output file format, run:
 ```
-python -m app.simulator data/VMI12_data.json control.yaml VMI12_simulated.json -i json -o json
+python -m app.simulator --state-input-container json --state-output-container json data/VMI12_data.json control.yaml outdir
 ```
 
 To only run the preprocessor, run:
@@ -181,12 +182,14 @@ python -m app.simulator --help
 To run the post processing application, run in the project root
 
 ```
-python -m app.post_processing input.pickle pp_control.yaml output.pickle
+python -m app.post_processing -o json input.pickle pp_control.yaml outdir
 ```
+
+This produces `outdir/pp_result.json` file.
 
 * `input.pickle` The result file of a simulator run.
 * `pp_control.yaml` is the declaration of post processing function chain.
-* `output.pickle` is the output file for post processed results
+* `outdir` is the output directory for post processed results
 
 To learn more about the available post processing commands (and how to input/output a JSON file), run:
 ```
@@ -222,10 +225,15 @@ A simulation run is declared in the YAML file `control.yaml`.
 The file contains two significant structures for functionality.
 The structure will be expanded to allow parameters and constraints declaration for specific operations.
 
-1. Simulation time step parameters in the object `simulation_params`
-   1. `initial_step_time` is the integer point of time for the simulation's first cycle
-   2. `step_time_interval` is the integer amount of time between each simulation cycle
-   3. `final_step_time` is the integer point of time for the simulations's last cycle
+1. Application file IO configuration in `io_configuration` object. These may be overridden by equivalent command line arguments. Note that e.g. `state_format` with `fdm` below is written as `--state-format fdm` when given as a command line argument.
+   1. `state_format` specifies the data format of the input computational units
+      1. `fdm` is the standard Forest Data Model.
+      2. `vmi12` and `vmi13` denote the VMI data format and container.
+      3. `forest_centre` denotes the Forest Centre XML data format and container.
+   2. `state_input_container` is the file type for `fdm` data format. This may be `csv`, `pickle` or `json`.
+   3. `preprocessing_output_container` is the file type for outputting the `fdm` formatted state of computational units after preprocessing operations. This may be `csv`, `pickle` or `json` or commented out for no output.
+   4. `state_output_container` is the file type for outputting the `fdm` formatted state of individual computational units during and after the simulation. This may be `csv`, `pickle` or `json` or commented out for no output.
+   5. `derived_data_output_container` is the file type for outputting derived data during and after the simulation. This may be `pickle` or `json` or commented out for no output.
 2. Operaton run constrains in the object `run_constraints`
 3. Operation parameters in the object `operation_params`. Operation parameters may be declared as a list of 1 or more parameter sets (objects). Operations within an `alternatives` block are expanded as further alternatives for each parameter set. Multiple parameter sets may not be declared for operations within any `sequence` block.
 4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
@@ -235,15 +243,14 @@ The structure will be expanded to allow parameters and constraints declaration f
       2. `alternatives` a list of operations which represent alternative branches
 5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional) arguments under `preprocessing_params` as key-value pairs. 
 6. Operation parameters that **exist in files** can be passed in `operation_file_params` as demonstated below: 
-
-```yaml 
-operation_file_params:
-  first_thinning:
-    thinning_limits: C:/path-to-file/thinning-limits.txt
-  cross_cutting:
-    timber_price_table: C:/path-to-file/timber-prices.csv
-```
-Note however, that the it is the user's responsibility to provide the file in a valid format. 
+   ```yaml 
+   operation_file_params:
+     first_thinning:
+       thinning_limits: /path/to/file/thinning-limits.txt
+     cross_cut_thinning_output:
+       timber_price_table: /path/to/file/timber-prices.csv
+   ```
+   Note however, that it is the user's responsibility to provide the file in a valid format. 
 
 
 The following example declares a simulation, which runs four event cycles at time points 0, 5, 10 and 15.
@@ -255,15 +262,6 @@ Images below describe the simulation as a step tree, and further as the computat
 * At time point 15, `reporting` is done on the 9 individual state branches.
 
 ```yaml
-# simulation run control parameters
-# simulation epoch at intial_step_time 0
-# simulation progresses in step_time_interval of 5 units
-# simulation end at final_step_time 15
-simulation_params:
-  initial_step_time: 0
-  step_time_interval: 5
-  final_step_time: 15
-
 # example of operation run constrains
 # minimum time interval constrain between thinnings is 10 years
 run_constraints:
