@@ -149,6 +149,8 @@ def main():
         print_logline("Simulating alternatives...")
         strategy_runner = resolve_strategy_runner(app_arguments.strategy)
         result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
+    else:
+        result = {}
 
     print_logline("Writing output...")
     write_full_simulation_result_dirtree(result, app_arguments)
