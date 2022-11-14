@@ -71,6 +71,35 @@ class TestFileReading(unittest.TestCase):
         self.assertListEqual(data, result)
         shutil.rmtree('outdir')
 
+    def test_rsd(self):
+        data = [
+            ForestStand(
+                identifier="123-234",
+                geo_location=(600000.0, 300000.0, 30.0, "EPSG:3067"),
+                land_use_category=2,
+                fra_category="1",
+                auxiliary_stand=False,
+                reference_trees=[
+                    ReferenceTree(
+                        identifier="123-234-1",
+                        species=TreeSpecies.PINE,
+                        stems_per_ha=200.0,
+                        sapling=False
+                    )
+                ]
+            )
+        ]
+        app.file_io.prepare_target_directory("outdir")
+        target = Path("outdir", "output.rsd")
+        app.file_io.rsd_writer(target, data)
+
+        #There is no rsd input so check sanity just by file existence and non-emptiness
+        exists = os.path.exists(target)
+        size = os.path.getsize(target)
+        self.assertTrue(exists)
+        self.assertTrue(size > 0)
+        shutil.rmtree('outdir')
+
     def test_read_stands_from_pickle_file(self):
         unpickled_stands = app.file_io.read_stands_from_file("tests/resources/two_ffc_stands.pickle", "fdm", "pickle")
         self.assertEqual(len(unpickled_stands), 2)
