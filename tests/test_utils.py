@@ -57,9 +57,10 @@ def parametrized_operation(x, **kwargs):
         return x
 
 def parametrized_operation_using_file_parameter(x, **kwargs):
-    value_in_file = kwargs.get("dummy_file")
-    if value_in_file == "kissa123\n":
-        return value_in_file
+    file_path = kwargs.get("dummy_file")
+    file_contents = open(file_path, "r").read()
+    if file_contents == "kissa123\n":
+        return file_contents
     else:
         return x
 

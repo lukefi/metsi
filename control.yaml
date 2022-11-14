@@ -1,9 +1,9 @@
 #File IO configuration values. Can be overriden by CLI arguments. May be commented out for None.
 io_configuration:
   state_format: fdm #options: fdm, vmi12, vmi13, forest_centre
-  state_input_container: pickle #Only relevant with fdm state_format. Options: pickle, json
-  preprocessing_output_container: pickle #options: pickle, json
-  state_output_container: pickle #options: pickle, json
+  state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
+  preprocessing_output_container: csv #options: pickle, json, csv, rsd (special case not usable as input container)
+  state_output_container: csv #options: pickle, json, csv
   derived_data_output_container: pickle #options: pickle, json
 
 run_constraints:
@@ -22,7 +22,6 @@ operation_params:
   thinning_from_below:
     - thinning_factor: 0.97
       e: 0.2
-      cross_cut: false
     - thinning_factor: 0.8
       e: 0.2
   thinning_from_above:
