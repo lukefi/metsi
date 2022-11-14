@@ -9,7 +9,7 @@ from forestryfunctions.cross_cutting import cross_cutting
 def cross_cut_thinning_output(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
     Calculates cross cutting volumes and values for thinning results that haven't yet been cross cut.
-    :returns: the same payload as was given as input, but with cross cutting results stored in the simulation_aggregates. 
+    :returns: the same payload as was given as input, but with cross cutting results stored in the simulation_aggregates.
     """
     stand, simulation_aggregates = payload
     thinning_aggregates = defaultdict(dict)
@@ -23,14 +23,14 @@ def cross_cut_thinning_output(payload: OpTuple[ForestStand], **operation_paramet
                     results = cross_cutting.cross_cut_trees(aggr, stand.area, timber_price_table)
                     thinning_aggregates[tag][tp] = CrossCutResults(results)
                     aggr.cross_cut_done = True
-                    
+
     simulation_aggregates.get("thinned_trees_cross_cut").update(thinning_aggregates)
     return payload
 
 
 def cross_cut_whole_stand(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
-    Cross cuts the `payload`'s stand at its current state. Does not modify the state, only calculates and stores the result of cross cutting. 
+    Cross cuts the `payload`'s stand at its current state. Does not modify the state, only calculates and stores the result of cross cutting.
     The results are stored in simulation_aggregates.
     """
     stand, simulation_aggregates = payload
