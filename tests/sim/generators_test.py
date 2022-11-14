@@ -110,7 +110,7 @@ class TestGenerators(unittest.TestCase):
         result = compose(*generators)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
-            simulation_state=0, 
+            simulation_state=0,
             aggregated_results=AggregatedResults(),
             operation_history=[]
             )
@@ -134,7 +134,7 @@ class TestGenerators(unittest.TestCase):
         result = compose(*generators)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
-            simulation_state=0, 
+            simulation_state=0,
             aggregated_results=AggregatedResults(),
             operation_history=[]
             )
@@ -211,22 +211,21 @@ class TestGenerators(unittest.TestCase):
     def test_generate_time_series(self):
         declaration = """
         simulation_events:
-          - time_points: [0, 1]
+          - time_points: [0, 1, 4, 100, 1000, 8, 9]
             generators:
               - sequence:
                 - inc
                 - inc
-                
           - time_points: [9, 8]
             generators:
               - sequence:
                 - inc
                 - inc
-          - time_points: [4, 6]
+          - time_points: [4, 6, 10, 12]
             generators:
               - sequence:
                 - inc
                 - inc
         """
         result = generate_time_series(yaml.safe_load(declaration)['simulation_events'])
-        self.assertEqual([0, 1, 4, 6, 8, 9], result)
+        self.assertEqual([0, 1, 4, 6, 8, 9, 10, 12, 100, 1000], result)
