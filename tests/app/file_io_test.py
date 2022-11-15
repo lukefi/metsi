@@ -80,11 +80,6 @@ class TestFileReading(unittest.TestCase):
         stands = app.file_io.read_stands_from_file("tests/resources/SMK_source.xml", "forest_centre", "")
         self.assertEqual(len(stands), 3)
 
-    def test_read_full_simulation_result_input_file(self):
-        data: dict = app.file_io.read_full_simulation_result_input_file("tests/resources/post_processing_input_one_vmi12_stand_nine_schedules.pickle", "pickle")
-        self.assertFalse(data.get('0-023-002-02-1') is None)
-        self.assertEqual(len(data.get('0-023-002-02-1')), 9)
-
     def test_read_schedule_payload_from_directory(self):
         dir = Path("tests/resources/testing_output_directory/0-023-002-02-1/1")
         result = app.file_io.read_schedule_payload_from_directory(dir)
@@ -108,42 +103,4 @@ class TestFileReading(unittest.TestCase):
             "state_input_container": "pickle"
         }
         self.assertRaises(Exception, app.file_io.read_stands_from_file, **kwargs)
-
-    def test_write_full_simulation_results_to_file(self):
-        stands = [
-            ForestStand(
-                reference_trees=[
-                    ReferenceTree(identifier=1)
-                ]
-            ),
-            ForestStand(
-                reference_trees=[
-                    ReferenceTree(identifier=2)
-                ]
-            )
-        ]
-        data = {
-            '123': [
-                OperationPayload(
-                    simulation_state=stands,
-                    aggregated_results=None,
-                    operation_history={}
-                )
-            ]
-        }
-        outdir = app.file_io.prepare_target_directory("outdir")
-
-        app.file_io.write_full_simulation_result_to_file(data, outdir, "pickle")
-        self.assertTrue(os.path.isfile("outdir/output.pickle"))
-
-        app.file_io.write_full_simulation_result_to_file(data, outdir, "json")
-        self.assertTrue(os.path.isfile("outdir/output.json"))
-
-        app.file_io.write_full_simulation_result_to_file(data, outdir, "csv")
-        self.assertTrue(os.path.isfile("outdir/output.json"))
-
-        #write_result_to_file should raise an Exception if the given output_format is not supported
-        self.assertRaises(Exception, app.file_io.write_full_simulation_result_to_file, stands, outdir, "txt")
-        shutil.rmtree("outdir")
-
         

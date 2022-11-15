@@ -11,7 +11,7 @@ from sim.core_types import AggregatedResults, OperationPayload
 from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
 from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, \
-    write_full_simulation_result_to_file, write_full_simulation_result_dirtree, prepare_target_directory, \
+    write_full_simulation_result_dirtree, prepare_target_directory, \
     determine_file_path, write_stands_to_file
 from app.app_io import sim_cli_arguments, set_default_arguments
 
@@ -154,9 +154,6 @@ def main():
 
     print_logline("Writing output...")
     write_full_simulation_result_dirtree(result, app_arguments)
-    if app_arguments.state_output_container is not None:
-        # TODO: Retained old output for post_processing backwards compatibility. Should go away with program flow redesign.
-        write_full_simulation_result_to_file(result, outdir, app_arguments.state_output_container)
 
     print_logline("Done. Exiting.")
 

@@ -97,15 +97,6 @@ def read_stands_from_file(file_path: str, state_format: str, container_format: s
         raise Exception(f"Unsupported state format '{state_format}'")
 
 
-def read_full_simulation_result_input_file(file_path: str, input_format: str) -> dict[str, list[OperationPayload]]:
-    if input_format == "pickle":
-        return pickle_reader(file_path)
-    elif input_format == "json":
-        return json_reader(file_path)
-    else:
-        raise Exception(f"Unsupported input format '{input_format}'")
-
-
 def scan_dir_for_file(dirpath: Path, basename: str, suffixes: list[str]) -> Optional[tuple[Path, str]]:
     """
     From given directory path, find the optional filename for given basename with list of possible file suffixes.
@@ -161,13 +152,6 @@ def read_full_simulation_result_dirtree(source_path: Path) -> dict[str, list[Ope
     return result
 
 
-def write_full_simulation_result_to_file(result: Any, directory: Path, output_format: str):
-    override_format = "json" if output_format == "csv" else output_format
-    writer = object_writer(override_format)
-    filepath = determine_file_path(directory, f"output.{override_format}")
-    writer(filepath, result)
-
-
 def write_stands_to_file(result: list[ForestStand], filepath: Path, state_output_container: str):
     writer = stand_writer(state_output_container)
     writer(filepath, result)
@@ -175,13 +159,6 @@ def write_stands_to_file(result: list[ForestStand], filepath: Path, state_output
 
 def write_derived_data_to_file(result: AggregatedResults, filepath: Path, derived_data_output_container: str):
     writer = object_writer(derived_data_output_container)
-    writer(filepath, result)
-
-
-def write_post_processing_result_to_file(result: Any, directory: Path, output_format: str):
-    override_format = "json" if output_format == "csv" else output_format
-    writer = object_writer(override_format)
-    filepath = determine_file_path(directory, f"pp_result.{override_format}")
     writer(filepath, result)
 
 
