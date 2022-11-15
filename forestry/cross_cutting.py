@@ -24,7 +24,12 @@ def cross_cut_thinning_output(payload: OpTuple[ForestStand], **operation_paramet
                     thinning_aggregates[tag][tp] = CrossCutResults(results)
                     aggr.cross_cut_done = True
 
-    simulation_aggregates.get("thinned_trees_cross_cut").update(thinning_aggregates)
+    for tag, res in thinning_aggregates.items():
+        try:
+            simulation_aggregates.get("thinned_trees_cross_cut")[tag].update(res)
+        except KeyError:
+            simulation_aggregates.get("thinned_trees_cross_cut")[tag] = res
+
     return payload
 
 
