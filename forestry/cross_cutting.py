@@ -12,7 +12,7 @@ def cross_cut_thinning_output(payload: OpTuple[ForestStand], **operation_paramet
     :returns: the same payload as was given as input, but with cross cutting results stored in the simulation_aggregates.
     """
     stand, simulation_aggregates = payload
-    thinning_aggregates = defaultdict(dict)
+    cross_cut_result_aggregate = defaultdict(dict)
     for tag, res in simulation_aggregates.operation_results.items():
         for tp, aggr in res.items():
             #cross cut only if we're dealing with a thinning aggregate, and it hasn't already been cross cut
@@ -21,10 +21,10 @@ def cross_cut_thinning_output(payload: OpTuple[ForestStand], **operation_paramet
 
                     timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
                     results = cross_cutting.cross_cut_trees(aggr, stand.area, timber_price_table)
-                    thinning_aggregates[tag][tp] = CrossCutResults(results)
+                    cross_cut_result_aggregate[tag][tp] = CrossCutResults(results)
                     aggr.cross_cut_done = True
 
-    for tag, res in thinning_aggregates.items():
+    for tag, res in cross_cut_result_aggregate.items():
         try:
             simulation_aggregates.get("thinned_trees_cross_cut")[tag].update(res)
         except KeyError:
