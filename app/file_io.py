@@ -3,9 +3,9 @@ import os
 import pickle
 from pathlib import Path
 import jsonpickle
-from typing import Any, Callable
+from typing import Any, Callable, Iterator, Optional
 import yaml
-from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder, ForestBuilder
+from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
 from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands
 from forestdatamodel.model import ForestStand
 from sim.core_types import OperationPayload, AggregatedResults
@@ -69,6 +69,15 @@ def fdm_reader(container_format: str) -> StandReader:
         raise Exception(f"Unsupported container format '{container_format}'")
 
 
+def object_reader(container_format: str) -> Any:
+    if container_format == "pickle":
+        return pickle_reader
+    elif container_format == "json":
+        return json_reader
+    else:
+        raise Exception(f"Unsupported container format '{container_format}'")
+
+
 def external_reader(state_format: str, **builder_flags) -> StandReader:
     if state_format == "vmi13":
         return lambda path: VMI13Builder(builder_flags, vmi_file_reader(path)).build()
@@ -95,6 +104,26 @@ def read_full_simulation_result_input_file(file_path: str, input_format: str) ->
         return json_reader(file_path)
     else:
         raise Exception(f"Unsupported input format '{input_format}'")
+
+
+def parse_file_or_default(file: Path, reader: Callable[[Path], Any], default=None) -> Optional[Any]:
+    """Deserialize given file with given reader function or return default"""
+    if os.path.exists(file):
+        return reader(file)
+    else:
+        return default
+
+
+def read_schedule_payload_from_directory(schedule_path: Path, input_container: str, derived_data_container: str) -> OperationPayload:
+    with determine_file_path(schedule_path, f"unit_state.{input_container}") as file:
+        stands = parse_file_or_default(file, fdm_reader(input_container), [])
+    with determine_file_path(schedule_path, f"derived_data.{derived_data_container}") as file:
+        derived_data = parse_file_or_default(file, object_reader(derived_data_container))
+    return OperationPayload(
+        simulation_state=stands,
+        aggregated_results=derived_data,
+        operation_history=[]
+    )
 
 
 def write_full_simulation_result_to_file(result: Any, directory: Path, output_format: str):

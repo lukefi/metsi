@@ -85,6 +85,12 @@ class TestFileReading(unittest.TestCase):
         self.assertFalse(data.get('0-023-002-02-1') is None)
         self.assertEqual(len(data.get('0-023-002-02-1')), 9)
 
+    def test_read_schedule_payload_from_directory(self):
+        dir = Path("tests/resources/testing_output_directory/123/1")
+        result = app.file_io.read_schedule_payload_from_directory(dir, "csv", "pickle")
+        self.assertEqual("0-023-002-02-1", result.simulation_state[0].identifier)
+        self.assertEqual(2, len(result.aggregated_results.get("report_biomass")))
+
     def test_read_stands_from_nonexisting_file(self):
         kwargs = {
             "file_path": "tests/resources/nonexisting_file.pickle",
