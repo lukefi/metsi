@@ -141,6 +141,26 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> OperationPayloa
     )
 
 
+def get_subdirectory_names(path: Path) -> list[str]:
+    if not os.path.isdir(path):
+        raise Exception(f"Given input path {path} is not a directory.")
+    _, dirs, _ = next(os.walk(path))
+    return dirs
+
+
+def read_full_simulation_result_dirtree(source_path: Path) -> dict[str, list[OperationPayload]]:
+    def schedulepaths_for_stand(stand_path: Path) -> Iterator[Path]:
+        schedules = get_subdirectory_names(stand_path)
+        return map(lambda schedule: Path(stand_path, schedule), schedules)
+    result = {}
+    stand_identifiers = get_subdirectory_names(source_path)
+    stands_to_schedules = map(lambda stand_id: (stand_id, schedulepaths_for_stand(Path(source_path, stand_id))), stand_identifiers)
+    for stand_id, schedulepaths in stands_to_schedules:
+        payloads = list(map(lambda schedulepath: read_schedule_payload_from_directory(schedulepath), schedulepaths))
+        result[stand_id] = payloads
+    return result
+
+
 def write_full_simulation_result_to_file(result: Any, directory: Path, output_format: str):
     override_format = "json" if output_format == "csv" else output_format
     writer = object_writer(override_format)

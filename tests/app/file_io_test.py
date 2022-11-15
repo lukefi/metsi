@@ -91,6 +91,16 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual("0-023-002-02-1", result.simulation_state.identifier)
         self.assertEqual(2, len(result.aggregated_results.get("report_biomass")))
 
+    def test_read_simulation_result_dirtree(self):
+        dir = Path("tests/resources/testing_output_directory")
+        result = app.file_io.read_full_simulation_result_dirtree(dir)
+        self.assertEqual(1, len(result.items()))
+        self.assertEqual(2, len(result["0-023-002-02-1"]))
+        self.assertEqual("0-023-002-02-1", result["0-023-002-02-1"][0].simulation_state.identifier)
+        self.assertEqual(2, len(result["0-023-002-02-1"][0].aggregated_results.get("report_biomass")))
+        self.assertEqual("0-023-002-02-1", result["0-023-002-02-1"][1].simulation_state.identifier)
+        self.assertEqual(2, len(result["0-023-002-02-1"][1].aggregated_results.get("report_biomass")))
+
     def test_read_stands_from_nonexisting_file(self):
         kwargs = {
             "file_path": "tests/resources/nonexisting_file.pickle",
