@@ -25,7 +25,7 @@ class TestOperations(unittest.TestCase):
         self.assertRaises(Exception, prepared_function)
 
     def test_strategies_by_comparison(self):
-        declaration = load_yaml('branching.yaml')
+        declaration = load_yaml('runners_test/branching.yaml')
         initial = OperationPayload(
             simulation_state=1,
             aggregated_results=AggregatedResults(),
@@ -40,7 +40,7 @@ class TestOperations(unittest.TestCase):
         self.assertEqual(results_partial, results_full)
 
     def test_no_parameters_propagation(self):
-        declaration = load_yaml('no_parameters.yaml')
+        declaration = load_yaml('runners_test/no_parameters.yaml')
         initial = OperationPayload(
             simulation_state=1,
             aggregated_results=AggregatedResults(),
@@ -53,7 +53,7 @@ class TestOperations(unittest.TestCase):
         self.assertEqual(5, results[0])
 
     def test_parameters_propagation(self):
-        declaration = load_yaml('parameters.yaml')
+        declaration = load_yaml('runners_test/parameters.yaml')
         initial = OperationPayload(
             simulation_state=1,
             aggregated_results=AggregatedResults(),
@@ -66,7 +66,7 @@ class TestOperations(unittest.TestCase):
         self.assertEqual(9, results[0])
 
     def test_parameters_branching(self):
-        declaration = load_yaml('parameters_branching.yaml')
+        declaration = load_yaml('runners_test/parameters_branching.yaml')
         initial = OperationPayload(
             simulation_state=1,
             aggregated_results=AggregatedResults(),

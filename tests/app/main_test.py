@@ -17,7 +17,7 @@ from typing import List
 def run_simulator(state_input_files: List[str], state_output_containers: List[str]):
 
     strategies = ['full', 'partial']
-    control_file = 'tests/resources/main_test_control.yaml'
+    control_file = 'tests/resources/main_test/main_test_control.yaml'
     run_details = []
     output_details = []
 
@@ -56,8 +56,8 @@ def run_simulator(state_input_files: List[str], state_output_containers: List[st
 class MainTest(unittest.TestCase):
 
     input_files = [
-        'tests/resources/two_ffc_stands.pickle',
-        'tests/resources/two_vmi12_stands_as_jsonpickle.json'
+        'tests/resources/main_test/two_ffc_stands.pickle',
+        'tests/resources/main_test/two_vmi12_stands_as_jsonpickle.json'
     ]
     input_containers = [
         'pickle',
@@ -86,7 +86,7 @@ class MainTest(unittest.TestCase):
         sim_results = run_simulator(self.input_files, self.input_containers)
         for i, sim_dir in enumerate(sim_results):
             pp_input_dir = sim_dir
-            pp_control_file = 'tests/resources/pp_test_control.yaml'
+            pp_control_file = 'tests/resources/main_test/pp_test_control.yaml'
             pp_output_dir = 'pp_outdir'
 
             sys.argv = [

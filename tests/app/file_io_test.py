@@ -18,12 +18,12 @@ class Test:
 
 class TestFileReading(unittest.TestCase):
     def test_file_contents(self):
-        input_file_path = os.path.join(os.getcwd(), "tests", "resources", "test_dummy")
+        input_file_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "test_dummy")
         result = app.file_io.file_contents(input_file_path)
         self.assertEqual("kissa123\n", result)
 
     def test_simulation_declaration_from_yaml_file(self):
-        input_file_path = os.path.join(os.getcwd(), "tests", "resources", "control.yaml")
+        input_file_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "control.yaml")
         result = app.file_io.simulation_declaration_from_yaml_file(input_file_path)
         self.assertEqual(1, len(result.keys()))
 
@@ -52,42 +52,42 @@ class TestFileReading(unittest.TestCase):
         shutil.rmtree('outdir')
 
     def test_read_stands_from_pickle_file(self):
-        unpickled_stands = app.file_io.read_stands_from_file("tests/resources/two_ffc_stands.pickle", "fdm", "pickle")
+        unpickled_stands = app.file_io.read_stands_from_file("tests/resources/file_io_test/two_ffc_stands.pickle", "fdm", "pickle")
         self.assertEqual(len(unpickled_stands), 2)
         self.assertEqual(type(unpickled_stands[0]), ForestStand)
 
     def test_read_stands_from_json_file(self):
-        stands_from_json = app.file_io.read_stands_from_file("tests/resources/two_vmi12_stands_as_jsonpickle.json", "fdm", "json")
+        stands_from_json = app.file_io.read_stands_from_file("tests/resources/file_io_test/two_vmi12_stands_as_jsonpickle.json", "fdm", "json")
         self.assertEqual(len(stands_from_json), 2)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
         self.assertEqual(type(stands_from_json[1].reference_trees[0]), ReferenceTree)
 
     def test_read_stands_from_csv_file(self):
-        stands_from_csv = app.file_io.read_stands_from_file("tests/resources/preprocessing_result.csv", "fdm", "csv")
+        stands_from_csv = app.file_io.read_stands_from_file("tests/resources/file_io_test/preprocessing_result.csv", "fdm", "csv")
         self.assertEqual(len(stands_from_csv), 1)
         self.assertEqual(type(stands_from_csv[0]), ForestStand)
         self.assertEqual(type(stands_from_csv[0].reference_trees[0]), ReferenceTree)
 
     def test_read_stands_from_vmi12_file(self):
-        stands = app.file_io.read_stands_from_file("tests/resources/VMI12_source_mini.dat", "vmi12", "")
+        stands = app.file_io.read_stands_from_file("tests/resources/file_io_test/VMI12_source_mini.dat", "vmi12", "")
         self.assertEqual(len(stands), 7)
 
     def test_read_stands_from_vmi13_file(self):
-        stands = app.file_io.read_stands_from_file("tests/resources/VMI13_source_mini.dat", "vmi13", "")
+        stands = app.file_io.read_stands_from_file("tests/resources/file_io_test/VMI13_source_mini.dat", "vmi13", "")
         self.assertEqual(len(stands), 3)
 
     def test_read_stands_from_xml_file(self):
-        stands = app.file_io.read_stands_from_file("tests/resources/SMK_source.xml", "forest_centre", "")
+        stands = app.file_io.read_stands_from_file("tests/resources/file_io_test/SMK_source.xml", "forest_centre", "")
         self.assertEqual(len(stands), 3)
 
     def test_read_schedule_payload_from_directory(self):
-        dir = Path("tests/resources/testing_output_directory/0-023-002-02-1/1")
+        dir = Path("tests/resources/file_io_test/testing_output_directory/0-023-002-02-1/1")
         result = app.file_io.read_schedule_payload_from_directory(dir)
         self.assertEqual("0-023-002-02-1", result.simulation_state.identifier)
         self.assertEqual(2, len(result.aggregated_results.get("report_biomass")))
 
     def test_read_simulation_result_dirtree(self):
-        dir = Path("tests/resources/testing_output_directory")
+        dir = Path("tests/resources/file_io_test/testing_output_directory")
         result = app.file_io.read_full_simulation_result_dirtree(dir)
         self.assertEqual(1, len(result.items()))
         self.assertEqual(2, len(result["0-023-002-02-1"]))
@@ -98,7 +98,7 @@ class TestFileReading(unittest.TestCase):
 
     def test_read_stands_from_nonexisting_file(self):
         kwargs = {
-            "file_path": "tests/resources/nonexisting_file.pickle",
+            "file_path": "nonexisting_file.pickle",
             "state_format": "fdm",
             "state_input_container": "pickle"
         }
