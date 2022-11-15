@@ -1,0 +1,55 @@
+#File IO configuration values. Can be overriden by CLI arguments. May be commented out for None.
+io_configuration:
+  state_format: fdm #options: fdm, vmi12, vmi13, forest_centre
+  state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
+  preprocessing_output_container: csv #options: pickle, json, csv
+  state_output_container: csv #options: pickle, json, csv
+  derived_data_output_container: pickle #options: pickle, json
+
+run_constraints:
+  thinning_from_below:
+    minimum_time_interval: 15
+
+operation_params:
+  thinning_from_below:
+    - thinning_factor: 0.97
+      e: 0.2
+  report_biomass:
+    - model_set: 1
+  report_collectives:
+    - Ftot: reference_trees.stems_per_ha
+      Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
+      Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
+
+
+preprocessing_params:
+  generate_reference_trees:
+    - n_trees: 10
+
+preprocessing_operations:
+  - generate_reference_trees
+
+operation_file_params:
+  cross_cut_thinning_output:
+    timber_price_table: data/parameter_files/timber_price_table.csv
+
+simulation_events:
+  # we describe here objects with schedule for which time points they are active
+  - time_points: [0]
+    generators:
+      - sequence:
+          - report_biomass
+  - time_points: [5, 10, 15, 20, 25, 30]
+    generators:
+      - sequence:
+          - grow_acta
+  - time_points: [5, 15, 25]
+    generators:
+      - alternatives:
+          - do_nothing
+          - do_nothing
+  - time_points: [30]
+    generators:
+      - sequence:
+          - report_biomass
+          - cross_cut_thinning_output

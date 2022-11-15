@@ -17,7 +17,7 @@ from typing import List
 def run_simulator(state_input_files: List[str], state_output_containers: List[str]):
 
     strategies = ['full', 'partial']
-    control_file = 'control.yaml'
+    control_file = 'tests/resources/main_test_control.yaml'
     run_details = []
     output_details = []
 
@@ -30,11 +30,7 @@ def run_simulator(state_input_files: List[str], state_output_containers: List[st
                 f"output.{container}",
                 strategy
             ))
-            output_details.append((
-                f"outdir{i}-{strategy}",
-                f"output.{container}",
-                container
-            ))
+            output_details.append(f"outdir{i}-{strategy}")
 
     for input_file, state_output_container, output_dir, _, strategy in run_details:
         sys.argv = [
@@ -53,7 +49,6 @@ def run_simulator(state_input_files: List[str], state_output_containers: List[st
             control_file,
             output_dir
         ]
-        print(sys.argv)
         simulator.main()
     return output_details
 
@@ -69,33 +64,40 @@ class MainTest(unittest.TestCase):
         'json'
     ]
 
+    def verify_result_dir(self, outdir):
+        _, stands, _ = next(os.walk(outdir))
+        self.assertEqual(2, len(stands))
+        for stand in stands:
+            _, schedules, _ = next(os.walk(Path(outdir, stand)))
+            self.assertEqual(8, len(schedules))
+            for schedule in schedules:
+                _, _, files = next(os.walk(Path(outdir, stand, schedule)))
+                self.assertEqual(2, len(files))
+
     def test_sim_main(self):
         sim_results = run_simulator(self.input_files, self.input_containers)
-        for output_dir, output_file, _ in sim_results:
-            filepath = Path(output_dir, output_file)
+        for output_dir in sim_results:
+            self.verify_result_dir(output_dir)
             preprocessing_filepath = Path(output_dir, 'preprocessing_result.pickle')
-            self.assertTrue(os.path.exists(filepath))
             self.assertTrue(os.path.exists(preprocessing_filepath))
             shutil.rmtree(output_dir)
 
     def test_post_processing_main(self):
         sim_results = run_simulator(self.input_files, self.input_containers)
-        for i, (sim_dir, sim_file, container) in enumerate(sim_results):
-            pp_input_file = os.path.join(os.getcwd(), sim_dir, sim_file)
-            pp_control_file = 'pp_control.yaml'
-            pp_result_file = 'pp_result.pickle'
+        for i, sim_dir in enumerate(sim_results):
+            pp_input_dir = sim_dir
+            pp_control_file = 'tests/resources/pp_test_control.yaml'
+            pp_output_dir = 'pp_outdir'
 
             sys.argv = [
                 'foo',
-                '--input-format',
-                container,
-                pp_input_file,
+                pp_input_dir,
                 pp_control_file,
-                sim_dir
+                pp_output_dir
             ]
 
             pp.main()
 
-            pp_result_path = Path(sim_dir, pp_result_file)
-            self.assertTrue(os.path.exists(pp_result_path))
+            self.verify_result_dir(pp_output_dir)
+            shutil.rmtree(pp_output_dir)
             shutil.rmtree(sim_dir)

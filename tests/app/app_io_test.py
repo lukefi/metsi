@@ -31,10 +31,10 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual("2", result.strata_origin)
 
     def test_post_rocessing_cli_arguments(self):
-        args = ['input.json', 'control.yaml', 'outdir']
+        args = ['simdir', 'control.yaml', 'outdir']
         result = aio.post_processing_cli_arguments(args)
         self.assertEqual(5, len(result.__dict__.keys()))
-        self.assertEqual('input.json', result.input_file)
+        self.assertEqual('simdir', result.input_directory)
         self.assertEqual('control.yaml', result.control_file)
         self.assertEqual('outdir', result.target_directory)
 

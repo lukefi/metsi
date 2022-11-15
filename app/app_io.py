@@ -65,19 +65,17 @@ def sim_cli_arguments(args: List[str]):
 
 def post_processing_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 post processing')
-    parser.add_argument('input_file', help='Post processing input file (simulator output)')
+    parser.add_argument('input_directory', help='Post processing input file (simulator output)')
     parser.add_argument('control_file', help='Post processing control declaration file', default='pp_control.yaml')
     parser.add_argument('target_directory', help='Directory path for program output')
-    parser.add_argument('-i','--input-format',
+    parser.add_argument('--state-output-container',
+                        choices=['pickle', 'json', 'csv'],
+                        type=str,
+                        help='Container format of state output files: \'pickle\' (default), \'json\', \'csv\'')
+    parser.add_argument('--derived-data-output-container',
                         choices=['pickle', 'json'],
                         type=str,
-                        help='Format of the input file: \'pickle\' (default) or \'json\'',
-                        default='pickle')
-    parser.add_argument('-o','--output-format',
-                        choices=['pickle', 'json'],
-                        type=str,
-                        help='Format of the output file: \'pickle\' (default) or \'json\'',
-                        default='pickle')
+                        help='Container format of derived data result file: \'pickle\' (default), \'json\'')
     return parser.parse_args(args)
 
 
