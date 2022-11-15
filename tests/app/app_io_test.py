@@ -39,8 +39,8 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual('outdir', result.target_directory)
 
     def test_export_cli_arguments(self):
-        args = ['input.pickle', 'control.yaml']
+        args = ['simdir', 'control.yaml']
         result = aio.export_cli_arguments(args)
         self.assertEqual(2, len(result.__dict__.keys()))
-        self.assertEqual('input.pickle', result.input_file)
+        self.assertEqual('simdir', result.input_file)
         self.assertEqual('control.yaml', result.control_file)
