@@ -106,6 +106,21 @@ def read_full_simulation_result_input_file(file_path: str, input_format: str) ->
         raise Exception(f"Unsupported input format '{input_format}'")
 
 
+def scan_dir_for_file(dirpath: Path, basename: str, suffixes: list[str]) -> Optional[tuple[Path, str]]:
+    """
+    From given directory path, find the optional filename for given basename with list of possible file suffixes.
+    Raises Exception if directory path is not a directory.
+    """
+    if not os.path.isdir(dirpath):
+        raise Exception(f"Given input path {dirpath} is not a directory.")
+    _, _, files = next(os.walk(dirpath))
+    filenames_with_suffix = list(map(lambda suffix: (f"{basename}.{suffix}", suffix), suffixes))
+    for filename, suffix in filenames_with_suffix:
+        if filename in files:
+            return Path(dirpath, filename), suffix
+    return None
+
+
 def parse_file_or_default(file: Path, reader: Callable[[Path], Any], default=None) -> Optional[Any]:
     """Deserialize given file with given reader function or return default"""
     if os.path.exists(file):
@@ -114,11 +129,11 @@ def parse_file_or_default(file: Path, reader: Callable[[Path], Any], default=Non
         return default
 
 
-def read_schedule_payload_from_directory(schedule_path: Path, input_container: str, derived_data_container: str) -> OperationPayload:
-    with determine_file_path(schedule_path, f"unit_state.{input_container}") as file:
-        stands = parse_file_or_default(file, fdm_reader(input_container), [])
-    with determine_file_path(schedule_path, f"derived_data.{derived_data_container}") as file:
-        derived_data = parse_file_or_default(file, object_reader(derived_data_container))
+def read_schedule_payload_from_directory(schedule_path: Path) -> OperationPayload:
+    unit_state_file, input_container = scan_dir_for_file(schedule_path, "unit_state", ["csv", "json", "pickle"])
+    derived_data_file, derived_data_container = scan_dir_for_file(schedule_path, "derived_data", ["json", "pickle"])
+    stands = [] if unit_state_file is None else parse_file_or_default(unit_state_file, fdm_reader(input_container), [])
+    derived_data = None if derived_data_file is None else parse_file_or_default(derived_data_file, object_reader(derived_data_container))
     return OperationPayload(
         simulation_state=stands,
         aggregated_results=derived_data,
