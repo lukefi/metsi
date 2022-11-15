@@ -41,6 +41,10 @@ def sim_cli_arguments(args: List[str]):
                         choices=['pickle', 'json', 'csv'],
                         type=str,
                         help='Container format of preprocessing result file: \'pickle\' (default), \'json\', \'csv\'')
+    parser.add_argument('--derived-data-output-container',
+                        choices=['pickle', 'json'],
+                        type=str,
+                        help='Container format of derived data result file: \'pickle\' (default), \'json\'')
     parser.add_argument('--reference-trees',
                         default=False,
                         action=argparse.BooleanOptionalAction,
