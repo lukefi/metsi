@@ -135,7 +135,7 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> OperationPayloa
     stands = [] if unit_state_file is None else parse_file_or_default(unit_state_file, fdm_reader(input_container), [])
     derived_data = None if derived_data_file is None else parse_file_or_default(derived_data_file, object_reader(derived_data_container))
     return OperationPayload(
-        simulation_state=stands,
+        simulation_state=None if stands == [] else stands[0],
         aggregated_results=derived_data,
         operation_history=[]
     )

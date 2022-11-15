@@ -88,7 +88,7 @@ class TestFileReading(unittest.TestCase):
     def test_read_schedule_payload_from_directory(self):
         dir = Path("tests/resources/testing_output_directory/0-023-002-02-1/1")
         result = app.file_io.read_schedule_payload_from_directory(dir)
-        self.assertEqual("0-023-002-02-1", result.simulation_state[0].identifier)
+        self.assertEqual("0-023-002-02-1", result.simulation_state.identifier)
         self.assertEqual(2, len(result.aggregated_results.get("report_biomass")))
 
     def test_read_stands_from_nonexisting_file(self):
