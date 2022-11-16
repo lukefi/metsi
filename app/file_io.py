@@ -17,6 +17,14 @@ ObjectWriter = Callable[[Path, Any], None]
 
 
 def prepare_target_directory(path_descriptor: str) -> Path:
+    """
+    Sanity check a given directory path. Existing directory must be accessible for writing. Raise exception if directory
+    is not usable. Create the directory if not existing.
+    necessary.
+
+    :param path_descriptor: relative directory path
+    :return: Path instance for directory
+    """
     if os.path.exists(path_descriptor):
         if os.path.isdir(path_descriptor) and os.access(path_descriptor, os.W_OK):
             return Path(path_descriptor)
@@ -61,6 +69,7 @@ def file_contents(file_path: str) -> str:
 
 
 def fdm_reader(container_format: str) -> StandReader:
+    """Resolve a reader function for FDM data containers"""
     if container_format == "pickle":
         return pickle_reader
     elif container_format == "json":
@@ -81,6 +90,7 @@ def object_reader(container_format: str) -> Any:
 
 
 def external_reader(state_format: str, **builder_flags) -> StandReader:
+    """Resolve and prepare a reader function for non-FDM data formats"""
     if state_format == "vmi13":
         return lambda path: VMI13Builder(builder_flags, vmi_file_reader(path)).build()
     elif state_format == "vmi12":
@@ -90,6 +100,16 @@ def external_reader(state_format: str, **builder_flags) -> StandReader:
 
 
 def read_stands_from_file(file_path: str, state_format: str, container_format: str, **builder_flags) -> list[ForestStand]:
+    """
+    Read a list of ForestStands from given file with given configuration. Directly reads FDM format data. Utilizes
+    FDM ForestBuilder utilities to transform VMI12, VMI13 or Forest Centre data into FDM ForestStand format.
+
+    :param file_path: input file Path
+    :param state_format: data format of input file
+    :param container_format: container format of input file
+    :param builder_flags: optional extra flags to pass for ForestBuilder implementations
+    :return: list of ForestStands as computational units for simulation
+    """
     builder_flags = {"reference_trees": False, "strata_origin": "1"} if builder_flags == {} else builder_flags
     if state_format == "fdm":
         return fdm_reader(container_format)(file_path)
@@ -101,8 +121,9 @@ def read_stands_from_file(file_path: str, state_format: str, container_format: s
 
 def scan_dir_for_file(dirpath: Path, basename: str, suffixes: list[str]) -> Optional[tuple[Path, str]]:
     """
-    From given directory path, find the optional filename for given basename with list of possible file suffixes.
+    From given directory path, find the filename for given basename with list of possible file suffixes.
     Raises Exception if directory path is not a directory.
+    :returns a pair with full filename and matching suffix
     """
     if not os.path.isdir(dirpath):
         raise Exception(f"Given input path {dirpath} is not a directory.")
@@ -123,6 +144,13 @@ def parse_file_or_default(file: Path, reader: Callable[[Path], Any], default=Non
 
 
 def read_schedule_payload_from_directory(schedule_path: Path) -> OperationPayload:
+    """
+    Create an OperationPayload from a directory which optionally contains usable unit_state and derived_data files.
+    Utilizes a scanner function to resolve the files with known container formats. Files may not exist.
+
+    :param schedule_path: Path for a schedule directory
+    :return: OperationPayload with simulation_state and aggregated_results if found
+    """
     unit_state_file, input_container = scan_dir_for_file(schedule_path, "unit_state", ["csv", "json", "pickle"])
     derived_data_file, derived_data_container = scan_dir_for_file(schedule_path, "derived_data", ["json", "pickle"])
     stands = [] if unit_state_file is None else parse_file_or_default(unit_state_file, fdm_reader(input_container), [])
@@ -142,6 +170,14 @@ def get_subdirectory_names(path: Path) -> list[str]:
 
 
 def read_full_simulation_result_dirtree(source_path: Path) -> dict[str, list[OperationPayload]]:
+    """
+    Read simulation results from a given source directory, packing them into the simulation results dict structure.
+    Utilizes a directory scanner function to find unit_state and derived_data files for known possible container
+    formats.
+
+    :param source_path: Path for simulation results
+    :return: simulation results dict structure
+    """
     def schedulepaths_for_stand(stand_path: Path) -> Iterator[Path]:
         schedules = get_subdirectory_names(stand_path)
         return map(lambda schedule: Path(stand_path, schedule), schedules)
@@ -155,16 +191,28 @@ def read_full_simulation_result_dirtree(source_path: Path) -> dict[str, list[Ope
 
 
 def write_stands_to_file(result: list[ForestStand], filepath: Path, state_output_container: str):
+    """Resolve a writer function for ForestStands matching the given state_output_container. Invokes write."""
     writer = stand_writer(state_output_container)
     writer(filepath, result)
 
 
 def write_derived_data_to_file(result: AggregatedResults, filepath: Path, derived_data_output_container: str):
+    """Resolve a writer function for AggregatedResults matching the given derived_data_output_container. Invokes write."""
     writer = object_writer(derived_data_output_container)
     writer(filepath, result)
 
 
 def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
+    """
+    Unwraps the given simulation result structure into computational units and further into produced schedules.
+    Writes these as a matching directory structure, splitting OperationPayloads into unit_state and derived_data files.
+    Details for output directory, unit state container format and derived data container format are extracted from
+    given app_arguments structure.
+
+    :param result: the simulation results structure
+    :param app_arguments: application run configuration
+    :return: None
+    """
     for stand_id, schedules in result.items():
         for i, schedule in enumerate(schedules):
             if app_arguments.state_output_container is not None:
