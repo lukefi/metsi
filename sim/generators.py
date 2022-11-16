@@ -121,7 +121,7 @@ def generate_time_series(simulation_events: list) -> list[int]:
     time_points = set()
     for event_set in simulation_events:
         time_points.update(event_set['time_points'])
-    return list(time_points)
+    return sorted(list(time_points))
 
 
 def get_configuration_from_simulation_declaration(simulation_declaration):

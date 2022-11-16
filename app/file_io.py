@@ -6,7 +6,7 @@ import jsonpickle
 from typing import Any, Callable, Iterator, Optional
 import yaml
 from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
-from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands
+from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands, rsd_rows
 from forestdatamodel.model import ForestStand
 from sim.core_types import OperationPayload, AggregatedResults
 
@@ -35,6 +35,8 @@ def stand_writer(container_format: str) -> StandWriter:
         return json_writer
     elif container_format == "csv":
         return csv_writer
+    elif container_format == "rsd":
+        return rsd_writer
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
@@ -199,6 +201,11 @@ def json_writer(filepath: Path, data: Any):
 def csv_writer(filepath: Path, data: Any):
     with open(filepath, 'w', newline='\n') as file:
         file.writelines('\n'.join(stands_to_csv(data, ';')))
+
+
+def rsd_writer(filepath: Path, data: list[ForestStand]):
+    with open(filepath, 'w', newline='\n') as file:
+        file.writelines('\n'.join(rsd_rows(data)))
 
 
 def json_reader(file_path: str) -> Any:

@@ -2,6 +2,7 @@ import unittest
 import os
 import shutil
 from pathlib import Path
+from forestdatamodel.enums.internal import TreeSpecies
 import app.file_io
 from dataclasses import dataclass
 from forestdatamodel.model import ForestStand, ReferenceTree
@@ -49,6 +50,54 @@ class TestFileReading(unittest.TestCase):
         result = app.file_io.json_reader('outdir/output.json')
         self.assertListEqual(data, result)
         os.remove('outdir/output.json')
+        shutil.rmtree('outdir')
+
+    def test_csv(self):
+        data = [
+            ForestStand(
+                identifier="123-234",
+                geo_location=(600000.0, 300000.0, 30.0, "EPSG:3067"),
+                reference_trees=[
+                    ReferenceTree(
+                        identifier="123-234-1",
+                        species=TreeSpecies.PINE
+                    )
+                ]
+            )
+        ]
+        app.file_io.prepare_target_directory("outdir")
+        app.file_io.csv_writer(Path("outdir", "output.csv"), data)
+        result = app.file_io.csv_to_stands("outdir/output.csv", ";")
+        self.assertListEqual(data, result)
+        shutil.rmtree('outdir')
+
+    def test_rsd(self):
+        data = [
+            ForestStand(
+                identifier="123-234",
+                geo_location=(600000.0, 300000.0, 30.0, "EPSG:3067"),
+                land_use_category=2,
+                fra_category="1",
+                auxiliary_stand=False,
+                reference_trees=[
+                    ReferenceTree(
+                        identifier="123-234-1",
+                        species=TreeSpecies.PINE,
+                        stems_per_ha=200.0,
+                        sapling=False
+                    )
+                ]
+            )
+        ]
+        app.file_io.prepare_target_directory("outdir")
+        target = Path("outdir", "output.rsd")
+        app.file_io.rsd_writer(target, data)
+
+        #There is no rsd input so check sanity just by file existence and non-emptiness
+        exists = os.path.exists(target)
+        size = os.path.getsize(target)
+        self.assertTrue(exists)
+        self.assertTrue(size > 0)
         shutil.rmtree('outdir')
 
     def test_read_stands_from_pickle_file(self):
