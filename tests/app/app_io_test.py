@@ -1,6 +1,8 @@
 import unittest
+
+import app.app_io
 from app import app_io as aio
-from app.app_io import set_default_arguments
+from app.app_io import set_default_arguments, RunMode
 
 
 class TestAppIO(unittest.TestCase):
@@ -29,6 +31,39 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual(None, result.state_output_container)
         self.assertEqual(True, result.reference_trees)
         self.assertEqual("2", result.strata_origin)
+
+    def test_run_modes(self):
+        successes = [
+            ("preprocess,simulate,postprocess,export", [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]),
+            ("preprocess,simulate,export", [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.EXPORT]),
+            ("preprocess,simulate,postprocess", [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.POSTPROCESS]),
+            ("preprocess,simulate", [RunMode.PREPROCESS, RunMode.SIMULATE]),
+            ("preprocess", [RunMode.PREPROCESS]),
+            ("simulate,postprocess,export", [RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]),
+            ("simulate,postprocess", [RunMode.SIMULATE, RunMode.POSTPROCESS]),
+            ("simulate,export", [RunMode.SIMULATE, RunMode.EXPORT]),
+            ("simulate", [RunMode.SIMULATE]),
+            ("postprocess,export", [RunMode.POSTPROCESS, RunMode.EXPORT]),
+            ("postprocess", [RunMode.POSTPROCESS]),
+            ("export", [RunMode.EXPORT])
+        ]
+        failures = [
+            "preprocess,postprocess,export",
+            "preprocess,postprocess",
+            "preprocess,export",
+            "simulate,preprocess",
+            "postprocess,preprocess",
+            "postprocess,simulate",
+            "export,preprocess",
+            "abc",
+            123,
+            "preporcess,simulate"
+        ]
+        fn = app.app_io.Mela2Configuration.parse_run_modes
+        for case in successes:
+            self.assertEqual(case[1], fn(case[0]))
+        for case in failures:
+            self.assertRaises(Exception, fn, case)
 
     def test_post_rocessing_cli_arguments(self):
         args = ['simdir', 'control.yaml', 'outdir']

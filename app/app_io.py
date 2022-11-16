@@ -1,5 +1,52 @@
 import argparse
+from enum import Enum
+from types import SimpleNamespace
 from typing import List
+
+
+class RunMode(Enum):
+    PREPROCESS = "preprocess"
+    SIMULATE = "simulate"
+    POSTPROCESS = "postprocess"
+    EXPORT = "export"
+
+
+class Mela2Configuration(SimpleNamespace):
+    run_modes = [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]
+
+    def set_run_modes(self, modestring: str):
+        self.run_modes = Mela2Configuration.parse_run_modes(modestring)
+
+    @classmethod
+    def parse_run_modes(cls, modestring):
+        try:
+            mode_candidates = list(map(lambda x: RunMode(x), modestring.split(sep=",")))
+        except:
+            raise Exception(f"Unable to parse run mode list '{modestring}'. "
+                            f"Allowed modes: {','.join(map(lambda x: x.value, RunMode))}")
+        last = len(mode_candidates) - 1
+        for i, candidate in enumerate(mode_candidates):
+            if candidate == RunMode.PREPROCESS:
+                if i < last and mode_candidates[i + 1] != RunMode.SIMULATE:
+                    raise Exception("Run mode 'preprocess' must be followed by 'simulate'")
+                if i != 0:
+                    raise Exception("Run mode 'preprocess' must be the first mode")
+            if candidate == RunMode.SIMULATE:
+                if i > 1:
+                    raise Exception("Run mode 'simulate' must be up to the second mode")
+                if i == 1 and mode_candidates[i - 1] != RunMode.PREPROCESS:
+                    raise Exception("Run mode 'simulate' must be preceded by 'preprocess'")
+            if candidate == RunMode.POSTPROCESS:
+                if i < last - 1:
+                    raise Exception("Run mode 'postprocess' must be second from last or last mode")
+                if i > 0 and mode_candidates[i - 1] != RunMode.SIMULATE:
+                    raise Exception("Run mode 'postprocess' can be preceded only by 'simulate'")
+            if candidate == RunMode.EXPORT:
+                if i < last:
+                    raise Exception("Run mode 'export' must be the last mode")
+                if i > 0 and mode_candidates[i - 1] not in (RunMode.SIMULATE, RunMode.POSTPROCESS):
+                    raise Exception("Run mode 'export' must be preceded by 'simulate' or 'postprocess'")
+        return mode_candidates
 
 
 def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> argparse.Namespace:
