@@ -76,13 +76,13 @@ RENEWAL_AGES = {
 INSTRUCTIONS = {
         SiteTypeKey.OMT: {
             'species':2,
-            'stems/ha':2000,
-            'soil preparation':2
+            'stems/ha':2200,
+            'soil preparation':3
         },
         SiteTypeKey.MT: {
             'species':2,
-            'stems/ha':2000,
-            'soil preparation':2
+            'stems/ha':2200,
+            'soil preparation':3
         },
         SiteTypeKey.VT: {
             'species':1,
@@ -91,40 +91,44 @@ INSTRUCTIONS = {
         },
         SiteTypeKey.CT: {
             'species':1,
-            'stems/ha':500,
-            'soil preparation':4
+            'stems/ha':2000,
+            'soil preparation':1
         }
     }
 
-def create_clearcutting_limits_table(input_data: str) -> List:
+def create_clearcutting_limits_table(file_path: str) -> List:
+    contents = None
+    with open(file_path, "r") as f:
+        contents = f.read()
     # read thinning_limits into a list of lists
-    table = input_data.split('\n')
-    table = [row.split(sep=' ') for row in table]
-    # this function is based on the structure in data/parameter_files/Thin.txt.
-    # for now, to catch a file with a differing structure, raise an error if the row and column numbers do not match.
+    table = contents.split('\n')
+    table = [row.split() for row in table]
+    
     if len(table) != 4 or len(table[0]) != 5:
         raise Exception('Clearcutting limits file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
     else:
         return table
 
-def create_clearcutting_instructions_table(input_data: str) -> List:
+def create_clearcutting_instructions_table(file_path: str) -> List:
+    contents = None
+    with open(file_path, "r") as f:
+        contents = f.read()
     # read thinning_limits into a list of lists
-    table = input_data.split('\n')
-    table = [row.split(sep=' ') for row in table]
-    # this function is based on the structure in data/parameter_files/Thin.txt.
-    # for now, to catch a file with a differing structure, raise an error if the row and column numbers do not match.
+    table = contents.split('\n')
+    table = [row.split() for row in table]
+    
     if len(table) != 4 or len(table[0]) != 3:
-        raise Exception('Clearcutting intructions file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
+        raise Exception('Clearcutting limits file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
     else:
         return table
 
 def get_clearcutting_agelimits_from_parameter_file_contents(
-    clearcutting_agelimits: str,
+    file_path: str,
     ) -> dict:
     """
     Creates a table from :clearcutting_agelimits
     """
-    ages = create_clearcutting_limits_table(clearcutting_agelimits)
+    ages = create_clearcutting_limits_table(file_path)
     RENEWAL_AGES = {
         SiteTypeKey.OMT: {
             SpeciesKey.PINE:int(ages[0][0]),
@@ -154,12 +158,12 @@ def get_clearcutting_agelimits_from_parameter_file_contents(
     return RENEWAL_AGES
 
 def get_clearcutting_diameterlimits_from_parameter_file_contents(
-    clearcutting_diameterlimits: str,
+    file_path: str,
     ) -> dict:
     """
     Creates a table from :clearcutting_diamterlimits
     """
-    diameters = create_clearcutting_limits_table(clearcutting_diameterlimits)
+    diameters = create_clearcutting_limits_table(file_path)
     RENEWAL_DIAMETERS = {
         SiteTypeKey.OMT: {
             SpeciesKey.PINE:float(diameters[0][0]),
@@ -189,63 +193,63 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
     return RENEWAL_DIAMETERS
 
 def get_clearcutting_instructions_from_parameter_file_contents(
-    clearcutting_instructions: str,
+    file_path: str,
     ) -> dict:
     """
     Creates a table from :clearcutting_agelimits
     """
-    instructions = create_clearcutting_instructions_table(clearcutting_instructions)
+    instructions = create_clearcutting_instructions_table(file_path)
     INSTRUCTIONS = {
         SiteTypeKey.OMT: {
             'species':int(instructions[0][0]),
             'stems/ha':int(instructions[0][1]),
-            'soil preparation':int(instructions[0][0])
+            'soil preparation':int(instructions[0][2])
         },
         SiteTypeKey.MT: {
             'species':int(instructions[1][0]),
             'stems/ha':int(instructions[1][1]),
-            'soil preparation':int(instructions[1][0])
+            'soil preparation':int(instructions[1][2])
         },
         SiteTypeKey.VT: {
             'species':int(instructions[2][0]),
             'stems/ha':int(instructions[2][1]),
-            'soil preparation':int(instructions[2][0])
+            'soil preparation':int(instructions[2][2])
         },
         SiteTypeKey.CT: {
             'species':int(instructions[3][0]),
             'stems/ha':int(instructions[3][1]),
-            'soil preparation':int(instructions[3][0])
+            'soil preparation':int(instructions[3][2])
         }
     }
     return INSTRUCTIONS
 
-def get_clearcutting_limits(stand: ForestStand, clearcutting_limits_ages: str = None, clearcutting_limits_diameters: str = None) -> Tuple[int, float]:
+def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None, file_path_diameters: str = None) -> Tuple[int, float]:
     """ Finds minimum age and and minimum mean diameter for clearcutting
     a stand from parameter files defined in control. yaml. It is user's responsibility to provide it in correct format. 
     Parsing failure will raise an exception. 
     If file not provided in control.yaml, the hardcoded structures will be used."""
     site_type_key = site_type_to_key(stand.site_type_category)
     species_key = species_to_key_clearcut(stand)
-    if clearcutting_limits_ages is not None:
-        age_limits = get_clearcutting_agelimits_from_parameter_file_contents(clearcutting_limits_ages)
+    if file_path_ages is not None:
+        age_limits = get_clearcutting_agelimits_from_parameter_file_contents(file_path_ages)
         age_limit = age_limits[site_type_key][species_key]
     else:
         age_limit = RENEWAL_AGES[site_type_key][species_key]
-    if clearcutting_limits_diameters is not None:
-        diameter_limits = get_clearcutting_diameterlimits_from_parameter_file_contents(clearcutting_limits_diameters)
+    if file_path_diameters is not None:
+        diameter_limits = get_clearcutting_diameterlimits_from_parameter_file_contents(file_path_diameters)
         diameter_limit = diameter_limits[site_type_key][species_key]
     else:
         diameter_limit = RENEWAL_DIAMETERS[site_type_key][species_key]
     return (age_limit,diameter_limit)
 
-def get_clearcutting_instructions(stand: ForestStand,clearcutting_instructions: str = None) -> dict:
+def get_clearcutting_instructions(stand: ForestStand,file_path_instructions: str = None) -> dict:
     site_type_key = site_type_to_key(stand.site_type_category)
-    if clearcutting_instructions is not None:
-        instructions =get_clearcutting_instructions_from_parameter_file_contents(clearcutting_instructions)
+    if file_path_instructions is not None:
+        instructions =get_clearcutting_instructions_from_parameter_file_contents(file_path_instructions)
         regen = instructions[site_type_key]
     else:
          regen = INSTRUCTIONS[site_type_key]
-    return (regen)
+    return regen
 
 def species_to_key_clearcut(stand:ForestStand) -> str:
     """ converts tree species to into a key for clearcut lookup table """

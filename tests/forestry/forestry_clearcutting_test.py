@@ -26,86 +26,80 @@ class ClearcuttingTest(unittest.TestCase):
         ]
         return stand
    
-    def read_clearcutting_limits_file(self,ages,instructions):
-        if ages:
-            return open('data/parameter_files/renewal_ages_southernFI.txt', 'r').read()
-        elif instructions:
-             return open('data/parameter_files/clearcut_instructions.txt', 'r').read()
-        else:
-            return open('data/parameter_files/renewal_diameters_southernFI.txt', 'r').read()
     
     def test_create_clearcutting_limits_table(self):
         # thinning_limits = open('tests/resources/thinning_limits.txt', 'r').read()
-        table = clearcutting_lim.create_clearcutting_limits_table(self.read_clearcutting_limits_file(ages=True,instructions=False))
-        self.assertEqual(len(table), 4)
-        self.assertEqual(len(table[0]), 5)
-        self.assertEqual(int(table[1][3]), 50)
+        table_ages = clearcutting_lim.create_clearcutting_limits_table('data/parameter_files/renewal_ages_southernFI.txt')
+        self.assertEqual(len(table_ages), 4)
+        self.assertEqual(len(table_ages[0]), 5)
+        self.assertEqual(int(table_ages[1][3]), 50)
     
     def test_get_clearcutting_limits_dict_ages(self):
-        ages = clearcutting_lim.get_clearcutting_agelimits_from_parameter_file_contents(self.read_clearcutting_limits_file(ages=True,instructions=False))
+        ages = clearcutting_lim.get_clearcutting_agelimits_from_parameter_file_contents('data/parameter_files/renewal_ages_southernFI.txt')
         self.assertEqual(ages[SiteTypeKey.OMT][SpeciesKey.DOWNY_BIRCH],50)
         self.assertEqual(ages[SiteTypeKey.CT][SpeciesKey.PINE],90)
     
     def test_get_clearcutting_limits_dict_diameters(self):
-        diameters = clearcutting_lim.get_clearcutting_diameterlimits_from_parameter_file_contents(self.read_clearcutting_limits_file(ages=False,instructions=False))
+        diameters = clearcutting_lim.get_clearcutting_diameterlimits_from_parameter_file_contents('data/parameter_files/renewal_diameters_southernFI.txt')
         self.assertEqual(diameters[SiteTypeKey.OMT][SpeciesKey.DOWNY_BIRCH],23.0)
         self.assertEqual(diameters[SiteTypeKey.CT][SpeciesKey.PINE],22.0)
     
-    def test_clearcut_with_output(self):
-        stand = self.generate_stand_fixture()
-        simulation_aggregates = AggregatedResults()
-        stand, simulation_aggregates = clearcut.clearcut_with_output(stand,simulation_aggregates,'clearcutting')
-        self.assertEqual(192,simulation_aggregates.prev('clearcutting').removed[-1].stems_removed_per_ha)
-        self.assertEqual(33.0,simulation_aggregates.prev('clearcutting').removed[-1].height)
-    
-    def test_clearcutting(self):
+    def test_get_regeneration_instructions_dict(self):
+        instructions = clearcutting_lim.get_clearcutting_instructions_from_parameter_file_contents('data/parameter_files/clearcut_instructions.txt')
+        self.assertEqual(instructions[SiteTypeKey.OMT]["species"],2)
+
+    def test_get_clearcutting_limits(self):
         stand = self.generate_stand_fixture()
         mean_d13 = futil.calculate_basal_area_weighted_attribute_sum(stand.reference_trees,
         f=lambda x: x.breast_height_diameter*futil.calculate_basal_area(x))
         self.assertEqual(36.33495699307285, mean_d13)
         self.assertEqual(93.96598639455782, futil.mean_age_stand(stand))
-        age_limits = self.read_clearcutting_limits_file(ages=True,instructions=False)
-        diameter_limits = self.read_clearcutting_limits_file(ages=False,instructions=False)
-        self.assertEqual(70, clearcutting_lim.get_clearcutting_limits(stand,age_limits,diameter_limits)[0])
-        self.assertEqual(26, clearcutting_lim.get_clearcutting_limits(stand,age_limits,diameter_limits)[1])
-        instructions = self.read_clearcutting_limits_file(ages=False,instructions=True)
-        operation_parameters = {'clearcutting_limits_ages': age_limits,'clearcutting_limits_diameters':diameter_limits,
-        'clearcutting_instructions':instructions}
+        self.assertEqual(70, clearcutting_lim.get_clearcutting_limits(stand,'data/parameter_files/renewal_ages_southernFI.txt','data/parameter_files/renewal_diameters_southernFI.txt')[0])
+        self.assertEqual(26, clearcutting_lim.get_clearcutting_limits(stand,'data/parameter_files/renewal_ages_southernFI.txt','data/parameter_files/renewal_diameters_southernFI.txt')[1])
+    
+    def test_clearcut_with_output(self):
+        stand = self.generate_stand_fixture()
+        simulation_aggregates = AggregatedResults()
+        stand, simulation_aggregates = clearcut.clearcut_with_output(stand,simulation_aggregates,'clearcutting')
+        self.assertEqual(192,simulation_aggregates.prev('clearcutting').trees[-1].stems_to_cut_per_ha)
+        self.assertEqual(33.0,simulation_aggregates.prev('clearcutting').trees[-1].height)
+    
+    def test_clearcutting(self):
+        stand = self.generate_stand_fixture()
+        operation_parameters = {'clearcutting_limits_ages': 'data/parameter_files/renewal_ages_southernFI.txt','clearcutting_limits_diameters':'data/parameter_files/renewal_diameters_southernFI.txt',
+        'clearcutting_instructions':'data/parameter_files/clearcut_instructions.txt'}
         simulation_aggregates = AggregatedResults()
         oper_input = (stand, simulation_aggregates)
         stand, aggr = clearcut.clearcutting(oper_input, **operation_parameters)
         self.assertEqual(0, futil.overall_stems_per_ha(stand))
         self.assertEqual(0, futil.mean_age_stand(stand))
-        self.assertEqual(192,simulation_aggregates.prev('clearcutting').removed[-1].stems_removed_per_ha)
+        self.assertEqual(192,aggr.prev('clearcutting').trees[-1].stems_to_cut_per_ha)
     
     def test_planting(self):
-        instructions = self.read_clearcutting_limits_file(ages=False,instructions=True)
         stand = ForestStand
+        simulation_aggregates = AggregatedResults()
         stand.reference_trees = []
         stand.site_type_category = 3
         stand.identifier = '1001'
-        regen = clearcutting_lim.get_clearcutting_instructions(stand,instructions)
-        stand, planting_description = clearcut.plant(stand,regen_species = regen['species'], rt_count = 10, rt_stems= regen['stems/ha'], 
+        regen = clearcutting_lim.get_clearcutting_instructions(stand,'data/parameter_files/clearcut_instructions.txt')
+        (stand, output) = clearcut.plant(stand,simulation_aggregates,"regeneration",regen_species = regen['species'], rt_count = 10, rt_stems= regen['stems/ha'], 
             soil_preparation=regen['soil preparation'])
-        self.assertEqual(200,stand.reference_trees[-1].stems_per_ha)
-        self.assertEqual(clearcut.SoilPreparationKey.MOUNDING,planting_description['soil preparation'])
-        self.assertEqual(TreeSpecies.SPRUCE,planting_description['species'])
+        self.assertEqual(220,stand.reference_trees[-1].stems_per_ha)
+        self.assertEqual(clearcut.SoilPreparationKey.PATCH_MOUNDING,output.prev("regeneration")['soil preparation'])
+        self.assertEqual(TreeSpecies.SPRUCE,output.prev("regeneration")['species'])
         self.assertEqual('1001-9-tree',stand.reference_trees[-1].identifier)
 
     def test_clearcutting_and_planting(self):
         stand = self.generate_stand_fixture()
         stand.identifier = '1001'
-        age_limits = self.read_clearcutting_limits_file(ages=True,instructions=False)
-        diameter_limits = self.read_clearcutting_limits_file(ages=False,instructions=False)
-        regen = self.read_clearcutting_limits_file(ages=False,instructions=True)
-        mean_d13 = futil.calculate_basal_area_weighted_attribute_sum(stand.reference_trees,
-        f=lambda x: x.breast_height_diameter*futil.calculate_basal_area(x))
-        operation_parameters = {'clearcutting_limits_ages': age_limits,'clearcutting_limits_diameters':diameter_limits,
-        'clearcutting_instructions':regen}
+        operation_parameters = {'clearcutting_limits_ages': 'data/parameter_files/renewal_ages_southernFI.txt','clearcutting_limits_diameters':'data/parameter_files/renewal_diameters_southernFI.txt',
+        'clearcutting_instructions':'data/parameter_files/clearcut_instructions.txt'}
         simulation_aggregates = AggregatedResults()
         oper_input = (stand, simulation_aggregates)
         stand, aggr = clearcut.clearcutting_and_planting(oper_input,**operation_parameters)
-        self.assertEqual(200,stand.reference_trees[-1].stems_per_ha)
+        self.assertEqual(2,aggr.prev("regeneration")['species'])
+        self.assertEqual(192,aggr.prev("clearcutting").trees[-1].stems_to_cut_per_ha)
+        self.assertEqual(220,stand.reference_trees[-1].stems_per_ha)
         self.assertEqual(TreeSpecies.SPRUCE,stand.reference_trees[-1].species)
         self.assertEqual('1001-9-tree',stand.reference_trees[-1].identifier)
 
