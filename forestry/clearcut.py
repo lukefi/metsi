@@ -69,7 +69,7 @@ def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple
     """
     stand, simulation_aggregates = input
     
-    if len(stand.reference_trees)>0:
+    if len(stand.reference_trees)>0 and sum(x.breast_height_diameter for x in stand.reference_trees)>0:
         age_limits_path = operation_parameters.get('clearcutting_limits_ages', None)
         diameter_limits_path = operation_parameters.get('clearcutting_limits_diameters', None)
         (age_limit, diameter_limit) = get_clearcutting_limits(stand,age_limits_path, diameter_limits_path)
@@ -77,8 +77,8 @@ def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple
         diameter_limit_reached = futil.calculate_basal_area_weighted_attribute_sum(stand.reference_trees,
         f=lambda x: x.breast_height_diameter*futil.calculate_basal_area(x))>=diameter_limit
         if age_limit_reached or diameter_limit_reached:
-            stand, output= clearcut_with_output(stand,simulation_aggregates,'clearcutting')
-            return (stand,output)
+            stand, aggr= clearcut_with_output(stand,simulation_aggregates,'clearcutting')
+            return (stand,aggr)
         else:
             raise UserWarning("Unable to perform clearcutting")
     else:
@@ -91,7 +91,7 @@ def clearcutting_and_planting(input: OpTuple[ForestStand], **operation_parameter
     """
     stand, simulation_aggregates = input
     
-    if len(stand.reference_trees)>0:
+    if len(stand.reference_trees)>0 and sum(x.breast_height_diameter for x in stand.reference_trees)>0:
         age_limits_path = operation_parameters.get('clearcutting_limits_ages', None)
         diameter_limits_path = operation_parameters.get('clearcutting_limits_diameters', None)
         instructions_path = operation_parameters.get('clearcutting_instructions', None)

@@ -15,6 +15,8 @@ def grow_acta(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[
     if len(stand.reference_trees) == 0:
         return input
     saplings, matures = split_sapling_trees(stand.reference_trees)
-    grow_saplings(saplings)
-    grow_diameter_and_height(matures)
+    if len(saplings)>0:
+        grow_saplings(saplings)
+    if len(matures)>0:
+        grow_diameter_and_height(matures)
     return stand, None
