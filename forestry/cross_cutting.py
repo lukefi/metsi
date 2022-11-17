@@ -6,9 +6,10 @@ from forestry.utils import get_timber_price_table
 from forestryfunctions.cross_cutting import cross_cutting
 
 
-def cross_cut_thinning_output(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+
+def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
-    Calculates cross cutting volumes and values for thinning results that haven't yet been cross cut.
+    Calculates cross cutting volumes and values for CrossCuttableTrees that haven't yet been cross cut.
     :returns: the same payload as was given as input, but with cross cutting results stored in the simulation_aggregates.
     """
     stand, simulation_aggregates = payload

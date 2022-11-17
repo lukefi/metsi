@@ -5,7 +5,7 @@ from forestry.aggregates import BiomassAggregate, VolumeAggregate
 from forestryfunctions import forestry_utils as futil
 from forestryfunctions.r_utils import lmfor_volume
 from forestry.biomass_repola import biomasses_by_component_stand
-from forestry.cross_cutting import cross_cut_thinning_output, cross_cut_whole_stand
+from forestry.cross_cutting import cross_cut_felled_trees, cross_cut_whole_stand
 from forestry.grow_acta import grow_acta
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
@@ -66,7 +66,7 @@ operation_lookup = {
     'report_biomass': report_biomass,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
-    'cross_cut_thinning_output': cross_cut_thinning_output,
+    'cross_cut_felled_trees': cross_cut_felled_trees,
     'cross_cut_whole_stand': cross_cut_whole_stand,
 }
 
