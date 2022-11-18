@@ -59,7 +59,7 @@ preprocessing_operations:
 operation_file_params:
   thinning_from_above:
     thinning_limits: data/parameter_files/Thin.txt
-  cross_cut_thinning_output:
+  cross_cut_felled_trees:
     timber_price_table: data/parameter_files/timber_price_table.csv
 
 simulation_events:
@@ -92,4 +92,4 @@ simulation_events:
   - time_points: [0,20]
     generators:
       - sequence:
-          - cross_cut_thinning_output  
+          - cross_cut_felled_trees
