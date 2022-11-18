@@ -3,7 +3,7 @@ from functools import cache
 import sys
 from typing import IO, Any, Generic, Iterator, TypeVar, Union
 from app.app_io import export_cli_arguments
-from app.file_io import pickle_reader, simulation_declaration_from_yaml_file
+from app.file_io import simulation_declaration_from_yaml_file, read_full_simulation_result_dirtree
 from sim.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
 from sim.core_types import OperationPayload
 
@@ -121,7 +121,7 @@ def j_out(decl: dict, data: dict[str, list[OperationPayload]]):
 
 def main():
     args = export_cli_arguments(sys.argv[1:])
-    data = pickle_reader(args.input_file)
+    data = read_full_simulation_result_dirtree(args.input_directory)
     decl = simulation_declaration_from_yaml_file(args.control_file)
     format = decl.get("format", "j").lower()
     if format == "j":
