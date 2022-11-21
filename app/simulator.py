@@ -5,10 +5,9 @@ from typing import List, Callable, Dict
 import sys
 import multiprocessing
 import forestry.operations
-import forestry.preprocessing as preprocessing
-from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evaluate_sequence
+from app.preprocessor import preprocess_stands
+from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from sim.core_types import AggregatedResults, OperationPayload
-from sim.generators import simple_processable_chain
 from forestdatamodel.model import ForestStand
 from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, \
     write_full_simulation_result_dirtree, prepare_target_directory, \
@@ -42,14 +41,6 @@ def print_run_result(results: dict):
             print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
             print("variant {} biomass report: {}".format(i, last_biomass_reporting_aggregate))
             print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
-
-
-def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -> List[ForestStand]:
-    preprocessing_operations = simulation_declaration.get('preprocessing_operations', {})
-    preprocessing_params = simulation_declaration.get('preprocessing_params', {})
-    preprocessing_funcs = simple_processable_chain(preprocessing_operations, preprocessing_params, preprocessing.operation_lookup)
-    stands = evaluate_sequence(stands, *preprocessing_funcs)
-    return stands
 
 
 def run_strategy_multiprocessing_wrapper(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict, run_strategy: Callable,  queue: queue.Queue) -> None:
