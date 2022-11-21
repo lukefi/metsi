@@ -2,7 +2,7 @@ import bisect
 from functools import cache
 import sys
 from typing import IO, Any, Generic, Iterator, TypeVar, Union
-from app.app_io import export_cli_arguments
+from app.app_io import generate_program_configuration, Mela2Configuration, parse_cli_arguments
 from app.file_io import simulation_declaration_from_yaml_file, read_full_simulation_result_dirtree
 from sim.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
 from sim.core_types import OperationPayload
@@ -120,9 +120,17 @@ def j_out(decl: dict, data: dict[str, list[OperationPayload]]):
 
 
 def main():
-    args = export_cli_arguments(sys.argv[1:])
-    data = read_full_simulation_result_dirtree(args.input_path)
-    decl = simulation_declaration_from_yaml_file(args.control_file)
+    cli_arguments = parse_cli_arguments(sys.argv[1:])
+    control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
+    try:
+        control_structure = simulation_declaration_from_yaml_file(control_file)
+    except:
+        print(f"Application control file path '{control_file}' can not be read. Aborting....")
+        return
+    app_arguments = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+
+    data = read_full_simulation_result_dirtree(app_arguments.input_path)
+    decl = simulation_declaration_from_yaml_file(app_arguments.control_file)
     format = decl.get("format", "j").lower()
     if format == "j":
         j_out(decl, data)

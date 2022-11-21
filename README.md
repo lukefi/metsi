@@ -225,7 +225,7 @@ A simulation run is declared in the YAML file `control.yaml`.
 The file contains two significant structures for functionality.
 The structure will be expanded to allow parameters and constraints declaration for specific operations.
 
-1. Application file IO configuration in `io_configuration` object. These may be overridden by equivalent command line arguments. Note that e.g. `state_format` with `fdm` below is written as `--state-format fdm` when given as a command line argument.
+1. Application configuration in `app_configuration` object. These may be overridden by equivalent command line arguments. Note that e.g. `state_format` with `fdm` below is written as `--state-format fdm` when given as a command line argument.
    1. `state_format` specifies the data format of the input computational units
       1. `fdm` is the standard Forest Data Model.
       2. `vmi12` and `vmi13` denote the VMI data format and container.
@@ -234,6 +234,10 @@ The structure will be expanded to allow parameters and constraints declaration f
    3. `preprocessing_output_container` is the file type for outputting the `fdm` formatted state of computational units after preprocessing operations. This may be `csv`, `pickle` or `json` or commented out for no output.
    4. `state_output_container` is the file type for outputting the `fdm` formatted state of individual computational units during and after the simulation. This may be `csv`, `pickle` or `json` or commented out for no output.
    5. `derived_data_output_container` is the file type for outputting derived data during and after the simulation. This may be `pickle` or `json` or commented out for no output.
+   6. `strategy` is the simulation event tree formation strategy. Can be `partial` or `full`.
+   7. `reference_trees` instructs the `vmi12` and `vmi13` data converters to choose either reference trees or tree strata from the source. `True` or `False`.
+   8. `strata_origin` instructs the `forest_centre` converter to choose only strata with certain origin to the result. `1`, `2` or `3`.
+   9. `multiprocessing` instructs the application to parallelizes the computation to available CPU cores in the system. `True` or `False`.
 2. Operaton run constrains in the object `run_constraints`
 3. Operation parameters in the object `operation_params`. Operation parameters may be declared as a list of 1 or more parameter sets (objects). Operations within an `alternatives` block are expanded as further alternatives for each parameter set. Multiple parameter sets may not be declared for operations within any `sequence` block.
 4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.

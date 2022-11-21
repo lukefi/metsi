@@ -8,6 +8,8 @@ import yaml
 from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
 from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands, rsd_rows
 from forestdatamodel.model import ForestStand
+
+from app.app_io import Mela2Configuration
 from sim.core_types import OperationPayload, AggregatedResults
 
 
@@ -202,7 +204,7 @@ def write_derived_data_to_file(result: AggregatedResults, filepath: Path, derive
     writer(filepath, result)
 
 
-def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: argparse.Namespace):
+def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: Mela2Configuration):
     """
     Unwraps the given simulation result structure into computational units and further into produced schedules.
     Writes these as a matching directory structure, splitting OperationPayloads into unit_state and derived_data files.

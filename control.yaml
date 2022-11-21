@@ -1,10 +1,12 @@
-#File IO configuration values. Can be overriden by CLI arguments. May be commented out for None.
-io_configuration:
+#Application configuration values. Can be overriden by CLI arguments. May be commented out for None or default from Mela2Configuration.
+app_configuration:
+  control_file: control.yaml
   state_format: fdm #options: fdm, vmi12, vmi13, forest_centre
   state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
   preprocessing_output_container: csv #options: pickle, json, csv, rsd (special case not usable as input container)
   state_output_container: csv #options: pickle, json, csv
   derived_data_output_container: pickle #options: pickle, json
+  strategy: partial
 
 run_constraints:
   thinning_from_below:

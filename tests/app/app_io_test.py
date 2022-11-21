@@ -12,7 +12,7 @@ class TestAppIO(unittest.TestCase):
             'state_output_container': 'pickle'
         }
         args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
-        result = set_default_arguments(aio.sim_cli_arguments(args), default_io_arguments)
+        result = set_default_arguments(aio.parse_cli_arguments(args), default_io_arguments)
         self.assertEqual(None, result.preprocessing_output_container)
         self.assertEqual(None, result.state_input_container)
         self.assertEqual('pickle', result.state_output_container)
@@ -20,7 +20,7 @@ class TestAppIO(unittest.TestCase):
 
     def test_sim_cli_arguments(self):
         args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
-        result = aio.sim_cli_arguments(args)
+        result = aio.parse_cli_arguments(args)
         self.assertEqual(12, len(result.__dict__.keys()))
         self.assertEqual('input.pickle', result.input_path)
         self.assertEqual('control.yaml', result.control_file)
@@ -65,17 +65,17 @@ class TestAppIO(unittest.TestCase):
         for case in failures:
             self.assertRaises(Exception, fn, case)
 
-    def test_post_rocessing_cli_arguments(self):
-        args = ['simdir', 'control.yaml', 'outdir']
-        result = aio.post_processing_cli_arguments(args)
-        self.assertEqual(5, len(result.__dict__.keys()))
-        self.assertEqual('simdir', result.input_path)
-        self.assertEqual('control.yaml', result.control_file)
-        self.assertEqual('outdir', result.target_directory)
+    def test_mela2_configuration(self):
+        args = ['cli_input', 'cli_control.yaml', 'cli_output', '-s', 'full', '--state-format', 'vmi12', '--state-output-container', 'json']
+        cli_args = aio.parse_cli_arguments(args)
+        control_args = {'state_output_container': 'pickle', 'preprocessing_output_container': 'json'}
+        result = app.app_io.generate_program_configuration(cli_args, control_args)
+        self.assertEqual('cli_input', result.input_path)
+        self.assertEqual('cli_control.yaml', result.control_file)
+        self.assertEqual('cli_output', result.target_directory)
+        self.assertEqual('full', result.strategy)
+        self.assertEqual('vmi12', result.state_format)
+        self.assertEqual('json', result.state_output_container)  # CLI overrides control source
+        self.assertEqual('json', result.preprocessing_output_container)  # control source overrides Mela2Configuration
+        self.assertEqual('json', result.derived_data_output_container)  # Mela2Configuration default
 
-    def test_export_cli_arguments(self):
-        args = ['simdir', 'control.yaml']
-        result = aio.export_cli_arguments(args)
-        self.assertEqual(2, len(result.__dict__.keys()))
-        self.assertEqual('simdir', result.input_path)
-        self.assertEqual('control.yaml', result.control_file)

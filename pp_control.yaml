@@ -1,5 +1,5 @@
-#File IO configuration values. Can be overriden by CLI arguments. May be commented out for None.
-io_configuration:
+#Application configuration values. Can be overriden by CLI arguments. May be commented out for None.
+app_configuration:
   state_output_container: csv #options: pickle, json, csv
   derived_data_output_container: pickle #options: pickle, json
 

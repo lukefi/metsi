@@ -13,7 +13,7 @@ from forestdatamodel.model import ForestStand
 from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, \
     write_full_simulation_result_dirtree, prepare_target_directory, \
     determine_file_path, write_stands_to_file
-from app.app_io import sim_cli_arguments, set_default_arguments
+from app.app_io import parse_cli_arguments, Mela2Configuration, generate_program_configuration
 
 start_time = time.time_ns()
 
@@ -124,9 +124,14 @@ def resolve_strategy_runner(source: str) -> Callable:
 
 
 def main():
-    app_arguments = sim_cli_arguments(sys.argv[1:])
-    simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
-    app_arguments = set_default_arguments(app_arguments, simulation_declaration['io_configuration'])
+    cli_arguments = parse_cli_arguments(sys.argv[1:])
+    control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
+    try:
+        control_structure = simulation_declaration_from_yaml_file(control_file)
+    except:
+        print(f"Application control file path '{control_file}' can not be read. Aborting....")
+        return
+    app_arguments = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
 
     print_logline("Preparing run...")
     stands = read_stands_from_file(
@@ -139,7 +144,7 @@ def main():
     outdir = prepare_target_directory(app_arguments.target_directory)
 
     print_logline("Preprocessing computational units...")
-    result = preprocess_stands(stands, simulation_declaration)
+    result = preprocess_stands(stands, control_structure)
 
     if app_arguments.preprocessing_output_container is not None:
         filepath = determine_file_path(outdir, f"preprocessing_result.{app_arguments.preprocessing_output_container}")
@@ -148,7 +153,7 @@ def main():
     if app_arguments.strategy != "skip":
         print_logline("Simulating alternatives...")
         strategy_runner = resolve_strategy_runner(app_arguments.strategy)
-        result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
+        result = run_stands(result, control_structure, strategy_runner, app_arguments.multiprocessing)
     else:
         result = {}
 

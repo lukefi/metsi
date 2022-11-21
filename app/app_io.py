@@ -1,7 +1,7 @@
 import argparse
 from enum import Enum
 from types import SimpleNamespace
-from typing import List
+from typing import List, Optional
 
 
 class RunMode(Enum):
@@ -12,7 +12,19 @@ class RunMode(Enum):
 
 
 class Mela2Configuration(SimpleNamespace):
+    input_path = None
+    target_directory = None
+    control_file = "control.yaml"
     run_modes = [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]
+    state_format = "fdm"
+    state_input_container = "csv"
+    state_output_container = "csv"
+    preprocessing_output_container = "csv"
+    derived_data_output_container = "json"
+    strategy = "partial"
+    multiprocessing = False
+    reference_trees = False  # ForestBuilder parameter
+    strata_origin = "1"  # ForestBuilder parameter
 
     def set_run_modes(self, modestring: str):
         self.run_modes = Mela2Configuration.parse_run_modes(modestring)
@@ -49,6 +61,30 @@ class Mela2Configuration(SimpleNamespace):
         return mode_candidates
 
 
+def merge_dicts(sources: list[dict]=[]) -> dict:
+    """Merge dicts in given list of dicts, overriding keys in order."""
+    result = {}
+    for source in sources:
+        result |= source
+    return result
+
+
+def remove_nones(source: dict) -> dict:
+    """Return a dict with items from 'source' with keys mapping to None removed"""
+    filtered = {}
+    for k, v in source.items():
+        if v is not None:
+            filtered[k] = v
+    return filtered
+
+
+def generate_program_configuration(cli_args: argparse.Namespace, control_source: dict={}) -> Mela2Configuration:
+    """Generate a Mela2Configuration, overriding values with control file source, then with CLI arguments"""
+    cli_source = remove_nones(cli_args.__dict__)
+    merged = merge_dicts([control_source, cli_source])
+    return Mela2Configuration(**merged)
+
+
 def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> argparse.Namespace:
     """If args Namespace has its given member as None, in-place replace it with value from defaults"""
     for member in [
@@ -63,15 +99,14 @@ def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> a
     return cli_args
 
 
-def sim_cli_arguments(args: List[str]):
-    parser = argparse.ArgumentParser(description='Mela2.0 simulator')
-    parser.add_argument('input_path', help='Simulator input file')
-    parser.add_argument('control_file', help='Simulation control declaration file', default='control.yaml')
+def parse_cli_arguments(args: List[str]):
+    parser = argparse.ArgumentParser(description='Mela2.0 forest growth calculator. CLI arguments override matching control file arguments.')
+    parser.add_argument('input_path', help='Application input file or directory')
+    parser.add_argument('control_file', help='Application control declaration file', default='control.yaml')
     parser.add_argument('target_directory', help='Directory path for program output', default='output')
     parser.add_argument('-s', '--strategy',
                         type=str,
-                        help='Simulation alternatives tree formation strategy: \'full\' (default), \'partial\', \'skip\'',
-                        default='full')
+                        help='Simulation event tree formation strategy: \'full\' (default), \'partial\', \'skip\'')
     parser.add_argument('--state-format',
                         choices=['fdm', 'vmi12', 'vmi13', 'forest_centre'],
                         type=str,
@@ -93,41 +128,14 @@ def sim_cli_arguments(args: List[str]):
                         type=str,
                         help='Container format of derived data result file: \'pickle\' (default), \'json\'')
     parser.add_argument('--reference-trees',
-                        default=False,
                         action=argparse.BooleanOptionalAction,
                         help="Include reference trees from VMI data source.")
     parser.add_argument('--strata-origin',
-                        default='1',
                         choices=['1', '2', '3'],
                         type=str,
                         help='Stratum origin type selector for Forest Centre data. Default \'1\'.')
-
     parser.add_argument('-m', '--multiprocessing', 
                         action=argparse.BooleanOptionalAction,
-                        help="Enable parallel simulation of computational units over the amount of CPU cores available.",
-                        default=False)
+                        help="Enable parallel simulation of computational units over the amount of CPU cores available.")
 
-    return parser.parse_args(args)
-
-
-def post_processing_cli_arguments(args: List[str]):
-    parser = argparse.ArgumentParser(description='Mela2.0 post processing')
-    parser.add_argument('input_path', help='Post processing input directory (simulator output)')
-    parser.add_argument('control_file', help='Post processing control declaration file', default='pp_control.yaml')
-    parser.add_argument('target_directory', help='Directory path for program output')
-    parser.add_argument('--state-output-container',
-                        choices=['pickle', 'json', 'csv'],
-                        type=str,
-                        help='Container format of state output files: \'pickle\' (default), \'json\', \'csv\'')
-    parser.add_argument('--derived-data-output-container',
-                        choices=['pickle', 'json'],
-                        type=str,
-                        help='Container format of derived data result file: \'pickle\' (default), \'json\'')
-    return parser.parse_args(args)
-
-
-def export_cli_arguments(args: List[str]):
-    parser = argparse.ArgumentParser(description='Mela2.0 data export')
-    parser.add_argument('input_path', help='Input directory (simulator or post processing output)')
-    parser.add_argument('control_file', help='Export control declaration file', default='export_control.yaml')
     return parser.parse_args(args)
