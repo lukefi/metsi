@@ -94,4 +94,12 @@ simulation_events:
   - time_points: [0,20]
     generators:
       - sequence:
-          - cross_cut_thinning_output  
+          - cross_cut_thinning_output
+
+post_processing:
+  operation_params:
+    do_nothing:
+      - param: value
+
+  post_processing:
+    - do_nothing

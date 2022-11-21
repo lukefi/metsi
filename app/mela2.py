@@ -6,8 +6,10 @@ from forestdatamodel.model import ForestStand
 
 import app.preprocessor
 from app.app_io import parse_cli_arguments, Mela2Configuration, generate_program_configuration, RunMode
+from app.export import exporting
 from app.file_io import simulation_declaration_from_yaml_file, prepare_target_directory, read_stands_from_file, \
     read_full_simulation_result_dirtree, determine_file_path, write_stands_to_file, write_full_simulation_result_dirtree
+from app.post_processing import postprocessing
 from app.simulator import resolve_strategy_runner, run_stands
 from sim.core_types import OperationPayload
 
@@ -44,8 +46,12 @@ def simulate(config: Mela2Configuration, control: dict, stands: list[ForestStand
 
 
 def post_process(config: Mela2Configuration, control: dict, data: dict[str, list[OperationPayload]]) -> dict[str, list[OperationPayload]]:
-    print("Post processing...")
-    return {}
+    print_logline("Post-processing alternatives...")
+    result = postprocessing(config, control['post_processing'], data)
+    if config.state_output_container is not None or config.derived_data_output_container is not None:
+        print_logline(f"Writing post-processing results to '{config.target_directory}'")
+        write_full_simulation_result_dirtree(result, config)
+    return result
 
 
 def export(config: Mela2Configuration, control: dict, data: dict[str, list[OperationPayload]]) -> None:
