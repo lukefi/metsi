@@ -42,6 +42,11 @@ operation_params:
     - Ftot: reference_trees.stems_per_ha
       Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
       Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
+  # example graph definitions.
+  # you can use these by cloning the pymotti repo in your simulator folder.
+  grow_fhk:
+    - graph: pymotti/graph.g.lua
+      luapath: pymotti/?.lua
 
 
 preprocessing_params:
