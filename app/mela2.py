@@ -4,7 +4,8 @@ import sys
 from forestdatamodel.model import ForestStand
 
 from app.app_io import parse_cli_arguments, Mela2Configuration, generate_program_configuration, RunMode
-from app.file_io import simulation_declaration_from_yaml_file, prepare_target_directory
+from app.file_io import simulation_declaration_from_yaml_file, prepare_target_directory, read_stands_from_file, \
+    read_full_simulation_result_dirtree
 from sim.core_types import OperationPayload
 
 
@@ -46,6 +47,10 @@ def main() -> int:
     try:
         app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
         prepare_target_directory(app_config.target_directory)
+        if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
+            input_data = read_stands_from_file(app_config)
+        elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.SIMULATE]:
+            input_data = read_full_simulation_result_dirtree(app_config.input_path)
     except Exception as e:
         print(e)
         print("Aborting run...")
