@@ -7,6 +7,7 @@ app_configuration:
   state_output_container: csv #options: pickle, json, csv
   derived_data_output_container: pickle #options: pickle, json
   strategy: partial
+  run_modes: preprocess,simulate,postprocess
 
 run_constraints:
   thinning_from_below:
