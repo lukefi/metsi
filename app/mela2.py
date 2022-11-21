@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 
 from forestdatamodel.model import ForestStand
 
@@ -12,17 +11,7 @@ from app.file_io import simulation_declaration_from_yaml_file, prepare_target_di
 from app.post_processing import post_process_alternatives
 from app.simulator import simulate_alternatives
 from sim.core_types import OperationPayload
-
-start_time = time.time_ns()
-
-
-def runtime_now() -> float:
-    global start_time
-    return round((time.time_ns() - start_time) / 1000000000, 1)
-
-
-def print_logline(message: str):
-    print("{} {}".format(runtime_now(), message))
+from app.logging import print_logline
 
 
 def preprocess(config: Mela2Configuration, control: dict, stands: list[ForestStand]) -> list[ForestStand]:
