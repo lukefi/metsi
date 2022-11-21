@@ -1,5 +1,5 @@
 import unittest
-from forestry.cross_cutting import cross_cut_whole_stand, cross_cut_thinning_output
+from forestry.cross_cutting import cross_cut_whole_stand, cross_cut_felled_trees
 from sim.core_types import AggregatedResults
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
@@ -42,8 +42,8 @@ class CrossCuttingTest(unittest.TestCase):
 
         operation_parameters = {'timber_price_table': "tests/resources/timber_price_table.csv"}
 
-        _, aggrs = cross_cut_thinning_output(payload, **operation_parameters)
-        res = aggrs.get("thinned_trees_cross_cut")["thinning_from_below"]
+        _, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
+        res = aggrs.get("cross_cutting")["thinning_from_below"]
         self.assertEqual(res.keys(), {20})
         self.assertEqual(len(res[20].results), 2)
         self.assertEqual(aggrs.get('thinning_from_below')[10].cross_cut_done, True)
@@ -77,8 +77,8 @@ class CrossCuttingTest(unittest.TestCase):
             )
         )
 
-        stand, aggrs = cross_cut_thinning_output(payload, **operation_parameters)
-        res = aggrs.get("thinned_trees_cross_cut")["thinning_from_below"]
+        stand, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
+        res = aggrs.get("cross_cutting")["thinning_from_below"]
         self.assertEqual(res.keys(), {20})
         self.assertEqual(len(res[20].results), 2)
 
@@ -95,8 +95,8 @@ class CrossCuttingTest(unittest.TestCase):
 
         payload = (stand, aggrs)
 
-        _, aggrs = cross_cut_thinning_output(payload, **operation_parameters)
-        res = aggrs.get("thinned_trees_cross_cut")["thinning_from_below"]
+        _, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
+        res = aggrs.get("cross_cutting")["thinning_from_below"]
         # test that the results of both cross cut operations are in thinned_trees_cross_cut
         self.assertEqual(res.keys(), {20, 30})
         self.assertEqual(len(res[30].results), 2)
@@ -131,7 +131,38 @@ class CrossCuttingTest(unittest.TestCase):
 
         operation_parameters = {'timber_price_table': 'tests/resources/timber_price_table.csv'}
 
-        _, aggrs = cross_cut_whole_stand(payload, **operation_parameters)
-        res = aggrs.get("standing_trees_cross_cut")
-        self.assertEqual(len(res[0]), 6)
+        new_stand, aggrs = cross_cut_whole_stand(payload, **operation_parameters)
+        res = aggrs.get("cross_cutting")["standing_trees"]
+        self.assertEqual(len(res[0].results), 6)
+        
+        # test that cross_cut_whole_stand has not modified the trees
+        self.assertEqual(
+            [rt.stems_per_ha for rt in stand.reference_trees], 
+            [rt.stems_per_ha for rt in new_stand.reference_trees]
+            )
 
+
+    def test_cross_cut_whole_stand_called_twice(self):
+        """
+        This test simulates the case when the value of a stand is calculated in two different time points.
+        """
+        stand = ForestStand(
+            area=2.0,
+            reference_trees=[
+                ReferenceTree(
+                    species=TreeSpecies.UNKNOWN_CONIFEROUS,
+                    breast_height_diameter=15.57,
+                    height=18.29,
+                    stems_per_ha=0.0062,
+                ),
+            ]
+        )
+        payload = (stand, AggregatedResults(current_time_point=1))
+
+        operation_parameters = {'timber_price_table': 'tests/resources/timber_price_table.csv'}
+
+        stand, aggrs = cross_cut_whole_stand(payload, **operation_parameters)
+        aggrs.current_time_point=2
+        _, aggrs = cross_cut_whole_stand((stand, aggrs), **operation_parameters)
+        res = aggrs.get("cross_cutting")["standing_trees"]
+        self.assertEqual(2, len(res.keys()))

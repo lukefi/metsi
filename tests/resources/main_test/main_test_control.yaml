@@ -30,7 +30,7 @@ preprocessing_operations:
   - generate_reference_trees
 
 operation_file_params:
-  cross_cut_thinning_output:
+  cross_cut_felled_trees:
     timber_price_table: data/parameter_files/timber_price_table.csv
 
 simulation_events:
@@ -52,4 +52,4 @@ simulation_events:
     generators:
       - sequence:
           - report_biomass
-          - cross_cut_thinning_output
+          - cross_cut_felled_trees
