@@ -151,7 +151,7 @@ See table below for a quick reference of forestry operations usable in control.y
 | report_volume             | Collect tree volume data from ForestStand state                                                |                             | native                    |
 | report_thinning           | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
 | report_collectives        | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
-| cross_cut_thinning_output | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
+| cross_cut_felled_trees | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
 | cross_cut_whole_stand     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 
 To run the simulator application, run the following command in the project root.
@@ -247,7 +247,7 @@ The structure will be expanded to allow parameters and constraints declaration f
    operation_file_params:
      first_thinning:
        thinning_limits: /path/to/file/thinning-limits.txt
-     cross_cut_thinning_output:
+     cross_cut_felled_trees:
        timber_price_table: /path/to/file/timber-prices.csv
    ```
    Note however, that it is the user's responsibility to provide the file in a valid format. 
