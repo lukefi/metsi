@@ -45,6 +45,7 @@ def main() -> int:
         return 1
     try:
         app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+        prepare_target_directory(app_config.target_directory)
     except Exception as e:
         print(e)
         print("Aborting run...")
@@ -52,6 +53,10 @@ def main() -> int:
 
     for mode in app_config.run_modes:
         mode_runners[mode](app_config, control_structure)
+
+    _, dirs, files = next(os.walk(app_config.target_directory))
+    if len(dirs) == 0 and len(files) == 0:
+        os.rmdir(app_config.target_directory)
 
     return 0
 
