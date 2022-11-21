@@ -119,6 +119,14 @@ def j_out(configuration: Mela2Configuration, decl: dict, data: dict[str, list[Op
         j_xda(f, decl, data)
 
 
+def exporting(config: Mela2Configuration, decl, data):
+    format = decl.get("format", "j").lower()
+    if format == "j":
+        j_out(config, decl, data)
+    else:
+        raise ValueError("Unknown output format: '{}'".format(format))
+
+
 def main():
     cli_arguments = parse_cli_arguments(sys.argv[1:])
     control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
@@ -131,11 +139,7 @@ def main():
 
     data = read_full_simulation_result_dirtree(app_config.input_path)
     decl = simulation_declaration_from_yaml_file(app_config.control_file)
-    format = decl.get("format", "j").lower()
-    if format == "j":
-        j_out(decl, data)
-    else:
-        raise ValueError("Unknown output format: '{}'".format(format))
+    exporting(app_config, decl, data)
 
 
 if __name__ == "__main__":

@@ -55,7 +55,8 @@ def post_process(config: Mela2Configuration, control: dict, data: dict[str, list
 
 
 def export(config: Mela2Configuration, control: dict, data: dict[str, list[OperationPayload]]) -> None:
-    print("Exporting...")
+    print_logline("Exporting data...")
+    exporting(config, control['export'], data)
 
 
 mode_runners = {
