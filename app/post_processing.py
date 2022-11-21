@@ -11,23 +11,11 @@ from sim.generators import simple_processable_chain
 from sim.runners import evaluate_sequence
 
 
-def main():
-    cli_arguments = parse_cli_arguments(sys.argv[1:])
-    control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
-    try:
-        control_structure = simulation_declaration_from_yaml_file(control_file)
-    except:
-        print(f"Application control file path '{control_file}' can not be read. Aborting....")
-        return
-    app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+def postprocessing(config: Mela2Configuration, control: dict, input_data: dict[str, list[OperationPayload]]):
 
-    app.file_io.prepare_target_directory(app_config.target_directory)
-    input_data: dict[str, List[OperationPayload]] = read_full_simulation_result_dirtree(app_config.input_path)
-
-    control_declaration = simulation_declaration_from_yaml_file(app_config.control_file)
     chain = simple_processable_chain(
-        control_declaration.get('post_processing', []),
-        control_declaration.get('operation_params', {}),
+        control.get('post_processing', []),
+        control.get('operation_params', {}),
         operation_lookup
     )
     result = {}
@@ -40,6 +28,23 @@ def main():
                 OperationPayload(
                     simulation_state=processed_schedule[0],
                     aggregated_results=processed_schedule[1]))
+    return result
+
+
+def main():
+    cli_arguments = parse_cli_arguments(sys.argv[1:])
+    control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
+    try:
+        control_structure = simulation_declaration_from_yaml_file(control_file)
+    except:
+        print(f"Application control file path '{control_file}' can not be read. Aborting....")
+        return
+    app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+
+    app.file_io.prepare_target_directory(app_config.target_directory)
+    input_data: dict[str, List[OperationPayload]] = read_full_simulation_result_dirtree(app_config.input_path)
+    control_declaration = simulation_declaration_from_yaml_file(app_config.control_file)
+    result = postprocessing(app_config, control_declaration, input_data)
     write_full_simulation_result_dirtree(result, app_config)
 
 
