@@ -114,6 +114,12 @@ def resolve_strategy_runner(source: str) -> Callable:
         raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
 
 
+def simulating(config, control, stands):
+    strategy_runner = resolve_strategy_runner(config.strategy)
+    result = run_stands(stands, control, strategy_runner, config.multiprocessing)
+    return result
+
+
 def main():
     cli_arguments = parse_cli_arguments(sys.argv[1:])
     control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
@@ -137,8 +143,7 @@ def main():
 
     if app_config.strategy != "skip":
         print_logline("Simulating alternatives...")
-        strategy_runner = resolve_strategy_runner(app_config.strategy)
-        result = run_stands(result, control_structure, strategy_runner, app_config.multiprocessing)
+        result = simulating(app_config, control_structure, result)
     else:
         result = {}
 
@@ -146,6 +151,7 @@ def main():
     write_full_simulation_result_dirtree(result, app_config)
 
     print_logline("Done. Exiting.")
+
 
 if __name__ == "__main__":
     main()

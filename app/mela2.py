@@ -10,7 +10,7 @@ from app.export import exporting
 from app.file_io import simulation_declaration_from_yaml_file, prepare_target_directory, read_stands_from_file, \
     read_full_simulation_result_dirtree, determine_file_path, write_stands_to_file, write_full_simulation_result_dirtree
 from app.post_processing import postprocessing
-from app.simulator import resolve_strategy_runner, run_stands
+from app.simulator import simulating
 from sim.core_types import OperationPayload
 
 start_time = time.time_ns()
@@ -37,8 +37,7 @@ def preprocess(config: Mela2Configuration, control: dict, stands: list[ForestSta
 
 def simulate(config: Mela2Configuration, control: dict, stands: list[ForestStand]) -> dict[str, list[OperationPayload]]:
     print_logline("Simulating alternatives...")
-    strategy_runner = resolve_strategy_runner(config.strategy)
-    result = run_stands(stands, control, strategy_runner, config.multiprocessing)
+    result = simulating(config, control, stands)
     if config.state_output_container is not None or config.derived_data_output_container is not None:
         print_logline(f"Writing simulation results to '{config.target_directory}'")
         write_full_simulation_result_dirtree(result, config)
@@ -78,6 +77,7 @@ def main() -> int:
     try:
         app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
         prepare_target_directory(app_config.target_directory)
+        print_logline("Reading input...")
         if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
             input_data = read_stands_from_file(app_config)
         elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.SIMULATE]:
