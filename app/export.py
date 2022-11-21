@@ -119,7 +119,7 @@ def j_out(configuration: Mela2Configuration, decl: dict, data: dict[str, list[Op
         j_xda(f, decl, data)
 
 
-def exporting(config: Mela2Configuration, decl, data):
+def export_variables(config: Mela2Configuration, decl, data):
     format = decl.get("format", "j").lower()
     if format == "j":
         j_out(config, decl, data)
@@ -139,7 +139,7 @@ def main():
 
     data = read_full_simulation_result_dirtree(app_config.input_path)
     decl = simulation_declaration_from_yaml_file(app_config.control_file)
-    exporting(app_config, decl, data)
+    export_variables(app_config, decl, data)
 
 
 if __name__ == "__main__":

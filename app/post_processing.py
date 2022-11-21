@@ -11,7 +11,7 @@ from sim.generators import simple_processable_chain
 from sim.runners import evaluate_sequence
 
 
-def postprocessing(config: Mela2Configuration, control: dict, input_data: dict[str, list[OperationPayload]]):
+def post_process_alternatives(config: Mela2Configuration, control: dict, input_data: dict[str, list[OperationPayload]]):
 
     chain = simple_processable_chain(
         control.get('post_processing', []),
@@ -44,7 +44,7 @@ def main():
     app.file_io.prepare_target_directory(app_config.target_directory)
     input_data: dict[str, List[OperationPayload]] = read_full_simulation_result_dirtree(app_config.input_path)
     control_declaration = simulation_declaration_from_yaml_file(app_config.control_file)
-    result = postprocessing(app_config, control_declaration, input_data)
+    result = post_process_alternatives(app_config, control_declaration, input_data)
     write_full_simulation_result_dirtree(result, app_config)
 
 

@@ -114,7 +114,7 @@ def resolve_strategy_runner(source: str) -> Callable:
         raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
 
 
-def simulating(config, control, stands):
+def simulate_alternatives(config, control, stands):
     strategy_runner = resolve_strategy_runner(config.strategy)
     result = run_stands(stands, control, strategy_runner, config.multiprocessing)
     return result
@@ -143,7 +143,7 @@ def main():
 
     if app_config.strategy != "skip":
         print_logline("Simulating alternatives...")
-        result = simulating(app_config, control_structure, result)
+        result = simulate_alternatives(app_config, control_structure, result)
     else:
         result = {}
 
