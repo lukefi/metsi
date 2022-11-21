@@ -159,12 +159,12 @@ The created output diretory contains all generated variants for all computation 
 The output directory container output is usable as input for the `app/post_processing.py` application.
 
 ```
-python -m app.simulator --state-input-container pickle data/VMI12_data.pickle control.yaml outdir
+python -m app.simulator --state-input-container pickle data/VMI12_data.pickle outdir control.yaml
 ```
 
 In case you want to use JSON as the input and/or output file format, run:
 ```
-python -m app.simulator --state-input-container json --state-output-container json data/VMI12_data.json control.yaml outdir
+python -m app.simulator --state-input-container json --state-output-container json data/VMI12_data.json outdir control.yaml
 ```
 
 To only run the preprocessor, run:
@@ -182,7 +182,7 @@ python -m app.simulator --help
 To run the post processing application, run in the project root
 
 ```
-python -m app.post_processing -o json input.pickle pp_control.yaml outdir
+python -m app.post_processing -o json input.pickle outdir pp_control.yaml
 ```
 
 This produces `outdir/pp_result.json` file.
@@ -199,10 +199,11 @@ python -m app.post_processing --help
 
 Run
 ```
-python -m app.export input.pickle export_control.yaml
+python -m app.export input_path output_path export_control.yaml
 ```
 where
-* `input.pickle` is simulator or post-processor output,
+* `input_path` is simulator or post-processor output directory,
+* `output_path` is output directory for this run,
 * `export_control.yaml` is the export declaration file.
 
 ## Testing

@@ -19,7 +19,7 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual('fdm', result.state_format)
 
     def test_sim_cli_arguments(self):
-        args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
+        args = ['input.pickle', 'output2', 'control.yaml', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
         result = aio.parse_cli_arguments(args)
         self.assertEqual(12, len(result.__dict__.keys()))
         self.assertEqual('input.pickle', result.input_path)
@@ -66,7 +66,7 @@ class TestAppIO(unittest.TestCase):
             self.assertRaises(Exception, fn, case)
 
     def test_mela2_configuration(self):
-        args = ['cli_input', 'cli_control.yaml', 'cli_output', '-s', 'full', '--state-format', 'vmi12', '--state-output-container', 'json']
+        args = ['cli_input', 'cli_output', 'cli_control.yaml', '-s', 'full', '--state-format', 'vmi12', '--state-output-container', 'json']
         cli_args = aio.parse_cli_arguments(args)
         control_args = {'state_output_container': 'pickle', 'preprocessing_output_container': 'json'}
         result = app.app_io.generate_program_configuration(cli_args, control_args)

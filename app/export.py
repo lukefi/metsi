@@ -111,11 +111,11 @@ def j_cda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
         )
 
 
-def j_out(decl: dict, data: dict[str, list[OperationPayload]]):
+def j_out(configuration: Mela2Configuration, decl: dict, data: dict[str, list[OperationPayload]]):
     """Write J files."""
-    with open(decl.get("cda", "data.cda"), "w") as f:
+    with open(f"{configuration.target_directory}/{decl.get('cda', 'data.cda')}", "w") as f:
         j_cda(f, decl, data)
-    with open(decl.get("xda", "data.xda"), "w") as f:
+    with open(f"{configuration.target_directory}/{decl.get('xda', 'data.xda')}", "w") as f:
         j_xda(f, decl, data)
 
 

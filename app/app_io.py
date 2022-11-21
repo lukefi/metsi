@@ -102,8 +102,8 @@ def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> a
 def parse_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 forest growth calculator. CLI arguments override matching control file arguments.')
     parser.add_argument('input_path', help='Application input file or directory')
-    parser.add_argument('control_file', help='Application control declaration file', default='control.yaml')
-    parser.add_argument('target_directory', help='Directory path for program output', default='output')
+    parser.add_argument('target_directory', help='Directory path for program output')
+    parser.add_argument('control_file', nargs='?', help='Application control declaration file')
     parser.add_argument('-s', '--strategy',
                         type=str,
                         help='Simulation event tree formation strategy: \'full\' (default), \'partial\', \'skip\'')

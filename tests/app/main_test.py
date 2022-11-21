@@ -46,8 +46,8 @@ def run_simulator(state_input_files: List[str], state_output_containers: List[st
             '--state-output-container',
             state_output_container,
             input_file,
-            control_file,
-            output_dir
+            output_dir,
+            control_file
         ]
         simulator.main()
     return output_details
@@ -92,8 +92,8 @@ class MainTest(unittest.TestCase):
             sys.argv = [
                 'foo',
                 pp_input_dir,
-                pp_control_file,
-                pp_output_dir
+                pp_output_dir,
+                pp_control_file
             ]
 
             pp.main()
