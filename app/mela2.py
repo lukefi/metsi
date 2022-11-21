@@ -1,30 +1,48 @@
 import os
 import sys
+import time
 
 from forestdatamodel.model import ForestStand
 
+import app.preprocessor
 from app.app_io import parse_cli_arguments, Mela2Configuration, generate_program_configuration, RunMode
 from app.file_io import simulation_declaration_from_yaml_file, prepare_target_directory, read_stands_from_file, \
-    read_full_simulation_result_dirtree
+    read_full_simulation_result_dirtree, determine_file_path, write_stands_to_file
 from sim.core_types import OperationPayload
 
-
-def preprocess(config: Mela2Configuration, control: dict) -> list[ForestStand]:
-    print("Preprocessing...")
-    return []
+start_time = time.time_ns()
 
 
-def simulate(config: Mela2Configuration, control: dict) -> dict[str, list[OperationPayload]]:
+def runtime_now() -> float:
+    global start_time
+    return round((time.time_ns() - start_time) / 1000000000, 1)
+
+
+def print_logline(message: str):
+    print("{} {}".format(runtime_now(), message))
+
+
+def preprocess(config: Mela2Configuration, control: dict, stands: list[ForestStand]) -> list[ForestStand]:
+    print_logline("Preprocessing...")
+    result = app.preprocessor.preprocess_stands(stands, control)
+    if config.preprocessing_output_container is not None:
+        print_logline(f"Writing preprocessed data to '{config.target_directory}/preprocessing_result.{config.preprocessing_output_container}'")
+        filepath = determine_file_path(config.target_directory, f"preprocessing_result.{config.preprocessing_output_container}")
+        write_stands_to_file(result, filepath, config.preprocessing_output_container)
+    return result
+
+
+def simulate(config: Mela2Configuration, control: dict, stands: list[ForestStand]) -> dict[str, list[OperationPayload]]:
     print("Simulating...")
     return {}
 
 
-def post_process(config: Mela2Configuration, control: dict) -> dict[str, list[OperationPayload]]:
+def post_process(config: Mela2Configuration, control: dict, data: dict[str, list[OperationPayload]]) -> dict[str, list[OperationPayload]]:
     print("Post processing...")
     return {}
 
 
-def export(control: dict) -> None:
+def export(config: Mela2Configuration, control: dict, data: dict[str, list[OperationPayload]]) -> None:
     print("Exporting...")
 
 
@@ -51,13 +69,17 @@ def main() -> int:
             input_data = read_stands_from_file(app_config)
         elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.SIMULATE]:
             input_data = read_full_simulation_result_dirtree(app_config.input_path)
+        else:
+            raise Exception("Can not determine input data for unknown run mode")
     except Exception as e:
         print(e)
         print("Aborting run...")
         return 1
 
+    current = input_data
     for mode in app_config.run_modes:
-        mode_runners[mode](app_config, control_structure)
+        runner = mode_runners[mode]
+        current = runner(app_config, control_structure, current)
 
     _, dirs, files = next(os.walk(app_config.target_directory))
     if len(dirs) == 0 and len(files) == 0:
