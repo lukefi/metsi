@@ -3,9 +3,10 @@ app_configuration:
   state_output_container: csv #options: pickle, json, csv
   derived_data_output_container: pickle #options: pickle, json
 
-operation_params:
-  do_nothing:
-    - param: value
-
 post_processing:
-  - do_nothing
+  operation_params:
+    do_nothing:
+      - param: value
+
+  post_processing:
+    - do_nothing

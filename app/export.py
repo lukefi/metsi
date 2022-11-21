@@ -1,9 +1,7 @@
 import bisect
 from functools import cache
-import sys
 from typing import IO, Any, Generic, Iterator, TypeVar, Union
-from app.app_io import generate_program_configuration, Mela2Configuration, parse_cli_arguments
-from app.file_io import simulation_declaration_from_yaml_file, read_full_simulation_result_dirtree
+from app.app_io import Mela2Configuration
 from sim.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
 from sim.core_types import OperationPayload
 
@@ -125,22 +123,3 @@ def export_variables(config: Mela2Configuration, decl, data):
         j_out(config, decl, data)
     else:
         raise ValueError("Unknown output format: '{}'".format(format))
-
-
-def main():
-    cli_arguments = parse_cli_arguments(sys.argv[1:])
-    control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
-    try:
-        control_structure = simulation_declaration_from_yaml_file(control_file)
-    except:
-        print(f"Application control file path '{control_file}' can not be read. Aborting....")
-        return
-    app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
-
-    data = read_full_simulation_result_dirtree(app_config.input_path)
-    decl = simulation_declaration_from_yaml_file(app_config.control_file)
-    export_variables(app_config, decl, data)
-
-
-if __name__ == "__main__":
-    main()

@@ -9,8 +9,7 @@ import sys
 import shutil
 import unittest
 from pathlib import Path
-import app.simulator as simulator
-import app.post_processing as pp
+from app import mela2
 from typing import List
 
 
@@ -45,11 +44,13 @@ def run_simulator(state_input_files: List[str], state_output_containers: List[st
             'pickle',
             '--state-output-container',
             state_output_container,
+            '-r',
+            'preprocess,simulate',
             input_file,
             output_dir,
             control_file
         ]
-        simulator.main()
+        mela2.main()
     return output_details
 
 
@@ -93,10 +94,12 @@ class MainTest(unittest.TestCase):
                 'foo',
                 pp_input_dir,
                 pp_output_dir,
-                pp_control_file
+                pp_control_file,
+                '-r',
+                'postprocess'
             ]
 
-            pp.main()
+            mela2.main()
 
             self.verify_result_dir(pp_output_dir)
             shutil.rmtree(pp_output_dir)

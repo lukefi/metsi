@@ -2,17 +2,11 @@ import os
 import time
 import queue
 from typing import List, Callable, Dict
-import sys
 import multiprocessing
 import forestry.operations
-from app.preprocessor import preprocess_stands
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from sim.core_types import AggregatedResults, OperationPayload
 from forestdatamodel.model import ForestStand
-from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, \
-    write_full_simulation_result_dirtree, prepare_target_directory, \
-    determine_file_path, write_stands_to_file
-from app.app_io import parse_cli_arguments, Mela2Configuration, generate_program_configuration
 
 start_time = time.time_ns()
 
@@ -118,40 +112,3 @@ def simulate_alternatives(config, control, stands):
     strategy_runner = resolve_strategy_runner(config.strategy)
     result = run_stands(stands, control, strategy_runner, config.multiprocessing)
     return result
-
-
-def main():
-    cli_arguments = parse_cli_arguments(sys.argv[1:])
-    control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
-    try:
-        control_structure = simulation_declaration_from_yaml_file(control_file)
-    except:
-        print(f"Application control file path '{control_file}' can not be read. Aborting....")
-        return
-    app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
-
-    print_logline("Preparing run...")
-    stands = read_stands_from_file(app_config)
-    outdir = prepare_target_directory(app_config.target_directory)
-
-    print_logline("Preprocessing computational units...")
-    result = preprocess_stands(stands, control_structure)
-
-    if app_config.preprocessing_output_container is not None:
-        filepath = determine_file_path(outdir, f"preprocessing_result.{app_config.preprocessing_output_container}")
-        write_stands_to_file(result, filepath, app_config.preprocessing_output_container)
-
-    if app_config.strategy != "skip":
-        print_logline("Simulating alternatives...")
-        result = simulate_alternatives(app_config, control_structure, result)
-    else:
-        result = {}
-
-    print_logline("Writing output...")
-    write_full_simulation_result_dirtree(result, app_config)
-
-    print_logline("Done. Exiting.")
-
-
-if __name__ == "__main__":
-    main()
