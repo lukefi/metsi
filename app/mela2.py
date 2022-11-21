@@ -1,3 +1,4 @@
+import os
 import sys
 
 from forestdatamodel.model import ForestStand
@@ -34,25 +35,27 @@ mode_runners = {
 }
 
 
-def main():
+def main() -> int:
     cli_arguments = parse_cli_arguments(sys.argv[1:])
     control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
     try:
         control_structure = simulation_declaration_from_yaml_file(control_file)
     except IOError:
         print(f"Application control file path '{control_file}' can not be read. Aborting....")
-        return
+        return 1
     try:
         app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
-        prepare_target_directory(app_config.target_directory)
     except Exception as e:
         print(e)
         print("Aborting run...")
-        return
+        return 1
 
     for mode in app_config.run_modes:
         mode_runners[mode](app_config, control_structure)
 
+    return 0
+
 
 if __name__ == '__main__':
-    main()
+    code = main()
+    sys.exit(code)
