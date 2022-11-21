@@ -127,10 +127,10 @@ def main():
     except:
         print(f"Application control file path '{control_file}' can not be read. Aborting....")
         return
-    app_arguments = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+    app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
 
-    data = read_full_simulation_result_dirtree(app_arguments.input_path)
-    decl = simulation_declaration_from_yaml_file(app_arguments.control_file)
+    data = read_full_simulation_result_dirtree(app_config.input_path)
+    decl = simulation_declaration_from_yaml_file(app_config.control_file)
     format = decl.get("format", "j").lower()
     if format == "j":
         j_out(decl, data)

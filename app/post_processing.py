@@ -19,12 +19,12 @@ def main():
     except:
         print(f"Application control file path '{control_file}' can not be read. Aborting....")
         return
-    app_arguments = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+    app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
 
-    app.file_io.prepare_target_directory(app_arguments.target_directory)
-    input_data: dict[str, List[OperationPayload]] = read_full_simulation_result_dirtree(app_arguments.input_path)
+    app.file_io.prepare_target_directory(app_config.target_directory)
+    input_data: dict[str, List[OperationPayload]] = read_full_simulation_result_dirtree(app_config.input_path)
 
-    control_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
+    control_declaration = simulation_declaration_from_yaml_file(app_config.control_file)
     chain = simple_processable_chain(
         control_declaration.get('post_processing', []),
         control_declaration.get('operation_params', {}),
@@ -40,7 +40,7 @@ def main():
                 OperationPayload(
                     simulation_state=processed_schedule[0],
                     aggregated_results=processed_schedule[1]))
-    write_full_simulation_result_dirtree(result, app_arguments)
+    write_full_simulation_result_dirtree(result, app_config)
 
 
 if __name__ == '__main__':

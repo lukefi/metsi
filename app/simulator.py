@@ -122,28 +122,28 @@ def main():
     except:
         print(f"Application control file path '{control_file}' can not be read. Aborting....")
         return
-    app_arguments = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+    app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
 
     print_logline("Preparing run...")
-    stands = read_stands_from_file(app_arguments)
-    outdir = prepare_target_directory(app_arguments.target_directory)
+    stands = read_stands_from_file(app_config)
+    outdir = prepare_target_directory(app_config.target_directory)
 
     print_logline("Preprocessing computational units...")
     result = preprocess_stands(stands, control_structure)
 
-    if app_arguments.preprocessing_output_container is not None:
-        filepath = determine_file_path(outdir, f"preprocessing_result.{app_arguments.preprocessing_output_container}")
-        write_stands_to_file(result, filepath, app_arguments.preprocessing_output_container)
+    if app_config.preprocessing_output_container is not None:
+        filepath = determine_file_path(outdir, f"preprocessing_result.{app_config.preprocessing_output_container}")
+        write_stands_to_file(result, filepath, app_config.preprocessing_output_container)
 
-    if app_arguments.strategy != "skip":
+    if app_config.strategy != "skip":
         print_logline("Simulating alternatives...")
-        strategy_runner = resolve_strategy_runner(app_arguments.strategy)
-        result = run_stands(result, control_structure, strategy_runner, app_arguments.multiprocessing)
+        strategy_runner = resolve_strategy_runner(app_config.strategy)
+        result = run_stands(result, control_structure, strategy_runner, app_config.multiprocessing)
     else:
         result = {}
 
     print_logline("Writing output...")
-    write_full_simulation_result_dirtree(result, app_arguments)
+    write_full_simulation_result_dirtree(result, app_config)
 
     print_logline("Done. Exiting.")
 
