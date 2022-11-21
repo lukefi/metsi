@@ -3,6 +3,7 @@ from forestdatamodel.model import ForestStand
 from forestryfunctions.preprocessing import tree_generation, pre_util
 from forestryfunctions.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from forestryfunctions.preprocessing.naslund import naslund_height
+from forestry.filter import applyfilter
 
 
 def exclude_sapling_trees(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
@@ -19,6 +20,14 @@ def exclude_empty_stands(stands: List[ForestStand], **operation_params)-> List[F
 def exclude_zero_stem_trees(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
     for stand in stands:
         stand.reference_trees = list(filter(lambda rt: rt.stems_per_ha > 0.0, stand.reference_trees))
+    return stands
+
+
+def preproc_filter(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
+    named = operation_params.get("named", {})
+    for k,v in operation_params.items():
+        if k != "named":
+            stands = applyfilter(stands, k, v, named)
     return stands
 
 
@@ -101,6 +110,7 @@ operation_lookup = {
     'exclude_sapling_trees': exclude_sapling_trees,
     'exclude_empty_stands': exclude_empty_stands,
     'exclude_zero_stem_trees': exclude_zero_stem_trees,
+    'filter': preproc_filter,
     'compute_location_metadata': compute_location_metadata,
     'generate_reference_trees': generate_reference_trees,
     'determine_tree_height': determine_tree_height,
