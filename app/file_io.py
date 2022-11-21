@@ -101,24 +101,23 @@ def external_reader(state_format: str, **builder_flags) -> StandReader:
         return lambda path: ForestCentreBuilder(builder_flags, xml_file_reader(path)).build()
 
 
-def read_stands_from_file(file_path: str, state_format: str, container_format: str, **builder_flags) -> list[ForestStand]:
+def read_stands_from_file(app_config: Mela2Configuration) -> list[ForestStand]:
     """
     Read a list of ForestStands from given file with given configuration. Directly reads FDM format data. Utilizes
     FDM ForestBuilder utilities to transform VMI12, VMI13 or Forest Centre data into FDM ForestStand format.
 
-    :param file_path: input file Path
-    :param state_format: data format of input file
-    :param container_format: container format of input file
-    :param builder_flags: optional extra flags to pass for ForestBuilder implementations
+    :param app_config: Mela2Configuration
     :return: list of ForestStands as computational units for simulation
     """
-    builder_flags = {"reference_trees": False, "strata_origin": "1"} if builder_flags == {} else builder_flags
-    if state_format == "fdm":
-        return fdm_reader(container_format)(file_path)
-    elif state_format in ("vmi13", "vmi12", "forest_centre"):
-        return external_reader(state_format, **builder_flags)(file_path)
+    if app_config.state_format == "fdm":
+        return fdm_reader(app_config.state_input_container)(app_config.input_path)
+    elif app_config.state_format in ("vmi13", "vmi12", "forest_centre"):
+        return external_reader(
+            app_config.state_format,
+            reference_trees=app_config.reference_trees,
+            strata_origin=app_config.strata_origin)(app_config.input_path)
     else:
-        raise Exception(f"Unsupported state format '{state_format}'")
+        raise Exception(f"Unsupported state format '{app_config.state_format}'")
 
 
 def scan_dir_for_file(dirpath: Path, basename: str, suffixes: list[str]) -> Optional[tuple[Path, str]]:

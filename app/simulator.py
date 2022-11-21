@@ -134,13 +134,7 @@ def main():
     app_arguments = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
 
     print_logline("Preparing run...")
-    stands = read_stands_from_file(
-        app_arguments.input_path,
-        app_arguments.state_format,
-        app_arguments.state_input_container,
-        reference_trees=app_arguments.reference_trees,
-        strata_origin=app_arguments.strata_origin
-    )
+    stands = read_stands_from_file(app_arguments)
     outdir = prepare_target_directory(app_arguments.target_directory)
 
     print_logline("Preprocessing computational units...")
