@@ -34,30 +34,30 @@ class Mela2Configuration(SimpleNamespace):
         try:
             mode_candidates = list(map(lambda x: RunMode(x), modestring.split(sep=",")))
         except:
-            raise Exception(f"Unable to parse run mode list '{modestring}'. "
+            raise ValueError(f"Unable to parse run mode list '{modestring}'. "
                             f"Allowed modes: {','.join(map(lambda x: x.value, RunMode))}")
         last = len(mode_candidates) - 1
         for i, candidate in enumerate(mode_candidates):
             if candidate == RunMode.PREPROCESS:
                 if i < last and mode_candidates[i + 1] != RunMode.SIMULATE:
-                    raise Exception("Run mode 'preprocess' must be followed by 'simulate'")
+                    raise ValueError("Run mode 'preprocess' must be followed by 'simulate'")
                 if i != 0:
-                    raise Exception("Run mode 'preprocess' must be the first mode")
+                    raise ValueError("Run mode 'preprocess' must be the first mode")
             if candidate == RunMode.SIMULATE:
                 if i > 1:
-                    raise Exception("Run mode 'simulate' must be up to the second mode")
+                    raise ValueError("Run mode 'simulate' must be up to the second mode")
                 if i == 1 and mode_candidates[i - 1] != RunMode.PREPROCESS:
-                    raise Exception("Run mode 'simulate' must be preceded by 'preprocess'")
+                    raise ValueError("Run mode 'simulate' must be preceded by 'preprocess'")
             if candidate == RunMode.POSTPROCESS:
                 if i < last - 1:
-                    raise Exception("Run mode 'postprocess' must be second from last or last mode")
+                    raise ValueError("Run mode 'postprocess' must be second from last or last mode")
                 if i > 0 and mode_candidates[i - 1] != RunMode.SIMULATE:
-                    raise Exception("Run mode 'postprocess' can be preceded only by 'simulate'")
+                    raise ValueError("Run mode 'postprocess' can be preceded only by 'simulate'")
             if candidate == RunMode.EXPORT:
                 if i < last:
-                    raise Exception("Run mode 'export' must be the last mode")
+                    raise ValueError("Run mode 'export' must be the last mode")
                 if i > 0 and mode_candidates[i - 1] not in (RunMode.SIMULATE, RunMode.POSTPROCESS):
-                    raise Exception("Run mode 'export' must be preceded by 'simulate' or 'postprocess'")
+                    raise ValueError("Run mode 'export' must be preceded by 'simulate' or 'postprocess'")
         return mode_candidates
 
 
@@ -82,7 +82,10 @@ def generate_program_configuration(cli_args: argparse.Namespace, control_source:
     """Generate a Mela2Configuration, overriding values with control file source, then with CLI arguments"""
     cli_source = remove_nones(cli_args.__dict__)
     merged = merge_dicts([control_source, cli_source])
-    return Mela2Configuration(**merged)
+    result = Mela2Configuration(**merged)
+    if merged.get('run_modes'):
+        result.set_run_modes(merged.get('run_modes'))
+    return result
 
 
 def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> argparse.Namespace:
@@ -104,6 +107,9 @@ def parse_cli_arguments(args: List[str]):
     parser.add_argument('input_path', help='Application input file or directory')
     parser.add_argument('target_directory', help='Directory path for program output')
     parser.add_argument('control_file', nargs='?', help='Application control declaration file')
+    parser.add_argument('-r', '--run-modes',
+                        help='Comma separated list of run modes. Possible modes: preprocess,simulate,postprocess,export',
+                        type=str)
     parser.add_argument('-s', '--strategy',
                         type=str,
                         help='Simulation event tree formation strategy: \'full\' (default), \'partial\', \'skip\'')
