@@ -130,7 +130,7 @@ def main():
 
     print_logline("Preparing run...")
     stands = read_stands_from_file(
-        app_arguments.input_file,
+        app_arguments.input_path,
         app_arguments.state_format,
         app_arguments.state_input_container,
         reference_trees=app_arguments.reference_trees,

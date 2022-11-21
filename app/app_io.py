@@ -65,7 +65,7 @@ def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> a
 
 def sim_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 simulator')
-    parser.add_argument('input_file', help='Simulator input file')
+    parser.add_argument('input_path', help='Simulator input file')
     parser.add_argument('control_file', help='Simulation control declaration file', default='control.yaml')
     parser.add_argument('target_directory', help='Directory path for program output', default='output')
     parser.add_argument('-s', '--strategy',
@@ -112,7 +112,7 @@ def sim_cli_arguments(args: List[str]):
 
 def post_processing_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 post processing')
-    parser.add_argument('input_directory', help='Post processing input file (simulator output)')
+    parser.add_argument('input_path', help='Post processing input directory (simulator output)')
     parser.add_argument('control_file', help='Post processing control declaration file', default='pp_control.yaml')
     parser.add_argument('target_directory', help='Directory path for program output')
     parser.add_argument('--state-output-container',
@@ -128,6 +128,6 @@ def post_processing_cli_arguments(args: List[str]):
 
 def export_cli_arguments(args: List[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 data export')
-    parser.add_argument('input_directory', help='Input directory (simulator or post processing output)')
+    parser.add_argument('input_path', help='Input directory (simulator or post processing output)')
     parser.add_argument('control_file', help='Export control declaration file', default='export_control.yaml')
     return parser.parse_args(args)

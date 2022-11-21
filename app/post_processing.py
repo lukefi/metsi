@@ -15,7 +15,7 @@ def main():
 
     app_arguments = post_processing_cli_arguments(sys.argv[1:])
     app.file_io.prepare_target_directory(app_arguments.target_directory)
-    input_data: dict[str, List[OperationPayload]] = read_full_simulation_result_dirtree(app_arguments.input_directory)
+    input_data: dict[str, List[OperationPayload]] = read_full_simulation_result_dirtree(app_arguments.input_path)
 
     control_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
     app_arguments = set_default_arguments(app_arguments, control_declaration['io_configuration'])

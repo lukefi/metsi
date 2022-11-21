@@ -121,7 +121,7 @@ def j_out(decl: dict, data: dict[str, list[OperationPayload]]):
 
 def main():
     args = export_cli_arguments(sys.argv[1:])
-    data = read_full_simulation_result_dirtree(args.input_directory)
+    data = read_full_simulation_result_dirtree(args.input_path)
     decl = simulation_declaration_from_yaml_file(args.control_file)
     format = decl.get("format", "j").lower()
     if format == "j":

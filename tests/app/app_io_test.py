@@ -22,7 +22,7 @@ class TestAppIO(unittest.TestCase):
         args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
         result = aio.sim_cli_arguments(args)
         self.assertEqual(12, len(result.__dict__.keys()))
-        self.assertEqual('input.pickle', result.input_file)
+        self.assertEqual('input.pickle', result.input_path)
         self.assertEqual('control.yaml', result.control_file)
         self.assertEqual('output2', result.target_directory)
         self.assertEqual('partial', result.strategy)
@@ -69,7 +69,7 @@ class TestAppIO(unittest.TestCase):
         args = ['simdir', 'control.yaml', 'outdir']
         result = aio.post_processing_cli_arguments(args)
         self.assertEqual(5, len(result.__dict__.keys()))
-        self.assertEqual('simdir', result.input_directory)
+        self.assertEqual('simdir', result.input_path)
         self.assertEqual('control.yaml', result.control_file)
         self.assertEqual('outdir', result.target_directory)
 
@@ -77,5 +77,5 @@ class TestAppIO(unittest.TestCase):
         args = ['simdir', 'control.yaml']
         result = aio.export_cli_arguments(args)
         self.assertEqual(2, len(result.__dict__.keys()))
-        self.assertEqual('simdir', result.input_directory)
+        self.assertEqual('simdir', result.input_path)
         self.assertEqual('control.yaml', result.control_file)
