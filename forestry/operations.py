@@ -9,6 +9,7 @@ from forestry.cross_cutting import cross_cut_felled_trees, cross_cut_whole_stand
 from forestry.grow_acta import grow_acta
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
+from forestry.renewal import cost_only_renewal
 from sim.core_types import OpTuple
 
 
@@ -68,6 +69,7 @@ operation_lookup = {
     'report_overall_removal': report_overall_removal,
     'cross_cut_felled_trees': cross_cut_felled_trees,
     'cross_cut_whole_stand': cross_cut_whole_stand,
+    'cost_only_renewal': cost_only_renewal,
 }
 
 try:
