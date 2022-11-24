@@ -10,10 +10,9 @@ import shutil
 import unittest
 from pathlib import Path
 from app import mela2
-from typing import List
 
 
-def run_simulator(state_input_files: List[str], state_output_containers: List[str]):
+def run_simulator(state_input_files: list[str], state_output_containers: list[str]):
 
     strategies = ['full', 'partial']
     control_file = 'tests/resources/main_test/main_test_control.yaml'

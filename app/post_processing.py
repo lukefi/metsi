@@ -1,11 +1,12 @@
 from app.app_io import Mela2Configuration
+from app.app_types import SimResults
 from forestry.operations import operation_lookup
 from sim.core_types import OperationPayload
 from sim.generators import simple_processable_chain
 from sim.runners import evaluate_sequence
 
 
-def post_process_alternatives(config: Mela2Configuration, control: dict, input_data: dict[str, list[OperationPayload]]):
+def post_process_alternatives(config: Mela2Configuration, control: dict, input_data: SimResults):
     chain = simple_processable_chain(
         control.get('post_processing', []),
         control.get('operation_params', {}),

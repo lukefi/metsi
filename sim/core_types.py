@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from copy import deepcopy
 from types import SimpleNamespace
-from typing import Callable, List, Optional, Any, Tuple, TypeVar
+from typing import Callable, Optional, Any, TypeVar, Generic
 
 
 def identity(x):
@@ -13,7 +13,7 @@ class Step:
     Step represents a computational operation in a tree of alternative computation paths.
     """
     operation: Callable = identity  # default to the identity function, essentially no-op
-    branches: List['Step'] = []
+    branches: list['Step'] = []
     previous: 'Step' or None = None
 
     def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None,
@@ -86,12 +86,15 @@ class AggregatedResults:
         self.get(tag)[self.current_time_point] = aggr
 
 
-class OperationPayload(SimpleNamespace):
+CUType = TypeVar("CUType")
+
+
+class OperationPayload(SimpleNamespace, Generic[CUType]):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
-    simulation_state: Any
+    simulation_state: CUType
     aggregated_results: AggregatedResults
-    operation_history: List[Tuple[int, str]]
+    operation_history: list[tuple[int, str, dict[str, dict]]]
 
     def __deepcopy__(self, memo: dict) -> "OperationPayload":
         return OperationPayload(
@@ -100,5 +103,7 @@ class OperationPayload(SimpleNamespace):
             operation_history = list(self.operation_history)
         )
 
-T = TypeVar("T")
-OpTuple = Tuple[T, AggregatedResults]
+
+OpTuple = tuple[CUType, AggregatedResults]
+SourceData = list[CUType]
+StrategyRunner = Callable[[OperationPayload[CUType], dict, dict], list[OperationPayload[CUType]]]

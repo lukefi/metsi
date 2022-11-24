@@ -1,6 +1,6 @@
-from typing import Optional, Callable, List
+from typing import Optional, Callable
 from copy import deepcopy
-from sim.core_types import OperationPayload
+from sim.core_types import OperationPayload, CUType
 from sim.generators import full_tree_generators, compose, partial_tree_generators_by_time_point, generate_time_series
 
 
@@ -22,7 +22,7 @@ def evaluate_sequence(payload, *operations: Callable) -> Optional:
     return current
 
 
-def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
+def run_chains_iteratively(payload, chains: list[list[Callable]]) -> list:
     """Execute all given operation chains for the given state payload. Return the collection of success results from
     all chains.
 
@@ -39,8 +39,7 @@ def run_chains_iteratively(payload, chains: List[List[Callable]]) -> List:
     return results
 
 
-def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict) -> List[
-    OperationPayload]:
+def run_full_tree_strategy(payload: OperationPayload[CUType], simulation_declaration: dict, operation_lookup: dict) -> list[OperationPayload[CUType]]:
     """Process the given operation payload using a simulation state tree created from the declaration. Full simulation
     tree and operation chains are pre-generated for the run. This tree strategy creates the full theoretical branching
     tree for the simulation, carrying a significant memory and runtime overhead for large trees.
@@ -58,8 +57,7 @@ def run_full_tree_strategy(payload: OperationPayload, simulation_declaration: di
     return result
 
 
-def run_partial_tree_strategy(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict) -> List[
-    OperationPayload]:
+def run_partial_tree_strategy(payload: OperationPayload[CUType], simulation_declaration: dict, operation_lookup: dict) -> list[OperationPayload[CUType]]:
     """Process the given operation payload using a simulation state tree created from the declaration. The simulation
     tree and operation chains are generated and executed in order per simulation time point. This reduces the amount of
     redundant, always-failing operation chains and redundant branches of the simulation tree.

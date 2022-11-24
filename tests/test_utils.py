@@ -3,7 +3,7 @@ This module contains a collection of util functions and dummy payload functions 
 """
 import os
 import unittest
-from typing import Any, List, Optional, Tuple, Callable
+from typing import Any, Optional, Callable
 
 import yaml
 
@@ -11,7 +11,7 @@ from sim.core_types import OpTuple, OperationPayload
 
 
 class ConverterTestSuite(unittest.TestCase):
-    def run_with_test_assertions(self, assertions: List[Tuple], fn: Callable):
+    def run_with_test_assertions(self, assertions: list[tuple], fn: Callable):
         for case in assertions:
             result = fn(*case[0])
             self.assertEqual(case[1], result)
@@ -46,7 +46,7 @@ def dec(x: int) -> int:
     return x - 1
 
 
-def max_reducer(x: List[int]) -> Optional[int]:
+def max_reducer(x: list[int]) -> Optional[int]:
     return max(x)
 
 
@@ -64,7 +64,7 @@ def parametrized_operation_using_file_parameter(x, **kwargs):
     else:
         return x
 
-def collect_results(payloads: List[OperationPayload]) -> List:
+def collect_results(payloads: list[OperationPayload]) -> list:
     return list(map(lambda payload: payload.simulation_state, payloads))
 
 

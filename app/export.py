@@ -2,6 +2,7 @@ import bisect
 from functools import cache
 from typing import IO, Any, Generic, Iterator, TypeVar, Union
 from app.app_io import Mela2Configuration
+from app.app_types import SimResults
 from sim.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
 from sim.core_types import OperationPayload
 
@@ -72,7 +73,7 @@ def j_row(out: IO, fns: list[CollectFn], getvar: GetVarFn):
     out.write("\n")
 
 
-def j_xda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
+def j_xda(out: IO, decl: dict, data: SimResults):
     """Write xdata file."""
     collectives = {
         k for schedules in data.values()
@@ -95,7 +96,7 @@ def j_xda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
             )
 
 
-def j_cda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
+def j_cda(out: IO, decl: dict, data: SimResults):
     """Write cdata file."""
     cvars = list(map(compile, ["len(schedules)", *decl.get("cvariables", [])]))
     for schedules in data.values():
@@ -109,7 +110,7 @@ def j_cda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
         )
 
 
-def j_out(configuration: Mela2Configuration, decl: dict, data: dict[str, list[OperationPayload]]):
+def j_out(configuration: Mela2Configuration, decl: dict, data: SimResults):
     """Write J files."""
     with open(f"{configuration.target_directory}/{decl.get('cda', 'data.cda')}", "w") as f:
         j_cda(f, decl, data)

@@ -1,10 +1,10 @@
-from typing import Any, Callable, List, Optional, Dict
+from typing import Any, Callable, Optional
 from sim.core_types import Step
 from sim.operations import prepared_processor, prepared_operation, resolve_operation
 from sim.util import get_or_default, dict_value, get_operation_file_params, merge_operation_params
 
 
-def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
+def sequence(parents: Optional[list[Step]] = None, *operations: Callable) -> list[Step]:
     """
     Generate a linear sequence of steps, optionally extending each Step in the given list of Steps with it.
     :param parents: optional
@@ -24,7 +24,7 @@ def sequence(parents: Optional[List[Step]] = None, *operations: Callable) -> Lis
     return result
 
 
-def alternatives(parents: Optional[List[Step]] = None, *operations: Callable) -> List[Step]:
+def alternatives(parents: Optional[list[Step]] = None, *operations: Callable) -> list[Step]:
     """
     Generate branches for an optional list of steps, out of an *args list of given operations
     :param parents:
@@ -62,7 +62,7 @@ def compose(*generator_series: Callable) -> Step:
     return root
 
 
-def repeat(times: int, *step_generators: Callable) -> List[Callable]:
+def repeat(times: int, *step_generators: Callable) -> list[Callable]:
     """
     For the given, positive, non-zero number of times, repeat the given list of generator functions and return them as
     a list.
@@ -80,7 +80,7 @@ def repeat(times: int, *step_generators: Callable) -> List[Callable]:
     return result
 
 
-def simple_processable_chain(operation_tags: List[str], operation_params: dict, operation_lookup: dict) -> List[
+def simple_processable_chain(operation_tags: list[str], operation_params: dict, operation_lookup: dict) -> list[
     Callable]:
     """Prepare a list of partially applied (parametrized) operation functions based on given declaration of operation
     tags and operation parameters"""
@@ -94,7 +94,7 @@ def simple_processable_chain(operation_tags: List[str], operation_params: dict, 
     return result
 
 
-def generator_declarations_for_time_point(simulation_events: List[dict], time: int) -> List[dict]:
+def generator_declarations_for_time_point(simulation_events: list[dict], time: int) -> list[dict]:
     """
     From simulation_steps, find the step generators declared for the given time point. Upon no match,
     a sequence of a single do_nothing operation is supplanted.
@@ -110,7 +110,7 @@ def generator_declarations_for_time_point(simulation_events: List[dict], time: i
     return generator_declarations
 
 
-def generator_function(key, generator_lookup: dict, *processors: Callable) -> Callable[[Any], List[Step]]:
+def generator_function(key, generator_lookup: dict, *processors: Callable) -> Callable[[Any], list[Step]]:
     """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
     argument list of processors with the generator."""
     return lambda parent_steps: generator_lookup[key](parent_steps, *processors)
@@ -162,7 +162,7 @@ def prepare_step_generator(generator_declaration, generator_lookup, operation_lo
     return generator
 
 
-def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -> List[Callable]:
+def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -> list[Callable]:
     """
     Creat a list of step generator functions describing a single simulator run.
 
@@ -183,8 +183,8 @@ def full_tree_generators(simulation_declaration: dict, operation_lookup: dict) -
     return generator_series
 
 
-def partial_tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> Dict[
-    int, List[Callable]]:
+def partial_tree_generators_by_time_point(simulation_declaration: dict, operation_lookup: dict) -> dict[
+    int, list[Callable]]:
     """
     Create a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
     partial step trees of the simulation.

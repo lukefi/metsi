@@ -1,4 +1,3 @@
-import argparse
 import os
 import pickle
 from pathlib import Path
@@ -7,15 +6,17 @@ from typing import Any, Callable, Iterator, Optional
 import yaml
 from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
 from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands, rsd_rows
-from forestdatamodel.model import ForestStand
 
 from app.app_io import Mela2Configuration
-from sim.core_types import OperationPayload, AggregatedResults
+from app.app_types import SimResults, ForestOpPayload
+from forestry.forestry_types import StandList
+from sim.core_types import AggregatedResults
 
 
-StandReader = Callable[[str], list[ForestStand]]
-StandWriter = Callable[[Path, list[ForestStand]], None]
-ObjectWriter = Callable[[Path, Any], None]
+StandReader = Callable[[str], StandList]
+StandWriter = Callable[[Path, StandList], None]
+ObjectLike = StandList or SimResults or AggregatedResults
+ObjectWriter = Callable[[Path, ObjectLike], None]
 
 
 def prepare_target_directory(path_descriptor: str) -> Path:
@@ -38,7 +39,7 @@ def prepare_target_directory(path_descriptor: str) -> Path:
 
 
 def stand_writer(container_format: str) -> StandWriter:
-    """Return a serialization file writer function for a list[ForestStand]"""
+    """Return a serialization file writer function for a ForestDataPackage"""
     if container_format == "pickle":
         return pickle_writer
     elif container_format == "json":
@@ -101,7 +102,7 @@ def external_reader(state_format: str, **builder_flags) -> StandReader:
         return lambda path: ForestCentreBuilder(builder_flags, xml_file_reader(path)).build()
 
 
-def read_stands_from_file(app_config: Mela2Configuration) -> list[ForestStand]:
+def read_stands_from_file(app_config: Mela2Configuration) -> StandList:
     """
     Read a list of ForestStands from given file with given configuration. Directly reads FDM format data. Utilizes
     FDM ForestBuilder utilities to transform VMI12, VMI13 or Forest Centre data into FDM ForestStand format.
@@ -144,7 +145,7 @@ def parse_file_or_default(file: Path, reader: Callable[[Path], Any], default=Non
         return default
 
 
-def read_schedule_payload_from_directory(schedule_path: Path) -> OperationPayload:
+def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload:
     """
     Create an OperationPayload from a directory which optionally contains usable unit_state and derived_data files.
     Utilizes a scanner function to resolve the files with known container formats. Files may not exist.
@@ -156,7 +157,7 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> OperationPayloa
     derived_data_file, derived_data_container = scan_dir_for_file(schedule_path, "derived_data", ["json", "pickle"])
     stands = [] if unit_state_file is None else parse_file_or_default(unit_state_file, fdm_reader(input_container), [])
     derived_data = None if derived_data_file is None else parse_file_or_default(derived_data_file, object_reader(derived_data_container))
-    return OperationPayload(
+    return ForestOpPayload(
         simulation_state=None if stands == [] else stands[0],
         aggregated_results=derived_data,
         operation_history=[]
@@ -170,7 +171,7 @@ def get_subdirectory_names(path: Path) -> list[str]:
     return dirs
 
 
-def read_full_simulation_result_dirtree(source_path: Path) -> dict[str, list[OperationPayload]]:
+def read_full_simulation_result_dirtree(source_path: Path) -> SimResults:
     """
     Read simulation results from a given source directory, packing them into the simulation results dict structure.
     Utilizes a directory scanner function to find unit_state and derived_data files for known possible container
@@ -191,7 +192,7 @@ def read_full_simulation_result_dirtree(source_path: Path) -> dict[str, list[Ope
     return result
 
 
-def write_stands_to_file(result: list[ForestStand], filepath: Path, state_output_container: str):
+def write_stands_to_file(result: StandList, filepath: Path, state_output_container: str):
     """Resolve a writer function for ForestStands matching the given state_output_container. Invokes write."""
     writer = stand_writer(state_output_container)
     writer(filepath, result)
@@ -203,7 +204,7 @@ def write_derived_data_to_file(result: AggregatedResults, filepath: Path, derive
     writer(filepath, result)
 
 
-def write_full_simulation_result_dirtree(result: dict[str, list[OperationPayload]], app_arguments: Mela2Configuration):
+def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mela2Configuration):
     """
     Unwraps the given simulation result structure into computational units and further into produced schedules.
     Writes these as a matching directory structure, splitting OperationPayloads into unit_state and derived_data files.
@@ -231,33 +232,33 @@ def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     return yaml.load(file_contents(file_path), Loader=yaml.CLoader)
 
 
-def pickle_writer(filepath: Path, data: Any):
+def pickle_writer(filepath: Path, data: ObjectLike):
     with open(filepath, 'wb') as f:
         pickle.dump(data, f, protocol=5)
 
 
-def pickle_reader(file_path: str) -> Any:
+def pickle_reader(file_path: str) -> ObjectLike:
     with open(file_path, 'rb') as f:
         return pickle.load(f)
 
 
-def json_writer(filepath: Path, data: Any):
+def json_writer(filepath: Path, data: ObjectLike):
     jsonpickle.set_encoder_options("json", indent=2)
     with open(filepath, 'w', newline='\n') as f:
         f.write(jsonpickle.encode(data))
 
 
-def csv_writer(filepath: Path, data: Any):
+def csv_writer(filepath: Path, data: StandList):
     with open(filepath, 'w', newline='\n') as file:
         file.writelines('\n'.join(stands_to_csv(data, ';')))
 
 
-def rsd_writer(filepath: Path, data: list[ForestStand]):
+def rsd_writer(filepath: Path, data: StandList):
     with open(filepath, 'w', newline='\n') as file:
         file.writelines('\n'.join(rsd_rows(data)))
 
 
-def json_reader(file_path: str) -> Any:
+def json_reader(file_path: str) -> ObjectLike:
     res = jsonpickle.decode(file_contents(file_path))
     return res
 

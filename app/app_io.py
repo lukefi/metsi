@@ -1,7 +1,6 @@
 import argparse
 from enum import Enum
 from types import SimpleNamespace
-from typing import List, Optional
 
 
 class RunMode(Enum):
@@ -102,7 +101,7 @@ def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> a
     return cli_args
 
 
-def parse_cli_arguments(args: List[str]):
+def parse_cli_arguments(args: list[str]):
     parser = argparse.ArgumentParser(description='Mela2.0 forest growth calculator. CLI arguments override matching control file arguments.')
     parser.add_argument('input_path', help='Application input file or directory')
     parser.add_argument('target_directory', help='Directory path for program output')
