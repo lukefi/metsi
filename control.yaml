@@ -38,6 +38,8 @@ operation_params:
       - even_thinning
   report_biomass:
     - model_set: 1
+  clearing:
+    - cost_per_ha: 123.4
   report_collectives:
     - Ftot: reference_trees.stems_per_ha
       Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
