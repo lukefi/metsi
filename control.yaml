@@ -42,11 +42,7 @@ operation_params:
     - Ftot: reference_trees.stems_per_ha
       Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
       Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
-  cost_only_renewal:
-    - operations:
-      - "410"
-      - "510"
-      - "570"
+
 
 preprocessing_params:
   generate_reference_trees:
@@ -65,8 +61,6 @@ operation_file_params:
     thinning_limits: data/parameter_files/Thin.txt
   cross_cut_felled_trees:
     timber_price_table: data/parameter_files/timber_price_table.csv
-  cost_only_renewal:
-    renewal_cost_table: data/parameter_files/renewal_operation_pricing.csv
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
@@ -99,4 +93,3 @@ simulation_events:
     generators:
       - sequence:
           - cross_cut_felled_trees
-
