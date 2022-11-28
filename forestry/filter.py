@@ -38,25 +38,24 @@ def applyfilter(
     if verb == "remove":
         p = predicate
         predicate = lambda f: not p(f)
-    match object:
-        case "stands":
-            stands = [
-                s
-                for s in stands
-                if predicate(makegetvarfn(named, s))
+    if object == "stands":
+        stands = [
+            s
+            for s in stands
+            if predicate(makegetvarfn(named, s))
+        ]
+    elif object == "trees":
+        for s in stands:
+            s.reference_trees = [
+                t
+                for t in s.reference_trees
+                if predicate(makegetvarfn(named, t, stand=s))
             ]
-        case "trees":
-            for s in stands:
-                s.reference_trees = [
-                    t
-                    for t in s.reference_trees
-                    if predicate(makegetvarfn(named, t, stand=s))
-                ]
-        case "strata":
-            for s in stands:
-                s.tree_strata = [
-                    t
-                    for t in s.tree_strata
-                    if predicate(makegetvarfn(named, t, stand=s))
-                ]
+    elif object == "strata":
+        for s in stands:
+            s.tree_strata = [
+                t
+                for t in s.tree_strata
+                if predicate(makegetvarfn(named, t, stand=s))
+            ]
     return stands
