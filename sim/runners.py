@@ -1,7 +1,7 @@
 from typing import Optional, Callable
 from copy import deepcopy
-from sim.core_types import OperationPayload, CUType
-from sim.generators import full_tree_generators, compose, partial_tree_generators_by_time_point, generate_time_series
+from sim.core_types import OperationPayload, CUType, SimConfiguration
+from sim.generators import full_tree_generators, compose, partial_tree_generators_by_time_point
 
 
 def evaluate_sequence(payload, *operations: Callable) -> Optional:
@@ -39,35 +39,33 @@ def run_chains_iteratively(payload, chains: list[list[Callable]]) -> list:
     return results
 
 
-def run_full_tree_strategy(payload: OperationPayload[CUType], simulation_declaration: dict, operation_lookup: dict) -> list[OperationPayload[CUType]]:
+def run_full_tree_strategy(payload: OperationPayload[CUType], config: SimConfiguration) -> list[OperationPayload[CUType]]:
     """Process the given operation payload using a simulation state tree created from the declaration. Full simulation
     tree and operation chains are pre-generated for the run. This tree strategy creates the full theoretical branching
     tree for the simulation, carrying a significant memory and runtime overhead for large trees.
 
     :param payload: a simulation state payload
-    :param simulation_declaration: a dictionary structure describing the simulation tree and its parameters (see control.yaml examples)
-    :param operation_lookup: a dictionary of operation tags mapped to a python function capable of processing a simulation state
+    :param config: a prepared SimConfiguration object
     :return: a list of resulting simulation state payloads
     """
 
-    generator_series = full_tree_generators(simulation_declaration, operation_lookup)
+    generator_series = full_tree_generators(config)
     tree = compose(*generator_series)
     chains = tree.operation_chains()
     result = run_chains_iteratively(payload, chains)
     return result
 
 
-def run_partial_tree_strategy(payload: OperationPayload[CUType], simulation_declaration: dict, operation_lookup: dict) -> list[OperationPayload[CUType]]:
+def run_partial_tree_strategy(payload: OperationPayload[CUType], config: SimConfiguration) -> list[OperationPayload[CUType]]:
     """Process the given operation payload using a simulation state tree created from the declaration. The simulation
     tree and operation chains are generated and executed in order per simulation time point. This reduces the amount of
     redundant, always-failing operation chains and redundant branches of the simulation tree.
 
     :param payload: a simulation state payload
-    :param simulation_declaration: a dictionary structure describing the simulation tree and its parameters (see control.yaml examples)
-    :param operation_lookup: a dictionary of operation tags mapped to a python function capable of processing a simulation state
+    :param config: a prepared SimConfiguration object
     :return: a list of resulting simulation state payloads
     """
-    generators_by_time_point = partial_tree_generators_by_time_point(simulation_declaration, operation_lookup)
+    generators_by_time_point = partial_tree_generators_by_time_point(config)
     chains_by_time_point = {}
     results = [payload]
 
@@ -75,7 +73,7 @@ def run_partial_tree_strategy(payload: OperationPayload[CUType], simulation_decl
     for time_point, generator_series in generators_by_time_point.items():
         chains_by_time_point[time_point] = compose(*generator_series).operation_chains()
 
-    for time_point in generate_time_series(simulation_declaration['simulation_events']):
+    for time_point in config.time_points:
         time_point_results: list[OperationPayload] = []
         for payload in results:
             payload_results = run_chains_iteratively(payload, chains_by_time_point[time_point])

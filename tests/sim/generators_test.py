@@ -1,8 +1,8 @@
 import unittest
 import sim.generators
 import yaml
-from sim.core_types import AggregatedResults, Step, OperationPayload
-from sim.generators import sequence, compose, alternatives, repeat, generate_time_series
+from sim.core_types import AggregatedResults, Step, OperationPayload, SimConfiguration
+from sim.generators import sequence, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from tests.test_utils import inc, dec, aggregating_increment, parametrized_operation
 
@@ -105,8 +105,8 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.full_tree_generators(
-            yaml.load(declaration, Loader=yaml.CLoader), {'inc': aggregating_increment})
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
+        generators = sim.generators.full_tree_generators(config)
         result = compose(*generators)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
@@ -129,8 +129,8 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc
         """
-        generators = sim.generators.full_tree_generators(
-            yaml.safe_load(declaration), {'inc': aggregating_increment})
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
+        generators = sim.generators.full_tree_generators(config)
         result = compose(*generators)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
@@ -154,8 +154,8 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        generators = sim.generators.full_tree_generators(
-            yaml.safe_load(declaration), {'inc': inc})
+        config = SimConfiguration(operation_lookup={'inc': inc}, **yaml.load(declaration, Loader=yaml.CLoader))
+        generators = sim.generators.full_tree_generators(config)
         result = compose(*generators)
         chain = result.operation_chains()[0]
         payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results=AggregatedResults())
@@ -170,9 +170,9 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-
+        config = SimConfiguration(operation_lookup={'inc': inc}, **yaml.load(declaration, Loader=yaml.CLoader))
         # generators for 2 time points'
-        generators = sim.generators.partial_tree_generators_by_time_point(yaml.safe_load(declaration), {'inc': inc})
+        generators = sim.generators.partial_tree_generators_by_time_point(config)
         self.assertEqual(2, len(generators.values()))
 
         # 1 sequence generators in each time point
@@ -227,5 +227,5 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        result = generate_time_series(yaml.safe_load(declaration)['simulation_events'])
-        self.assertEqual([0, 1, 4, 6, 8, 9, 10, 12, 100, 1000], result)
+        result = SimConfiguration(**yaml.safe_load(declaration))
+        self.assertEqual([0, 1, 4, 6, 8, 9, 10, 12, 100, 1000], result.time_points)

@@ -8,6 +8,37 @@ def identity(x):
     return x
 
 
+class SimulationEvent(SimpleNamespace):
+    time_points: list[int] = []
+    generators: list[dict] = {}
+
+
+class SimConfiguration(SimpleNamespace):
+    operation_lookup: dict[str, Callable] = {}
+    operation_params: dict[str, list[dict[str, Any]]] = {}
+    operation_file_params: dict[str, dict[str, str]] = {}
+    events: list[SimulationEvent] = []
+    run_constraints: dict[str, dict] = {}
+    time_points = []
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.populate_simulation_events(self.simulation_events)
+
+    def populate_simulation_events(self, events: list):
+        time_points = set()
+        self.events = list()
+        for event_set in events:
+            source_time_points = event_set.get('time_points', [])
+            new_event = SimulationEvent(
+                time_points=source_time_points,
+                generators=event_set.get('generators', [])
+            )
+            self.events.append(new_event)
+            time_points.update(source_time_points)
+        self.time_points = sorted(list(time_points))
+
+
 class Step:
     """
     Step represents a computational operation in a tree of alternative computation paths.

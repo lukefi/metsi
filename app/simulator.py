@@ -1,24 +1,24 @@
 import os
 import queue
-from typing import Callable
 import multiprocessing
 import forestry.operations
+import sim.generators
 from app.app_io import Mela2Configuration
 from app.app_types import ForestOpPayload
 from app.logging import print_logline
 from forestry.forestry_types import StandList
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
-from sim.core_types import AggregatedResults, StrategyRunner
+from sim.core_types import AggregatedResults, StrategyRunner, SimConfiguration
 
 
-def run_strategy_multiprocessing_wrapper(payload: ForestOpPayload, simulation_declaration: dict, operation_lookup: dict, run_strategy: StrategyRunner,  queue: queue.Queue) -> None:
+def run_strategy_multiprocessing_wrapper(payload: ForestOpPayload, config: SimConfiguration, run_strategy: StrategyRunner,  queue: queue.Queue) -> None:
     """Wrapper function for running a simulation strategy in a multiprocessing context. The result is placed in the given queue"""
-    result = run_strategy(payload, simulation_declaration, operation_lookup)
+    result = run_strategy(payload, config)
     queue.put(result)
 
 
 def run_stands(
-        stands: StandList, simulation_declaration: dict,
+        stands: StandList, config: SimConfiguration,
         run_strategy: StrategyRunner[ForestOpPayload],
         using_multiprocessing: bool
 ) -> dict[str, list[ForestOpPayload]]:
@@ -33,8 +33,7 @@ def run_stands(
             aggregated_results=AggregatedResults(),
             operation_history=[],
         ),
-        simulation_declaration,
-        forestry.operations.operation_lookup
+        config
      )
         for stand in stands
     ]
@@ -83,6 +82,10 @@ def resolve_strategy_runner(source: str) -> StrategyRunner[ForestOpPayload]:
 
 
 def simulate_alternatives(config: Mela2Configuration, control, stands: StandList):
+    simconfig = SimConfiguration(
+        operation_lookup=forestry.operations.operation_lookup,
+        generator_lookup=sim.generators.GENERATOR_LOOKUP,
+        **control)
     strategy_runner = resolve_strategy_runner(config.strategy)
-    result = run_stands(stands, control, strategy_runner, config.multiprocessing)
+    result = run_stands(stands, simconfig, strategy_runner, config.multiprocessing)
     return result

@@ -6,20 +6,13 @@ def get_or_default(maybe_value: Optional[Any], default: Any) -> Any:
     return default if maybe_value is None else maybe_value
 
 
-def dict_value(source: dict, key: str) -> Optional[Any]:
-    try:
-        return source[key]
-    except:
-        return None
-
-
-def get_operation_file_params(opreation_tag: str, operation_file_params: dict) -> dict:
+def get_operation_file_params(operation_tag: str, operation_file_params: dict) -> dict:
     """
     Checks whether the given parameter file(s) exist and returns the paths as a dict.
     This check ensures that the simulator will not crash later on when it tries to read the files.
     """
     result = {}
-    operation_param_file_paths = get_or_default(operation_file_params.get(opreation_tag), {})
+    operation_param_file_paths = operation_file_params.get(operation_tag, {})
 
     for name, path in operation_param_file_paths.items():
         file_exists = os.path.isfile(path)
