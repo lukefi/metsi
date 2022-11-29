@@ -583,7 +583,9 @@ def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
-    sdom = futil.solve_dominant_species(stand)
+    sdom = futil.solve_dominant_species(stand.reference_trees)
+    if sdom is None:
+        raise UserWarning(f"Unable to resolve thinning bounds with no dominant species found.")
     species_key = species_to_key(sdom)
     hdom = futil.solve_dominant_height_c_largest(stand)
 
@@ -633,7 +635,9 @@ FIRST_THINNING_RESIDUE_STEMS = {
 
 def resolve_first_thinning_residue(stand: ForestStand) -> float:
     """ Resolves stem count residue for first thinning operation. Values are stems per hectare. """
-    sdom = futil.solve_dominant_species(stand)
+    sdom = futil.solve_dominant_species(stand.reference_trees)
+    if sdom is None:
+        raise UserWarning(f"Unable to resolve first thinning residue with no dominant species found.")
     st_key = site_type_to_key(stand.site_type_category)
     spe_key = species_to_key(sdom)
     lower_limit = FIRST_THINNING_RESIDUE_STEMS[st_key][spe_key]
