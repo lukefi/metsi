@@ -17,9 +17,9 @@ class Mela2Configuration(SimpleNamespace):
     run_modes = [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]
     state_format = "fdm"
     state_input_container = "csv"
-    state_output_container = "csv"
-    preprocessing_output_container = "csv"
-    derived_data_output_container = "json"
+    state_output_container = None
+    preprocessing_output_container = None
+    derived_data_output_container = None
     strategy = "partial"
     multiprocessing = False
     reference_trees = False  # ForestBuilder parameter

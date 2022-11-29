@@ -77,6 +77,6 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual('vmi12', result.state_format)
         self.assertEqual('json', result.state_output_container)  # CLI overrides control source
         self.assertEqual('json', result.preprocessing_output_container)  # control source overrides Mela2Configuration
-        self.assertEqual('json', result.derived_data_output_container)  # Mela2Configuration default
+        self.assertEqual(None, result.derived_data_output_container)  # Mela2Configuration default
         self.assertEqual([RunMode.PREPROCESS], result.run_modes)
 
