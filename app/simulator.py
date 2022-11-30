@@ -53,9 +53,10 @@ def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -
 
 
 def run_strategy_multiprocessing_wrapper(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict, run_strategy: Callable,  queue: queue.Queue) -> None:
-    """Wrapper function for running a simulation strategy in a multiprocessing context. The result is placed in the given queue"""
+    """Wrapper function for running a simulation strategy in a multiprocessing context.
+    The forest stand identifier, result payloads pari is placed into the given queue."""
     result = run_strategy(payload, simulation_declaration, operation_lookup)
-    queue.put(result)
+    queue.put((payload.simulation_state.identifier, result))
 
 
 def run_stands(
@@ -98,16 +99,18 @@ def run_stands(
         #collect results from the queue into which the simulation results are put into.
         while not queue.empty():
             result = queue.get()
-            retval[result[0].simulation_state.identifier] = result
-        
+            id = result[0]
+            schedule_payloads = result[1]
+            print_logline(f"Alternatives for stand {id}: {len(schedule_payloads)}")
+            retval[id] = schedule_payloads
         return retval
 
     else:
         for arg in args:
-            result = run_strategy(*arg)
+            schedule_payloads = run_strategy(*arg)
             id = arg[0].simulation_state.identifier
-            print_logline(f"Alternatives for stand {id}: {len(result)}")
-            retval[id] = result
+            print_logline(f"Alternatives for stand {id}: {len(schedule_payloads)}")
+            retval[id] = schedule_payloads
         return retval
 
 
