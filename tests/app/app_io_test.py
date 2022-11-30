@@ -59,11 +59,12 @@ class TestAppIO(unittest.TestCase):
             123,
             "preporcess,simulate"
         ]
-        fn = app.app_io.Mela2Configuration.parse_run_modes
+
         for case in successes:
-            self.assertEqual(case[1], fn(case[0]))
+            result = app.app_io.Mela2Configuration(run_modes=case[0]).run_modes
+            self.assertEqual(case[1], result)
         for case in failures:
-            self.assertRaises(Exception, fn, case)
+            self.assertRaises(Exception, app.app_io.Mela2Configuration, **{'run_modes': case})
 
     def test_mela2_configuration(self):
         args = ['cli_input', 'cli_output', 'cli_control.yaml', '-s', 'full', '--state-format', 'vmi12', '--state-output-container', 'json']
