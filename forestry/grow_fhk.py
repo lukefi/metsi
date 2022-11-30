@@ -1,10 +1,14 @@
+import importlib
 import json
 from dataclasses import dataclass
 from functools import cache
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Generator, Optional
 from forestryfunctions.fhk import definevars
 from forestdatamodel.model import ForestStand
 import fhk
+
+StrArg = str|list[str]
+StrArgOpt = Optional[StrArg]
 
 def simvars(graph: fhk.Graph):
 
@@ -18,18 +22,28 @@ class Query:
     h: list[float] = fhk.root("tree#h'")
     f: list[float] = fhk.root("tree#f'")
 
+def iterargs(x: StrArgOpt) -> Generator[str, None, None]:
+    if isinstance(x, str):
+        yield x
+    elif x:
+        yield from x
+
 @cache
 def getquery(
-    fname: str,
-    lpath: Optional[str] = None,
-    debug: bool = False
+    fname: StrArgOpt   = None,
+    package: StrArgOpt = None,
+    lpath: StrArgOpt   = None,
+    debug: bool        = False
 ) -> Callable[..., Query]:
     with fhk.Graph() as g:
-        if lpath:
-            g.ldef(f'package.path=package.path..";"..{json.dumps(lpath)}')
+        for p in iterargs(lpath):
+            g.ldef(f'package.path=package.path..";"..{json.dumps(p)}')
+        for p in iterargs(package):
+            getattr(importlib.import_module(p), "register_graph")(g)
         if debug:
             g.sethook("v")
-        g.read(fname)
+        for f in iterargs(fname):
+            g.read(f)
         definevars(g)
         simvars(g)
         q = g.query(Query)
@@ -43,7 +57,12 @@ def getmem() -> fhk.Mem:
 
 def grow_fhk(input: tuple[ForestStand, Any], **args) -> tuple[ForestStand, None]:
     stand, _ = input
-    query = getquery(args["graph"], lpath=args.get("luapath"), debug=args.get("debug"))
+    query = getquery(
+        fname   = args.get("graph"),
+        package = args.get("package"),
+        lpath   = args.get("luapath"),
+        debug   = args.get("debug")
+    )
     mem = getmem()
     mem.reset()
     res = query(stand, mem=mem)
