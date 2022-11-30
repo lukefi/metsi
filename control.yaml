@@ -42,6 +42,8 @@ operation_params:
     - Ftot: reference_trees.stems_per_ha
       Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
       Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
+  grow_fhk:
+    - package: pymotti_graph
 
 
 preprocessing_params:
