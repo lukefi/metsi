@@ -65,7 +65,7 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
 def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     stand, simulation_aggregates = input
     if len(stand.reference_trees) == 0:
-        raise UserWarning("Unable to perform first thinning. No trees exist.")
+        raise UserWarning("Unable to perform thinning from above. No trees exist.")
     epsilon = operation_parameters['e']
     thinning_limits = operation_parameters.get('thinning_limits', None)
 
@@ -91,7 +91,7 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
 def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     stand, simulation_aggregates = input
     if len(stand.reference_trees) == 0:
-        raise UserWarning("Unable to perform first thinning. No trees exist.")
+        raise UserWarning("Unable to perform thinning from below. No trees exist.")
     epsilon = operation_parameters['e']
     thinning_limits = operation_parameters.get('thinning_limits', None)
 
@@ -117,7 +117,7 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
 def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     stand, simulation_aggregates = input
     if len(stand.reference_trees) == 0:
-        raise UserWarning("Unable to perform first thinning. No trees exist.")
+        raise UserWarning("Unable to perform even thinning. No trees exist.")
     epsilon = operation_parameters['e']
     thinning_limits = operation_parameters.get('thinning_limits', None)
 
