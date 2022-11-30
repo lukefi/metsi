@@ -5,7 +5,7 @@ import multiprocessing
 import forestry.operations
 from app.app_io import Mela2Configuration
 from app.app_types import ForestOpPayload
-from app.logging import print_logline
+from app.console_logging import print_logline
 from forestry.forestry_types import StandList
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from sim.core_types import AggregatedResults, StrategyRunner
