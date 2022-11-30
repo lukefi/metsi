@@ -151,6 +151,7 @@ See table below for a quick reference of forestry operations usable in control.y
 | report_volume             | Collect tree volume data from ForestStand state                                                |                             | native                    |
 | report_thinning           | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
 | report_collectives        | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
+| filter                    | [Filter](#filters) stands, trees and strata                                                    |                             | native                    |
 | cross_cut_felled_trees | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
 | cross_cut_whole_stand     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 
@@ -317,6 +318,40 @@ The collective arrays are just numpy arrays, so all numpy slicing operations are
 For export data collection you can index the collection array by collection **year**,
 so `Vpine` would export the collective `Vpine` from all periods, and `Vpine[0,5]` would
 export it from **years** 0 and 5.
+
+## Filters
+
+You can use the `filter` operation to control what data to keep or remove during pre-processing.
+It takes a dict of `action: expression` where `action` is of the form
+`select|remove[ stands|trees|strata]` and `expression` is a Python expression.
+`select` and `remove` are aliases for `select stands` and `remove stands`.
+`select` removes all objects for which `expression` evaluates to a falsy value,
+while `remove` removes objects for which `expression` evaluates to a truthy value.
+
+The following example removes all sapling trees, trees without stem count and stands
+without reference trees:
+```yaml
+preprocessing_params:
+  filter:
+    - remove trees: sapling or stems_per_ha == 0
+      remove: not reference_trees
+```
+
+Evaluation order is the order of parameters, so the example would first remove
+trees and then stands.
+
+You can also reuse filters with named filters. A named filter is an expression given in the `named`
+parameter, and it can be used in other expressions (including other named filters).
+The following example is equivalent to the previous one:
+```yaml
+preprocessing_params:
+  filter:
+    - named:
+        nostems: stems_per_ha == 0
+        notrees: not reference_trees
+      remove trees: sapling or nostems
+      remove: notrees
+```
 
 ## Simulator
 
