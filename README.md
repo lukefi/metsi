@@ -81,15 +81,26 @@ pip install rpy2
 
 ### Motti (optional)
 
-To be able to use forestry operations depending on the `pymotti` library
+There's two ways to use Motti growth models: the pure Python [`pymotti`](https://github.com/menu-hanke/pymotti)
+implementation, and the [fhk](https://github.com/menu-hanke/fhk)-based Lua implementation.
+They *should* give the same results for big tree natural processes. The difference is that the
+fhk implementation is much faster but also less complete for now.
 
-* Obtain GitHub access to https://github.com/menu-hanke/pymotti repository from menu-hanke organisation. Motti is not an open source implementation.
-* Clone and install the `pymotti` Python module as a locally sourced package with the commands below 
+To use the Python models, install `pymotti`:
+```
+pip install git+https://github.com/menu-hanke/pymotti
+```
+The corresponding growth operation is `grow_motti`.
 
+To use the Lua models, install `pymotti_graph` and `fhk`:
 ```
-git clone https://github.com/menu-hanke/pymotti
-pip install -e ./pymotti
+pip install -r fhk-requirements.txt
 ```
+You can then use the `grow_fhk` operation with `package: pymotti_graph`.
+
+**NOTE**: For either model, the input data must contain precomputed weather data
+(temperature sums, sea/lake indices). In practice this means that you must enable
+the `compute_location_metadata` preprocessing operation **even if you're using the Lua models**.
 
 ## Project layout
 
@@ -144,6 +155,7 @@ See table below for a quick reference of forestry operations usable in control.y
 | do_nothing                | This operation is no-op utility operation to simulate rest                                     |                             | native                    |
 | grow_acta                 | A simple ReferenceTree diameter and height growth operation                                    | Acta Forestalia Fennica 163 | forestry-function-library |
 | grow_motti                | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.              | Luke Motti group            | pymotti                   |
+| grow_fhk                  | A growth operation using an arbitrary fhk graph.                                               |                             | native/forestry-function-library |
 | first_thinning            | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest        | Reijo Mykkänen              | forestry-function-library |
 | thinning_from_below       | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees | Reijo Mykkänen              | forestry-function-library |
 | thinning_from_above       | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees | Reijo Mykkänen              | forestry-function-library |
