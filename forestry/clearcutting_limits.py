@@ -253,7 +253,7 @@ def get_clearcutting_instructions(stand: ForestStand,file_path_instructions: str
 
 def species_to_key_clearcut(stand:ForestStand) -> str:
     """ converts tree species to into a key for clearcut lookup table """
-    value = futil.solve_dominant_species(stand)
+    value = futil.solve_dominant_species(stand.reference_trees)
     if value in (TreeSpecies.PINE,):
         return  SpeciesKey.PINE
     elif value in (TreeSpecies.SPRUCE,):

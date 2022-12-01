@@ -71,7 +71,7 @@ class ClearcuttingTest(unittest.TestCase):
         simulation_aggregates = AggregatedResults()
         oper_input = (stand, simulation_aggregates)
         stand, aggr = clearcut.clearcutting(oper_input, **operation_parameters)
-        self.assertEqual(0, futil.overall_stems_per_ha(stand))
+        self.assertEqual(0, futil.overall_stems_per_ha(stand.reference_trees))
         self.assertEqual(0, futil.mean_age_stand(stand))
         self.assertEqual(192,aggr.prev('clearcutting').trees[-1].stems_to_cut_per_ha)
     
