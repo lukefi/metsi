@@ -1,10 +1,10 @@
 from typing import Tuple
 from forestdatamodel.model import ForestStand, ReferenceTree
-from forestryfunctions.cross_cutting.model import CrossCuttableTree
 from forestry.clearcutting_limits import *
 from forestryfunctions import forestry_utils as futil
 from forestdatamodel.enums.internal import TreeSpecies
 import enum
+from forestry.cross_cutting import CrossCuttableTree
 from sim.core_types import AggregatedResults, OpTuple
 
 def clearcut_with_output(

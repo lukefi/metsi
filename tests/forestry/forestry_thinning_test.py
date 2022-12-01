@@ -1,3 +1,4 @@
+from forestry.cross_cutting import CrossCuttableTree
 from tests.test_utils import ConverterTestSuite, get_default_timber_price_table
 from forestryfunctions.cross_cutting.model import CrossCuttableTree
 from forestdatamodel.model import ReferenceTree
