@@ -1,6 +1,6 @@
 from functools import cache
-from io import StringIO
 import numpy as np
+
 
 @cache
 def get_timber_price_table(file_path: str) -> np.ndarray:

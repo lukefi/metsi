@@ -1,76 +1,34 @@
 import os
-import time
 import queue
-from typing import List, Callable, Dict
-import sys
+from typing import Callable
 import multiprocessing
 import forestry.operations
-import forestry.preprocessing as preprocessing
-from sim.runners import run_full_tree_strategy, run_partial_tree_strategy, evaluate_sequence
-from sim.core_types import AggregatedResults, OperationPayload
-from sim.generators import simple_processable_chain
-from forestdatamodel.model import ForestStand
-from app.file_io import read_stands_from_file, simulation_declaration_from_yaml_file, \
-    write_full_simulation_result_dirtree, prepare_target_directory, \
-    determine_file_path, write_stands_to_file
-from app.app_io import sim_cli_arguments, set_default_arguments
-
-start_time = time.time_ns()
+from app.app_io import Mela2Configuration
+from app.app_types import ForestOpPayload
+from app.console_logging import print_logline
+from forestry.forestry_types import StandList
+from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
+from sim.core_types import AggregatedResults, StrategyRunner
 
 
-def runtime_now() -> float:
-    global start_time
-    return round((time.time_ns() - start_time) / 1000000000, 1)
-
-
-def print_logline(message: str):
-    print("{} {}".format(runtime_now(), message))
-
-
-def print_stand_result(stand: ForestStand):
-    print("volume {}".format(forestry.operations.compute_volume(stand)))
-
-
-def print_run_result(results: dict):
-    for id in results.keys():
-        for i, result in enumerate(results[id]):
-            print("{} variant {} result: ".format(id, i), end='')
-            print_stand_result(result.simulation_state)
-            last_volume_reporting_aggregate = result.aggregated_results.prev('report_volume')
-            last_biomass_reporting_aggregate = result.aggregated_results.prev('report_biomass')
-            last_removal_reporting_aggregate = result.aggregated_results.prev('report_overall_removal')
-            print("variant {} growth report: {}".format(i, last_volume_reporting_aggregate))
-            print("variant {} biomass report: {}".format(i, last_biomass_reporting_aggregate))
-            print("variant {} thinning report: {}".format(i, last_removal_reporting_aggregate))
-
-
-def preprocess_stands(stands: List[ForestStand], simulation_declaration: dict) -> List[ForestStand]:
-    preprocessing_operations = simulation_declaration.get('preprocessing_operations', {})
-    preprocessing_params = simulation_declaration.get('preprocessing_params', {})
-    preprocessing_funcs = simple_processable_chain(preprocessing_operations, preprocessing_params, preprocessing.operation_lookup)
-    stands = evaluate_sequence(stands, *preprocessing_funcs)
-    return stands
-
-
-def run_strategy_multiprocessing_wrapper(payload: OperationPayload, simulation_declaration: dict, operation_lookup: dict, run_strategy: Callable,  queue: queue.Queue) -> None:
-    """Wrapper function for running a simulation strategy in a multiprocessing context.
-    The forest stand identifier, result payloads pari is placed into the given queue."""
+def run_strategy_multiprocessing_wrapper(payload: ForestOpPayload, simulation_declaration: dict, operation_lookup: dict, run_strategy: StrategyRunner,  queue: queue.Queue) -> None:
+    """Wrapper function for running a simulation strategy in a multiprocessing context. The result is placed in the given queue"""
     result = run_strategy(payload, simulation_declaration, operation_lookup)
     queue.put((payload.simulation_state.identifier, result))
 
 
 def run_stands(
-        stands: List[ForestStand], simulation_declaration: dict,
-        run_strategy: Callable[[OperationPayload, dict, dict], List[OperationPayload]],
+        stands: StandList, simulation_declaration: dict,
+        run_strategy: StrategyRunner[ForestOpPayload],
         using_multiprocessing: bool
-) -> Dict[str, List[OperationPayload]]:
+) -> dict[str, list[ForestOpPayload]]:
     """Run the simulation for all given stands, from the given declaration, using the given run strategy. Return the
     results organized into a dict keyed with stand identifiers."""
 
     retval = {}
     args = [
      (
-        OperationPayload(
+        ForestOpPayload(
             simulation_state=stand,
             aggregated_results=AggregatedResults(),
             operation_history=[],
@@ -114,7 +72,7 @@ def run_stands(
         return retval
 
 
-def resolve_strategy_runner(source: str) -> Callable:
+def resolve_strategy_runner(source: str) -> StrategyRunner[ForestOpPayload]:
     strategy_map = {
         'full': run_full_tree_strategy,
         'partial': run_partial_tree_strategy
@@ -126,39 +84,7 @@ def resolve_strategy_runner(source: str) -> Callable:
         raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
 
 
-def main():
-    app_arguments = sim_cli_arguments(sys.argv[1:])
-    simulation_declaration = simulation_declaration_from_yaml_file(app_arguments.control_file)
-    app_arguments = set_default_arguments(app_arguments, simulation_declaration['io_configuration'])
-
-    print_logline("Preparing run...")
-    stands = read_stands_from_file(
-        app_arguments.input_file,
-        app_arguments.state_format,
-        app_arguments.state_input_container,
-        reference_trees=app_arguments.reference_trees,
-        strata_origin=app_arguments.strata_origin
-    )
-    outdir = prepare_target_directory(app_arguments.target_directory)
-
-    print_logline("Preprocessing computational units...")
-    result = preprocess_stands(stands, simulation_declaration)
-
-    if app_arguments.preprocessing_output_container is not None:
-        filepath = determine_file_path(outdir, f"preprocessing_result.{app_arguments.preprocessing_output_container}")
-        write_stands_to_file(result, filepath, app_arguments.preprocessing_output_container)
-
-    if app_arguments.strategy != "skip":
-        print_logline("Simulating alternatives...")
-        strategy_runner = resolve_strategy_runner(app_arguments.strategy)
-        result = run_stands(result, simulation_declaration, strategy_runner, app_arguments.multiprocessing)
-    else:
-        result = {}
-
-    print_logline("Writing output...")
-    write_full_simulation_result_dirtree(result, app_arguments)
-
-    print_logline("Done. Exiting.")
-
-if __name__ == "__main__":
-    main()
+def simulate_alternatives(config: Mela2Configuration, control, stands: StandList):
+    strategy_runner = resolve_strategy_runner(config.strategy)
+    result = run_stands(stands, control, strategy_runner, config.multiprocessing)
+    return result

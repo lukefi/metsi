@@ -1,9 +1,8 @@
-from typing import Tuple
 from forestryfunctions.naturalprocess.grow_motti import MottiGrowthPredictor
 from forestdatamodel.model import ForestStand
 
 
-def grow_motti(input: Tuple[ForestStand, None], **operation_parameters) -> Tuple[ForestStand, None]:
+def grow_motti(input: tuple[ForestStand, None], **operation_parameters) -> tuple[ForestStand, None]:
     stand, _ = input
     growth = MottiGrowthPredictor(stand).evolve()
     for i, t in enumerate(stand.reference_trees):

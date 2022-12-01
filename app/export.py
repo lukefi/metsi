@@ -1,9 +1,8 @@
 import bisect
 from functools import cache
-import sys
 from typing import IO, Any, Generic, Iterator, TypeVar, Union
-from app.app_io import export_cli_arguments
-from app.file_io import simulation_declaration_from_yaml_file, read_full_simulation_result_dirtree
+from app.app_io import Mela2Configuration
+from app.app_types import SimResults
 from sim.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
 from sim.core_types import OperationPayload
 
@@ -74,7 +73,7 @@ def j_row(out: IO, fns: list[CollectFn], getvar: GetVarFn):
     out.write("\n")
 
 
-def j_xda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
+def j_xda(out: IO, decl: dict, data: SimResults):
     """Write xdata file."""
     collectives = {
         k for schedules in data.values()
@@ -97,7 +96,7 @@ def j_xda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
             )
 
 
-def j_cda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
+def j_cda(out: IO, decl: dict, data: SimResults):
     """Write cdata file."""
     cvars = list(map(compile, ["len(schedules)", *decl.get("cvariables", [])]))
     for schedules in data.values():
@@ -111,24 +110,17 @@ def j_cda(out: IO, decl: dict, data: dict[str, list[OperationPayload]]):
         )
 
 
-def j_out(decl: dict, data: dict[str, list[OperationPayload]]):
+def j_out(configuration: Mela2Configuration, decl: dict, data: SimResults):
     """Write J files."""
-    with open(decl.get("cda", "data.cda"), "w") as f:
+    with open(f"{configuration.target_directory}/{decl.get('cda', 'data.cda')}", "w") as f:
         j_cda(f, decl, data)
-    with open(decl.get("xda", "data.xda"), "w") as f:
+    with open(f"{configuration.target_directory}/{decl.get('xda', 'data.xda')}", "w") as f:
         j_xda(f, decl, data)
 
 
-def main():
-    args = export_cli_arguments(sys.argv[1:])
-    data = read_full_simulation_result_dirtree(args.input_directory)
-    decl = simulation_declaration_from_yaml_file(args.control_file)
+def export_variables(config: Mela2Configuration, decl, data):
     format = decl.get("format", "j").lower()
     if format == "j":
-        j_out(decl, data)
+        j_out(config, decl, data)
     else:
         raise ValueError("Unknown output format: '{}'".format(format))
-
-
-if __name__ == "__main__":
-    main()
