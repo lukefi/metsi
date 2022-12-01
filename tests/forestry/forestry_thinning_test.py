@@ -1,6 +1,5 @@
-from collections import OrderedDict
 from tests.test_utils import ConverterTestSuite, get_default_timber_price_table
-from forestryfunctions.cross_cutting.model import CrossCuttableTrees, CrossCuttableTree
+from forestryfunctions.cross_cutting.model import CrossCuttableTree
 from forestdatamodel.model import ReferenceTree
 from forestry.thinning_limits import *
 from sim.core_types import AggregatedResults
@@ -52,7 +51,7 @@ class ThinningsTest(ConverterTestSuite):
         self.assertAlmostEqual(257.6202, result_stand.reference_trees[0].stems_per_ha, places=4)
         self.assertAlmostEqual(180.7842, result_stand.reference_trees[1].stems_per_ha, places=4)
         self.assertAlmostEqual(570.594, result_stand.reference_trees[2].stems_per_ha, places=4)
-        self.assertAlmostEqual(600-570.594, collected_aggregates.prev(operation_tag).trees[-1].stems_to_cut_per_ha, places=4)
+        self.assertAlmostEqual(600-570.594, collected_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha, places=4)
 
 
     def test_thinning_from_above(self):
@@ -83,7 +82,7 @@ class ThinningsTest(ConverterTestSuite):
         self.assertAlmostEqual(124.0792, result_stand.reference_trees[0].stems_per_ha, places=4)
         self.assertAlmostEqual(145.4833, result_stand.reference_trees[1].stems_per_ha, places=4)
         self.assertAlmostEqual(170.2916, result_stand.reference_trees[2].stems_per_ha, places=4)
-        self.assertAlmostEqual(200-170.2916, collected_aggregates.prev(operation_tag).trees[-1].stems_to_cut_per_ha, places=4)
+        self.assertAlmostEqual(200-170.2916, collected_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha, places=4)
 
     def test_thinning_from_below(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -113,7 +112,7 @@ class ThinningsTest(ConverterTestSuite):
         self.assertAlmostEqual(119.1652, result_stand.reference_trees[0].stems_per_ha, places=4)
         self.assertAlmostEqual(142.5737, result_stand.reference_trees[1].stems_per_ha, places=4)
         self.assertAlmostEqual(170.2745, result_stand.reference_trees[2].stems_per_ha, places=4)
-        self.assertAlmostEqual(202-170.2745, collected_aggregates.prev('thinning_from_below').trees[-1].stems_to_cut_per_ha, places=4)
+        self.assertAlmostEqual(202-170.2745, collected_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha, places=4)
 
     def test_even_thinning(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -143,39 +142,36 @@ class ThinningsTest(ConverterTestSuite):
         self.assertAlmostEqual(100.0, result_stand.reference_trees[0].stems_per_ha, places=4)
         self.assertAlmostEqual(100.5, result_stand.reference_trees[1].stems_per_ha, places=4)
         self.assertAlmostEqual(101.0, result_stand.reference_trees[2].stems_per_ha, places=4)
-        self.assertAlmostEqual(202-101.0, collected_aggregates.prev('even_thinning').trees[-1].stems_to_cut_per_ha, places=4)
+        self.assertAlmostEqual(202-101.0, collected_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha, places=4)
 
     def test_report_overall_removal(self):
         operation_results = {
-
-            'thin1': OrderedDict({
-                0: CrossCuttableTrees([
+            "felled_trees":[
                     CrossCuttableTree(
                         stems_to_cut_per_ha=100,
                         species=TreeSpecies.PINE,
                         breast_height_diameter=0,
-                        height=0
-                    )
-                ])
-            }),
-            'thin2': OrderedDict({
-                0: CrossCuttableTrees([
+                        height=0,
+                        source="thin1",
+                        time_point=0
+                    ),
                     CrossCuttableTree(
                         stems_to_cut_per_ha=200,
                         species=TreeSpecies.PINE,
                         breast_height_diameter=0,
-                        height=0
-                    )
-                ]),
-                15: CrossCuttableTrees([
+                        height=0,
+                        source="thin2",
+                        time_point=0
+                    ),
                     CrossCuttableTree(
                         stems_to_cut_per_ha=300,
                         species=TreeSpecies.PINE,
                         breast_height_diameter=0,
-                        height=0
-                    )
-                ])
-            })
+                        height=0,
+                        source="thin2",
+                        time_point=15
+                    ),
+            ]
         }
 
         simulation_aggregates = AggregatedResults(

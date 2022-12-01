@@ -1,6 +1,6 @@
 from forestdatamodel.model import ForestStand
 from typing import Any, Callable
-from forestryfunctions.cross_cutting.model import CrossCuttableTrees, CrossCuttableTree
+from forestryfunctions.cross_cutting.model import CrossCuttableTree
 from forestry.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
 from forestryfunctions.harvest import thinning
 from forestryfunctions import forestry_utils as futil
@@ -22,12 +22,21 @@ def iterative_thinning_with_output(
     No output is written for unchanged trees."""
     f0 = [t.stems_per_ha for t in stand.reference_trees]
     stand = thinning.iterative_thinning(stand, thinning_factor, thin_predicate, extra_factor_solver)
-    thinning_output = CrossCuttableTrees(trees=[
-            CrossCuttableTree(f-t.stems_per_ha, t.species, t.breast_height_diameter, t.height)
+
+    thinning_output = [
+            CrossCuttableTree(
+                f-t.stems_per_ha, 
+                t.species, 
+                t.breast_height_diameter, 
+                t.height,
+                tag,
+                aggr.current_time_point
+            )
             for t,f in zip(stand.reference_trees, f0)
             if f > t.stems_per_ha
-        ])
-    aggr.store(tag, thinning_output)
+        ]
+
+    aggr.extend_list_result("felled_trees", thinning_output)
 
     return stand, aggr
 
@@ -144,15 +153,11 @@ def report_overall_removal(payload: OpTuple, **operation_parameters) -> OpTuple:
 
     report_removal_collection = {}
     for tag in operation_tags:
-        thinning_aggregates = simulation_aggregates.operation_results.get(tag)
+        thinning_aggregates = [x for x in simulation_aggregates.get_list_result("felled_trees") if x.source == tag]
         if thinning_aggregates is None:
             new_aggregate = 0.0
         else:
-            new_aggregate = sum(
-                v.stems_to_cut_per_ha
-                for y in thinning_aggregates.values()
-                for v in y.trees
-            )
+            new_aggregate = sum(y.stems_to_cut_per_ha for y in thinning_aggregates)
         report_removal_collection[tag] = new_aggregate
     simulation_aggregates.store('report_overall_removal', report_removal_collection)
     return payload
