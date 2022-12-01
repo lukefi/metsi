@@ -1,6 +1,6 @@
 from typing import Tuple
 from forestdatamodel.model import ForestStand, ReferenceTree
-from forestryfunctions.cross_cutting.model import  CrossCuttableTrees,CrossCuttableTree
+from forestryfunctions.cross_cutting.model import CrossCuttableTree
 from forestry.clearcutting_limits import *
 from forestryfunctions import forestry_utils as futil
 from forestdatamodel.enums.internal import TreeSpecies
@@ -14,16 +14,20 @@ def clearcut_with_output(
     """Clears the stand's reference tree list
     :returns: clearcut stand and removed trees as CrosCuttableTrees
     """
-    #initialises the thinning_output dictionary where stems_removed_per_ha is aggregated to during the thinning operation
-    aggr.store(
-        tag,
-        CrossCuttableTrees([
-            CrossCuttableTree(t.stems_per_ha, t.species, t.breast_height_diameter, t.height)
+    trees = [
+            CrossCuttableTree(
+                t.stems_per_ha, 
+                t.species, 
+                t.breast_height_diameter, 
+                t.height, 
+                tag,
+                aggr.current_time_point
+                )
                 for t in stand.reference_trees
-        ])
-    ) 
+            ]
+    aggr.extend_list_result("felled_trees", trees)
     stand.reference_trees = []
-    #pois ffl ja lisäys tähän
+
     return stand, aggr
 
 class SoilPreparationKey(enum.IntEnum):
