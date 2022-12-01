@@ -1,6 +1,7 @@
 import argparse
 from enum import Enum
 from types import SimpleNamespace
+from typing import Optional
 
 
 class RunMode(Enum):
@@ -17,19 +18,21 @@ class Mela2Configuration(SimpleNamespace):
     run_modes = [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]
     state_format = "fdm"
     state_input_container = "csv"
-    state_output_container = "csv"
-    preprocessing_output_container = "csv"
-    derived_data_output_container = "json"
+    state_output_container = None
+    preprocessing_output_container = None
+    derived_data_output_container = None
     strategy = "partial"
     multiprocessing = False
     reference_trees = False  # ForestBuilder parameter
     strata_origin = "1"  # ForestBuilder parameter
 
-    def set_run_modes(self, modestring: str):
-        self.run_modes = Mela2Configuration.parse_run_modes(modestring)
+    def __init__(self, **kwargs):
+        if kwargs.get('run_modes') is not None:
+            self.set_run_modes(kwargs['run_modes'])
+            kwargs.__delitem__('run_modes')
+        super().__init__(**kwargs)
 
-    @classmethod
-    def parse_run_modes(cls, modestring):
+    def set_run_modes(self, modestring: str):
         try:
             mode_candidates = list(map(lambda x: RunMode(x), modestring.split(sep=",")))
         except:
@@ -57,15 +60,7 @@ class Mela2Configuration(SimpleNamespace):
                     raise ValueError("Run mode 'export' must be the last mode")
                 if i > 0 and mode_candidates[i - 1] not in (RunMode.SIMULATE, RunMode.POSTPROCESS):
                     raise ValueError("Run mode 'export' must be preceded by 'simulate' or 'postprocess'")
-        return mode_candidates
-
-
-def merge_dicts(sources: list[dict]=[]) -> dict:
-    """Merge dicts in given list of dicts, overriding keys in order."""
-    result = {}
-    for source in sources:
-        result |= source
-    return result
+        self.run_modes = mode_candidates
 
 
 def remove_nones(source: dict) -> dict:
@@ -80,10 +75,8 @@ def remove_nones(source: dict) -> dict:
 def generate_program_configuration(cli_args: argparse.Namespace, control_source: dict={}) -> Mela2Configuration:
     """Generate a Mela2Configuration, overriding values with control file source, then with CLI arguments"""
     cli_source = remove_nones(cli_args.__dict__)
-    merged = merge_dicts([control_source, cli_source])
+    merged = {**control_source, **cli_source}
     result = Mela2Configuration(**merged)
-    if merged.get('run_modes'):
-        result.set_run_modes(merged.get('run_modes'))
     return result
 
 

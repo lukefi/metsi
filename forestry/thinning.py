@@ -9,7 +9,7 @@ from sim.core_types import AggregatedResults, OpTuple
 def evaluate_thinning_conditions(predicates):
     return all(f() for f in predicates)
 
-    
+
 def iterative_thinning_with_output(
     stand: ForestStand,
     aggr: AggregatedResults,
@@ -34,6 +34,8 @@ def iterative_thinning_with_output(
 
 def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     stand, simulation_aggregates = input
+    if len(stand.reference_trees) == 0:
+        raise UserWarning("Unable to perform first thinning. No trees exist.")
     epsilon = operation_parameters['e']
     hdom_0 = operation_parameters['dominant_height_lower_bound']
     hdom_n = operation_parameters['dominant_height_upper_bound']
@@ -42,7 +44,7 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
 
     residue_stems = resolve_first_thinning_residue(stand)
 
-    stems_over_limit = lambda: residue_stems < futil.overall_stems_per_ha(stand)
+    stems_over_limit = lambda: residue_stems < futil.overall_stems_per_ha(stand.reference_trees)
     hdom_in_between = lambda: hdom_0 <= futil.solve_dominant_height_c_largest(stand) <= hdom_n
     predicates = [stems_over_limit, hdom_in_between]
 
@@ -52,7 +54,7 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
-            thin_predicate = lambda stand: (residue_stems + epsilon) <= futil.overall_stems_per_ha(stand),
+            thin_predicate = lambda s: (residue_stems + epsilon) <= futil.overall_stems_per_ha(s.reference_trees),
             extra_factor_solver = lambda i, n, c: (1.0-c) * i/n,
             tag = 'first_thinning',
         )
@@ -62,13 +64,15 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
 
 def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     stand, simulation_aggregates = input
+    if len(stand.reference_trees) == 0:
+        raise UserWarning("Unable to perform thinning from above. No trees exist.")
     epsilon = operation_parameters['e']
     thinning_limits = operation_parameters.get('thinning_limits', None)
 
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter, reverse=True)
 
     (lower_limit, upper_limit) = resolve_thinning_bounds(stand, thinning_limits)
-    upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
+    upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand.reference_trees)
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
@@ -76,7 +80,7 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
-            thin_predicate = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand),
+            thin_predicate = lambda s: (lower_limit + epsilon) <= futil.overall_basal_area(s.reference_trees),
             extra_factor_solver = lambda i, n, c: (1.0-c) * i/n,
             tag = 'thinning_from_above',
         )
@@ -86,13 +90,15 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
 
 def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     stand, simulation_aggregates = input
+    if len(stand.reference_trees) == 0:
+        raise UserWarning("Unable to perform thinning from below. No trees exist.")
     epsilon = operation_parameters['e']
     thinning_limits = operation_parameters.get('thinning_limits', None)
 
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
 
     (lower_limit, upper_limit) = resolve_thinning_bounds(stand, thinning_limits)
-    upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
+    upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand.reference_trees)
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
@@ -100,7 +106,7 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
-            thin_predicate = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand),
+            thin_predicate = lambda s: (lower_limit + epsilon) <= futil.overall_basal_area(s.reference_trees),
             extra_factor_solver = lambda i, n, c: (1.0-c) * i/n,
             tag = 'thinning_from_below',
         )
@@ -110,11 +116,13 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
 
 def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     stand, simulation_aggregates = input
+    if len(stand.reference_trees) == 0:
+        raise UserWarning("Unable to perform even thinning. No trees exist.")
     epsilon = operation_parameters['e']
     thinning_limits = operation_parameters.get('thinning_limits', None)
 
     (lower_limit, upper_limit) = resolve_thinning_bounds(stand, thinning_limits)
-    upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand)
+    upper_limit_reached = lambda: upper_limit < futil.overall_basal_area(stand.reference_trees)
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
@@ -122,7 +130,7 @@ def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTupl
             stand = stand,
             aggr = simulation_aggregates,
             thinning_factor = operation_parameters['thinning_factor'],
-            thin_predicate = lambda stand: (lower_limit + epsilon) <= futil.overall_basal_area(stand),
+            thin_predicate = lambda s: (lower_limit + epsilon) <= futil.overall_basal_area(s.reference_trees),
             extra_factor_solver = lambda i, n, c: 0,
             tag = 'even_thinning',
         )

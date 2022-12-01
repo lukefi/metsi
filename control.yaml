@@ -1,11 +1,10 @@
 #Application configuration values. Can be overriden by CLI arguments. May be commented out for None or default from Mela2Configuration.
 app_configuration:
-  control_file: control.yaml
   state_format: fdm #options: fdm, vmi12, vmi13, forest_centre
   state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
-  preprocessing_output_container: csv #options: pickle, json, csv, rsd (special case not usable as input container)
-  state_output_container: csv #options: pickle, json, csv
-  derived_data_output_container: pickle #options: pickle, json
+  #preprocessing_output_container: csv #options: pickle, json, csv, null, rsd (special case not usable as input container)
+  #state_output_container: csv #options: pickle, json, csv, null
+  #derived_data_output_container: pickle #options: pickle, json, null
   strategy: partial
   run_modes: preprocess,simulate,postprocess
 
@@ -45,25 +44,31 @@ operation_params:
     - Ftot: reference_trees.stems_per_ha
       Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
       Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
+  grow_fhk:
+    - package: pymotti_graph
 
 
 preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
+  filter:
+    - remove trees: sapling or stems_per_ha == 0
+      remove: not reference_trees
 
 preprocessing_operations:
   - generate_reference_trees # comment out if input data contains direct trees (vmi12 or vmi13)
-  - exclude_sapling_trees
-  - exclude_empty_stands
-  - exclude_zero_stem_trees
-  # requires pymotti dependency
-  # - compute_location_metadata
+  - filter
+  - compute_location_metadata
 
 operation_file_params:
   thinning_from_above:
     thinning_limits: data/parameter_files/Thin.txt
   cross_cut_felled_trees:
     timber_price_table: data/parameter_files/timber_price_table.csv
+  clearcutting:
+    clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt  
+    clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt 
+    clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
@@ -76,8 +81,9 @@ simulation_events:
     generators:
       - sequence:
         - grow_acta
-        # requires pymotti dependency
-        # - grow_motti
+        #- grow_motti
+        # requires fhk dependencies from fhk-requirements.txt
+        #- grow_fhk
   - time_points: [5, 15, 25]
     generators:
       - alternatives:
@@ -86,6 +92,7 @@ simulation_events:
           - thinning_from_above
           - first_thinning
           - even_thinning
+          - clearcutting
   - time_points: [30]
     generators:
       - sequence:

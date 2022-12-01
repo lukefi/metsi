@@ -50,6 +50,10 @@ def max_reducer(x: list[int]) -> Optional[int]:
     return max(x)
 
 
+def grow_dummy(f: float, d: float, h: float, dd: float) -> tuple[float, float, float]:
+    return f-f%100, d+dd/500, h+dd/1000
+
+
 def parametrized_operation(x, **kwargs):
     if kwargs.get('amplify') is True:
         return x * 1000

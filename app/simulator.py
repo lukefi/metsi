@@ -5,7 +5,7 @@ import forestry.operations
 import sim.generators
 from app.app_io import Mela2Configuration
 from app.app_types import ForestOpPayload
-from app.logging import print_logline
+from app.console_logging import print_logline
 from forestry.forestry_types import StandList
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
 from sim.core_types import AggregatedResults, StrategyRunner, SimConfiguration
@@ -14,7 +14,7 @@ from sim.core_types import AggregatedResults, StrategyRunner, SimConfiguration
 def run_strategy_multiprocessing_wrapper(payload: ForestOpPayload, config: SimConfiguration, run_strategy: StrategyRunner,  queue: queue.Queue) -> None:
     """Wrapper function for running a simulation strategy in a multiprocessing context. The result is placed in the given queue"""
     result = run_strategy(payload, config)
-    queue.put(result)
+    queue.put((payload.simulation_state.identifier, result))
 
 
 def run_stands(
@@ -56,16 +56,18 @@ def run_stands(
         #collect results from the queue into which the simulation results are put into.
         while not queue.empty():
             result = queue.get()
-            retval[result[0].simulation_state.identifier] = result
-        
+            id = result[0]
+            schedule_payloads = result[1]
+            print_logline(f"Alternatives for stand {id}: {len(schedule_payloads)}")
+            retval[id] = schedule_payloads
         return retval
 
     else:
         for arg in args:
-            result = run_strategy(*arg)
+            schedule_payloads = run_strategy(*arg)
             id = arg[0].simulation_state.identifier
-            print_logline(f"Alternatives for stand {id}: {len(result)}")
-            retval[id] = result
+            print_logline(f"Alternatives for stand {id}: {len(schedule_payloads)}")
+            retval[id] = schedule_payloads
         return retval
 
 

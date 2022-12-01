@@ -117,7 +117,7 @@ class AggregatedResults:
         self.get(tag)[self.current_time_point] = aggr
 
 
-CUType = TypeVar("CUType")
+CUType = TypeVar("CUType")  # CU for Computational Unit
 
 
 class OperationPayload(SimpleNamespace, Generic[CUType]):
