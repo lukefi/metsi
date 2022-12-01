@@ -1,5 +1,5 @@
 from typing import Any, Callable, Optional
-from sim.core_types import Step, SimConfiguration, SimulationEvent
+from sim.core_types import Step, SimConfiguration, SimulationEvent, OperationPayload
 from sim.operations import prepared_processor, prepared_operation, resolve_operation
 from sim.util import get_operation_file_params, merge_operation_params
 
@@ -133,23 +133,32 @@ def prepare_step_generator(generator_declaration: dict, config: SimConfiguration
     processors = []
     for operation_tag in operation_tags:
         parameter_set_choices = config.operation_params.get(operation_tag, [{}])
-        operation_run_constraints = config.run_constraints.get(operation_tag)
-        this_operation_file_params = get_operation_file_params(operation_tag, config.operation_file_params)
         if len(parameter_set_choices) > 1 and generator_tag == 'sequence':
             raise Exception("Alternatives by operation parameters not supported in sequences. Use "
                             "alternatives clause for operation {} in time point {} or reduce operation parameter "
                             "set size to 0 or 1.".format(operation_tag, time_point))
-        for parameter_set in parameter_set_choices:
-            combined_params = merge_operation_params(parameter_set, this_operation_file_params)
-            processor = prepared_processor(
-                operation_tag,
-                config.operation_lookup,
-                time_point,
-                operation_run_constraints,
-                **combined_params)
-            processors.append(processor)
+        processor = prepare_parametrized_operations(config, operation_tag, time_point)
+        processors.extend(processor)
     generator = generator_function(generator_tag, GENERATOR_LOOKUP, *processors)
     return generator
+
+
+def prepare_parametrized_operations(config: SimConfiguration,
+                                    operation_tag: str,
+                                    time_point: int) -> list[Callable[[Any], OperationPayload]]:
+    parameter_set_choices = config.operation_params.get(operation_tag, [{}])
+    operation_run_constraints = config.run_constraints.get(operation_tag)
+    this_operation_file_params = get_operation_file_params(operation_tag, config.operation_file_params)
+    results = []
+    for parameter_set in parameter_set_choices:
+        combined_params = merge_operation_params(parameter_set, this_operation_file_params)
+        results.append(prepared_processor(
+            operation_tag,
+            config.operation_lookup,
+            time_point,
+            operation_run_constraints,
+            **combined_params))
+    return results
 
 
 def full_tree_generators(config: SimConfiguration) -> list[Callable]:
