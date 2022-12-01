@@ -1,5 +1,5 @@
 from typing import Any, Callable, Optional
-from sim.core_types import Step, SimConfiguration, SimulationEvent, OperationPayload
+from sim.core_types import Step, SimConfiguration, SimulationEvent, OperationPayload, GeneratorFn
 from sim.operations import prepared_processor, prepared_operation, resolve_operation
 from sim.util import get_operation_file_params, merge_operation_params
 
@@ -48,7 +48,7 @@ GENERATOR_LOOKUP = {
     }
 
 
-def compose(*generator_series: Callable) -> Step:
+def compose(*generator_series: GeneratorFn) -> Step:
     """
     Generate a simulation Step tree using the given list of generator functions
     :param generator_series: generator functions which produce sequences and branches ('alternatives') of Step function wrappers
@@ -62,7 +62,7 @@ def compose(*generator_series: Callable) -> Step:
     return root
 
 
-def repeat(times: int, *step_generators: Callable) -> list[Callable]:
+def repeat(times: int, *step_generators: GeneratorFn) -> list[GeneratorFn]:
     """
     For the given, positive, non-zero number of times, repeat the given list of generator functions and return them as
     a list.
@@ -110,7 +110,7 @@ def generator_declarations_for_time_point(events: list[SimulationEvent], time: i
     return generator_declarations
 
 
-def generator_function(key, generator_lookup: dict, *processors: Callable) -> Callable[[Any], list[Step]]:
+def generator_function(key, generator_lookup: dict, *processors: Callable) -> GeneratorFn:
     """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
     argument list of processors with the generator."""
     return lambda parent_steps: generator_lookup[key](parent_steps, *processors)
@@ -124,7 +124,7 @@ def generate_time_series(simulation_events: list) -> list[int]:
     return sorted(list(time_points))
 
 
-def prepare_step_generator(generator_declaration: dict, config: SimConfiguration, time_point):
+def prepare_step_generator(generator_declaration: dict, config: SimConfiguration, time_point) -> GeneratorFn:
     """Return a prepared Step generator function based on simulation declaration and operation details. Operations
     with multiple parameter sets are expanded within their alternatives generator block. Operations with multiple
     parameter sets within a sequence generator block throw an Exception."""

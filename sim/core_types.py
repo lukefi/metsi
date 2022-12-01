@@ -138,3 +138,4 @@ class OperationPayload(SimpleNamespace, Generic[CUType]):
 OpTuple = tuple[CUType, AggregatedResults]
 SourceData = list[CUType]
 StrategyRunner = Callable[[OperationPayload[CUType], dict, dict], list[OperationPayload[CUType]]]
+GeneratorFn = Callable[[Optional[list[Step]]], list[Step]]
