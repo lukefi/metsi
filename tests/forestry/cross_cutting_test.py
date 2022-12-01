@@ -1,9 +1,9 @@
 import unittest
-from forestry.cross_cutting import cross_cut_whole_stand, cross_cut_felled_trees
+from forestry.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees
 from sim.core_types import AggregatedResults
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
-from forestryfunctions.cross_cutting.model import CrossCuttableTrees, CrossCuttableTree
+from forestryfunctions.cross_cutting.model import CrossCuttableTree
 
 class CrossCuttingTest(unittest.TestCase):
     
@@ -16,26 +16,26 @@ class CrossCuttingTest(unittest.TestCase):
             ForestStand(area=2.0), 
             AggregatedResults(
                 operation_results={
-                    "thinning_from_below":{
-                        10: CrossCuttableTrees(
-                                trees = [CrossCuttableTree(
-                                    stems_to_cut_per_ha = 0.006261167484111818,
-                                    species = TreeSpecies.UNKNOWN_CONIFEROUS,
-                                    breast_height_diameter = 15.57254199723247,
-                                    height = 18.293846547993535,
-                            )],
-                            cross_cut_done=True
+                    "felled_trees": [
+                        CrossCuttableTree(
+                                stems_to_cut_per_ha = 0.006261167484111818,
+                                species = TreeSpecies.UNKNOWN_CONIFEROUS,
+                                breast_height_diameter = 15.57254199723247,
+                                height = 18.293846547993535,
+                                source = "thinning_from_below",
+                                time_point=10,
+                                cross_cut_done=True
                         ),
-                        20: CrossCuttableTrees(
-                                trees = [CrossCuttableTree(
-                                    stems_to_cut_per_ha = 0.006261167484111818,
-                                    species = TreeSpecies.UNKNOWN_CONIFEROUS,
-                                    breast_height_diameter = 15.57254199723247,
-                                    height = 18.293846547993535,
-                            )],
-                            cross_cut_done=False
-                        ),
-                    }
+                        CrossCuttableTree(
+                                stems_to_cut_per_ha = 0.006261167484111818,
+                                species = TreeSpecies.UNKNOWN_CONIFEROUS,
+                                breast_height_diameter = 15.57254199723247,
+                                height = 18.293846547993535,
+                                source = "thinning_from_below",
+                                time_point=20,
+                                cross_cut_done=False
+                        )
+                    ]
                 }
             )
         )
@@ -43,10 +43,11 @@ class CrossCuttingTest(unittest.TestCase):
         operation_parameters = {'timber_price_table': "tests/resources/timber_price_table.csv"}
 
         _, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
-        res = aggrs.get("cross_cutting")["thinning_from_below"]
-        self.assertEqual(res.keys(), {20})
-        self.assertEqual(len(res[20].results), 2)
-        self.assertEqual(aggrs.get('thinning_from_below')[10].cross_cut_done, True)
+        res = aggrs.get_list_result("cross_cutting")
+        self.assertEqual(res[0].time_point, 20)
+        self.assertEqual(len(res), 2)
+        self.assertEqual(res[0].source, "thinning_from_below")
+        self.assertEqual(aggrs.get_list_result('felled_trees')[1].cross_cut_done, True)
 
 
     def test_cross_cut_thinning_output_called_twice(self):
@@ -62,44 +63,43 @@ class CrossCuttingTest(unittest.TestCase):
             ForestStand(area=2.0), 
             AggregatedResults(
                 operation_results={
-                    "thinning_from_below":{
-                        20: CrossCuttableTrees(
-                                trees = [CrossCuttableTree(
+                    "felled_trees": [CrossCuttableTree(
                                     stems_to_cut_per_ha = 0.006261167484111818,
                                     species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                     breast_height_diameter = 15.57254199723247,
                                     height = 18.293846547993535,
-                            )],
-                            cross_cut_done=False
-                        ),
-                    },
-                }
-            )
+                                    source = "thinning_from_below",
+                                    time_point=20,
+                                    cross_cut_done=False
+                    )]
+                },
+            ),
         )
 
         stand, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
-        res = aggrs.get("cross_cutting")["thinning_from_below"]
-        self.assertEqual(res.keys(), {20})
-        self.assertEqual(len(res[20].results), 2)
+        res = aggrs.get_list_result("cross_cutting")
+        self.assertEqual(len(res), 2)
 
         # after the first cross cutting (above), add new thinning results, which need to be cross cut
-        aggrs.operation_results["thinning_from_below"][30] = CrossCuttableTrees(
-            trees = [CrossCuttableTree(
+        aggrs.operation_results["felled_trees"].append(
+            CrossCuttableTree(
                 stems_to_cut_per_ha = 0.006261167484111818,
                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                 breast_height_diameter = 15.57254199723247,
                 height = 18.293846547993535,
-        )],
-            cross_cut_done=False
+                source = "thinning_from_below",
+                time_point=30,
+                cross_cut_done=False
+            ),
         )
 
         payload = (stand, aggrs)
 
         _, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
-        res = aggrs.get("cross_cutting")["thinning_from_below"]
+        res = aggrs.get_list_result("cross_cutting")
         # test that the results of both cross cut operations are in thinned_trees_cross_cut
-        self.assertEqual(res.keys(), {20, 30})
-        self.assertEqual(len(res[30].results), 2)
+        self.assertEqual([r.time_point for r in res], [20, 20, 30, 30])
+        self.assertEqual(len(res), 4)
 
 
     def test_cross_cut_standing_trees(self):
@@ -131,9 +131,10 @@ class CrossCuttingTest(unittest.TestCase):
 
         operation_parameters = {'timber_price_table': 'tests/resources/timber_price_table.csv'}
 
-        new_stand, aggrs = cross_cut_whole_stand(payload, **operation_parameters)
-        res = aggrs.get("cross_cutting")["standing_trees"]
-        self.assertEqual(len(res[0].results), 6)
+        new_stand, aggrs = cross_cut_standing_trees(payload, **operation_parameters)
+        res = aggrs.get_list_result("cross_cutting")
+        self.assertEqual(len(res), 6)
+        self.assertEqual(res[0].source, "standing_trees")
         
         # test that cross_cut_whole_stand has not modified the trees
         self.assertEqual(
@@ -161,8 +162,9 @@ class CrossCuttingTest(unittest.TestCase):
 
         operation_parameters = {'timber_price_table': 'tests/resources/timber_price_table.csv'}
 
-        stand, aggrs = cross_cut_whole_stand(payload, **operation_parameters)
+        stand, aggrs = cross_cut_standing_trees(payload, **operation_parameters)
         aggrs.current_time_point=2
-        _, aggrs = cross_cut_whole_stand((stand, aggrs), **operation_parameters)
-        res = aggrs.get("cross_cutting")["standing_trees"]
-        self.assertEqual(2, len(res.keys()))
+        _, aggrs = cross_cut_standing_trees((stand, aggrs), **operation_parameters)
+        res = aggrs.get_list_result("cross_cutting")
+        self.assertEqual(len(res), 4)
+        self.assertEqual([r.time_point for r in res], [1, 1, 2, 2])
