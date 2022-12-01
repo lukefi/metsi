@@ -102,7 +102,7 @@ class CrossCuttingTest(unittest.TestCase):
         self.assertEqual(len(res[30].results), 2)
 
 
-    def test_cross_cut_whole_stand(self):
+    def test_cross_cut_standing_trees(self):
         #stand with three reference trees
         stand = ForestStand(
             area=2.0,
@@ -142,7 +142,7 @@ class CrossCuttingTest(unittest.TestCase):
             )
 
 
-    def test_cross_cut_whole_stand_called_twice(self):
+    def test_cross_cut_standing_trees_called_twice(self):
         """
         This test simulates the case when the value of a stand is calculated in two different time points.
         """

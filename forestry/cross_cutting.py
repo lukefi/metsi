@@ -36,7 +36,7 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
     return payload
 
 
-def cross_cut_whole_stand(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+def cross_cut_standing_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
     Cross cuts the `payload`'s stand at its current state. Does not modify the state, only calculates and stores the result of cross cutting.
     The results are stored in simulation_aggregates.
