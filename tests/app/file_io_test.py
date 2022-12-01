@@ -6,6 +6,8 @@ from forestdatamodel.enums.internal import TreeSpecies
 import app.file_io
 from dataclasses import dataclass
 from forestdatamodel.model import ForestStand, ReferenceTree
+
+from app.app_io import Mela2Configuration
 from sim.core_types import OperationPayload
 
 
@@ -101,32 +103,62 @@ class TestFileReading(unittest.TestCase):
         shutil.rmtree('outdir')
 
     def test_read_stands_from_pickle_file(self):
-        unpickled_stands = app.file_io.read_stands_from_file("tests/resources/file_io_test/two_ffc_stands.pickle", "fdm", "pickle")
+        config = Mela2Configuration(
+            input_path="tests/resources/file_io_test/two_ffc_stands.pickle",
+            state_format="fdm",
+            state_input_container="pickle"
+        )
+        unpickled_stands = app.file_io.read_stands_from_file(config)
         self.assertEqual(len(unpickled_stands), 2)
         self.assertEqual(type(unpickled_stands[0]), ForestStand)
 
     def test_read_stands_from_json_file(self):
-        stands_from_json = app.file_io.read_stands_from_file("tests/resources/file_io_test/two_vmi12_stands_as_jsonpickle.json", "fdm", "json")
+        config = Mela2Configuration(
+            input_path="tests/resources/file_io_test/two_vmi12_stands_as_jsonpickle.json",
+            state_format="fdm",
+            state_input_container="json"
+        )
+        stands_from_json = app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands_from_json), 2)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
         self.assertEqual(type(stands_from_json[1].reference_trees[0]), ReferenceTree)
 
     def test_read_stands_from_csv_file(self):
-        stands_from_csv = app.file_io.read_stands_from_file("tests/resources/file_io_test/preprocessing_result.csv", "fdm", "csv")
+        config = Mela2Configuration(
+            input_path="tests/resources/file_io_test/preprocessing_result.csv",
+            state_format="fdm",
+            state_input_container="csv"
+        )
+        stands_from_csv = app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands_from_csv), 1)
         self.assertEqual(type(stands_from_csv[0]), ForestStand)
         self.assertEqual(type(stands_from_csv[0].reference_trees[0]), ReferenceTree)
 
     def test_read_stands_from_vmi12_file(self):
-        stands = app.file_io.read_stands_from_file("tests/resources/file_io_test/VMI12_source_mini.dat", "vmi12", "")
+        config = Mela2Configuration(
+            input_path="tests/resources/file_io_test/VMI12_source_mini.dat",
+            state_format="vmi12",
+            state_input_container=""
+        )
+        stands = app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands), 7)
 
     def test_read_stands_from_vmi13_file(self):
-        stands = app.file_io.read_stands_from_file("tests/resources/file_io_test/VMI13_source_mini.dat", "vmi13", "")
+        config = Mela2Configuration(
+            input_path="tests/resources/file_io_test/VMI13_source_mini.dat",
+            state_format="vmi13",
+            state_input_container=""
+        )
+        stands = app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands), 3)
 
     def test_read_stands_from_xml_file(self):
-        stands = app.file_io.read_stands_from_file("tests/resources/file_io_test/SMK_source.xml", "forest_centre", "")
+        config = Mela2Configuration(
+            input_path="tests/resources/file_io_test/SMK_source.xml",
+            state_format="forest_centre",
+            state_input_container=""
+        )
+        stands = app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands), 3)
 
     def test_read_schedule_payload_from_directory(self):
@@ -146,10 +178,10 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(2, len(result["0-023-002-02-1"][1].aggregated_results.get("report_biomass")))
 
     def test_read_stands_from_nonexisting_file(self):
-        kwargs = {
-            "file_path": "nonexisting_file.pickle",
-            "state_format": "fdm",
-            "state_input_container": "pickle"
-        }
-        self.assertRaises(Exception, app.file_io.read_stands_from_file, **kwargs)
+        config = Mela2Configuration(
+            input_path="nonexisting_file.pickle",
+            state_format="fdm",
+            state_input_container="pickle"
+        )
+        self.assertRaises(Exception, app.file_io.read_stands_from_file, config)
         

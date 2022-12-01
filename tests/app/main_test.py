@@ -9,12 +9,10 @@ import sys
 import shutil
 import unittest
 from pathlib import Path
-import app.simulator as simulator
-import app.post_processing as pp
-from typing import List
+from app import mela2
 
 
-def run_simulator(state_input_files: List[str], state_output_containers: List[str]):
+def run_simulator(state_input_files: list[str], state_output_containers: list[str]):
 
     strategies = ['full', 'partial']
     control_file = 'tests/resources/main_test/main_test_control.yaml'
@@ -45,11 +43,13 @@ def run_simulator(state_input_files: List[str], state_output_containers: List[st
             'pickle',
             '--state-output-container',
             state_output_container,
+            '-r',
+            'preprocess,simulate',
             input_file,
-            control_file,
-            output_dir
+            output_dir,
+            control_file
         ]
-        simulator.main()
+        mela2.main()
     return output_details
 
 
@@ -92,11 +92,13 @@ class MainTest(unittest.TestCase):
             sys.argv = [
                 'foo',
                 pp_input_dir,
+                pp_output_dir,
                 pp_control_file,
-                pp_output_dir
+                '-r',
+                'postprocess'
             ]
 
-            pp.main()
+            mela2.main()
 
             self.verify_result_dir(pp_output_dir)
             shutil.rmtree(pp_output_dir)

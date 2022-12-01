@@ -1,10 +1,12 @@
-#File IO configuration values. Can be overriden by CLI arguments. May be commented out for None.
-io_configuration:
+#Application configuration values. Can be overriden by CLI arguments. May be commented out for None or default from Mela2Configuration.
+app_configuration:
   state_format: fdm #options: fdm, vmi12, vmi13, forest_centre
   state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
-  preprocessing_output_container: csv #options: pickle, json, csv, rsd (special case not usable as input container)
-  state_output_container: csv #options: pickle, json, csv
-  derived_data_output_container: pickle #options: pickle, json
+  #preprocessing_output_container: csv #options: pickle, json, csv, null, rsd (special case not usable as input container)
+  #state_output_container: csv #options: pickle, json, csv, null
+  #derived_data_output_container: pickle #options: pickle, json, null
+  strategy: partial
+  run_modes: preprocess,simulate,postprocess
 
 run_constraints:
   thinning_from_below:
@@ -56,8 +58,7 @@ preprocessing_params:
 preprocessing_operations:
   - generate_reference_trees # comment out if input data contains direct trees (vmi12 or vmi13)
   - filter
-  # requires pymotti dependency
-  # - compute_location_metadata
+  - compute_location_metadata
 
 operation_file_params:
   thinning_from_above:
@@ -80,8 +81,9 @@ simulation_events:
     generators:
       - sequence:
         - grow_acta
-        # requires pymotti dependency
-        # - grow_motti
+        #- grow_motti
+        # requires fhk dependencies from fhk-requirements.txt
+        #- grow_fhk
   - time_points: [5, 15, 25]
     generators:
       - alternatives:
@@ -101,3 +103,25 @@ simulation_events:
     generators:
       - sequence:
           - cross_cut_felled_trees
+
+post_processing:
+  operation_params:
+    do_nothing:
+      - param: value
+
+  post_processing:
+    - do_nothing
+
+export:
+  format: J
+
+  cvariables:
+    - year
+    - site_type_category
+    - land_use_category
+    - soil_peatland_category
+
+  xvariables:
+    - Ftot[0]
+    - Fpine[0,5,10]
+    - int(site_type_category < 7) * sum(Fbirch)

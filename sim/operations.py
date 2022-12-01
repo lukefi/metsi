@@ -1,6 +1,6 @@
 from functools import cache
 import typing
-from typing import List, Optional, Tuple, TypeVar
+from typing import Optional, TypeVar
 from sim.collectives import collect_all, autocollective, getvarfn
 from sim.core_types import OpTuple, OperationPayload
 from sim.util import get_or_default, dict_value
@@ -9,7 +9,7 @@ from sim.util import get_or_default, dict_value
 T = TypeVar("T")
 
 
-def _get_operation_last_run(operation_history: List[Tuple[int, str]], operation_tag: str) -> Optional[int]:
+def _get_operation_last_run(operation_history: list[tuple[int, str]], operation_tag: str) -> Optional[int]:
     return next((t for t, o, p in reversed(operation_history) if o == operation_tag), None)
 
 
@@ -41,7 +41,7 @@ def prepared_processor(operation_tag, processor_lookup, time_point: int, operati
     return lambda payload: processor(payload, operation, operation_tag, time_point, operation_run_constraints, **operation_parameters)
 
 
-def processor(payload: OperationPayload, operation: typing.Callable, operation_tag, time_point: int,
+def processor(payload: OperationPayload, operation: typing.Callable[[OpTuple], OpTuple], operation_tag, time_point: int,
               operation_run_constraints: Optional[dict], **operation_parameters: dict) -> OperationPayload:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     if operation_run_constraints is not None:

@@ -130,7 +130,7 @@ def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTupl
         raise UserWarning("Unable to perform even thinning")
 
 
-def report_overall_removal(payload: OpTuple[Any], **operation_parameters) -> OpTuple[Any]:
+def report_overall_removal(payload: OpTuple, **operation_parameters) -> OpTuple:
     _, simulation_aggregates = payload
     operation_tags = operation_parameters['thinning_method']
 

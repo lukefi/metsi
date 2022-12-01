@@ -130,23 +130,139 @@ Dependencies may be installed with the `pip` utility as follows
 pip install -r requirements.txt
 ```
 
-## Applications
+## Application
 
-The project contains two application entry points. These are the `app/simulator.py` and the `app/post_processing.py`.
-The operational details about these applications are documented separately.
+The project contains a single application entry point. This is the `app/mela2.py`.
 
-## Usage of the simulator application
+The application implements a 4 phase pipeline.
+These phases are: preprocess, simulate, postprocess and export.
+Each of the phases can be run independetly or as sequences, as long as their logical order for input data structuring is preserved.
+Each application phase uses the given YAML file (default `control.yaml`) as their configuration.
 
-The simulator application depends upon
+### Phases
 
-1. A source data file which contains forest stand, reference tree and tree stratum information
-   1. a .json file or .pickle file containing Forest Data Model type source data.
-   2. a .dat file containing VMI12 or VMI13 type source data
-   3. a .xml file containing Forest Centre type source data
-2. A YAML file which is used as a configuration for a simulator run. See `control.yaml` for an example. See section about Simulation control for further information.
+| phase       | description                                                                            |
+|-------------|----------------------------------------------------------------------------------------|
+| preprocess  | Operations for filtering or modifying the input data set                               |
+| simulate    | Discrete time-step simulation and data collection with given event tree and operations |
+| postprocess | Operations for further deriving and marshalling of data from the simulation results    |
+| export      | File output into different formats based on simulation or post-processing results      |
+
+
+### Input types
+
+Input for preprocess and simulate phases is a forest data file.
+This file is a list of forest stand objects with lists of associated reference trees and tree strata.
+The file can be of following types and formats:
+
+1. a .json file or .pickle file containing Forest Data Model type source data.
+2. a .dat file containing VMI12 or VMI13 type source data
+3. a .xml file containing Forest Centre type source data
+
+Input for postprocess and export phases is a directory produced by the simulate phase.
 
 There are several example input files in the project `data` directory.
-These are data files with a list of ForestStand objects containing a list of RefenceTree objects generated from TreeStratum objects with Weibull distribution.
+
+### Output types
+
+Preprocessing generates a csv, pickle or json file with the computational units as a list.
+The data is always in FDM format.
+The file is written into the configured output directory as `preprocessing-result.{csv,pickle,json}`.
+
+Simulate collects a nested data structure containing the final states for each produced alternatives of each computational unit.
+A dictionary data structure for computed data during the simulation is included for each such alternative.
+This data structure can be outputted as a directory structure into the configured output directory.
+
+Post-processing utilizes exactly same nested data structure as produced by simulation.
+It will derive further data within and across the produced alternatives and stores them within the derived data structure.
+This data can be outputted as a directory structure into the configured output directory.
+
+Exporting uses the nested data structure above.
+It will select partial data sets as configured.
+These data sets may be written to any supported and compatible file containers.
+Such support must be implemented on a case-by-case basis as modules into the exporting functionality.
+
+When phases are run in order on the same run, intermediate result files do not need to be written out.
+Data is kept and propagated in-memory.
+
+### Run examples
+
+Use the following command to output simulator application help menu.
+```
+python -m app.mela2 --help
+```
+
+Input path, output path and optionally the control file path must be supplied as CLI positional arguments.
+All other parameters in commands below can also be set in the `control.yaml` file `app_configuration` block.
+Control file settings override program defaults (see app/app_io.py Mela2Configuration class).
+CLI arguments override the settings in the control file.
+
+**TODO: at the time of writing this, there are no post-processing operations ready to be used. Post-processing will `do_nothing`**
+**TODO: at the time of writing this, export is not readily usable with the default control.yaml to produce proper output**
+
+All examples below default to `control.yaml` in the working directory as the control file source unless otherwise specified in the command line. 
+
+Preprocessing, simulation and post-processing phases do not produce output files by default.
+Configuration for preprocessing output container, state output container and derived data output container need to be set to produce output files.
+The default mode of operation is to run the full pipeline and only the export phase will create files as configured.
+
+To run full pipeline from a VMI12 data source file using direct reference trees from the input data, run:
+```
+python -m app.mela2 --state-format vmi12 --reference-trees -r preprocess,simulate,postprocess,export data/VMI12_source_mini.dat sim_outdir
+```
+
+To run full pipeline from a VMI13 data source file using direct reference trees from the input data, run:
+```
+python -m app.mela2 --state-format vmi13 --reference-trees -r preprocess,simulate,postprocess,export data/VMI13_source_mini.dat sim_outdir
+```
+
+To run full pipeline from a Forest Centre source file, run:
+```
+python -m app.mela2 --state-format forest_centre --reference-trees -r preprocess,simulate,postprocess,export data/SMK_source.xml sim_outdir
+```
+
+To run full pipeline from a FDM formatted data from csv (or json or pickle with replacement below), run:
+```
+python -m app.mela2 --state-input-container csv -r preprocess,simulate,postprocess,export forest_data.csv sim_outdir
+```
+
+#### Preprocessing and simulation
+
+To run preprocess and simulate phases of the application, run the following command in the project root.
+The created output directory contains all generated variants for all computation units (ForestStand) along with derived data.
+```
+python -m app.mela2 --state-input-container pickle -r preprocess,simulate data/VMI12_data.pickle sim_outdir
+```
+
+In case you need to use a FDM formatted JSON file as the input and/or output file format, run:
+```
+python -m app.mela2 --state-input-container json --state-output-container json -r preprocess,simulate data/VMI12_data.json sim_outdir
+```
+
+To only run the preprocessor and produce output as `outdir/preprocessing_result.csv`, with a control yaml file in non-default location `my_project/control_preprocessing.yaml`, run:
+```
+python -m app.mela2 --preprocessing-output-container csv -r preprocess data/VMI12_data.json sim_outdir my_project/control_preprocessing.yaml
+```
+
+To use the preprocessed result file as input for a simulation, and produce schedule results in csv+json format run:
+```
+python -m app.mela2 --state-input-container csv --state-output-container csv --derived-data-output-container json -r simulate sim_outdir/preprocessing_result.csv sim_outdir my_project/control_simulate.yaml
+```
+
+#### Post-processing and export
+
+The output directory `outdir` from simulate is usable as input for the post-processing phase of the application.
+It will create a new directory `outdir2` with matching structure for its output with the following command:
+```
+python -m app.mela2 -r postprocess outdir outdir2 my_project/postprocessing_control.yaml
+```
+
+The output directory `outdir` from simulation (or `outdir2` from post-processing) can be used as input for the export phase as follows:
+```
+python -m app.mela2 -r export outdir outdir2 my_project/export_control.yaml
+```
+
+## Operations
 
 See table below for a quick reference of forestry operations usable in control.yaml.
 
@@ -167,56 +283,7 @@ See table below for a quick reference of forestry operations usable in control.y
 | cross_cut_felled_trees | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
 | cross_cut_whole_stand     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 
-To run the simulator application, run the following command in the project root.
-The created output diretory contains all generated variants for all computation units (ForestStand) along with derived data.
-The output directory container output is usable as input for the `app/post_processing.py` application.
 
-```
-python -m app.simulator --state-input-container pickle data/VMI12_data.pickle control.yaml outdir
-```
-
-In case you want to use JSON as the input and/or output file format, run:
-```
-python -m app.simulator --state-input-container json --state-output-container json data/VMI12_data.json control.yaml outdir
-```
-
-To only run the preprocessor, run:
-```
-python -m app.simulator -s skip ...
-```
-
-Use the following command to output simulator application help menu.
-```
-python -m app.simulator --help
-```
-
-## Usage of the post processing application
-
-To run the post processing application, run in the project root
-
-```
-python -m app.post_processing -o json input.pickle pp_control.yaml outdir
-```
-
-This produces `outdir/pp_result.json` file.
-
-* `input.pickle` The result file of a simulator run.
-* `pp_control.yaml` is the declaration of post processing function chain.
-* `outdir` is the output directory for post processed results
-
-To learn more about the available post processing commands (and how to input/output a JSON file), run:
-```
-python -m app.post_processing --help
-```
-## Usage of the data export application
-
-Run
-```
-python -m app.export input.pickle export_control.yaml
-```
-where
-* `input.pickle` is simulator or post-processor output,
-* `export_control.yaml` is the export declaration file.
 
 ## Testing
 
@@ -232,13 +299,11 @@ You can also use python internal module unittest
 python -m unittest <test suite module.class path>
 ```
 
-# Simulation control
+# Application control
 
-A simulation run is declared in the YAML file `control.yaml`.
-The file contains two significant structures for functionality.
-The structure will be expanded to allow parameters and constraints declaration for specific operations.
+A run is declared in the YAML file `control.yaml`.
 
-1. Application file IO configuration in `io_configuration` object. These may be overridden by equivalent command line arguments. Note that e.g. `state_format` with `fdm` below is written as `--state-format fdm` when given as a command line argument.
+1. Application configuration in `app_configuration` object. These may be overridden by equivalent command line arguments. Note that e.g. `state_format` with `fdm` below is written as `--state-format fdm` when given as a command line argument.
    1. `state_format` specifies the data format of the input computational units
       1. `fdm` is the standard Forest Data Model.
       2. `vmi12` and `vmi13` denote the VMI data format and container.
@@ -247,6 +312,10 @@ The structure will be expanded to allow parameters and constraints declaration f
    3. `preprocessing_output_container` is the file type for outputting the `fdm` formatted state of computational units after preprocessing operations. This may be `csv`, `pickle` or `json` or commented out for no output.
    4. `state_output_container` is the file type for outputting the `fdm` formatted state of individual computational units during and after the simulation. This may be `csv`, `pickle` or `json` or commented out for no output.
    5. `derived_data_output_container` is the file type for outputting derived data during and after the simulation. This may be `pickle` or `json` or commented out for no output.
+   6. `strategy` is the simulation event tree formation strategy. Can be `partial` or `full`.
+   7. `reference_trees` instructs the `vmi12` and `vmi13` data converters to choose either reference trees or tree strata from the source. `True` or `False`.
+   8. `strata_origin` instructs the `forest_centre` converter to choose only strata with certain origin to the result. `1`, `2` or `3`.
+   9. `multiprocessing` instructs the application to parallelizes the computation to available CPU cores in the system. `True` or `False`.
 2. Operaton run constrains in the object `run_constraints`
 3. Operation parameters in the object `operation_params`. Operation parameters may be declared as a list of 1 or more parameter sets (objects). Operations within an `alternatives` block are expanded as further alternatives for each parameter set. Multiple parameter sets may not be declared for operations within any `sequence` block.
 4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for those operations to be run.
@@ -263,8 +332,11 @@ The structure will be expanded to allow parameters and constraints declaration f
      cross_cut_felled_trees:
        timber_price_table: /path/to/file/timber-prices.csv
    ```
-   Note however, that it is the user's responsibility to provide the file in a valid format. 
-
+   Note, that it is the user's responsibility to provide the file in a valid format for each operation.
+7. Post-processing is controlled in the `post_processing` section of the file
+   1. `operation_params` section sets key-value pairs to be passed as parameters to named post-processing operations
+   2. `post_processing` section lists a non-branching list of post-processing operations to be run in sequence for the given data
+8. Export is controlled in the `export` section of the file (TODO: structure is in works)
 
 The following example declares a simulation, which runs four event cycles at time points 0, 5, 10 and 15.
 Images below describe the simulation as a step tree, and further as the computation chains that are generated from the tree.
