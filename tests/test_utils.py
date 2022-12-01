@@ -80,9 +80,8 @@ def file_contents(file_path: str) -> str:
 
 def load_yaml(file_name: str) -> dict:
     return yaml.load(file_contents(os.path.join(os.getcwd(), "tests", "resources", file_name)), Loader=yaml.CLoader)
+    
 
-def get_default_timber_price_table() -> str:
-    return open("tests/resources/timber_price_table.csv", "r").read()
 DEFAULT_TIMBER_PRICE_TABLE = np.array(
                         [[  1., 160., 370.,  55.],
                         [  1., 160., 400.,  57.],
