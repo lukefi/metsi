@@ -4,6 +4,50 @@ from sim.operations import prepared_processor, prepared_operation, resolve_opera
 from sim.util import get_operation_file_params, merge_operation_params
 
 
+class NestableGenerator:
+    parent = None
+    prepared_generator: Optional[GeneratorFn] = None
+    children: list['NestableGenerator'] = []
+
+    def __init__(self,
+                 config: SimConfiguration,
+                 generator_declaration: dict,
+                 time_point: int,
+                 parent: Optional['NestableGenerator'] = None):
+        self.parent = parent
+        self.generator_type = list(generator_declaration.keys())[0]
+        children_tags = generator_declaration[self.generator_type]
+        wrappable_operations = []
+
+        for child in children_tags:
+            if isinstance(child, dict):
+                # Encountered a nested generator.
+                if list(child.keys())[0] in ('sequence', 'alternative'):
+                    if len(wrappable_operations) > 0:
+                        #  Must wrap operations so far under a nested generator of our type.
+                        wrapping_generator_declaration = {
+                            self.generator_type: wrappable_operations
+                        }
+                        self.children.append(NestableGenerator(config, wrapping_generator_declaration, time_point, self))
+                        wrappable_operations = []
+                    self.children.append(NestableGenerator(config, child, time_point, self))
+                else:
+                    # Encountered an operation.
+                    # TODO: case for in-line parameters for operation #211, #217
+                    ...
+            elif isinstance(child, str):
+                parameter_set_choices = config.operation_params.get(child, [{}])
+                if len(parameter_set_choices) > 1 and self.generator_type == 'sequence':
+                    raise Exception("Alternatives by operation parameters not supported in sequences. Use "
+                                    "alternatives clause for operation {} in time point {} or reduce operation parameter "
+                                    "set size to 0 or 1.".format(child, time_point))
+                wrappable_operations.extend(prepare_parametrized_operations(config, child, time_point))
+        if len(wrappable_operations) > 0:
+            if len(self.children):
+                raise Exception("Unrecoverable fault in NestedGenerator. Having stray unwrapped operations in a nested generator declaration.")
+            self.prepared_generator = generator_function(self.generator_type, GENERATOR_LOOKUP, *wrappable_operations)
+
+
 def sequence(parents: Optional[list[Step]] = None, *operations: Callable) -> list[Step]:
     """
     Generate a linear sequence of steps, optionally extending each Step in the given list of Steps with it.
@@ -124,25 +168,6 @@ def generate_time_series(simulation_events: list) -> list[int]:
     return sorted(list(time_points))
 
 
-def prepare_step_generator(generator_declaration: dict, config: SimConfiguration, time_point) -> GeneratorFn:
-    """Return a prepared Step generator function based on simulation declaration and operation details. Operations
-    with multiple parameter sets are expanded within their alternatives generator block. Operations with multiple
-    parameter sets within a sequence generator block throw an Exception."""
-    generator_tag = list(generator_declaration.keys())[0]
-    operation_tags = generator_declaration[generator_tag]
-    processors = []
-    for operation_tag in operation_tags:
-        parameter_set_choices = config.operation_params.get(operation_tag, [{}])
-        if len(parameter_set_choices) > 1 and generator_tag == 'sequence':
-            raise Exception("Alternatives by operation parameters not supported in sequences. Use "
-                            "alternatives clause for operation {} in time point {} or reduce operation parameter "
-                            "set size to 0 or 1.".format(operation_tag, time_point))
-        processor = prepare_parametrized_operations(config, operation_tag, time_point)
-        processors.extend(processor)
-    generator = generator_function(generator_tag, GENERATOR_LOOKUP, *processors)
-    return generator
-
-
 def prepare_parametrized_operations(config: SimConfiguration,
                                     operation_tag: str,
                                     time_point: int) -> list[Callable[[Any], OperationPayload]]:
@@ -161,7 +186,7 @@ def prepare_parametrized_operations(config: SimConfiguration,
     return results
 
 
-def full_tree_generators(config: SimConfiguration) -> list[Callable]:
+def full_tree_generators(config: SimConfiguration) -> list[NestableGenerator]:
     """
     Creat a list of step generator functions describing a single simulator run.
 
@@ -173,14 +198,14 @@ def full_tree_generators(config: SimConfiguration) -> list[Callable]:
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
         for generator_declaration in generator_declarations:
-            generator = prepare_step_generator(generator_declaration, config, time_point)
+            generator = NestableGenerator(config, generator_declaration, time_point)
             generator_series.append(generator)
     return generator_series
 
 
-def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int, list[Callable]]:
+def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int, list[NestableGenerator]]:
     """
-    Create a dict of step generator functions describing keyed by their time_point in the simulation. Used for generating
+    Create a dict of NestableGenerators describing keyed by their time_point in the simulation. Used for generating
     partial step trees of the simulation.
 
     :param config: a prepared SimConfiguration object
@@ -193,7 +218,7 @@ def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int,
         generator_series = []
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
         for generator_declaration in generator_declarations:
-            generator = prepare_step_generator(generator_declaration, config, time_point)
+            generator = NestableGenerator(config, generator_declaration, time_point)
             generator_series.append(generator)
         generators_by_time_point[time_point] = generator_series
     return generators_by_time_point

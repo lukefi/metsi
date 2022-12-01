@@ -106,7 +106,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
-        generators = sim.generators.full_tree_generators(config)
+        generators = map(lambda x: x.prepared_generator, sim.generators.full_tree_generators(config))
         result = compose(*generators)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
@@ -130,7 +130,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
-        generators = sim.generators.full_tree_generators(config)
+        generators = map(lambda x: x.prepared_generator, sim.generators.full_tree_generators(config))
         result = compose(*generators)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
@@ -155,7 +155,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         config = SimConfiguration(operation_lookup={'inc': inc}, **yaml.load(declaration, Loader=yaml.CLoader))
-        generators = sim.generators.full_tree_generators(config)
+        generators = map(lambda x: x.prepared_generator, sim.generators.full_tree_generators(config))
         result = compose(*generators)
         chain = result.operation_chains()[0]
         payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results=AggregatedResults())
@@ -176,15 +176,15 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(2, len(generators.values()))
 
         # 1 sequence generators in each time point
-        gen_one = generators[0]
-        gen_two = generators[1]
+        gen_one = list(map(lambda x: x.prepared_generator, generators[0]))
+        gen_two = list(map(lambda x: x.prepared_generator, generators[1]))
         self.assertEqual(1, len(gen_one))
         self.assertEqual(1, len(gen_two))
 
         # 1 chain from both generated trees
         # 1 root + 2 processors (inc) in both chains
-        tree_one = compose(*generators[0])
-        tree_two = compose(*generators[1])
+        tree_one = compose(*gen_one)
+        tree_two = compose(*gen_two)
         chain_one = tree_one.operation_chains()
         chain_two = tree_two.operation_chains()
         self.assertEqual(1, len(chain_one))
