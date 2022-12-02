@@ -38,7 +38,7 @@ class NestableGenerator:
                 prepared_operations = []
                 for op in self.free_operations:
                     prepared_operations.extend(prepare_parametrized_operations(config, op, time_point))
-                self.prepared_generator = generator_function(self.generator_type, GENERATOR_LOOKUP, *prepared_operations)
+                self.prepared_generator = generator_function(self.generator_type, config.generator_lookup, *prepared_operations)
             else:
                 self.wrap_free_operations()
 

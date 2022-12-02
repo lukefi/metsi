@@ -42,7 +42,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         generator = sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
@@ -66,7 +66,7 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         generator = sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
@@ -91,7 +91,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': inc}, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': inc}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         generator = sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
@@ -107,7 +107,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': inc}, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': inc}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         # generators for 2 time points'
         generators = sim.generators.partial_tree_generators_by_time_point(config)
         self.assertEqual(2, len(generators.values()))
@@ -155,7 +155,7 @@ class TestGenerators(unittest.TestCase):
                 - inc # 4, 5, 6, 7
                 - inc # 5, 6, 7, 8
         """
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         generator = sim.generators.full_tree_generators(config)
         tree = compose_nested(generator)
         chains = tree.operation_chains()
