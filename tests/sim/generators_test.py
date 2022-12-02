@@ -2,7 +2,7 @@ import unittest
 import sim.generators
 import yaml
 from sim.core_types import AggregatedResults, Step, OperationPayload, SimConfiguration
-from sim.generators import sequence, compose, alternatives, repeat
+from sim.generators import sequence, compose_nested, compose, alternatives, repeat
 from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from tests.test_utils import inc, dec, aggregating_increment, parametrized_operation
 
@@ -106,8 +106,8 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
-        generators = map(lambda x: x.prepared_generator, sim.generators.full_tree_generators(config))
-        result = compose(*generators)
+        generator = sim.generators.full_tree_generators(config)
+        result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             simulation_state=0,
@@ -130,8 +130,8 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
-        generators = map(lambda x: x.prepared_generator, sim.generators.full_tree_generators(config))
-        result = compose(*generators)
+        generator = sim.generators.full_tree_generators(config)
+        result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             simulation_state=0,
@@ -155,10 +155,10 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         config = SimConfiguration(operation_lookup={'inc': inc}, **yaml.load(declaration, Loader=yaml.CLoader))
-        generators = map(lambda x: x.prepared_generator, sim.generators.full_tree_generators(config))
-        result = compose(*generators)
+        generator = sim.generators.full_tree_generators(config)
+        result = compose_nested(generator)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, run_history={}, aggregated_results=AggregatedResults())
+        payload = OperationPayload(simulation_state=0, operation_history=[], aggregated_results=AggregatedResults())
         self.assertRaises(Exception, run_sequence, payload, *chain)
 
     def test_tree_generators_by_time_point(self):
@@ -176,21 +176,71 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(2, len(generators.values()))
 
         # 1 sequence generators in each time point
-        gen_one = list(map(lambda x: x.prepared_generator, generators[0]))
-        gen_two = list(map(lambda x: x.prepared_generator, generators[1]))
-        self.assertEqual(1, len(gen_one))
-        self.assertEqual(1, len(gen_two))
+        gen_one = generators[0]
+        gen_two = generators[1]
 
         # 1 chain from both generated trees
         # 1 root + 2 processors (inc) in both chains
-        tree_one = compose(*gen_one)
-        tree_two = compose(*gen_two)
+        tree_one = compose_nested(gen_one)
+        tree_two = compose_nested(gen_two)
         chain_one = tree_one.operation_chains()
         chain_two = tree_two.operation_chains()
         self.assertEqual(1, len(chain_one))
         self.assertEqual(1, len(chain_two))
         self.assertEqual(3, len(chain_one[0]))
         self.assertEqual(3, len(chain_two[0]))
+
+    def test_nested_tree_generators(self):
+        """Create a nested generators event tree. Use simple incrementation operation with starting value 0. Sequences
+        and alternatives result in 4 branches with separately incremented values."""
+        declaration = """
+        simulation_events:
+          - time_points: [0]
+            generators:
+              - sequence:
+                - inc # 1
+                - sequence:
+                  - inc # 2
+                - alternatives:
+                  - inc # 3
+                  - sequence:
+                    - inc # 3
+                    - alternatives:
+                      - inc # 4
+                      - sequence:
+                        - inc # 4
+                        - inc # 5
+                  - sequence:
+                    - inc # 3
+                    - inc # 4
+                    - inc # 5
+                    - inc # 6
+                - inc # 4, 5, 6, 7
+                - inc # 5, 6, 7, 8
+        """
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, **yaml.load(declaration, Loader=yaml.CLoader))
+        generator = sim.generators.full_tree_generators(config)
+        tree = compose_nested(generator)
+        chains = tree.operation_chains()
+        self.assertEqual(4, len(chains))
+
+        lengths = []
+        results = []
+
+        for chain in chains:
+            value = evaluate_sequence(
+                OperationPayload(
+                    simulation_state=0,
+                    operation_history=[],
+                    aggregated_results=AggregatedResults()),
+                *chain
+            ).simulation_state
+            results.append(value)
+            lengths.append(len(chain))
+
+        # chain lengths have the root no_op function at start
+        self.assertListEqual([6, 7, 8, 9], lengths)
+        self.assertListEqual([5, 6, 7, 8], results)
 
     def test_simple_processable_chain(self):
         operation_tags = ['inc', 'inc', 'inc', 'param_oper']

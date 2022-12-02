@@ -1,7 +1,7 @@
 from typing import Optional, Callable
 from copy import deepcopy
 from sim.core_types import OperationPayload, CUType, SimConfiguration
-from sim.generators import full_tree_generators, compose, partial_tree_generators_by_time_point
+from sim.generators import full_tree_generators, compose_nested, partial_tree_generators_by_time_point
 
 
 def evaluate_sequence(payload, *operations: Callable) -> Optional:
@@ -49,8 +49,8 @@ def run_full_tree_strategy(payload: OperationPayload[CUType], config: SimConfigu
     :return: a list of resulting simulation state payloads
     """
 
-    generator_series = map(lambda x: x.prepared_generator, full_tree_generators(config))
-    tree = compose(*generator_series)
+    nestable_generator = full_tree_generators(config)
+    tree = compose_nested(nestable_generator)
     chains = tree.operation_chains()
     result = run_chains_iteratively(payload, chains)
     return result
@@ -70,9 +70,8 @@ def run_partial_tree_strategy(payload: OperationPayload[CUType], config: SimConf
     results = [payload]
 
     #build chains_by_time_point, which is a dict of chains
-    for time_point, generator_series in generators_by_time_point.items():
-        generator_series = map(lambda x: x.prepared_generator, generator_series)
-        chains_by_time_point[time_point] = compose(*generator_series).operation_chains()
+    for time_point, nestable_generator in generators_by_time_point.items():
+        chains_by_time_point[time_point] = compose_nested(nestable_generator).operation_chains()
 
     for time_point in config.time_points:
         time_point_results: list[OperationPayload] = []

@@ -5,47 +5,105 @@ from sim.util import get_operation_file_params, merge_operation_params
 
 
 class NestableGenerator:
-    parent = None
+    """
+    NestableGenerator represents a tree for nested event generators in the simulation tree. Construction of this class
+    creates a tree structure where leaf nodes represent actual GeneratorFn instances to populate a Step tree. The
+    tree organization represents the nested sequences and alternatives structure in simulation events declaration.
+    """
     prepared_generator: Optional[GeneratorFn] = None
-    children: list['NestableGenerator'] = []
+    time_point: int = 0
+    nested_generators: list['NestableGenerator']
+    free_operations: list[dict or str]
+    config: SimConfiguration
 
     def __init__(self,
                  config: SimConfiguration,
                  generator_declaration: dict,
-                 time_point: int,
-                 parent: Optional['NestableGenerator'] = None):
-        self.parent = parent
+                 time_point: int):
+        """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
+        time point."""
+        self.config = config
         self.generator_type = list(generator_declaration.keys())[0]
+        self.time_point = time_point
+        self.nested_generators = []
+        self.free_operations = []
         children_tags = generator_declaration[self.generator_type]
-        wrappable_operations = []
 
         for child in children_tags:
-            if isinstance(child, dict):
-                # Encountered a nested generator.
-                if list(child.keys())[0] in ('sequence', 'alternative'):
-                    if len(wrappable_operations) > 0:
-                        #  Must wrap operations so far under a nested generator of our type.
-                        wrapping_generator_declaration = {
-                            self.generator_type: wrappable_operations
-                        }
-                        self.children.append(NestableGenerator(config, wrapping_generator_declaration, time_point, self))
-                        wrappable_operations = []
-                    self.children.append(NestableGenerator(config, child, time_point, self))
-                else:
-                    # Encountered an operation.
-                    # TODO: case for in-line parameters for operation #211, #217
-                    ...
-            elif isinstance(child, str):
-                parameter_set_choices = config.operation_params.get(child, [{}])
-                if len(parameter_set_choices) > 1 and self.generator_type == 'sequence':
-                    raise Exception("Alternatives by operation parameters not supported in sequences. Use "
-                                    "alternatives clause for operation {} in time point {} or reduce operation parameter "
-                                    "set size to 0 or 1.".format(child, time_point))
-                wrappable_operations.extend(prepare_parametrized_operations(config, child, time_point))
-        if len(wrappable_operations) > 0:
-            if len(self.children):
-                raise Exception("Unrecoverable fault in NestedGenerator. Having stray unwrapped operations in a nested generator declaration.")
-            self.prepared_generator = generator_function(self.generator_type, GENERATOR_LOOKUP, *wrappable_operations)
+            self.wrap_generator_candidate(child)
+
+        if len(self.free_operations):
+            if len(self.nested_generators) == 0:
+                # leaf node, prepare the actual GeneratorFn
+                prepared_operations = []
+                for op in self.free_operations:
+                    prepared_operations.extend(prepare_parametrized_operations(config, op, time_point))
+                self.prepared_generator = generator_function(self.generator_type, GENERATOR_LOOKUP, *prepared_operations)
+            else:
+                self.wrap_free_operations()
+
+    def wrap_generator_candidate(self, candidate):
+        """Create NestableGenerators for nested generator declarations within current generator block. Separate
+        individual operations as free operations into self state."""
+        if isinstance(candidate, dict):
+            # Encountered a nested generator.
+            if list(candidate.keys())[0] in ('sequence', 'alternatives'):
+                # Preceding free operations must be wrapped as NestableGenerators
+                self.wrap_free_operations()
+                self.nested_generators.append(NestableGenerator(self.config, candidate, self.time_point))
+        elif isinstance(candidate, str):
+            # Encountered an operation tag.
+            self.free_operations.append(candidate)
+
+    def wrap_free_operations(self):
+        """Create NestableGenerators for individual operations collected into self state. Clear the list of operations
+        afterwards."""
+        if len(self.free_operations):
+            if self.generator_type == 'alternatives':
+                for operation in self.free_operations:
+                    decl = {'sequence': [operation]}
+                    self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
+            elif self.generator_type == 'sequence':
+                decl = {'sequence': self.free_operations}
+                self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
+            self.free_operations = []
+
+    def unwrap(self, previous: list[Step]) -> list[Step]:
+        """
+        Recursive depth-first walkthrough of NestableGenerator tree starting from self to generate a list of Steps.
+        These steps denote the leaves of the given Step trees as expanded by self.
+
+        Sequence type NestableGenerators generate their tree of children Steps to follow up each of the given previous
+        Steps in order. Idea is like "previous + next1,next2 => [previous, next1, next2]".
+
+        Alternatives type NestableGenerators generate their tree of children Steps attaching a copy to each given
+        previous Step. Idea is like "previous + next1,next2 => [previous, next1], [previous, next2]".
+
+        Recursion end condition 1 is that self is a leaf that has a GeneratorFn that ultimately extends upon
+        the previous Steps and returns the resulting list of Steps.
+
+        Recursion end condition 2 is that a leaf that has no GeneratorFn or child NestableGenerators. Returns the
+        previous Steps unaltered.
+
+        :param previous: list of Steps denoting the Step tree at parent NestableGenerator or another Step root
+        :return: list of Steps resulting from attempting to attach self's tree of Steps into previous Steps
+        """
+        if self.prepared_generator is not None:
+            return self.prepared_generator(previous)
+        elif len(self.nested_generators) == 0:
+            return previous
+        else:
+            if self.generator_type == 'sequence':
+                current = previous
+                for child in self.nested_generators:
+                    current = child.unwrap(current)
+                return current
+            elif self.generator_type == 'alternatives':
+                current = []
+                for child in self.nested_generators:
+                    current.extend(child.unwrap(previous))
+                return current
+            return previous
 
 
 def sequence(parents: Optional[list[Step]] = None, *operations: Callable) -> list[Step]:
@@ -92,17 +150,30 @@ GENERATOR_LOOKUP = {
     }
 
 
-def compose(*generator_series: GeneratorFn) -> Step:
+def compose(*generators: GeneratorFn) -> Step:
     """
     Generate a simulation Step tree using the given list of generator functions
-    :param generator_series: generator functions which produce sequences and branches ('alternatives') of Step function wrappers
+
+    :param generators: generator functions which produce sequences and branches ('alternatives') of Step function wrappers
     :return: The root node of the generated tree
     """
     root = Step()
     previous = [root]
-    for generator in generator_series:
+    for generator in generators:
         current = generator(previous)
         previous = current
+    return root
+
+
+def compose_nested(nestable_generator: NestableGenerator) -> Step:
+    """
+    Generate a simulation Step tree using the given NestableGenerator.
+
+    :param nestable_generator: NestableGenerator tree for generating a Step tree.
+    :return: The root node of the generated Step tree
+    """
+    root = Step()
+    nestable_generator.unwrap([root])
     return root
 
 
@@ -186,24 +257,22 @@ def prepare_parametrized_operations(config: SimConfiguration,
     return results
 
 
-def full_tree_generators(config: SimConfiguration) -> list[NestableGenerator]:
+def full_tree_generators(config: SimConfiguration) -> NestableGenerator:
     """
-    Creat a list of step generator functions describing a single simulator run.
+    Creat a NestableGenerator describing a single simulator run.
 
     :param config: a prepared SimConfiguration object
     :return: a list of prepared generator functions
     """
-    generator_series = []
-
+    wrapper = NestableGenerator(config, {'sequence': []}, 0)
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
-        for generator_declaration in generator_declarations:
-            generator = NestableGenerator(config, generator_declaration, time_point)
-            generator_series.append(generator)
-    return generator_series
+        time_point_wrapper_declaration = {'sequence': generator_declarations}
+        wrapper.nested_generators.append(NestableGenerator(config, time_point_wrapper_declaration, time_point))
+    return wrapper
 
 
-def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int, list[NestableGenerator]]:
+def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int, NestableGenerator]:
     """
     Create a dict of NestableGenerators describing keyed by their time_point in the simulation. Used for generating
     partial step trees of the simulation.
@@ -215,11 +284,11 @@ def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int,
     generators_by_time_point = {}
 
     for time_point in config.time_points:
-        generator_series = []
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
-        for generator_declaration in generator_declarations:
-            generator = NestableGenerator(config, generator_declaration, time_point)
-            generator_series.append(generator)
-        generators_by_time_point[time_point] = generator_series
+        sequence_wrapper_declaration = {
+            'sequence': generator_declarations
+        }
+        wrapper_generator = NestableGenerator(config, sequence_wrapper_declaration, time_point)
+        generators_by_time_point[time_point] = wrapper_generator
     return generators_by_time_point
 
