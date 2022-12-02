@@ -2,7 +2,7 @@ import unittest
 import sim.generators
 import yaml
 from sim.core_types import AggregatedResults, Step, OperationPayload, SimConfiguration
-from sim.generators import sequence, compose_nested, compose, alternatives, repeat
+from sim.generators import sequence, compose_nested, alternatives
 from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from tests.test_utils import inc, dec, aggregating_increment, parametrized_operation
 
@@ -32,69 +32,6 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(6, len(result))
         self.assertEqual(3, len(parent1.branches))
         self.assertEqual(3, len(parent2.branches))
-
-    def test_sequence_composition(self):
-        generators = [
-            lambda x: sequence(
-                x,
-                inc,
-                inc
-            ),
-            lambda y: sequence(
-                y,
-                inc,
-                inc
-            )
-        ]
-        result = compose(*generators)
-        chain = result.operation_chains()[0]
-        computation_result = run_sequence(0, *chain)
-        self.assertEqual(5, len(chain))
-        self.assertEqual(4, computation_result)
-
-    def test_branches_and_sequences_chainability(self):
-        generators = [
-            lambda x: sequence(
-                x,
-                inc,
-                inc
-            ),
-            lambda y: alternatives(
-                y,
-                inc,
-                dec
-            ),
-            lambda z: sequence(
-                z,
-                inc,
-                inc
-            )
-        ]
-        result = compose(*generators)
-        chains = result.operation_chains()
-        self.assertEqual(2, len(chains))
-        chain1 = chains[0]
-        chain2 = chains[1]
-        self.assertEqual(6, len(chain1))
-        self.assertEqual(6, len(chain2))
-        computation_result1 = run_sequence(0, *chain1)
-        computation_result2 = run_sequence(0, *chain2)
-        self.assertEqual(5, computation_result1)
-        self.assertEqual(3, computation_result2)
-
-    def test_repeat(self):
-        generators = repeat(
-            2,
-            lambda x: sequence(
-                x,
-                inc,
-                inc
-            ))
-        result = compose(*generators)
-        chain = result.operation_chains()[0]
-        computation_result = run_sequence(0, *chain)
-        self.assertEqual(5, len(chain))
-        self.assertEqual(4, computation_result)
 
     def test_yaml_declaration(self):
         declaration = """
