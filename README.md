@@ -474,12 +474,15 @@ It is generated based on the `control.yaml` declaration. Unique operation chains
 For the simulation purposes, these input functions are the prepared processors (see above), but the simulator implementation literally does not care what these functions are.
 Sequences are linear chains of steps.
 Alternatives are branching steps.
-The generators are chainable such that they can expand the step tree in formation based on the results of earlier generator results.
-
 Step instances are generated and bound to earlier steps (parents) as successors (children).
-`compose` function executes the `sequence` and `alternatives` to build the complete simulation step tree.
 
-The `generators_from_declaration` function prepares the generator functions from the `control.yaml` structure, preparing necessary processor and operation functions within.
+The generators are chainable and nestable such that they can expand the step tree in formation based on the results of a previous generator's results.
+The `NestableGenerator` represents a tree structure for nested generator declarations.
+It is constructed from the `simulation_events` structure given from a configuration source.
+A `SimConfiguration` structure, likewise populated from a configuration source is used as a template for binding the created generator functions with prepared domain operation functions.
+The control source is an application's `control.yaml` file's dict structure or another compatible source. 
+
+`compose_nested` function executes the given `NestableGenerator` which in turn utilizes its prepared `sequence` and `alternatives` calls to build a complete simulation step tree.
 
 ## The domain
 
