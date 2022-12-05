@@ -52,7 +52,6 @@ class Step:
     def add_branch_from_operation(self, operation: Callable):
         self.add_branch(Step(operation, self))
 
-
 class AggregatedResults:
 
     def __init__(
@@ -63,9 +62,17 @@ class AggregatedResults:
         self.operation_results: dict[str, Any] = operation_results or {}
         self.current_time_point: int = current_time_point or 0
 
+    def _copy_op_results(self, value: Any) -> dict or list:
+        if isinstance(value, dict):
+            return OrderedDict(value.items())
+        elif isinstance(value, list):
+            return list(value)
+        else:
+            return deepcopy(value)
+
     def __deepcopy__(self, memo: dict) -> "AggregatedResults":
         return AggregatedResults(
-            operation_results = {k: OrderedDict(v.items()) for k,v in self.operation_results.items()},
+            operation_results = {k: self._copy_op_results(v) for k,v in self.operation_results.items()},
             current_time_point = self.current_time_point
         )
 
