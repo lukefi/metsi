@@ -179,6 +179,21 @@ class TestGenerators(unittest.TestCase):
         self.assertListEqual([6, 7, 8, 9], lengths)
         self.assertListEqual([5, 6, 7, 8], results)
 
+    def test_simulation_events_sequence_multiparameter_exception(self):
+        declaration = """
+        operation_params:
+          inc:
+            - param1: 1
+            - param1: 2  
+        simulation_events:
+          - time_points: [0]
+            generators:
+              - sequence:
+                - inc 
+        """
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        self.assertRaises(Exception, sim.generators.full_tree_generators, config)
+
     def test_simple_processable_chain(self):
         operation_tags = ['inc', 'inc', 'inc', 'param_oper']
         operation_params = {'param_oper': [{'amplify': True}]}
@@ -187,7 +202,6 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(len(operation_tags), len(chain))
         result = evaluate_sequence(1, *chain)
         self.assertEqual(4000, result)
-
 
     def test_simple_processable_chain_multiparameter_exception(self):
         operation_tags = ['param_oper']

@@ -53,7 +53,18 @@ class NestableGenerator:
                 self.nested_generators.append(NestableGenerator(self.config, candidate, self.time_point))
         elif isinstance(candidate, str):
             # Encountered an operation tag.
+            self.check_operation_sanity(candidate)
             self.free_operations.append(candidate)
+
+    def check_operation_sanity(self, candidate: str):
+        """Raise an Exception if operation candidate is not usable in current NestableGenerator context"""
+        parameter_set_choices = self.config.operation_params.get(candidate, [{}])
+        if len(parameter_set_choices) > 1 and self.generator_type == 'sequence':
+            # TODO: for the time being, multiple parameter sets for sequence operations don't make sense
+            # needs to be addressed during in-line parameters work in #211
+            raise Exception("Alternatives by operation parameters not supported in sequences. Use "
+                            "alternatives clause for operation {} in time point {} or reduce operation parameter "
+                            "set size to 0 or 1.".format(candidate, self.time_point))
 
     def wrap_free_operations(self):
         """Create NestableGenerators for individual operations collected into self state. Clear the list of operations
