@@ -10,12 +10,12 @@ def get_timber_price_table(file_path: str) -> np.ndarray:
     return table
 
 @cache
-def get_renewal_costs_as_dict(file_path: str) -> Dict[str, List[Any]]:
+def get_renewal_costs_as_dict(file_path: str) -> Dict[str, float]:
     """Returns the csv at :file_path: as a dictionary."""
     costs = {}
     with open(file_path, "r") as f:
         reader = csv.reader(f, delimiter=';')
         _ = next(reader)  # skip header
         for row in reader:
-            costs[row[0]] = {"cost_per_ha": float(row[1]), "operation_name": row[2]}
+            costs[row[0]] = float(row[1]) # operation: cost
     return costs

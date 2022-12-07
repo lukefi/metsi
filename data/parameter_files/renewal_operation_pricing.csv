@@ -1,34 +1,32 @@
-SMK operation code;price/ha;label
-400;100;Raivaus
-410;100;Mekaaninen raivaus
-420;100;Mekaanis-kemiallinen raivaus
-440;100;Haavan vesottumisen ennakkotorjunta
-450;100;Raivaus ennen hakkuita
-570;100;Kulotus
-600;100;T√§ydennysistutus
-630;100;T√§ydennyskylv√∂
-640;100;Mekaaninen hein√§ntorjunta
-650;100;Kemiallinen hein√§ntorjunta
-660;100;Mekaaninen perkaus
-670;100;Kemiallinen perkaus
-680;100;Mekaanis-kemiallinen perkaus
-690;100;Reik√§perkaus
-930;100;Uudisojitus
-940;100;Kunnostusojitus
-950;100;Ojien tukkiminen
-990;100;Juurik√§√§v√§n torjunta
-999;100;Muu perustamistoimenpide
-500;100;Ei tarpeen
-501;100;Maanpinnan k√§sittely
-510;100;Laikutus
-520;100;Laikkum√§t√§stys
-521;100;K√§√§nt√∂m√§t√§stys
-522;100;Naverom√§t√§stys
-530;100;√§estys
-540;100;Auraus
-550;100;Ojitusm√§t√§stys
-560;100;Pellon muokkaus
-570;100;Kulotus
-580;100;Kaivurilaikutus
-585;100;Muokkaus kantoja nostamalla
-590;100;Ristiin√§estys
+operation;cost_per_ha;SMK operation code;Finnish;
+clearing;100;400;Raivaus;
+mechanical_clearing;100;410;Mekaaninen raivaus;
+mechanical_chemical_clearing;100;420;Mekaanis-kemiallinen raivaus;
+prevention_of_aspen_saplings;100;440;Haavan vesottumisen ennakkotorjunta;
+clearing_before_cutting;100;450;Raivaus ennen hakkuita;
+complementary_planting;100;600;T‰ydennysistutus;
+complementary_sowing;100;630;T‰ydennyskylvˆ;
+mechanical_hay_prevention;100;640;Mekaaninen hein‰ntorjunta;
+chemical_hay_prevention;100;650;Kemiallinen hein‰ntorjunta;
+mechanical_clearing_other_species;100;660;Mekaaninen perkaus;
+chemical_clearing_other_species;100;670;Kemiallinen perkaus;
+mechanical_chemical_clearing_other_species;100;680;Mekaanis-kemiallinen perkaus;
+hole_clearing;100;690;Reik‰perkaus;
+ditching;100;930;Uudisojitus;
+reconditioning_ditching;100;940;Kunnostusojitus;
+ditch_blocking;100;950;Ojien tukkiminen;
+root_rot_prevention;100;990;Juurik‰‰v‰n torjunta;
+other_regeneration;100;999;Muu perustamistoimenpide;
+soil_preparation;100;501;Maanpinnan k‰sittely;
+scalping;100;510;Laikutus;
+mounding_by_scalping;100;520;Laikkum‰t‰stys;
+mounding_by_ground_turning;100;521;K‰‰ntˆm‰t‰stys;
+furrow_mounding;100;522;Naverom‰t‰stys;
+harrowing;100;530;‰estys;
+ploughing;100;540;Auraus;
+mounding_by_ditching;100;550;Ojitusm‰t‰stys;
+field_preparation;100;560;Pellon muokkaus;
+controlled_burning;100;570;Kulotus;
+digger_scalping;100;580;Kaivurilaikutus;
+soil_preparation_by_tree_stump_lifting;100;585;Muokkaus kantoja nostamalla;
+cross_harrowing;100;590;Ristiin‰estys;
