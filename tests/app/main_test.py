@@ -69,7 +69,6 @@ class MainTest(unittest.TestCase):
         self.assertEqual(2, len(stands))
         for stand in stands:
             _, schedules, _ = next(os.walk(Path(outdir, stand)))
-            self.assertEqual(8, len(schedules))
             for schedule in schedules:
                 _, _, files = next(os.walk(Path(outdir, stand, schedule)))
                 self.assertEqual(2, len(files))

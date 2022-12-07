@@ -15,16 +15,19 @@ class NestableGenerator:
     nested_generators: list['NestableGenerator']
     free_operations: list[dict or str]
     config: SimConfiguration
+    wrapped_alternative: bool = False  # TODO: dirty workaround to address multiparameters in alternatives, find another solution in #211 / #217 for multiparameters
 
     def __init__(self,
                  config: SimConfiguration,
                  generator_declaration: dict,
-                 time_point: int):
+                 time_point: int,
+                 wrapped_alternative: bool = False):
         """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
         time point."""
         self.config = config
         self.generator_type = list(generator_declaration.keys())[0]
         self.time_point = time_point
+        self.wrapped_alternative = wrapped_alternative
         self.nested_generators = []
         self.free_operations = []
         children_tags = generator_declaration[self.generator_type]
@@ -59,7 +62,7 @@ class NestableGenerator:
     def check_operation_sanity(self, candidate: str):
         """Raise an Exception if operation candidate is not usable in current NestableGenerator context"""
         parameter_set_choices = self.config.operation_params.get(candidate, [{}])
-        if len(parameter_set_choices) > 1 and self.generator_type == 'sequence':
+        if len(parameter_set_choices) > 1 and self.generator_type == 'sequence' and not self.wrapped_alternative:
             # TODO: for the time being, multiple parameter sets for sequence operations don't make sense
             # needs to be addressed during in-line parameters work in #211
             raise Exception("Alternatives by operation parameters not supported in sequences. Use "
@@ -73,7 +76,7 @@ class NestableGenerator:
             if self.generator_type == 'alternatives':
                 for operation in self.free_operations:
                     decl = {'sequence': [operation]}
-                    self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
+                    self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point, True))
             elif self.generator_type == 'sequence':
                 decl = {'sequence': self.free_operations}
                 self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
