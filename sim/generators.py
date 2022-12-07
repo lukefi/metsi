@@ -90,8 +90,6 @@ class NestableGenerator:
         """
         if self.prepared_generator is not None:
             return self.prepared_generator(previous)
-        elif len(self.nested_generators) == 0:
-            return previous
         else:
             if self.generator_type == 'sequence':
                 current = previous
