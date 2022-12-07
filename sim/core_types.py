@@ -36,7 +36,7 @@ class SimConfiguration(SimpleNamespace):
             )
             self.events.append(new_event)
             time_points.update(source_time_points)
-        self.time_points = sorted(list(time_points))
+        self.time_points = sorted(time_points)
 
 
 class Step:
