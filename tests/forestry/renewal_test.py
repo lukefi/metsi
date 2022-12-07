@@ -10,179 +10,198 @@ class RenewalTest(unittest.TestCase):
         ForestStand(area=2.0), 
         AggregatedResults(current_time_point=3)
     )
+    operation_parameters = {}
 
-    operation_parameters = {'cost_per_ha': 1000}
+    def assertStandsEqual(self, stand1: ForestStand, stand2: ForestStand):
+        """
+        Test that stand1 and stand2 are equal.
+        It performs a sort of "deep diff" for the stands, relying on the fact that only reference_trees and tree_strata are (lists of) complex objects in the stand.
+        Objects are cast to dicts to avoid using the overridden __eq__ methods of the respective classes.
+        """
+        for t in range(len(stand1.reference_trees)):
+            trees_expected = stand1.reference_trees[t].__dict__
+            trees_actual = stand2.reference_trees[t].__dict__
+            self.assertTrue(trees_expected == trees_actual)
+        
+        for s in range(len(stand1.tree_strata)):
+            strata_expected = stand1.tree_strata[s].__dict__
+            strata_actual = stand2.tree_strata[s].__dict__
+            self.assertTrue(strata_expected == strata_actual)
+
+        stands_expected = stand1.__dict__
+        stands_actual = stand2.__dict__
+        self.assertTrue(stands_expected == stands_actual)
 
     def test_clearing(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = clearing(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["clearing"][3], 2000.0)
+        new_stand, aggrs = clearing(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["clearing"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_mechanical_clearing(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = mechanical_clearing(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["mechanical_clearing"][3], 2000.0)
+        new_stand, aggrs = mechanical_clearing(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["mechanical_clearing"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_mechanical_chemical_clearing(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = mechanical_chemical_clearing(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["mechanical_chemical_clearing"][3], 2000.0)
+        new_stand, aggrs = mechanical_chemical_clearing(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["mechanical_chemical_clearing"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_prevention_of_aspen_saplings(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = prevention_of_aspen_saplings(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["prevention_of_aspen_saplings"][3], 2000.0)
+        new_stand, aggrs = prevention_of_aspen_saplings(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["prevention_of_aspen_saplings"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_clearing_before_cutting(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = clearing_before_cutting(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["clearing_before_cutting"][3], 2000.0)
+        new_stand, aggrs = clearing_before_cutting(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["clearing_before_cutting"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_complementary_planting(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = complementary_planting(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["complementary_planting"][3], 2000.0)
+        new_stand, aggrs = complementary_planting(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["complementary_planting"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_complementary_sowing(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = complementary_sowing(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["complementary_sowing"][3], 2000.0)
+        new_stand, aggrs = complementary_sowing(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["complementary_sowing"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
     
     def test_mechanical_hay_prevention(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = mechanical_hay_prevention(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["mechanical_hay_prevention"][3], 2000.0)
+        new_stand, aggrs = mechanical_hay_prevention(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["mechanical_hay_prevention"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_mechanical_clearing_other_species(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = mechanical_clearing_other_species(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["mechanical_clearing_other_species"][3], 2000.0)
+        new_stand, aggrs = mechanical_clearing_other_species(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["mechanical_clearing_other_species"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_chemical_clearing_other_species(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = chemical_clearing_other_species(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["chemical_clearing_other_species"][3], 2000.0)
+        new_stand, aggrs = chemical_clearing_other_species(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["chemical_clearing_other_species"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_mechanical_chemical_clearing_other_species(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = mechanical_chemical_clearing_other_species(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["mechanical_chemical_clearing_other_species"][3], 2000.0)
+        new_stand, aggrs = mechanical_chemical_clearing_other_species(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["mechanical_chemical_clearing_other_species"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_hole_clearing(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = hole_clearing(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["hole_clearing"][3], 2000.0)
+        new_stand, aggrs = hole_clearing(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["hole_clearing"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_ditching(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = ditching(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["ditching"][3], 2000.0)
+        new_stand, aggrs = ditching(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["ditching"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_reconditioning_ditching(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = reconditioning_ditching(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["reconditioning_ditching"][3], 2000.0)
+        new_stand, aggrs = reconditioning_ditching(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["reconditioning_ditching"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_ditch_blocking(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = ditch_blocking(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["ditch_blocking"][3], 2000.0)
+        new_stand, aggrs = ditch_blocking(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["ditch_blocking"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_root_rot_prevention(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = root_rot_prevention(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["root_rot_prevention"][3], 2000.0)
+        new_stand, aggrs = root_rot_prevention(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["root_rot_prevention"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_other_regeneration(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = other_regeneration(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["other_regeneration"][3], 2000.0)
+        new_stand, aggrs = other_regeneration(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["other_regeneration"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_soil_preparation(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = soil_preparation(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["soil_preparation"][3], 2000.0)
+        new_stand, aggrs = soil_preparation(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["soil_preparation"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_scalping(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = scalping(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["scalping"][3], 2000.0)
+        new_stand, aggrs = scalping(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["scalping"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_mounding_by_ground_turning(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = mounding_by_ground_turning(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["mounding_by_ground_turning"][3], 2000.0)
+        new_stand, aggrs = mounding_by_ground_turning(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["mounding_by_ground_turning"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_furrow_mounding(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = furrow_mounding(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["furrow_mounding"][3], 2000.0)
+        new_stand, aggrs = furrow_mounding(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["furrow_mounding"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_harrowing(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = harrowing(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["harrowing"][3], 2000.0)
+        new_stand, aggrs = harrowing(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["harrowing"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_ploughing(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = ploughing(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["ploughing"][3], 2000.0)
+        new_stand, aggrs = ploughing(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["ploughing"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_mounding_by_ditching(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = mounding_by_ditching(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["mounding_by_ditching"][3], 2000.0)
+        new_stand, aggrs = mounding_by_ditching(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["mounding_by_ditching"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_field_preparation(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = field_preparation(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["field_preparation"][3], 2000.0)
+        new_stand, aggrs = field_preparation(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["field_preparation"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_controlled_burning(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = controlled_burning(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["controlled_burning"][3], 2000.0)
+        new_stand, aggrs = controlled_burning(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["controlled_burning"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
     
     def test_digger_scalping(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = digger_scalping(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["digger_scalping"][3], 2000.0)
+        new_stand, aggrs = digger_scalping(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["digger_scalping"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_soil_preparation_by_tree_stump_lifting(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = soil_preparation_by_tree_stump_lifting(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["soil_preparation_by_tree_stump_lifting"][3], 2000.0)
+        new_stand, aggrs = soil_preparation_by_tree_stump_lifting(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["soil_preparation_by_tree_stump_lifting"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
 
     def test_cross_harrowing(self):
         payload = deepcopy(self.payload)
-        op_params = deepcopy(self.operation_parameters)
-        _, aggrs = cross_harrowing(payload, **op_params)
-        self.assertEqual(aggrs.get("renewal")["cross_harrowing"][3], 2000.0)
+        new_stand, aggrs = cross_harrowing(payload, **self.operation_parameters)
+        self.assertEqual(aggrs.get("renewal")["cross_harrowing"].area_applied_to, self.payload[0].area)
+        self.assertStandsEqual(payload[0], new_stand) # the operation should not modify the stand, thus checking that it hasn't done so
