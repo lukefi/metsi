@@ -6,8 +6,6 @@ from typing import Any, Callable, Iterator, Optional
 import yaml
 from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
 from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands, rsd_rows
-from munch import Munch
-
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults, ForestOpPayload
 from forestry.forestry_types import StandList
