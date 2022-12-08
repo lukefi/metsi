@@ -119,11 +119,9 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
     results = []
 
     felled_trees = simulation_aggregates.get_list_result("felled_trees")
-    felled_trees.sort(key=lambda x: x.cross_cut_done) # elements with `cross_cut_done = False` will be first
-        
-    for tree in felled_trees:
-        if tree.cross_cut_done == True:
-            break
+    felled_trees_not_cut = filter(lambda x: not x.cross_cut_done, felled_trees)
+    
+    for tree in felled_trees_not_cut:
         res = cross_cut_tree(tree, stand.area, timber_price_table)
         results.extend(res)
         tree.cross_cut_done = True
