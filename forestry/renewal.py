@@ -3,14 +3,15 @@ from sim.core_types import OpTuple
 from forestdatamodel.model import ForestStand
 
 @dataclass
-class RenewalAggregate:
+class PriceableOperationInfo:
      operation_name: str
-     area_applied_to: float
+     units: float
+     time_point: int
 
 
 def _store_renewal_aggregate(payload: OpTuple[ForestStand], op_tag: str):
      stand, aggrs = payload
-     aggregate = RenewalAggregate(operation_name=op_tag, area_applied_to=stand.area)
+     aggregate = PriceableOperationInfo(operation_name=op_tag, units=stand.area, time_point=aggrs.current_time_point)
      aggrs.upsert_nested(aggregate, "renewal", op_tag) #TODO: need to change this to store into a list, after #236 is merged
 
 
