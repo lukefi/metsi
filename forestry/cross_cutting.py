@@ -1,16 +1,9 @@
 from collections import defaultdict
-from sim.core_types import AggregatedResults, OpTuple
+from sim.core_types import OpTuple
 from forestdatamodel.model import ForestStand
 from forestryfunctions.cross_cutting.model import CrossCuttableTrees
 from forestry.utils import get_timber_price_table
 from forestryfunctions.cross_cutting import cross_cutting
-
-def _store_cross_cutting_results(simulation_aggregates: AggregatedResults, cross_cut_result_aggregate: defaultdict) -> AggregatedResults:
-    for tag, res in cross_cut_result_aggregate.items():
-        try:
-            simulation_aggregates.get("cross_cutting")[tag].update(res)
-        except KeyError:
-            simulation_aggregates.get("cross_cutting")[tag] = res
 
 
 def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
@@ -31,7 +24,8 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
                     cross_cut_result_aggregate[tag][tp] = results
                     aggr.cross_cut_done = True
 
-    _store_cross_cutting_results(simulation_aggregates, cross_cut_result_aggregate)
+    for tag, res in cross_cut_result_aggregate.items():
+        simulation_aggregates.upsert_nested(res, "cross_cutting", tag)
 
     return payload
 
@@ -49,7 +43,8 @@ def cross_cut_whole_stand(payload: OpTuple[ForestStand], **operation_parameters)
     results = cross_cutting.cross_cut_trees(cross_cuttable_trees, stand.area, timber_price_table)
     cross_cut_result_aggregate["standing_trees"][simulation_aggregates.current_time_point] = results
 
-    _store_cross_cutting_results(simulation_aggregates, cross_cut_result_aggregate)
+    for tag, res in cross_cut_result_aggregate.items():
+        simulation_aggregates.upsert_nested(res, "cross_cutting", tag)
 
     return payload
 
