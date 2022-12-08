@@ -48,7 +48,14 @@ def plant(stand: ForestStand, aggr: AggregatedResults, tag: str,regen_species: T
     """
     for i in range(rt_count):
         tree_id = stand.identifier + f"-{i}-tree"
-        tree = ReferenceTree(identifier=tree_id,stems_per_ha=rt_stems/rt_count,species=regen_species,breast_height_diameter=0,biological_age=1, height=0.3,sapling=True)
+        tree = ReferenceTree(identifier=tree_id,
+                             stems_per_ha=rt_stems/rt_count,
+                             species=regen_species,
+                             breast_height_diameter=0,
+                             breast_height_age=0,
+                             biological_age=1,
+                             height=0.3,
+                             sapling=True)
         stand.reference_trees.append(tree)
     
     regeneration_description = {
