@@ -1,28 +1,19 @@
-from typing import List
 from forestdatamodel.model import ForestStand
 from forestryfunctions.preprocessing import tree_generation, pre_util
 from forestryfunctions.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from forestryfunctions.preprocessing.naslund import naslund_height
+from forestry.filter import applyfilter
 
 
-def exclude_sapling_trees(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
-    for stand in stands:
-        stand.reference_trees = list(filter(lambda t: (t if t.sapling is False else None), stand.reference_trees))
+def preproc_filter(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+    named = operation_params.get("named", {})
+    for k,v in operation_params.items():
+        if k != "named":
+            stands = applyfilter(stands, k, v, named)
     return stands
 
 
-def exclude_empty_stands(stands: List[ForestStand], **operation_params)-> List[ForestStand]:
-    stands = list(filter(lambda s: (s if len(s.reference_trees) > 0 else None), stands))
-    return stands
-
-
-def exclude_zero_stem_trees(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
-    for stand in stands:
-        stand.reference_trees = list(filter(lambda rt: rt.stems_per_ha > 0.0, stand.reference_trees))
-    return stands
-
-
-def compute_location_metadata(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
+def compute_location_metadata(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """
     This operation sets in-place the location based metadata properties for each given ForestStand, where missing.
     These properties are: height above sea level, temperature sum, sea effect, lake effect, monthly temperature and
@@ -63,7 +54,7 @@ def compute_location_metadata(stands: List[ForestStand], **operation_params) -> 
     return stands
 
 
-def generate_reference_trees(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
+def generate_reference_trees(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Operation function that generates (N * stratum) reference trees for each stand """
     n_trees = pre_util.get_or_default(operation_params['n_trees'])
     for stand in stands:
@@ -81,7 +72,7 @@ def generate_reference_trees(stands: List[ForestStand], **operation_params) -> L
     return stands
 
 
-def determine_tree_height(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
+def determine_tree_height(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Fill in missing (None or nonpositive) tree heights from Näslund height curve """
     for stand in stands:
         for tree in stand.reference_trees:
@@ -90,7 +81,7 @@ def determine_tree_height(stands: List[ForestStand], **operation_params) -> List
     return stands
 
 
-def determine_tree_age(stands: List[ForestStand], **operation_params) -> List[ForestStand]:
+def determine_tree_age(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Supplement missing age for reference trees """
     for stand in stands:
         supplement_age_for_reference_trees(stand.reference_trees, stand.tree_strata)
@@ -98,9 +89,7 @@ def determine_tree_age(stands: List[ForestStand], **operation_params) -> List[Fo
 
 
 operation_lookup = {
-    'exclude_sapling_trees': exclude_sapling_trees,
-    'exclude_empty_stands': exclude_empty_stands,
-    'exclude_zero_stem_trees': exclude_zero_stem_trees,
+    'filter': preproc_filter,
     'compute_location_metadata': compute_location_metadata,
     'generate_reference_trees': generate_reference_trees,
     'determine_tree_height': determine_tree_height,

@@ -1,3 +1,4 @@
+from importlib import import_module
 from itertools import repeat
 from functools import reduce
 from forestdatamodel.model import ForestStand
@@ -10,6 +11,7 @@ from forestry.grow_acta import grow_acta
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
 from sim.core_types import OpTuple
+from forestry.clearcut import clearcutting, clearcutting_and_planting
 
 
 def compute_volume(stand: ForestStand) -> float:
@@ -63,6 +65,8 @@ operation_lookup = {
     'thinning_from_above': thinning_from_above,
     'first_thinning': first_thinning,
     'even_thinning': even_thinning,
+    #'clearcutting': clearcutting,
+    'clearcutting': clearcutting_and_planting,
     'report_biomass': report_biomass,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
@@ -70,11 +74,14 @@ operation_lookup = {
     'cross_cut_whole_stand': cross_cut_whole_stand,
 }
 
-try:
-    from forestry.grow_motti import grow_motti
-except ImportError:
-    # just don't register it when pymotti isn't found.
-    # we don't want to make pymotti a required dependency until it's public.
-    pass
-else:
-    operation_lookup['grow_motti'] = grow_motti
+def try_register(mod: str, func: str):
+    try:
+        operation_lookup[func] = getattr(import_module(mod), func)
+    except ImportError:
+        pass
+
+# only register grow_motti when pymotti is installed
+try_register("forestry.grow_motti", "grow_motti")
+
+# only register grow_fhk when fhk is installed
+try_register("forestry.grow_fhk", "grow_fhk")

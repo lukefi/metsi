@@ -5,7 +5,6 @@ Thinning limits lookup table is used for solving lower (y0) and upper (y1) bound
 of basal area thinnings.
 """
 from functools import cache, lru_cache
-from typing import Dict, List, Tuple
 from enum import Enum
 from collections.abc import KeysView
 from bisect import bisect
@@ -520,7 +519,7 @@ LIMITS_SLICE_LOOKUP = {
 }
 
 @cache
-def create_thinning_limits_table(file_path: str) -> List:
+def create_thinning_limits_table(file_path: str) -> list:
     contents = None
     with open(file_path, "r") as f:
         contents = f.read()
@@ -542,7 +541,7 @@ def get_thinning_limits_from_parameter_file_contents(
     sp_category: SoilPeatlandKey, 
     site_type: SiteTypeKey, 
     species: SpeciesKey
-    ) -> Dict[int, Tuple]:
+    ) -> dict[int, tuple]:
     """
     Creates a table from :thinning_limits: and uses it to return a dict that contains tuples of lower and upper limits for each height bracket 
     for the given stand parameters (:county:, :sp_category:, :site_type:, :species:).
@@ -575,7 +574,7 @@ def get_thinning_limits_from_parameter_file_contents(
     return limits_for_species
 
 
-def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None) -> Tuple[float, float]:
+def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None) -> tuple[float, float]:
     """ Resolves lower and upper bound for thinning. Values are in meters (m).
     :thinning_limits: thinning limits from a file parameter defined in control. yaml. It is user's responsibility to provide it in correct format. 
     Parsing failure will raise an exception. 
@@ -583,7 +582,9 @@ def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
-    sdom = futil.solve_dominant_species(stand)
+    sdom = futil.solve_dominant_species(stand.reference_trees)
+    if sdom is None:
+        raise UserWarning(f"Unable to resolve thinning bounds with no dominant species found.")
     species_key = species_to_key(sdom)
     hdom = futil.solve_dominant_height_c_largest(stand)
 
@@ -633,7 +634,9 @@ FIRST_THINNING_RESIDUE_STEMS = {
 
 def resolve_first_thinning_residue(stand: ForestStand) -> float:
     """ Resolves stem count residue for first thinning operation. Values are stems per hectare. """
-    sdom = futil.solve_dominant_species(stand)
+    sdom = futil.solve_dominant_species(stand.reference_trees)
+    if sdom is None:
+        raise UserWarning(f"Unable to resolve first thinning residue with no dominant species found.")
     st_key = site_type_to_key(stand.site_type_category)
     spe_key = species_to_key(sdom)
     lower_limit = FIRST_THINNING_RESIDUE_STEMS[st_key][spe_key]

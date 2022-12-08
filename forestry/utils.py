@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import numpy as np
 import csv
 
+
 @cache
 def get_timber_price_table(file_path: str) -> np.ndarray:
     """Converts the string representation of a timber price table csv to a numpy.ndarray."""
