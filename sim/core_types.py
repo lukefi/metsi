@@ -63,6 +63,10 @@ class AggregatedResults:
         self.current_time_point: int = current_time_point or 0
 
     def _copy_op_results(self, value: Any) -> dict or list:
+        """
+        optimises the deepcopy of self by shallow copying dict and list type operation_results.
+        This relies on the assumption that an operation result is not modified after it's stored.
+        """
         if isinstance(value, dict):
             return OrderedDict(value.items())
         elif isinstance(value, list):

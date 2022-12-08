@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import unittest
 from collections import OrderedDict
 from copy import deepcopy
@@ -39,3 +40,25 @@ class AggregateUtilsTest(unittest.TestCase):
         result = deepcopy(self.simulation_aggregates)
         result.store('oper3', new_aggregate)
         self.assertEqual(fixture.operation_results, result.operation_results)
+
+    def test_list_result_deepcopy(self):
+        """
+        Ensures that appending to a deepcopied list of operation_results does not modify the source list.
+        """
+        @dataclass
+        class Dummy:
+            value: str
+
+        original = AggregatedResults(
+            operation_results = {
+                'oper1': [Dummy(1), Dummy(2)],
+            },
+            current_time_point = 1
+        )
+
+        copied = deepcopy(original)
+        copied.operation_results['oper1'].append(Dummy(3))
+
+        self.assertEqual(len(original.operation_results["oper1"]), 2)
+        self.assertEqual(len(copied.operation_results["oper1"]), 3)
+
