@@ -106,7 +106,7 @@ def cross_cut_tree(
     results.extend(res)
     
     return results
-
+    
 
 def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
@@ -117,6 +117,7 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
     timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
 
     results = []
+
 
     felled_trees = simulation_aggregates.get_list_result("felled_trees")
     felled_trees_not_cut = filter(lambda x: not x.cross_cut_done, felled_trees)
