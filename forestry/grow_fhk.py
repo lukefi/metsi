@@ -67,9 +67,16 @@ def grow_fhk(input: tuple[ForestStand, Any], **args) -> tuple[ForestStand, None]
     mem.reset()
     res = query(stand, mem=mem)
     for i,t in enumerate(stand.reference_trees):
+        height_before_growth = t.height
         t.breast_height_diameter = res.d[i]
         t.height = res.h[i]
         t.stems_per_ha = res.f[i]
+        t.biological_age += 5
+        if height_before_growth < 1.3 <= t.height:
+            t.breast_height_age = t.biological_age
+        if t.height >= 1.3 and t.sapling:
+            t.sapling = False
     # prune dead trees
+    stand.year += 5
     stand.reference_trees = [t for t in stand.reference_trees if t.stems_per_ha >= 1.0]
     return stand, None

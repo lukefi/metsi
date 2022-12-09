@@ -19,4 +19,5 @@ def grow_acta(input: tuple[ForestStand, None], **operation_parameters) -> tuple[
         grow_saplings(saplings)
     if len(matures)>0:
         grow_diameter_and_height(matures)
+    stand.year += 5
     return stand, None
