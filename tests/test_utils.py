@@ -4,6 +4,7 @@ This module contains a collection of util functions and dummy payload functions 
 import os
 import unittest
 from typing import Any, Optional, Callable
+import numpy as np
 
 import yaml
 from forestdatamodel.enums.internal import TreeSpecies
@@ -102,3 +103,22 @@ def prepare_growth_test_stand():
         year=2025
     )
     return compute_location_metadata([stand])[0]
+
+
+DEFAULT_TIMBER_PRICE_TABLE = np.array(
+                        [[  1., 160., 370.,  55.],
+                        [  1., 160., 400.,  57.],
+                        [  1., 160., 430.,  59.],
+                        [  1., 160., 460.,  59.],
+                        [  2.,  70., 300.,  17.]])
+
+
+TIMBER_PRICE_TABLE_THREE_GRADES = np.array(
+                        [[  1., 160., 370.,  55.],
+                        [  1., 160., 400.,  57.],
+                        [  1., 160., 430.,  59.],
+                        [  1., 160., 460.,  59.],
+                        [  2.,  70., 300.,  17.],
+                        [  2.,  70., 270.,  15.],
+                        [  3.,  70., 220.,  10.]
+                        ])

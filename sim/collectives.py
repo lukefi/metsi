@@ -111,8 +111,14 @@ class LazyListDataFrame:
     def __iter__(self) -> Iterator[Any]:
         return self._xs.__iter__()
 
-def autocollective(x: Any) -> Any:
-    """Automagically turn `x` into a LazyListDataFrame if it's a list."""
+def autocollective(x: Any, **list_filters) -> Any:
+    """
+    Automagically turn `x` into a LazyListDataFrame if it's a list.
+    :list_filters: define key-value pairs where the key is the filtered attribute, and the value is the accepted value of that attribute. 
+    """
     if isinstance(x, list):
+        if list_filters:
+            for key, value in list_filters.items():
+                x = [item for item in x if getattr(item, key) == value]
         return LazyListDataFrame(x)
     return x

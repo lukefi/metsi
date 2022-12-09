@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from copy import deepcopy
 from types import SimpleNamespace
 from typing import Callable, Optional, Any, TypeVar, Generic
@@ -52,20 +52,19 @@ class Step:
     def add_branch_from_operation(self, operation: Callable):
         self.add_branch(Step(operation, self))
 
-
 class AggregatedResults:
 
     def __init__(
         self,
-        operation_results: Optional[dict[str, OrderedDict[int, Any]]] = None,
+        operation_results: Optional[dict[str, Any]] = None,
         current_time_point: Optional[int] = None
     ):
-        self.operation_results: dict[str, OrderedDict[int, Any]] = operation_results or {}
+        self.operation_results: dict[str, Any] = operation_results or {}
         self.current_time_point: int = current_time_point or 0
 
     def __deepcopy__(self, memo: dict) -> "AggregatedResults":
         return AggregatedResults(
-            operation_results = {k: OrderedDict(v.items()) for k,v in self.operation_results.items()},
+            operation_results = deepcopy(self.operation_results, memo),
             current_time_point = self.current_time_point
         )
 
@@ -85,6 +84,47 @@ class AggregatedResults:
     def store(self, tag: str, aggr: Any):
         self.get(tag)[self.current_time_point] = aggr
 
+    def get_list_result(self, tag: str) -> list[Any]:
+        try:
+            return self.operation_results[tag]
+        except KeyError:
+            self.operation_results[tag] = []
+            return self.operation_results[tag]
+
+    def extend_list_result(self, tag: str, aggr: list[Any]):
+        self.get_list_result(tag).extend(aggr)
+
+    def upsert_nested(self, value, *keys):
+        """
+        Upsert a value under a key path in a nested dictionary (under self.operation_results).
+        :param value: The value to upsert.
+        :param keys: The key path to the value to be upserted. Lenght of keys must be 
+        larger than 1; this method is not intended to be used for upserting values  directly 
+        under operation_results.
+        """
+        def _upsert(d:dict, value: dict, *keys):
+            if len(keys) == 1:
+                try:
+                    if keys[0] in d.keys():
+                        # a dictionary will be updated with a dictionary, but other types will overrider the existing value
+                        if isinstance(value, dict) and isinstance(d[keys[0]], dict):
+                            d.get(keys[0]).update(value)
+                        else: 
+                            d[keys[0]] = value
+                    else:
+                        d[keys[0]] = value
+                except KeyError:
+                    d[keys[0]] = value
+                return d
+            else:
+                key = keys[0]
+                d[key] = _upsert(d.get(key, {}), value, *keys[1:])
+                return d
+
+        if len(keys) < 2:
+            raise ValueError("At least two keys must be provided.")
+
+        _upsert(self.get(keys[0]), value, *keys[1:])
 
 CUType = TypeVar("CUType")  # CU for Computational Unit
 
