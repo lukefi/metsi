@@ -1,9 +1,9 @@
 import unittest
 from forestry.cross_cutting import CrossCutResult, CrossCuttableTree, cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
-from sim.core_types import AggregatedResults, OperationPayload
+from sim.core_types import AggregatedResults, OperationPayload, Step
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
-from sim.generators import compose, alternatives
+from sim.generators import alternatives
 from sim.operations import processor, do_nothing
 from sim.runners import run_chains_iteratively
 from tests.test_utils import DEFAULT_TIMBER_PRICE_TABLE, TIMBER_PRICE_TABLE_THREE_GRADES
@@ -319,7 +319,15 @@ class CrossCuttableTreesTest(unittest.TestCase):
         )
         # the two processors are alternatives, meaning the first branch will run cross_cut_felled_trees and the second branch will run do_nothing.
         generator = lambda x: alternatives(x, *[cross_cut_processor, do_nothing_processor])
-        chains = compose(*[generator]).operation_chains()
+
+        generators = [generator]
+        root = Step()
+        previous = [root]
+        for generator in generators:
+            current = generator(previous)
+            previous = current
+
+        chains = root.operation_chains()
 
         results = run_chains_iteratively(payload, chains)
         # running the two branches (chains) should result in one branch having the felled trees cross_cut==True, but not in the other one. 
