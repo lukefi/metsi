@@ -68,7 +68,7 @@ def main() -> int:
         print_logline("Reading input...")
         if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
             input_data = read_stands_from_file(app_config)
-        elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.SIMULATE]:
+        elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.EXPORT]:
             input_data = read_full_simulation_result_dirtree(app_config.input_path)
         else:
             raise Exception("Can not determine input data for unknown run mode")
