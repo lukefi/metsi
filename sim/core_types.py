@@ -52,20 +52,19 @@ class Step:
     def add_branch_from_operation(self, operation: Callable):
         self.add_branch(Step(operation, self))
 
-
 class AggregatedResults:
 
     def __init__(
         self,
-        operation_results: Optional[dict[str, OrderedDict[int, Any]]] = None,
+        operation_results: Optional[dict[str, Any]] = None,
         current_time_point: Optional[int] = None
     ):
-        self.operation_results: dict[str, OrderedDict[int, Any]] = operation_results or {}
+        self.operation_results: dict[str, Any] = operation_results or {}
         self.current_time_point: int = current_time_point or 0
 
     def __deepcopy__(self, memo: dict) -> "AggregatedResults":
         return AggregatedResults(
-            operation_results = {k: OrderedDict(v.items()) for k,v in self.operation_results.items()},
+            operation_results = deepcopy(self.operation_results, memo),
             current_time_point = self.current_time_point
         )
 
@@ -84,6 +83,16 @@ class AggregatedResults:
 
     def store(self, tag: str, aggr: Any):
         self.get(tag)[self.current_time_point] = aggr
+
+    def get_list_result(self, tag: str) -> list[Any]:
+        try:
+            return self.operation_results[tag]
+        except KeyError:
+            self.operation_results[tag] = []
+            return self.operation_results[tag]
+
+    def extend_list_result(self, tag: str, aggr: list[Any]):
+        self.get_list_result(tag).extend(aggr)
 
     def upsert_nested(self, value, *keys):
         """
