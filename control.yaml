@@ -46,8 +46,12 @@ operation_params:
       Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
   grow_fhk:
     - package: pymotti_graph
-
-
+  report_state:
+    - dbh: reference_trees.breast_height_diameter
+      height: reference_trees.height
+  report_state:
+    - cross_cut_vol_pine: cross_cutting.volume_per_ha[(cross_cutting.species == 1)]
+     
 preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
@@ -106,6 +110,7 @@ simulation_events:
     generators:
       - sequence:
           - cross_cut_felled_trees
+          - report_state
 
 post_processing:
   operation_params:
