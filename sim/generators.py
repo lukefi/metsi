@@ -40,7 +40,12 @@ class NestableGenerator:
                 # leaf node, prepare the actual GeneratorFn
                 prepared_operations = []
                 for op in self.free_operations:
-                    prepared_operations.extend(prepare_parametrized_operations(config, op, time_point))
+                    ops = prepare_parametrized_operations(config, op, time_point)
+                    if len(ops) > 1 and self.wrapped_alternative:
+                        # multiparameter alternatives encountered must transform self to alternatives type
+                        # we know this is safe since no nested generators exist
+                        self.generator_type = 'alternatives'
+                    prepared_operations.extend(ops)
                 self.prepared_generator = generator_function(self.generator_type, config.generator_lookup, *prepared_operations)
             else:
                 self.wrap_free_operations()

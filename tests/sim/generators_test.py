@@ -179,6 +179,47 @@ class TestGenerators(unittest.TestCase):
         self.assertListEqual([6, 7, 8, 9], lengths)
         self.assertListEqual([5, 6, 7, 8], results)
 
+    def test_nested_tree_generators_multiparameter_alternative(self):
+        declaration = """
+        operation_params:
+          inc_param:
+            - incrementation: 2
+            - incrementation: 3
+        simulation_events:
+          - time_points: [0]
+            generators:
+              - sequence:
+                - inc
+                - alternatives:
+                  - sequence:
+                    - inc
+                  - inc_param
+                - inc
+        """
+        config = SimConfiguration(
+            operation_lookup={'inc_param': aggregating_increment, 'inc': aggregating_increment},
+            generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        generator = sim.generators.full_tree_generators(config)
+        tree = compose_nested(generator)
+        chains = tree.operation_chains()
+        self.assertEqual(3, len(chains))
+
+        lengths = []
+        results = []
+
+        for chain in chains:
+            value = evaluate_sequence(
+                OperationPayload(
+                    simulation_state=0,
+                    operation_history=[],
+                    aggregated_results=AggregatedResults()),
+                *chain
+            ).simulation_state
+            results.append(value)
+            lengths.append(len(chain))
+
+        self.assertListEqual([3, 4, 5], results)
+
     def test_simulation_events_sequence_multiparameter_exception(self):
         declaration = """
         operation_params:
