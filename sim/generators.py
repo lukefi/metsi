@@ -15,19 +15,16 @@ class NestableGenerator:
     nested_generators: list['NestableGenerator']
     free_operations: list[dict or str]
     config: SimConfiguration
-    wrapped_alternative: bool = False  # TODO: dirty workaround to address multiparameters in alternatives, find another solution in #211 / #217 for multiparameters
 
     def __init__(self,
                  config: SimConfiguration,
                  generator_declaration: dict,
-                 time_point: int,
-                 wrapped_alternative: bool = False):
+                 time_point: int):
         """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
         time point."""
         self.config = config
         self.generator_type = list(generator_declaration.keys())[0]
         self.time_point = time_point
-        self.wrapped_alternative = wrapped_alternative
         self.nested_generators = []
         self.free_operations = []
         children_tags = generator_declaration[self.generator_type]
@@ -41,10 +38,6 @@ class NestableGenerator:
                 prepared_operations = []
                 for op in self.free_operations:
                     ops = prepare_parametrized_operations(config, op, time_point)
-                    if len(ops) > 1 and self.wrapped_alternative:
-                        # multiparameter alternatives encountered must transform self to alternatives type
-                        # we know this is safe since no nested generators exist
-                        self.generator_type = 'alternatives'
                     prepared_operations.extend(ops)
                 self.prepared_generator = generator_function(self.generator_type, config.generator_lookup, *prepared_operations)
             else:
@@ -67,7 +60,7 @@ class NestableGenerator:
     def check_operation_sanity(self, candidate: str):
         """Raise an Exception if operation candidate is not usable in current NestableGenerator context"""
         parameter_set_choices = self.config.operation_params.get(candidate, [{}])
-        if len(parameter_set_choices) > 1 and self.generator_type == 'sequence' and not self.wrapped_alternative:
+        if len(parameter_set_choices) > 1 and self.generator_type == 'sequence':
             # TODO: for the time being, multiple parameter sets for sequence operations don't make sense
             # needs to be addressed during in-line parameters work in #211
             raise Exception("Alternatives by operation parameters not supported in sequences. Use "
@@ -78,13 +71,8 @@ class NestableGenerator:
         """Create NestableGenerators for individual operations collected into self state. Clear the list of operations
         afterwards."""
         if len(self.free_operations):
-            if self.generator_type == 'alternatives':
-                for operation in self.free_operations:
-                    decl = {'sequence': [operation]}
-                    self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point, True))
-            elif self.generator_type == 'sequence':
-                decl = {'sequence': self.free_operations}
-                self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
+            decl = {self.generator_type: self.free_operations}
+            self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
             self.free_operations = []
 
     def unwrap(self, previous: list[Step]) -> list[Step]:

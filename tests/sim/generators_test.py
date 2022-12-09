@@ -220,6 +220,74 @@ class TestGenerators(unittest.TestCase):
 
         self.assertListEqual([3, 4, 5], results)
 
+    def test_alternatives_embedding_equivalence(self):
+        """
+        This test shows that alternatives with multiple single operations nested in alternatives is equivalent to
+        sequences with single operations nested in alternatives.
+        """
+        declaration_one = """
+        simulation_events:
+          - time_points: [0]
+            generators:
+              - sequence:
+                - inc
+                - alternatives:
+                  - alternatives:
+                    - inc
+                    - inc
+                  - sequence:
+                    - inc
+                    - inc
+                  - alternatives:
+                    - inc
+                    - inc
+                - inc
+        """
+        declaration_two = """
+        simulation_events:
+          - time_points: [0]
+            generators:
+            - sequence:
+              - inc 
+              - alternatives:
+                - sequence:
+                  - inc
+                - sequence:
+                  - inc
+                - sequence:
+                  - inc 
+                  - inc
+                - sequence:
+                  - inc 
+                - sequence:
+                  - inc 
+              - inc
+        """
+        configs = [
+            SimConfiguration(operation_lookup={'inc_param': aggregating_increment, 'inc': aggregating_increment},
+                             generator_lookup=sim.generators.GENERATOR_LOOKUP,
+                             **yaml.load(declaration_one, Loader=yaml.CLoader)),
+            SimConfiguration(operation_lookup={'inc_param': aggregating_increment, 'inc': aggregating_increment},
+                             generator_lookup=sim.generators.GENERATOR_LOOKUP,
+                             **yaml.load(declaration_two, Loader=yaml.CLoader))
+        ]
+        generators = [sim.generators.full_tree_generators(config) for config in configs]
+        trees = [compose_nested(generator) for generator in generators]
+        chains_sets = [tree.operation_chains() for tree in trees]
+
+        results = ([], [])
+        for i, chains in enumerate(chains_sets):
+            for chain in chains:
+                value = evaluate_sequence(
+                    OperationPayload(
+                        simulation_state=0,
+                        operation_history=[],
+                        aggregated_results=AggregatedResults()),
+                    *chain
+                ).simulation_state
+                results[i].append(value)
+        self.assertListEqual(results[0], results[1])
+
     def test_simulation_events_sequence_multiparameter_exception(self):
         declaration = """
         operation_params:
