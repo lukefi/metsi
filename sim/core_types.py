@@ -62,21 +62,9 @@ class AggregatedResults:
         self.operation_results: dict[str, Any] = operation_results or {}
         self.current_time_point: int = current_time_point or 0
 
-    def _copy_op_results(self, value: Any) -> dict or list:
-        """
-        optimises the deepcopy of self by shallow copying dict and list type operation_results.
-        This relies on the assumption that an operation result is not modified after it's stored.
-        """
-        if isinstance(value, dict):
-            return OrderedDict(value.items())
-        elif isinstance(value, list):
-            return list(value)
-        else:
-            return deepcopy(value)
-
     def __deepcopy__(self, memo: dict) -> "AggregatedResults":
         return AggregatedResults(
-            operation_results = {k: self._copy_op_results(v) for k,v in self.operation_results.items()},
+            operation_results = deepcopy(self.operation_results, memo),
             current_time_point = self.current_time_point
         )
 

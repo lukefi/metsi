@@ -41,10 +41,7 @@ class AggregateUtilsTest(unittest.TestCase):
         result.store('oper3', new_aggregate)
         self.assertEqual(fixture.operation_results, result.operation_results)
 
-    def test_list_result_deepcopy(self):
-        """
-        Ensures that appending to a deepcopied list of operation_results does not modify the source list.
-        """
+    def test_modify_deepcopied_list_item_does_not_modify_original(self):
         @dataclass
         class Dummy:
             value: str
@@ -56,9 +53,7 @@ class AggregateUtilsTest(unittest.TestCase):
             current_time_point = 1
         )
 
+        #modifying an attribute of copy does not modify original
         copied = deepcopy(original)
-        copied.operation_results['oper1'].append(Dummy(3))
-
-        self.assertEqual(len(original.operation_results["oper1"]), 2)
-        self.assertEqual(len(copied.operation_results["oper1"]), 3)
-
+        copied.operation_results["oper1"][0].value = 4
+        self.assertEqual(original.operation_results["oper1"][0].value, 1)
