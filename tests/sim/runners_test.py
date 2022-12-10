@@ -1,5 +1,6 @@
 import unittest
-from sim.core_types import AggregatedResults, OperationPayload
+from sim.generators import GENERATOR_LOOKUP
+from sim.core_types import AggregatedResults, OperationPayload, SimConfiguration
 from sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy
 from tests.test_utils import raises, identity, none, collect_results, load_yaml, aggregating_increment
 
@@ -26,21 +27,23 @@ class TestOperations(unittest.TestCase):
 
     def test_strategies_by_comparison(self):
         declaration = load_yaml('runners_test/branching.yaml')
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        print(config)
         initial = OperationPayload(
             simulation_state=1,
             aggregated_results=AggregatedResults(),
             operation_history=[]
         )
-        results_full = collect_results(
-            run_full_tree_strategy(initial, declaration, {'inc': aggregating_increment}))
-        results_partial = collect_results(
-            run_partial_tree_strategy(initial, declaration, {'inc': aggregating_increment}))
+        results_full = collect_results(run_full_tree_strategy(initial, config))
+        results_partial = collect_results(run_partial_tree_strategy(initial, config))
         self.assertEqual(8, len(results_full))
         self.assertEqual(8, len(results_partial))
         self.assertEqual(results_partial, results_full)
 
     def test_no_parameters_propagation(self):
         declaration = load_yaml('runners_test/no_parameters.yaml')
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        print(config)
         initial = OperationPayload(
             simulation_state=1,
             aggregated_results=AggregatedResults(),
@@ -48,12 +51,14 @@ class TestOperations(unittest.TestCase):
         )
 
         results = collect_results(
-            run_full_tree_strategy(initial, declaration, {'inc': aggregating_increment})
+            run_full_tree_strategy(initial, config)
         )
         self.assertEqual(5, results[0])
 
     def test_parameters_propagation(self):
         declaration = load_yaml('runners_test/parameters.yaml')
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        print(config)
         initial = OperationPayload(
             simulation_state=1,
             aggregated_results=AggregatedResults(),
@@ -61,12 +66,13 @@ class TestOperations(unittest.TestCase):
         )
 
         results = collect_results(
-            run_full_tree_strategy(initial, declaration, {'inc': aggregating_increment})
+            run_full_tree_strategy(initial, config)
         )
         self.assertEqual(9, results[0])
 
     def test_parameters_branching(self):
         declaration = load_yaml('runners_test/parameters_branching.yaml')
+        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         initial = OperationPayload(
             simulation_state=1,
             aggregated_results=AggregatedResults(),
@@ -74,7 +80,7 @@ class TestOperations(unittest.TestCase):
         )
 
         results = collect_results(
-            run_full_tree_strategy(initial, declaration, {'inc': aggregating_increment})
+            run_full_tree_strategy(initial, config)
         )
         # do_nothing, do_nothing = 1
         # do_nothing, inc#1      = 2

@@ -3,7 +3,7 @@ import typing
 from typing import Any, Optional, TypeVar
 from sim.collectives import collect_all, autocollective, getvarfn
 from sim.core_types import OpTuple, OperationPayload
-from sim.util import get_or_default, dict_value
+from sim.util import get_or_default
 
 
 T = TypeVar("T")
@@ -93,8 +93,8 @@ def check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_
 
 def resolve_operation(tag: str, external_operation_lookup: dict) -> typing.Callable:
     operation = get_or_default(
-        dict_value(external_operation_lookup, tag),
-        dict_value(internal_operation_lookup, tag))
+        external_operation_lookup.get(tag),
+        internal_operation_lookup.get(tag))
     if operation is None:
         raise Exception("Operation " + tag + " not available")
     else:

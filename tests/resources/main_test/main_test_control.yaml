@@ -14,6 +14,8 @@ operation_params:
   thinning_from_below:
     - thinning_factor: 0.97
       e: 0.2
+    - thinning_factor: 0.8
+      e: 0.16
   report_biomass:
     - model_set: 1
   report_collectives:
@@ -39,16 +41,18 @@ simulation_events:
     generators:
       - sequence:
           - report_biomass
-  - time_points: [5, 10, 15, 20, 25, 30]
+  - time_points: [5, 10, 15, 20]
     generators:
       - sequence:
           - grow_acta
-  - time_points: [5, 15, 25]
+  - time_points: [5, 15]
     generators:
       - alternatives:
           - do_nothing
-          - do_nothing
-  - time_points: [30]
+          - thinning_from_below
+          - sequence:
+            - do_nothing
+  - time_points: [20]
     generators:
       - sequence:
           - report_biomass

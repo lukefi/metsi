@@ -96,7 +96,10 @@ simulation_events:
           - thinning_from_above
           - first_thinning
           - even_thinning
-          - clearcutting
+          - sequence:
+            - clearcutting
+            - do_nothing
+            # operations for renewal after clearcutting go here
   - time_points: [30]
     generators:
       - sequence:
