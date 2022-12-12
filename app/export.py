@@ -3,7 +3,7 @@ from functools import cache
 from typing import IO, Any, Generic, Iterator, TypeVar, Union
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults
-from sim.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
+from forestry.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
 from sim.core_types import OperationPayload
 
 

@@ -1,7 +1,7 @@
 import unittest
 from forestry.cross_cutting import CrossCutResult
 from sim.core_types import AggregatedResults
-from sim.operations import report_state
+from forestry.operations import report_state
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 
