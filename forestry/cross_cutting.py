@@ -84,17 +84,13 @@ def cross_cut_tree(
     :param tree: The tree to cross cut
     :returns: A list of CrossCutResult objects, whose length is given by the number of unique timber grades in the `timber_price_table`. In other words, the returned list contains the resulting quantities of each unique timber grade.
     """
-    results = []
-
     unique_timber_grades, volumes, values = cross_cut(
                             tree.species,
                             tree.breast_height_diameter,
                             tree.height,
-                            timber_price_table
-                            )
-
-    res = _create_cross_cut_results(
-                        stand_area, 
+        timber_price_table)
+    return _create_cross_cut_results(
+        stand_area,
                         tree.species, 
                         tree.stems_to_cut_per_ha, 
                         unique_timber_grades, 
