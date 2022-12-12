@@ -25,12 +25,11 @@ def _collector_wrapper(operation_parameters, *aliases, **named_aliases) -> dict[
 def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
     state, aggr = input
     res = _collector_wrapper(
-        collectives, 
+        collectives,
         lambda name: autocollective(getattr(state, name)),
         state = state,
         aggr = aggr.operation_results,
-        time = aggr.current_time_point
-        )
+        time = aggr.current_time_point)
     aggr.store('report_collectives', res)
     return input
 
@@ -38,14 +37,12 @@ def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
 def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
     state, aggr = input
     res = _collector_wrapper(
-        operation_parameters, 
+        operation_parameters,
         lambda name: autocollective(getattr(state, name)),
         lambda name: autocollective(
-                                    aggr.operation_results[name], 
-                                    time_point = aggr.current_time_point,
-                                    ),
-        state = state
-        )
+            aggr.operation_results[name],
+            time_point = aggr.current_time_point),
+        state = state)
     aggr.store('report_state', res)
     return input
 
