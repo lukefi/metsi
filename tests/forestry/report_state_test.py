@@ -17,7 +17,8 @@ class ReportStateTest(unittest.TestCase):
                         volume_per_ha=0.5,
                         value_per_ha=2,
                         stand_area=1,
-                        source="thinning_from_above",
+                        source="harvested",
+                        operation="thinning_from_above",
                         time_point=1
                     ),
                     CrossCutResult(
@@ -26,7 +27,8 @@ class ReportStateTest(unittest.TestCase):
                         volume_per_ha=0.5,
                         value_per_ha=2,
                         stand_area=1,
-                        source="thinning_from_below",
+                        source="harvested",
+                        operation="thinning_from_above",
                         time_point=1
                     ),
                 ]
