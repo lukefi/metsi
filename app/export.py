@@ -4,8 +4,8 @@ from typing import IO, Any, Generic, Iterator, TypeVar, Union
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults
 from forestry.collectives import CollectFn, GetVarFn, autocollective, compile, getvarfn
+from app.console_logging import print_logline
 from sim.core_types import OperationPayload
-
 
 T = TypeVar("T")
 class CollectiveSeries(Generic[T]):
@@ -110,17 +110,21 @@ def j_cda(out: IO, decl: dict, data: SimResults):
         )
 
 
-def j_out(configuration: Mela2Configuration, decl: dict, data: SimResults):
+def j_out(configuration: Mela2Configuration, decl: dict, data: SimResults, cda_filename: str, xda_filename: str):
     """Write J files."""
-    with open(f"{configuration.target_directory}/{decl.get('cda', 'data.cda')}", "w") as f:
+    with open(f"{configuration.target_directory}/{decl.get('cda', cda_filename)}", "w") as f:
         j_cda(f, decl, data)
-    with open(f"{configuration.target_directory}/{decl.get('xda', 'data.xda')}", "w") as f:
+    with open(f"{configuration.target_directory}/{decl.get('xda', xda_filename)}", "w") as f:
         j_xda(f, decl, data)
 
 
-def export_variables(config: Mela2Configuration, decl, data):
-    format = decl.get("format", "j").lower()
-    if format == "j":
-        j_out(config, decl, data)
-    else:
-        raise ValueError("Unknown output format: '{}'".format(format))
+def export_files(config: Mela2Configuration, decl, data):
+    output_handlers = []
+    for export_module_declaration in decl:
+        format = export_module_declaration.get("format", None)
+        if format == "J":
+            output_handlers.append(lambda: j_out(config, export_module_declaration, data, "data.cda", "data.xda"))
+        else:
+            print_logline("Unknown output format for export: '{}'".format(format))
+    for handler in output_handlers:
+        handler()

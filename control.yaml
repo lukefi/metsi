@@ -49,7 +49,6 @@ operation_params:
   report_state:
     - dbh: reference_trees.breast_height_diameter
       height: reference_trees.height
-  report_state:
     - cross_cut_vol_pine: cross_cutting.volume_per_ha[(cross_cutting.species == 1)]
      
 preprocessing_params:
@@ -121,15 +120,13 @@ post_processing:
     - do_nothing
 
 export:
-  format: J
-
-  cvariables:
-    - year
-    - site_type_category
-    - land_use_category
-    - soil_peatland_category
-
-  xvariables:
-    - Ftot[0]
-    - Fpine[0,5,10]
-    - int(site_type_category < 7) * sum(Fbirch)
+  - format: J
+    cvariables:
+      - year
+      - site_type_category
+      - land_use_category
+      - soil_peatland_category
+    xvariables:
+      - Ftot[0]
+      - Fpine[0,5,10]
+      - int(site_type_category < 7) * sum(Fbirch)
