@@ -46,10 +46,6 @@ class RegenerationKey(enum.IntEnum):
 
 
 def plant(stand: ForestStand, aggr: AggregatedResults, tag: str,regen_species: TreeSpecies, rt_count: int,rt_stems: int, soil_preparation: SoilPreparationKey) -> OpTuple[ForestStand]:
-    """Adds 10 reference trees to stand
-    this planting function is called after clearcutting so that the simulation doesn't
-    stop due to errors after clearcut.
-    """
     for i in range(rt_count):
         tree_id = stand.identifier + f"-{i}-tree"
         tree = ReferenceTree(identifier=tree_id,
@@ -95,29 +91,16 @@ def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple
     else:
         raise UserWarning("Unable to perform clearcutting")
 
-def clearcutting_and_planting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    """checks if either stand mean age or stand basal area weighted mean 
-    diameter is over limits given in separate files. 
-    If yes, function clearcut is called 
+def planting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+    """checks weather stand has reference trees, if not 
+    function plant is called
     """
     stand, simulation_aggregates = input
+    if len(stand.reference_trees)>0: 
+        raise UserWarning("No planting needed")
+
+    instructions_path = operation_parameters.get('renewal_instructions', None)
+    regen = get_planting_instructions(stand,instructions_path)
+    stand, output_planting = plant(stand,simulation_aggregates,"regeneration",regen['species'],10,regen['stems/ha'],regen['soil preparation'])
+    return (stand,output_planting)
     
-    if len(stand.reference_trees)>0 and sum(x.breast_height_diameter for x in stand.reference_trees)>0:
-        age_limits_path = operation_parameters.get('clearcutting_limits_ages', None)
-        diameter_limits_path = operation_parameters.get('clearcutting_limits_diameters', None)
-        instructions_path = operation_parameters.get('clearcutting_instructions', None)
-        (age_limit, diameter_limit) = get_clearcutting_limits(stand,age_limits_path, diameter_limits_path)
-        regen = get_clearcutting_instructions(stand,instructions_path)
-        age_limit_reached = futil.mean_age_stand(stand)>= age_limit
-        diameter_limit_reached = futil.calculate_basal_area_weighted_attribute_sum(stand.reference_trees,
-        f=lambda x: x.breast_height_diameter*futil.calculate_basal_area(x))>=diameter_limit
-    
-        if age_limit_reached or diameter_limit_reached:
-            stand, output = clearcut_with_output(stand,simulation_aggregates,'clearcutting')
-            stand, output_planting = plant(stand,output,"regeneration",regen['species'],10,regen['stems/ha'],regen['soil preparation'])
-            return (stand,output_planting)
-        else:
-            raise UserWarning("Unable to perform clearcutting")
-    else:
-        raise UserWarning("Unable to perform clearcutting")
- 

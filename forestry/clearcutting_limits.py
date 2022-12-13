@@ -109,7 +109,7 @@ def create_clearcutting_limits_table(file_path: str) -> List:
     else:
         return table
 
-def create_clearcutting_instructions_table(file_path: str) -> List:
+def create_planting_instructions_table(file_path: str) -> List:
     contents = None
     with open(file_path, "r") as f:
         contents = f.read()
@@ -118,7 +118,7 @@ def create_clearcutting_instructions_table(file_path: str) -> List:
     table = [row.split() for row in table]
     
     if len(table) != 4 or len(table[0]) != 3:
-        raise Exception('Clearcutting limits file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
+        raise Exception('planting instructions file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
     else:
         return table
 
@@ -192,13 +192,10 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
     }
     return RENEWAL_DIAMETERS
 
-def get_clearcutting_instructions_from_parameter_file_contents(
+def get_planting_instructions_from_parameter_file_contents(
     file_path: str,
     ) -> dict:
-    """
-    Creates a table from :clearcutting_agelimits
-    """
-    instructions = create_clearcutting_instructions_table(file_path)
+    instructions = create_planting_instructions_table(file_path)
     INSTRUCTIONS = {
         SiteTypeKey.OMT: {
             'species':int(instructions[0][0]),
@@ -242,10 +239,10 @@ def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None, file
         diameter_limit = RENEWAL_DIAMETERS[site_type_key][species_key]
     return (age_limit,diameter_limit)
 
-def get_clearcutting_instructions(stand: ForestStand,file_path_instructions: str = None) -> dict:
+def get_planting_instructions(stand: ForestStand,file_path_instructions: str = None) -> dict:
     site_type_key = site_type_to_key(stand.site_type_category)
     if file_path_instructions is not None:
-        instructions =get_clearcutting_instructions_from_parameter_file_contents(file_path_instructions)
+        instructions =get_planting_instructions_from_parameter_file_contents(file_path_instructions)
         regen = instructions[site_type_key]
     else:
          regen = INSTRUCTIONS[site_type_key]
