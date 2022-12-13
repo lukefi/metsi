@@ -28,27 +28,26 @@ def generate_empty_stands(stand_count, empty_stand_count):
 class PreprocessingTest(unittest.TestCase):
 
     def test_generate_reference_trees(self):
-        """ tree generation cases are as follows: skip, weibull, height, weibull, sapling """
-        heights = [10.0, 15.0, 20.0, 25.0]
-        diameters = [12.0, 17.0, 22.0, None]
-        areas = [None, 250.0, None, 250.0]
-        stems = [None, None, 300.0, 300.0]
+        """ In this suite there are two stratum fixture cases.
+        A stratum that has all necessary attributes inflated and one that needs mean diameter to be supplemented
+        """
+        normal_case = TreeStratum(mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None)
+        supplement_diameter_case = TreeStratum(mean_diameter=None, mean_height=25.0, basal_area=250.0, stems_per_ha=300.0)
+        fixtures = [normal_case, supplement_diameter_case]
         stand = ForestStand()
         stand.identifier = 'xxx'
-        stand.tree_strata = [
-            TreeStratum(mean_diameter=d, mean_height=h, basal_area=a, stems_per_ha=f)
-            for d, h, a, f in zip(diameters, heights, areas, stems)
-        ]
-        stand.tree_strata.append(
-            TreeStratum(sapling_stratum=True, mean_height=1.3, sapling_stems_per_ha=600.0, mean_diameter=0.0)
-        )
+        stand.tree_strata.extend(fixtures)
         result = preprocessing.generate_reference_trees([stand], n_trees=10)
-        self.assertEqual(31, len(result[0].reference_trees))
+        self.assertEqual(20, len(result[0].reference_trees))
         self.assertEqual('xxx-1-tree', result[0].reference_trees[0].identifier)
         self.assertEqual('xxx-2-tree', result[0].reference_trees[1].identifier)
+        self.assertEqual('xxx-11-tree', result[0].reference_trees[10].identifier)
+        self.assertEqual('xxx-12-tree', result[0].reference_trees[11].identifier)
         self.assertEqual(10237.96, result[0].reference_trees[0].stems_per_ha)
         self.assertEqual(1138.02, result[0].reference_trees[1].stems_per_ha)
-        self.assertEqual(30.0, result[0].tree_strata[3].mean_diameter)
+        self.assertEqual(2768.41, result[0].reference_trees[10].stems_per_ha)
+        self.assertEqual(982.96, result[0].reference_trees[11].stems_per_ha)
+
 
     def test_determine_tree_height(self):
         stand = ForestStand()
