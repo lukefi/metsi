@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ForestPropertyData xsi:schemaLocation="http://standardit.tapio.fi/schemas/forestData ForestData.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:gdt="http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes" xmlns:co="http://standardit.tapio.fi/schemas/forestData/common" xmlns:sf="http://standardit.tapio.fi/schemas/forestData/specialFeature" xmlns:op="http://standardit.tapio.fi/schemas/forestData/operation" xmlns:dts="http://standardit.tapio.fi/schemas/forestData/deadTreeStrata" xmlns:tss="http://standardit.tapio.fi/schemas/forestData/treeStandSummary" xmlns:tst="http://standardit.tapio.fi/schemas/forestData/treeStratum" xmlns:ts="http://standardit.tapio.fi/schemas/forestData/treeStand" xmlns:st="http://standardit.tapio.fi/schemas/forestData/Stand" xmlns="http://standardit.tapio.fi/schemas/forestData">
+  <st:Stands>
+    <st:Stand id="12345678">
+      <st:StandBasicData>
+        <st:CompleteState>1</st:CompleteState>
+        <st:StandNumber>1</st:StandNumber>
+        <st:MainGroup>1</st:MainGroup>
+        <st:SubGroup>1</st:SubGroup>
+        <st:FertilityClass>2</st:FertilityClass>
+        <st:SoilType>20</st:SoilType>
+        <st:DrainageState>1</st:DrainageState>
+        <st:DevelopmentClass>03</st:DevelopmentClass>
+        <st:StandQuality>0</st:StandQuality>
+        <st:MainTreeSpecies>2</st:MainTreeSpecies>
+        <st:Accessibility>2</st:Accessibility>
+        <st:StandBasicDataDate>2022-06-23</st:StandBasicDataDate>
+        <co:DataSource>11</co:DataSource>
+        <st:GrowthPlaceDataSource>5</st:GrowthPlaceDataSource>
+        <st:Area>2.2</st:Area>
+        <st:AreaDecrease>0.00</st:AreaDecrease>
+        <gdt:PolygonGeometry>
+          <gml:pointProperty>
+            <gml:Point srsName="EPSG:3067">
+              <gml:coordinates>438303,6803631</gml:coordinates>
+            </gml:Point>
+          </gml:pointProperty>
+        </gdt:PolygonGeometry>
+      </st:StandBasicData>
+      <ts:TreeStandData>
+        <ts:TreeStandDataDate type="1" date="2022-06-23">
+          <tst:TreeStrata>
+            <tst:TreeStratum id="2234567">
+              <tst:StratumNumber>1</tst:StratumNumber>
+              <tst:TreeSpecies>29</tst:TreeSpecies>
+              <tst:Storey>5</tst:Storey>
+              <tst:Age>50</tst:Age>
+              <tst:BasalArea>16.3</tst:BasalArea>
+              <tst:MeanDiameter>22.8</tst:MeanDiameter>
+              <tst:MeanHeight>22.8</tst:MeanHeight>
+              <tst:Volume>170.1</tst:Volume>
+              <co:DataSource>2</co:DataSource>
+            </tst:TreeStratum>
+            <tst:TreeStratum id="2234568">
+              <tst:StratumNumber>2</tst:StratumNumber>
+              <tst:TreeSpecies>2</tst:TreeSpecies>
+              <tst:Storey>5</tst:Storey>
+              <tst:Age>63</tst:Age>
+              <tst:BasalArea>10.3</tst:BasalArea>
+              <tst:MeanDiameter>23.6</tst:MeanDiameter>
+              <tst:MeanHeight>20.0</tst:MeanHeight>
+              <tst:Volume>99.0</tst:Volume>
+              <co:DataSource>2</co:DataSource>
+            </tst:TreeStratum>
+            <tst:TreeStratum id="2234569">
+              <tst:StratumNumber>3</tst:StratumNumber>
+              <tst:TreeSpecies>1</tst:TreeSpecies>
+              <tst:Storey>5</tst:Storey>
+              <tst:Age>70</tst:Age>
+              <tst:BasalArea>1.8</tst:BasalArea>
+              <tst:MeanDiameter>24.2</tst:MeanDiameter>
+              <tst:MeanHeight>22.6</tst:MeanHeight>
+              <tst:Volume>19.2</tst:Volume>
+              <co:DataSource>2</co:DataSource>
+            </tst:TreeStratum>
+          </tst:TreeStrata>
+        </ts:TreeStandDataDate>
+      </ts:TreeStandData>
+    </st:Stand>
+  </st:Stands>
+</ForestPropertyData>
