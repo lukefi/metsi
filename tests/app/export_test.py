@@ -2,7 +2,7 @@ import io
 from types import SimpleNamespace
 from typing import OrderedDict
 import unittest
-from app.export import j_cda, j_xda
+from app.export_handlers.j import j_xda, j_cda
 from sim.core_types import AggregatedResults, OperationPayload
 
 
