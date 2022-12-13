@@ -2,6 +2,7 @@ from functools import cache
 from typing import Dict
 import numpy as np
 import csv
+import json
 
 
 @cache
@@ -20,3 +21,9 @@ def get_renewal_costs_as_dict(file_path: str) -> Dict[str, float]:
         for row in reader:
             costs[row[0]] = float(row[1]) # operation: cost
     return costs
+    
+@cache
+def get_land_values_as_dict(file_path: str) -> dict:
+    with open(file_path, "r") as f:
+        return json.load(f)
+
