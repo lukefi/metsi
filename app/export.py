@@ -1,5 +1,6 @@
 import bisect
 from functools import cache
+from pathlib import Path
 from typing import IO, Any, Generic, Iterator, TypeVar, Union
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults
@@ -73,7 +74,7 @@ def j_row(out: IO, fns: list[CollectFn], getvar: GetVarFn):
     out.write("\n")
 
 
-def j_xda(out: IO, decl: dict, data: SimResults):
+def j_xda(out: IO, data: SimResults, xvariables: list[str]):
     """Write xdata file."""
     collectives = {
         k for schedules in data.values()
@@ -81,7 +82,7 @@ def j_xda(out: IO, decl: dict, data: SimResults):
         for c in payload.aggregated_results.operation_results["report_collectives"].values() # type: ignore
         for k in c
     }
-    xvars = list(map(compile, decl.get("xvariables", collectives)))
+    xvars = list(map(compile, xvariables or collectives))
     for schedules in data.values():
         for s in schedules:
             j_row(
@@ -96,9 +97,9 @@ def j_xda(out: IO, decl: dict, data: SimResults):
             )
 
 
-def j_cda(out: IO, decl: dict, data: SimResults):
+def j_cda(out: IO, data: SimResults, cvariables: list[str]):
     """Write cdata file."""
-    cvars = list(map(compile, ["len(schedules)", *decl.get("cvariables", [])]))
+    cvars = list(map(compile, ["len(schedules)", *cvariables]))
     for schedules in data.values():
         j_row(
             out = out,
@@ -110,12 +111,25 @@ def j_cda(out: IO, decl: dict, data: SimResults):
         )
 
 
-def j_out(configuration: Mela2Configuration, decl: dict, data: SimResults, cda_filename: str, xda_filename: str):
+def j_out(data: SimResults,
+          cda_filepath: Path,
+          xda_filepath: Path,
+          cvariables: list[str],
+          xvariables: list[str]):
     """Write J files."""
-    with open(f"{configuration.target_directory}/{decl.get('cda', cda_filename)}", "w") as f:
-        j_cda(f, decl, data)
-    with open(f"{configuration.target_directory}/{decl.get('xda', xda_filename)}", "w") as f:
-        j_xda(f, decl, data)
+    with open(cda_filepath, "w") as f:
+        j_cda(f, data, cvariables)
+    with open(xda_filepath, "w") as f:
+        j_xda(f, data, xvariables)
+
+
+def parse_j_config(config: Mela2Configuration, decl: dict) -> dict:
+    return {
+        'cda_filepath': Path(config.target_directory, decl.get("cda_filename", "data.cda")),
+        'xda_filepath': Path(config.target_directory, decl.get("xda_filename", "data.xda")),
+        'cvariables': decl.get("cvariables", []),
+        'xvariables': decl.get("xvariables", [])
+    }
 
 
 def export_files(config: Mela2Configuration, decl, data):
@@ -123,7 +137,8 @@ def export_files(config: Mela2Configuration, decl, data):
     for export_module_declaration in decl:
         format = export_module_declaration.get("format", None)
         if format == "J":
-            output_handlers.append(lambda: j_out(config, export_module_declaration, data, "data.cda", "data.xda"))
+            j_config = parse_j_config(config, export_module_declaration)
+            output_handlers.append(lambda: j_out(data, **j_config))
         else:
             print_logline("Unknown output format for export: '{}'".format(format))
     for handler in output_handlers:

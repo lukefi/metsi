@@ -56,7 +56,7 @@ class TestExport(unittest.TestCase):
             ]
         }
         cda = io.StringIO()
-        j_cda(out=cda, decl=decl, data=data)
+        j_cda(out=cda, data=data, cvariables=decl["cvariables"])
         self.assertEqual(
             cda.getvalue(),
             (
@@ -65,7 +65,7 @@ class TestExport(unittest.TestCase):
             )
         )
         xda = io.StringIO()
-        j_xda(out=xda, decl=decl, data=data)
+        j_xda(out=xda,data=data, xvariables=decl["xvariables"])
         self.assertEqual(
             xda.getvalue(),
             (
