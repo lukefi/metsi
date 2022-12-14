@@ -89,8 +89,6 @@ def cross_cut_tree(
     :param tree: The tree to cross cut
     :returns: A list of CrossCutResult objects, whose length is given by the number of unique timber grades in the `timber_price_table`. In other words, the returned list contains the resulting quantities of each unique timber grade.
     """
-    results = []
-
     unique_timber_grades, volumes, values = cross_cut(
                             tree.species,
                             tree.breast_height_diameter,
@@ -108,10 +106,8 @@ def cross_cut_tree(
                         tree.source,
                         tree.operation,
                         tree.time_point
-                        )
-    results.extend(res)
-    
-    return results
+                        )    
+    return res
     
 
 def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
