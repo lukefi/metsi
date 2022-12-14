@@ -4,7 +4,7 @@ app_configuration:
   state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
   #preprocessing_output_container: csv #options: pickle, json, csv, null, rsd (special case not usable as input container)
   #state_output_container: csv #options: pickle, json, csv, null
-  derived_data_output_container: json #options: pickle, json, null
+  #derived_data_output_container: json #options: pickle, json, null
   strategy: partial
   run_modes: preprocess,simulate,postprocess,export
 
@@ -70,13 +70,9 @@ operation_params:
 preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
-  filter:
-    - remove trees: sapling or stems_per_ha == 0
-      remove: not reference_trees
 
 preprocessing_operations:
-  - generate_reference_trees # comment out if input data contains direct trees (vmi12 or vmi13)
-  - filter
+  - generate_reference_trees
   - compute_location_metadata
 
 operation_file_params:
@@ -96,10 +92,9 @@ operation_file_params:
     timber_price_table: data/parameter_files/timber_price_table.csv
 
 simulation_events:
-  - time_points: [2022, 2027, 2032, 2037, 2042, 2047, 2052, 2057, 2062, 2067] # GROWTH/STATE YEARS
+  - time_points: [2022, 2027, 2032, 2037, 2042, 2052, 2057, 2062] # STATE YEARS
     generators:
       - sequence:
-        - grow_fhk
         - cross_cut_standing_trees
         - report_state
   - time_points: [2047, 2067] # EVENT YEARS
@@ -113,6 +108,10 @@ simulation_events:
         - cross_cut_felled_trees
         - report_state
         - report_collectives
+  - time_points: [2022, 2027, 2032, 2037, 2042, 2047, 2052, 2057, 2062] # GROWTH YEARS, transition operation +5 years
+    generators:
+      - sequence:
+          - grow_acta
 
 
 post_processing:
