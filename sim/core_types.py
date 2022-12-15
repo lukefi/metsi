@@ -88,15 +88,18 @@ class AggregatedResults:
     def __init__(
         self,
         operation_results: Optional[dict[str, Any]] = None,
-        current_time_point: Optional[int] = None
+        current_time_point: Optional[int] = None,
+        initial_time_point: Optional[int] = None
     ):
         self.operation_results: dict[str, Any] = operation_results or {}
-        self.current_time_point: int = current_time_point or 0
+        self.current_time_point: int = current_time_point or initial_time_point or 0
+        self.initial_time_point: int = initial_time_point or 0
 
     def __deepcopy__(self, memo: dict) -> "AggregatedResults":
         return AggregatedResults(
-            operation_results = deepcopy(self.operation_results, memo),
-            current_time_point = self.current_time_point
+            operation_results=deepcopy(self.operation_results, memo),
+            current_time_point=self.current_time_point,
+            initial_time_point=self.initial_time_point
         )
 
     def prev(self, tag: str) -> Any:
