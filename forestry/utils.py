@@ -1,5 +1,4 @@
 from functools import cache
-from typing import Dict
 import numpy as np
 import csv
 import json
@@ -12,7 +11,7 @@ def get_timber_price_table(file_path: str) -> np.ndarray:
     return table
 
 @cache
-def get_renewal_costs_as_dict(file_path: str) -> Dict[str, float]:
+def get_renewal_costs_as_dict(file_path: str) -> dict[str, float]:
     """Returns the csv at :file_path: as a dictionary, where key is the operation name and value ie the cost."""
     costs = {}
     with open(file_path, "r") as f:
