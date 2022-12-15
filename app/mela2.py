@@ -5,7 +5,7 @@ import app.preprocessor
 from app.app_io import parse_cli_arguments, Mela2Configuration, generate_program_configuration, RunMode
 from app.app_types import SimResults
 from forestry.forestry_types import StandList
-from app.export import export_variables
+from app.export import export_files
 from app.file_io import simulation_declaration_from_yaml_file, prepare_target_directory, read_stands_from_file, \
     read_full_simulation_result_dirtree, determine_file_path, write_stands_to_file, write_full_simulation_result_dirtree
 from app.post_processing import post_process_alternatives
@@ -43,7 +43,7 @@ def post_process(config: Mela2Configuration, control: dict, data: SimResults) ->
 
 def export(config: Mela2Configuration, control: dict, data: SimResults) -> None:
     print_logline("Exporting data...")
-    export_variables(config, control['export'], data)
+    export_files(config, control['export'], data)
 
 
 mode_runners = {

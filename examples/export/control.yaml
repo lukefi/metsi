@@ -4,17 +4,26 @@ app_configuration:
   state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
   #preprocessing_output_container: csv #options: pickle, json, csv, null, rsd (special case not usable as input container)
   #state_output_container: csv #options: pickle, json, csv, null
-  #derived_data_output_container: pickle #options: pickle, json, null
+  #derived_data_output_container: json #options: pickle, json, null
   strategy: partial
   run_modes: preprocess,simulate,postprocess,export
 
 run_constraints:
+  thinning_from_above:
+    minimum_time_interval: 20
+  thinning_from_below:
+    minimum_time_interval: 20
+  even_thinning:
+    minimum_time_interval: 20
   first_thinning:
     minimum_time_interval: 50
   clearcutting:
     minimum_time_interval: 50
 
 operation_params:
+  report_volume:
+    # Requires R dependency if true
+    - lmfor_volume: false
   first_thinning:
     - thinning_factor: 0.97
       e: 0.2
@@ -56,64 +65,54 @@ operation_params:
       timber_vol_pine_energy: cross_cutting.volume_per_ha[  (cross_cutting.species==1) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
       timber_vol_spruce_energy: cross_cutting.volume_per_ha[(cross_cutting.species==2) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
       timber_vol_birch_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
-     
+
+
 preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
-  filter:
-    - remove trees: sapling or stems_per_ha == 0
-      remove: not reference_trees
 
 preprocessing_operations:
-  - generate_reference_trees # reference trees from strata, replaces existing reference trees
-  #- compute_location_metadata # required for using grow_motti, grow_fhk
+  - generate_reference_trees
+  - compute_location_metadata
 
 operation_file_params:
   thinning_from_above:
     thinning_limits: data/parameter_files/Thin.txt
-  cross_cut_felled_trees:
-    timber_price_table: data/parameter_files/timber_price_table.csv
-  cross_cut_standing_trees:
-    timber_price_table: data/parameter_files/timber_price_table.csv
+  thinning_from_below:
+    thinning_limits: data/parameter_files/Thin.txt
+  even_thinning:
+    thinning_limits: data/parameter_files/Thin.txt
   clearcutting:
     clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt  
     clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt 
     clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
+  cross_cut_felled_trees:
+    timber_price_table: data/parameter_files/timber_price_table.csv
+  cross_cut_standing_trees:
+    timber_price_table: data/parameter_files/timber_price_table.csv
 
 simulation_events:
-  # we describe here objects with schedule for which time points they are active
-  - time_points: [2020, 2025, 2030, 2035, 2040, 2045, 2050]
+  - time_points: [2022, 2027, 2032, 2037, 2042, 2052, 2057, 2062] # STATE YEARS
     generators:
       - sequence:
-          - cross_cut_standing_trees
-          - report_biomass
-          - report_state
-  - time_points: [2030, 2050]
+        - cross_cut_standing_trees
+        - report_state
+  - time_points: [2047, 2067] # EVENT YEARS
     generators:
       - sequence:
         - cross_cut_standing_trees
       - alternatives:
         - do_nothing
-        # commented out to reduce the choices for default demo
-        #- thinning_from_below
-        #- thinning_from_above
-        - first_thinning
         - even_thinning
-        - sequence:
-          - clearcutting
-          - do_nothing
-          # operations for renewal after clearcutting go here
       - sequence:
-          - cross_cut_felled_trees
-          - report_state
-          - report_collectives
-  - time_points: [2020, 2025, 2030, 2035, 2040, 2045, 2050] # Grow at the end to transition assumed +5 years forwards
+        - cross_cut_felled_trees
+        - report_state
+        - report_collectives
+  - time_points: [2022, 2027, 2032, 2037, 2042, 2047, 2052, 2057, 2062] # GROWTH YEARS, transition operation +5 years
     generators:
       - sequence:
-        - grow_acta
-        #- grow_motti
-        # requires fhk dependencies from fhk-requirements.txt
-        #- grow_fhk
+          - grow_acta
+
 
 post_processing:
   operation_params:
@@ -125,6 +124,8 @@ post_processing:
 
 export:
   - format: J
+    cda_filename: data.cda
+    xda_filename: data.xda
     cvariables:
       - year
       - site_type_category
@@ -135,4 +136,4 @@ export:
       - Fpine
       - int(site_type_category < 7) * sum(Fbirch)
   - format: rm_schedules_events_timber
-    filename: timber_sums.txt
+

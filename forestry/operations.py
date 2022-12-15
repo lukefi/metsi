@@ -1,6 +1,8 @@
 from importlib import import_module
 from itertools import repeat
-from functools import reduce
+from functools import reduce, cache
+from typing import Any
+
 from forestdatamodel.model import ForestStand
 from forestry.aggregates import BiomassAggregate, VolumeAggregate
 from forestryfunctions import forestry_utils as futil
@@ -10,8 +12,10 @@ from forestry.cross_cutting import cross_cut_felled_trees, cross_cut_standing_tr
 from forestry.grow_acta import grow_acta
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
+from forestry.collectives import autocollective, getvarfn, collect_all
 from sim.core_types import OpTuple
-from forestry.clearcut import clearcutting, clearcutting_and_planting
+from forestry.clearcut import clearcutting_and_planting
+from sim.operations import T
 
 
 def compute_volume(stand: ForestStand) -> float:
@@ -58,6 +62,34 @@ def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[F
     return input
 
 
+def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
+    state, aggr = input
+    res = _collector_wrapper(
+        collectives,
+        lambda name: autocollective(getattr(state, name)),
+        state = state,
+        aggr = aggr.operation_results,
+        time = aggr.current_time_point
+        )
+    aggr.store('report_collectives', res)
+    return input
+
+
+def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
+    state, aggr = input
+    res = _collector_wrapper(
+        operation_parameters,
+        lambda name: autocollective(getattr(state, name)),
+        lambda name: autocollective(
+                                    aggr.operation_results[name],
+                                    time_point = aggr.current_time_point,
+                                    ),
+        state = state
+        )
+    aggr.store('report_state', res)
+    return input
+
+
 operation_lookup = {
     'grow_acta': grow_acta,
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
@@ -72,6 +104,8 @@ operation_lookup = {
     'report_overall_removal': report_overall_removal,
     'cross_cut_felled_trees': cross_cut_felled_trees,
     'cross_cut_standing_trees': cross_cut_standing_trees,
+    'report_collectives': report_collectives,
+    'report_state': report_state
 }
 
 def try_register(mod: str, func: str):
@@ -81,7 +115,14 @@ def try_register(mod: str, func: str):
         pass
 
 # only register grow_motti when pymotti is installed
+
 try_register("forestry.grow_motti", "grow_motti")
 
 # only register grow_fhk when fhk is installed
+
 try_register("forestry.grow_fhk", "grow_fhk")
+
+
+def _collector_wrapper(operation_parameters, *aliases, **named_aliases) -> dict[str, Any]:
+    getvar = cache(getvarfn(*aliases, **named_aliases))
+    return collect_all(operation_parameters, getvar=getvar)
