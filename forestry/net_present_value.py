@@ -49,7 +49,6 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
     interest_rates: list = operation_parameters["interest_rates"]
     land_values_file = operation_parameters["land_values"]
     renewal_costs_file = operation_parameters["renewal_costs"]
-    t_prime = operation_parameters["t_prime"] #TODO this may not be passed from control.yaml
     
     NPVs_per_rate: dict[str, float] = {}
 
@@ -70,8 +69,8 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
             discounted_cost = y.get_real_cost(unit_cost) / _discount_factor(r, y.time_point)
             npv -= discounted_cost
         
-        # 3. add bare land value
-        npv += _get_bare_land_value(land_values_file, stand.soil_peatland_category, stand.site_type_category, r) / _discount_factor(r, t_prime)
+        # 4. add discounted bare land value
+        npv += _get_bare_land_value(land_values_file, stand.soil_peatland_category, stand.site_type_category, r)
                
         NPVs_per_rate[str(r)] = npv
 

@@ -42,7 +42,6 @@ class NPVTest(unittest.TestCase):
             "interest_rates": [interest_rate],
             "land_values": "tests/resources/net_present_value_test/land_values_per_site_type_and_interest_rate.json",
             "renewal_costs": "tests/resources/renewal_test/renewal_operation_pricing.csv",
-            "t_prime": 151
         }
 
         stand, new_aggrs = npv.calculate_npv((stand, aggrs), **operation_parameters)
@@ -52,7 +51,7 @@ class NPVTest(unittest.TestCase):
                         soil_peatland_category = 1,
                         site_type = 1, 
                         interest_rate = interest_rate
-                        ) / npv._discount_factor(interest_rate, 151)
+                        )
         self.assertAlmostEqual(actual, expected)
 
 
@@ -84,12 +83,11 @@ class NPVTest(unittest.TestCase):
             "interest_rates": [interest_rate],
             "land_values": "tests/resources/net_present_value_test/land_values_per_site_type_and_interest_rate.json",
             "renewal_costs": "tests/resources/renewal_test/renewal_operation_pricing.csv",
-            "t_prime": 151
         }
 
         stand, new_aggrs = npv.calculate_npv((stand, aggrs), **operation_parameters)
         actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(str(interest_rate))
-        expected = 2587.826 + 32.450 # discounted value of three CrossCutResults + discounted bare land value
+        expected = 2587.826 + 2816 # discounted value of three CrossCutResults + discounted bare land value
         self.assertAlmostEqual(actual, expected, places=3)
 
     def test_npv_of_cross_cut_and_planted_stand_equals_the_discounted_timber_value_minus_planting_cost_plus_bare_land_value(self):
@@ -126,12 +124,11 @@ class NPVTest(unittest.TestCase):
             "interest_rates": [interest_rate],
             "land_values": "tests/resources/net_present_value_test/land_values_per_site_type_and_interest_rate.json",
             "renewal_costs": "tests/resources/renewal_test/renewal_operation_pricing.csv",
-            "t_prime": 151
         }
 
         stand, new_aggrs = npv.calculate_npv((stand, aggrs), **operation_parameters)
         actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(str(interest_rate))
-        expected = 2587.826 - 862.609 + 32.450 # discounted value of three CrossCutResults - discounted cost of planting + discounted bare land value
+        expected = 2587.8263 - 862.6087 + 2816 # discounted value of three CrossCutResults - discounted cost of planting + discounted bare land value
         self.assertAlmostEqual(actual, expected, places=3)
 
 

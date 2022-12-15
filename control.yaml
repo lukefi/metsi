@@ -58,7 +58,6 @@ operation_params:
       timber_vol_birch_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
   calculate_npv: 
     - interest_rates: [0.01, 0.02, 0.03, 0.04, 0.05] # list of decimals
-    - t_prime: 151 # years - defines the time discount factor of bare land value calculation
      
 preprocessing_params:
   generate_reference_trees:
