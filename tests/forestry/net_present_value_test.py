@@ -32,10 +32,13 @@ class NPVTest(unittest.TestCase):
 
     def test_discount_factor(self):
         fn = npv._discount_factor
-        self.assertEqual(fn(0, 0), 1)
-        self.assertEqual(fn(0.123, 0), 1)
-        self.assertEqual(fn(0, 123), 1)
-        self.assertAlmostEqual(fn(0.05, 20), 2.6533, places=4)
+        self.assertEqual(fn(0, 0, 0), 1)
+        self.assertEqual(fn(0.123, 0, 0), 1)
+        self.assertEqual(fn(0, 123, 0), 1)
+        self.assertAlmostEqual(fn(0.05, 20, 0), 2.6533, places=4)
+        self.assertEqual(fn(0, 2022, 2022), 1)
+        self.assertAlmostEqual(fn(0.05, 2025, 2020), 1.2763, places=4)
+
 
 
     def test_npv_of_untouched_stand_equals_bare_land_value_discounted_to_year_151(self):

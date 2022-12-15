@@ -1,4 +1,4 @@
-from sim.core_types import OpTuple
+from sim.core_types import AggregatedResults, OpTuple
 from forestdatamodel.model import ForestStand
 from forestry.cross_cutting import CrossCutResult
 from forestry.renewal import PriceableOperationInfo
@@ -33,15 +33,23 @@ def _get_bare_land_value(land_values: dict, soil_peatland_category: int, site_ty
     return land_value      
 
 
-def _discount_factor(r: float, t: int) -> float:
+def _discount_factor(r: float, current_time_point: int, initial_time_point) -> float:
+    t = current_time_point - initial_time_point
     return (1+r)**t
 
 
-def _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r) -> float:
+def _calculate_npv_for_rate(
+    stand: ForestStand, 
+    simulation_aggregates: AggregatedResults, 
+    land_values: dict, 
+    renewal_costs: dict, 
+    int_r: int
+    ) -> float:
     
     cc_results = simulation_aggregates.get("cross_cutting")
     renewal_results = simulation_aggregates.get("renewal")
     current_time_point = simulation_aggregates.current_time_point
+    initial_time_point = simulation_aggregates.initial_time_point
 
     r = int_r/100
     npv = 0.0
@@ -49,7 +57,7 @@ def _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_c
     # 1. add revenues from harvesting. This excludes results from cross_cut_standing_trees.
     x: CrossCutResult
     for x in filter(lambda x: x.source != "standing_trees", cc_results): #TODO: use x.operation as filter after merging #253
-        discounted_revenue = x.get_real_value() / _discount_factor(r, x.time_point)
+        discounted_revenue = x.get_real_value() / _discount_factor(r, x.time_point, initial_time_point)
         npv += discounted_revenue
     
     # 2. add discounted value of standing tree stock at the current time point.
@@ -59,14 +67,14 @@ def _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_c
     else:
         y: CrossCutResult
         for y in standing_cc_results:
-            discounted_revenue = y.get_real_value() / _discount_factor(r, current_time_point)
+            discounted_revenue = y.get_real_value() / _discount_factor(r, current_time_point, initial_time_point)
             npv += discounted_revenue
         
     # 3. subtract costs
     z: PriceableOperationInfo
     for z in renewal_results:
         unit_cost = renewal_costs[z.operation_name]
-        discounted_cost = z.get_real_cost(unit_cost) / _discount_factor(r, z.time_point)
+        discounted_cost = z.get_real_cost(unit_cost) / _discount_factor(r, z.time_point, initial_time_point)
         npv -= discounted_cost
         
     # 4. add discounted bare land value
