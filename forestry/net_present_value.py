@@ -6,7 +6,7 @@ from forestry.utils import get_renewal_costs_as_dict, get_land_values_as_dict
 
 
 
-def _get_bare_land_value(filepath: str, soil_peatland_category: int, site_type: int, interest_rate: float) -> float:
+def _get_bare_land_value(filepath: str, soil_peatland_category: int, site_type: int, interest_rate: int) -> float:
     
     SOIL_PEATLAND_CATEGORY_MAPPING = {
         1: "mineral_soils",
@@ -39,7 +39,7 @@ def _discount_factor(r: float, t: int) -> float:
 def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
     Expects that the relevant cross cut operations have been done before this.
-    Expects interest rates to be given as a decimal (e.g. 0.05) and that the interest rates in the land values file correspond to these values.
+    Expects interest rates to be given as integers (e.g. 5) and that the interest rates in the land values file correspond to these values.
     """
     stand, simulation_aggregates = payload
 
@@ -53,8 +53,8 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
     
     NPVs_per_rate: dict[str, float] = {}
 
-    for r in interest_rates:
-        r = float(r)
+    for int_r in interest_rates:
+        r = int_r/100
         npv = 0.0
 
         # 1. add revenues from harvesting. This excludes results from cross_cut_standing_trees.
@@ -81,9 +81,9 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
             npv -= discounted_cost
         
         # 4. add discounted bare land value
-        npv += _get_bare_land_value(land_values_file, stand.soil_peatland_category, stand.site_type_category, r)
+        npv += _get_bare_land_value(land_values_file, stand.soil_peatland_category, stand.site_type_category, int_r)
                
-        NPVs_per_rate[str(r)] = npv
+        NPVs_per_rate[int_r] = npv
 
     simulation_aggregates.store("net_present_value", NPVs_per_rate)
 

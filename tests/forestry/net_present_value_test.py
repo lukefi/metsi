@@ -13,7 +13,7 @@ class NPVTest(unittest.TestCase):
             "tests/resources/net_present_value_test/land_values_per_site_type_and_interest_rate.json", 
             soil_peatland_category = 1,
             site_type = 1, 
-            interest_rate = 0.05
+            interest_rate = 5
             )
         self.assertEqual(blv, 332)
 
@@ -37,7 +37,7 @@ class NPVTest(unittest.TestCase):
             operation_results={},
         )
         
-        interest_rate = 0.01
+        interest_rate = 1
         operation_parameters = {
             "interest_rates": [interest_rate],
             "land_values": "tests/resources/net_present_value_test/land_values_per_site_type_and_interest_rate.json",
@@ -45,7 +45,7 @@ class NPVTest(unittest.TestCase):
         }
 
         stand, new_aggrs = npv.calculate_npv((stand, aggrs), **operation_parameters)
-        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point][str(interest_rate)]
+        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point][interest_rate]
         expected = npv._get_bare_land_value(
                         "tests/resources/net_present_value_test/land_values_per_site_type_and_interest_rate.json", 
                         soil_peatland_category = 1,
@@ -62,7 +62,7 @@ class NPVTest(unittest.TestCase):
             site_type_category=1,
         )
 
-        interest_rate = 0.03
+        interest_rate = 3
 
         aggrs = AggregatedResults(
             operation_results={
@@ -87,7 +87,7 @@ class NPVTest(unittest.TestCase):
         }
 
         stand, new_aggrs = npv.calculate_npv((stand, aggrs), **operation_parameters)
-        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(str(interest_rate))
+        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(interest_rate)
         expected = 2587.826 + 2816 # discounted value of three CrossCutResults + discounted bare land value
         self.assertAlmostEqual(actual, expected, places=3)
 
@@ -98,7 +98,7 @@ class NPVTest(unittest.TestCase):
             site_type_category=1,
         )
 
-        interest_rate = 0.03
+        interest_rate = 3
 
         aggrs = AggregatedResults(
             operation_results={
@@ -129,7 +129,7 @@ class NPVTest(unittest.TestCase):
         }
 
         stand, new_aggrs = npv.calculate_npv((stand, aggrs), **operation_parameters)
-        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(str(interest_rate))
+        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(interest_rate)
         expected = 2587.8263 - 862.6087 + 2816 # discounted value of three CrossCutResults - discounted cost of planting + discounted bare land value
         self.assertAlmostEqual(actual, expected, places=3)
 
@@ -140,7 +140,7 @@ class NPVTest(unittest.TestCase):
             site_type_category=1,
         )
 
-        interest_rate = 0.03
+        interest_rate = 3
 
         aggrs = AggregatedResults(
             operation_results={
@@ -176,7 +176,7 @@ class NPVTest(unittest.TestCase):
         }
 
         stand, new_aggrs = npv.calculate_npv((stand, aggrs), **operation_parameters)
-        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(str(interest_rate))
+        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(interest_rate)
         expected = 862.6087 + 2816 # discounted value of current stock + discounted bare land value
         self.assertAlmostEqual(actual, expected, places=3)
 
