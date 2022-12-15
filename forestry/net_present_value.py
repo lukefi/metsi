@@ -49,6 +49,7 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
     interest_rates: list = operation_parameters["interest_rates"]
     land_values_file = operation_parameters["land_values"]
     renewal_costs_file = operation_parameters["renewal_costs"]
+    current_time_point = simulation_aggregates.current_time_point
     
     NPVs_per_rate: dict[str, float] = {}
 
@@ -56,17 +57,27 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
         r = float(r)
         npv = 0.0
 
-        # 1. add revenues
+        # 1. add revenues from harvesting. This excludes results from cross_cut_standing_trees.
         x: CrossCutResult
-        for x in cc_results:
+        for x in filter(lambda x: x.source != "standing_trees", cc_results): #TODO: use x.operation as filter after merging #253
             discounted_revenue = x.get_real_value() / _discount_factor(r, x.time_point)
             npv += discounted_revenue
+    
+        # 2. add value of standing tree stock discounted to the time point of the operation call.
+        standing_cc_results = list(filter(lambda x: x.source == "standing_trees" and x.time_point == current_time_point, cc_results))
+        if len(stand.reference_trees) > 0 and len(standing_cc_results) == 0:
+            raise UserWarning("NPV calculation did not find cross cut results for standing trees. Did you forget to declare the 'cross_cut_standing_trees' operation before 'calculate_npv'?")
+        else:
+            y: CrossCutResult
+            for y in standing_cc_results:
+                discounted_revenue = y.get_real_value() / _discount_factor(r, current_time_point)
+                npv += discounted_revenue
         
-        # 2. subtract costs
-        y: PriceableOperationInfo
-        for y in renewal_results:
-            unit_cost = get_renewal_costs_as_dict(renewal_costs_file)[y.operation_name]
-            discounted_cost = y.get_real_cost(unit_cost) / _discount_factor(r, y.time_point)
+        # 3. subtract costs
+        z: PriceableOperationInfo
+        for z in renewal_results:
+            unit_cost = get_renewal_costs_as_dict(renewal_costs_file)[z.operation_name]
+            discounted_cost = z.get_real_cost(unit_cost) / _discount_factor(r, z.time_point)
             npv -= discounted_cost
         
         # 4. add discounted bare land value

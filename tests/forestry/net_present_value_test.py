@@ -77,6 +77,7 @@ class NPVTest(unittest.TestCase):
                         time_point=5
                         )]*3
             },
+            current_time_point=5
         )
 
         operation_parameters = {
@@ -118,6 +119,7 @@ class NPVTest(unittest.TestCase):
                         time_point=5
                     )]
             },
+            current_time_point=5
         )
 
         operation_parameters = {
@@ -131,4 +133,50 @@ class NPVTest(unittest.TestCase):
         expected = 2587.8263 - 862.6087 + 2816 # discounted value of three CrossCutResults - discounted cost of planting + discounted bare land value
         self.assertAlmostEqual(actual, expected, places=3)
 
+    def test_calculate_npv_only_considers_standing_trees_cross_cut_results_from_the_present_time(self):
+        stand = ForestStand(
+            area=10,
+            soil_peatland_category=1,
+            site_type_category=1,
+        )
+
+        interest_rate = 0.03
+
+        aggrs = AggregatedResults(
+            operation_results={
+                "cross_cutting": [
+                    #this 'standing_trees' result should not be considered, since it's been done at time point 0, and the current time point is 5
+                    CrossCutResult(
+                        species=TreeSpecies.PINE,
+                        timber_grade=1,
+                        volume_per_ha=2,
+                        value_per_ha=100, 
+                        stand_area=stand.area,
+                        source="standing_trees",
+                        time_point=0
+                        ),
+                    #this 'standing_trees' result should be considered, since it's been done at the current time point (5)
+                    CrossCutResult(
+                        species=TreeSpecies.PINE,
+                        timber_grade=1,
+                        volume_per_ha=2,
+                        value_per_ha=100, 
+                        stand_area=stand.area,
+                        source="standing_trees",
+                        time_point=5
+                        )],
+            },
+            current_time_point=5
+        )
+
+        operation_parameters = {
+            "interest_rates": [interest_rate],
+            "land_values": "tests/resources/net_present_value_test/land_values_per_site_type_and_interest_rate.json",
+            "renewal_costs": "tests/resources/renewal_test/renewal_operation_pricing.csv",
+        }
+
+        stand, new_aggrs = npv.calculate_npv((stand, aggrs), **operation_parameters)
+        actual = new_aggrs.get("net_present_value")[new_aggrs.current_time_point].get(str(interest_rate))
+        expected = 862.6087 + 2816 # discounted value of current stock + discounted bare land value
+        self.assertAlmostEqual(actual, expected, places=3)
 
