@@ -6,7 +6,7 @@ from forestry.utils import get_renewal_costs_as_dict, get_land_values_as_dict
 
 
 
-def _get_bare_land_value(filepath: str, soil_peatland_category: int, site_type: int, interest_rate: int) -> float:
+def _get_bare_land_value(land_values: dict, soil_peatland_category: int, site_type: int, interest_rate: int) -> float:
     
     SOIL_PEATLAND_CATEGORY_MAPPING = {
         1: "mineral_soils",
@@ -27,14 +27,52 @@ def _get_bare_land_value(filepath: str, soil_peatland_category: int, site_type: 
         8: "open_mountains"
     }
     
-    land_values = get_land_values_as_dict(filepath)
     soil_peatland_key = SOIL_PEATLAND_CATEGORY_MAPPING.get(soil_peatland_category)
     site_type_key = SITE_TYPE_MAPPING.get(site_type)
     land_value = land_values[soil_peatland_key][site_type_key][str(interest_rate)]
-    return land_value        
+    return land_value      
+
 
 def _discount_factor(r: float, t: int) -> float:
     return (1+r)**t
+
+
+def _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r) -> float:
+    
+    cc_results = simulation_aggregates.get("cross_cutting")
+    renewal_results = simulation_aggregates.get("renewal")
+    current_time_point = simulation_aggregates.current_time_point
+
+    r = int_r/100
+    npv = 0.0
+
+    # 1. add revenues from harvesting. This excludes results from cross_cut_standing_trees.
+    x: CrossCutResult
+    for x in filter(lambda x: x.source != "standing_trees", cc_results): #TODO: use x.operation as filter after merging #253
+        discounted_revenue = x.get_real_value() / _discount_factor(r, x.time_point)
+        npv += discounted_revenue
+    
+    # 2. add discounted value of standing tree stock at the current time point.
+    standing_cc_results = list(filter(lambda x: x.source == "standing_trees" and x.time_point == current_time_point, cc_results))
+    if len(stand.reference_trees) > 0 and len(standing_cc_results) == 0:
+        raise UserWarning("NPV calculation did not find cross cut results for standing trees. Did you forget to declare the 'cross_cut_standing_trees' operation before 'calculate_npv'?")
+    else:
+        y: CrossCutResult
+        for y in standing_cc_results:
+            discounted_revenue = y.get_real_value() / _discount_factor(r, current_time_point)
+            npv += discounted_revenue
+        
+    # 3. subtract costs
+    z: PriceableOperationInfo
+    for z in renewal_results:
+        unit_cost = renewal_costs[z.operation_name]
+        discounted_cost = z.get_real_cost(unit_cost) / _discount_factor(r, z.time_point)
+        npv -= discounted_cost
+        
+    # 4. add discounted bare land value
+    npv += _get_bare_land_value(land_values, stand.soil_peatland_category, stand.site_type_category, int_r)
+    return npv
+
 
 def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
@@ -43,48 +81,16 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
     """
     stand, simulation_aggregates = payload
 
-    cc_results = simulation_aggregates.get("cross_cutting")
-    renewal_results = simulation_aggregates.get("renewal")
-
     interest_rates: list = operation_parameters["interest_rates"]
-    land_values_file = operation_parameters["land_values"]
-    renewal_costs_file = operation_parameters["renewal_costs"]
-    current_time_point = simulation_aggregates.current_time_point
+    land_values = get_land_values_as_dict(operation_parameters["land_values"])
+    renewal_costs = get_renewal_costs_as_dict(operation_parameters["renewal_costs"])
     
     NPVs_per_rate: dict[str, float] = {}
 
     for int_r in interest_rates:
-        r = int_r/100
-        npv = 0.0
-
-        # 1. add revenues from harvesting. This excludes results from cross_cut_standing_trees.
-        x: CrossCutResult
-        for x in filter(lambda x: x.source != "standing_trees", cc_results): #TODO: use x.operation as filter after merging #253
-            discounted_revenue = x.get_real_value() / _discount_factor(r, x.time_point)
-            npv += discounted_revenue
-    
-        # 2. add value of standing tree stock discounted to the time point of the operation call.
-        standing_cc_results = list(filter(lambda x: x.source == "standing_trees" and x.time_point == current_time_point, cc_results))
-        if len(stand.reference_trees) > 0 and len(standing_cc_results) == 0:
-            raise UserWarning("NPV calculation did not find cross cut results for standing trees. Did you forget to declare the 'cross_cut_standing_trees' operation before 'calculate_npv'?")
-        else:
-            y: CrossCutResult
-            for y in standing_cc_results:
-                discounted_revenue = y.get_real_value() / _discount_factor(r, current_time_point)
-                npv += discounted_revenue
-        
-        # 3. subtract costs
-        z: PriceableOperationInfo
-        for z in renewal_results:
-            unit_cost = get_renewal_costs_as_dict(renewal_costs_file)[z.operation_name]
-            discounted_cost = z.get_real_cost(unit_cost) / _discount_factor(r, z.time_point)
-            npv -= discounted_cost
-        
-        # 4. add discounted bare land value
-        npv += _get_bare_land_value(land_values_file, stand.soil_peatland_category, stand.site_type_category, int_r)
-               
-        NPVs_per_rate[int_r] = npv
+        NPVs_per_rate[int_r] = _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r)    
 
     simulation_aggregates.store("net_present_value", NPVs_per_rate)
 
     return payload
+
