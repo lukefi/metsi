@@ -149,7 +149,8 @@ class ThinningsTest(ConverterTestSuite):
                         species=TreeSpecies.PINE,
                         breast_height_diameter=0,
                         height=0,
-                        source="thin1",
+                        source="harvested",
+                        operation="thin1",
                         time_point=0
                     ),
                     CrossCuttableTree(
@@ -157,7 +158,8 @@ class ThinningsTest(ConverterTestSuite):
                         species=TreeSpecies.PINE,
                         breast_height_diameter=0,
                         height=0,
-                        source="thin2",
+                        source="harvested",
+                        operation="thin2",
                         time_point=0
                     ),
                     CrossCuttableTree(
@@ -165,7 +167,8 @@ class ThinningsTest(ConverterTestSuite):
                         species=TreeSpecies.PINE,
                         breast_height_diameter=0,
                         height=0,
-                        source="thin2",
+                        source="harvested",
+                        operation="thin2",
                         time_point=15
                     ),
             ]

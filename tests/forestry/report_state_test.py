@@ -1,7 +1,7 @@
 import unittest
 from forestry.cross_cutting import CrossCutResult
 from sim.core_types import AggregatedResults
-from sim.operations import report_state
+from forestry.operations import report_state
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 
@@ -17,7 +17,8 @@ class ReportStateTest(unittest.TestCase):
                         volume_per_ha=0.5,
                         value_per_ha=2,
                         stand_area=1,
-                        source="thinning_from_above",
+                        source="harvested",
+                        operation="thinning_from_above",
                         time_point=1
                     ),
                     CrossCutResult(
@@ -26,7 +27,8 @@ class ReportStateTest(unittest.TestCase):
                         volume_per_ha=0.5,
                         value_per_ha=2,
                         stand_area=1,
-                        source="thinning_from_below",
+                        source="harvested",
+                        operation="thinning_from_above",
                         time_point=1
                     ),
                 ]

@@ -62,7 +62,7 @@ class ClearcuttingTest(unittest.TestCase):
         simulation_aggregates = AggregatedResults()
         stand, simulation_aggregates = clearcut.clearcut_with_output(stand,simulation_aggregates,'clearcutting')
         self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha)
-        self.assertEqual("clearcutting", simulation_aggregates.get_list_result("felled_trees")[-1].source)
+        self.assertEqual("clearcutting", simulation_aggregates.get_list_result("felled_trees")[-1].operation)
         self.assertEqual(33.0,simulation_aggregates.get_list_result("felled_trees")[-1].height)
     
     def test_clearcutting(self):

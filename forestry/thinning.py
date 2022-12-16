@@ -29,6 +29,7 @@ def iterative_thinning_with_output(
                 t.species, 
                 t.breast_height_diameter, 
                 t.height,
+                'harvested',
                 tag,
                 aggr.current_time_point
             )
@@ -153,7 +154,7 @@ def report_overall_removal(payload: OpTuple, **operation_parameters) -> OpTuple:
 
     report_removal_collection = {}
     for tag in operation_tags:
-        thinning_aggregates = [x for x in simulation_aggregates.get_list_result("felled_trees") if x.source == tag]
+        thinning_aggregates = [x for x in simulation_aggregates.get_list_result("felled_trees") if x.operation == tag]
         if thinning_aggregates is None:
             new_aggregate = 0.0
         else:

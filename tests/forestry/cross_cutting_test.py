@@ -25,7 +25,8 @@ class CrossCuttingTest(unittest.TestCase):
                                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                 breast_height_diameter = 15.57254199723247,
                                 height = 18.293846547993535,
-                                source = "thinning_from_below",
+                                source = "harvested",
+                                operation = "thinning_from_below",
                                 time_point=10,
                                 cross_cut_done=True
                         ),
@@ -34,7 +35,8 @@ class CrossCuttingTest(unittest.TestCase):
                                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                 breast_height_diameter = 15.57254199723247,
                                 height = 18.293846547993535,
-                                source = "thinning_from_below",
+                                source = "harvested",
+                                operation = "thinning_from_below",
                                 time_point=20,
                                 cross_cut_done=False
                         )
@@ -49,7 +51,7 @@ class CrossCuttingTest(unittest.TestCase):
         res = aggrs.get_list_result("cross_cutting")
         self.assertEqual(res[0].time_point, 20)
         self.assertEqual(len(res), 2)
-        self.assertEqual(res[0].source, "thinning_from_below")
+        self.assertEqual(res[0].operation, "thinning_from_below")
         self.assertEqual(aggrs.get_list_result('felled_trees')[1].cross_cut_done, True)
 
 
@@ -71,7 +73,8 @@ class CrossCuttingTest(unittest.TestCase):
                                     species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                     breast_height_diameter = 15.57254199723247,
                                     height = 18.293846547993535,
-                                    source = "thinning_from_below",
+                                    source="harvested",
+                                    operation="thinning_from_below",
                                     time_point=20,
                                     cross_cut_done=False
                     )]
@@ -90,7 +93,8 @@ class CrossCuttingTest(unittest.TestCase):
                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                 breast_height_diameter = 15.57254199723247,
                 height = 18.293846547993535,
-                source = "thinning_from_below",
+                source="harvested",
+                operation="thinning_from_below",
                 time_point=30,
                 cross_cut_done=False
             ),
@@ -137,7 +141,7 @@ class CrossCuttingTest(unittest.TestCase):
         new_stand, aggrs = cross_cut_standing_trees(payload, **operation_parameters)
         res = aggrs.get_list_result("cross_cutting")
         self.assertEqual(len(res), 6)
-        self.assertEqual(res[0].source, "standing_trees")
+        self.assertEqual(res[0].source, "standing")
         
         # test that cross_cut_whole_stand has not modified the trees
         self.assertEqual(
@@ -181,7 +185,8 @@ class CrossCuttingTest(unittest.TestCase):
                                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                 breast_height_diameter = 15.57254199723247,
                                 height = 18.293846547993535,
-                                source="thin1",
+                                source="harvested",
+                                operation="thin1",
                                 time_point=0
                             ),
                             CrossCuttableTree(
@@ -189,7 +194,8 @@ class CrossCuttingTest(unittest.TestCase):
                                 species = TreeSpecies.PINE,
                                 breast_height_diameter = 16.071397406682646,
                                 height = 23.617432525999664,
-                                source="thin1",
+                                source="harvested",
+                                operation="thin1",
                                 time_point=0
                             ),
                             CrossCuttableTree(
@@ -197,7 +203,8 @@ class CrossCuttingTest(unittest.TestCase):
                                 species = TreeSpecies.SPRUCE,
                                 breast_height_diameter = 17.721245087039236,
                                 height = 16.353742669109522,
-                                source="thin1",
+                                source="harvested",
+                                operation="thin1",
                                 time_point=0
                             )
                         ]
@@ -218,7 +225,8 @@ class CrossCuttingTest(unittest.TestCase):
                                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                 breast_height_diameter = 15.57254199723247,
                                 height = 18.293846547993535,
-                                source="thin1",
+                                source="harvested",
+                                operation="thin1",
                                 time_point=0
                             ),
                             CrossCuttableTree(
@@ -226,7 +234,8 @@ class CrossCuttingTest(unittest.TestCase):
                                 species = TreeSpecies.PINE,
                                 breast_height_diameter = 16.071397406682646,
                                 height = 23.617432525999664,
-                                source="thin1",
+                                source="harvested",
+                                operation="thin1",
                                 time_point=0
                             ),
                             CrossCuttableTree(
@@ -234,7 +243,8 @@ class CrossCuttingTest(unittest.TestCase):
                                 species = TreeSpecies.SPRUCE,
                                 breast_height_diameter = 17.721245087039236,
                                 height = 16.353742669109522,
-                                source="thin1",
+                                source="harvested",
+                                operation="thin1",
                                 time_point=0
                             )
                         ]
@@ -261,7 +271,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
             area=296.23
         )
 
-        res = cross_cuttable_trees_from_stand(stand, source="thin1", time_point=0)
+        res = cross_cuttable_trees_from_stand(stand, time_point=0)
         self.assertEqual(len(res), 1)
         self.assertEqual(res[0].species, TreeSpecies.PINE)
         self.assertEqual(res[0].breast_height_diameter, 45.678)
@@ -288,7 +298,8 @@ class CrossCuttableTreesTest(unittest.TestCase):
                             species = TreeSpecies.SPRUCE,
                             breast_height_diameter = 17.721245087039236,
                             height = 16.353742669109522,
-                            source="thin1",
+                            source="harvested",
+                            operation="thin1",
                             time_point=0,
                             cross_cut_done=False
 
@@ -341,7 +352,8 @@ class CrossCutResultTest(unittest.TestCase):
             volume_per_ha=2.0,
             value_per_ha=10.0,
             stand_area=2.0,
-            source="thin1",
+            source="harvested",
+            operation="thin1",
             time_point=0
         )
 

@@ -2,7 +2,7 @@ import io
 from types import SimpleNamespace
 from typing import OrderedDict
 import unittest
-from app.export import j_cda, j_xda
+from app.export_handlers.j import j_xda, j_cda
 from sim.core_types import AggregatedResults, OperationPayload
 
 
@@ -56,7 +56,7 @@ class TestExport(unittest.TestCase):
             ]
         }
         cda = io.StringIO()
-        j_cda(out=cda, decl=decl, data=data)
+        j_cda(out=cda, data=data, cvariables=decl["cvariables"])
         self.assertEqual(
             cda.getvalue(),
             (
@@ -65,7 +65,7 @@ class TestExport(unittest.TestCase):
             )
         )
         xda = io.StringIO()
-        j_xda(out=xda, decl=decl, data=data)
+        j_xda(out=xda,data=data, xvariables=decl["xvariables"])
         self.assertEqual(
             xda.getvalue(),
             (

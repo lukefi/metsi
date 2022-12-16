@@ -1,5 +1,5 @@
 pyyaml==6.0
-git+https://github.com/menu-hanke/forestry-function-library@0.10.0#egg=forestryfunctions
+git+https://github.com/menu-hanke/forestry-function-library@0.12.0#egg=forestryfunctions
 git+https://github.com/menu-hanke/forest-data-model@0.4.7#egg=forestdatamodel
 git+https://github.com/menu-hanke/pymotti@v0.0.3#egg=pymotti
 jsonpickle==2.2.0
