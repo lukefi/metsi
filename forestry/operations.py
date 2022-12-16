@@ -11,7 +11,8 @@ from forestry.grow_acta import grow_acta
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
 from sim.core_types import OpTuple
-from forestry.clearcut import clearcutting, planting
+from forestry.clearcut import clearcutting
+from forestry.planting import planting
 
 
 def compute_volume(stand: ForestStand) -> float:
