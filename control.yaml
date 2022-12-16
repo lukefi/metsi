@@ -139,6 +139,6 @@ export:
     xvariables:
       - Ftot
       - Fpine
-      - int(site_type_category < 7) * sum(Fbirch)
+      - 0 if site_type_category is None else int(site_type_category < 7) * sum(Fbirch)
   - format: rm_schedules_events_timber
     filename: timber_sums.txt
