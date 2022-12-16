@@ -66,7 +66,8 @@ class NPVTest(unittest.TestCase):
                         volume_per_ha=2,
                         value_per_ha=100, 
                         stand_area=self.stand.area,
-                        source="thin1",
+                        source="harvested",
+                        operation="thin1",
                         time_point=5
                         )]*3
             },
@@ -88,7 +89,8 @@ class NPVTest(unittest.TestCase):
                         volume_per_ha=2,
                         value_per_ha=100, 
                         stand_area=self.stand.area,
-                        source="clearcutting",
+                        source="harvested",
+                        operation="clearcutting",
                         time_point=5
                         )]*3,
                 "renewal":[
@@ -117,7 +119,8 @@ class NPVTest(unittest.TestCase):
                         volume_per_ha=2,
                         value_per_ha=100, 
                         stand_area=self.stand.area,
-                        source="standing_trees",
+                        source="standing",
+                        operation="",
                         time_point=0
                         ),
                     #this 'standing_trees' result should be considered, since it's been done at the current time point (5)
@@ -127,7 +130,8 @@ class NPVTest(unittest.TestCase):
                         volume_per_ha=2,
                         value_per_ha=100, 
                         stand_area=self.stand.area,
-                        source="standing_trees",
+                        source="standing",
+                        operation="",
                         time_point=5
                         )],
             },

@@ -56,12 +56,12 @@ def _calculate_npv_for_rate(
 
     # 1. add revenues from harvesting. This excludes results from cross_cut_standing_trees.
     x: CrossCutResult
-    for x in filter(lambda x: x.source != "standing_trees", cc_results): #TODO: use x.operation as filter after merging #253
+    for x in filter(lambda x: x.source == "harvested", cc_results):
         discounted_revenue = x.get_real_value() / _discount_factor(r, x.time_point, initial_time_point)
         npv += discounted_revenue
     
     # 2. add discounted value of standing tree stock at the current time point.
-    standing_cc_results = list(filter(lambda x: x.source == "standing_trees" and x.time_point == current_time_point, cc_results))
+    standing_cc_results = list(filter(lambda x: x.source == "standing" and x.time_point == current_time_point, cc_results))
     if len(stand.reference_trees) > 0 and len(standing_cc_results) == 0:
         raise UserWarning("NPV calculation did not find cross cut results for standing trees. Did you forget to declare the 'cross_cut_standing_trees' operation before 'calculate_npv'?")
     else:
