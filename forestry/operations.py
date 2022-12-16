@@ -16,7 +16,7 @@ from forestry.collectives import autocollective, getvarfn, collect_all
 from sim.core_types import OpTuple
 from forestry.clearcut import clearcutting_and_planting
 from sim.operations import T
-
+from forestry.net_present_value import calculate_npv
 
 def compute_volume(stand: ForestStand) -> float:
     """Debug level function. Does not reflect any real usable model computation.
@@ -120,7 +120,8 @@ operation_lookup = {
     'cross_cut_standing_trees': cross_cut_standing_trees,
     'report_collectives': report_collectives,
     'report_state': report_state,
-    'report_period': report_period
+    'report_period': report_period,
+    'calculate_npv': calculate_npv
 }
 
 def try_register(mod: str, func: str):

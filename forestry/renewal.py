@@ -4,16 +4,18 @@ from forestdatamodel.model import ForestStand
 
 @dataclass
 class PriceableOperationInfo:
-     operation_name: str
+     operation: str
      units: float
      time_point: int
+
+     def get_real_cost(self, unit_cost: float) -> float:
+         return self.units * unit_cost
 
 
 def _store_renewal_aggregate(payload: OpTuple[ForestStand], op_tag: str):
      stand, aggrs = payload
-     aggregate = PriceableOperationInfo(operation_name=op_tag, units=stand.area, time_point=aggrs.current_time_point)
-     aggrs.upsert_nested(aggregate, "renewal", op_tag) #TODO: need to change this to store into a list, after #236 is merged
-
+     aggregate = PriceableOperationInfo(operation=op_tag, units=stand.area, time_point=aggrs.current_time_point)
+     aggrs.extend_list_result("renewal", [aggregate])
 
 def clearing(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]: 
      '''SMK operation code 400''' 
