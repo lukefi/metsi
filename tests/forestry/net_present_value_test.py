@@ -95,7 +95,7 @@ class NPVTest(unittest.TestCase):
                         )]*3,
                 "renewal":[
                     PriceableOperationInfo(
-                        operation_name="scalping",
+                        operation="scalping",
                         units=self.stand.area,
                         time_point=5
                     )]

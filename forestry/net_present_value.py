@@ -73,7 +73,7 @@ def _calculate_npv_for_rate(
     # 3. subtract costs
     z: PriceableOperationInfo
     for z in renewal_results:
-        unit_cost = renewal_costs[z.operation_name]
+        unit_cost = renewal_costs[z.operation]
         discounted_cost = z.get_real_cost(unit_cost) / _discount_factor(r, z.time_point, initial_time_point)
         npv -= discounted_cost
         
