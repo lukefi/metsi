@@ -28,21 +28,6 @@ def _clearcut_with_output(
 
     return stand, aggr
 
-class SoilPreparationKey(enum.IntEnum):
-    NONE = 0
-    SCALPING = 1
-    HARROWING = 2
-    PATCH_MOUNDING = 3 
-    DITCH_MOUNDING = 4
-    INVERTING = 5
-    OTHER = 6
-
-class RegenerationKey(enum.IntEnum):
-    NATURAL = 1
-    SEEDED = 2
-    PLANTED = 3
-
-
 
 def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """checks if either stand mean age or stand basal area weighted mean 

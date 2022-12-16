@@ -5,7 +5,7 @@ from forestry.thinning_limits import *
 from sim.core_types import AggregatedResults
 import forestry.thinning as thin
 import numpy as np
-from forestry.utils import get_timber_price_table
+from forestry.utils.file_io import get_timber_price_table
 
 class ThinningsTest(ConverterTestSuite):
 
