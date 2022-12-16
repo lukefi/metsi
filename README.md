@@ -281,10 +281,58 @@ See table below for a quick reference of forestry operations usable in control.y
 | report_collectives        | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
 | filter                    | [Filter](#filters) stands, trees and strata                                                    |                             | native                    |
 | cross_cut_felled_trees | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
-| cross_cut_whole_stand     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
+| cross_cut_standing_trees     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
+| [calculate_npv](#calculate_npv)           | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs.    |                 | native
+
+### calculate_npv
+
+Calculates the Net Present Value (NPV) of a given schedule.
+#### **parameters** 
+| parameter name        | type | location in control.yaml   | notes         |
+|-----------------------|------|----------------------------|---------------|
+| interest_rates        | list of int | operation_params    | e.g. [3], where 3 stands for 3% |
+| land_values           | file (json) | operation_file_params  |            |
+| renewal_costs         | file (csv)  | operation_file_params  |            |
 
 
+#### **additional information**
+- This operation expects that ``cross_cut_felled_trees`` has been called previously to cross cut any previous thinning output. 
+- This operation expects that ``cross_cut_standing_trees`` has been called in the same time point, so that the present value of the standing trees can be evaluated correctly. 
 
+
+#### **formula**
+
+$$
+NPV =
+\underbrace{\sum_{t=0}^T \frac{h_ta}{(1+r)^t}}_\text{(1)}+
+\underbrace{\frac{S_Ta}{(1+r)^T}}_\text{(2)}-
+\underbrace{\sum_{t=0}^T \frac{c_ta}{(1+r)^t}}_\text{(3)}+
+\underbrace{LV}_\text{(4)}
+
+$$
+
+where:
+
+- $h_t$ is the per-hectare harvest revenue from the stand at time $t$
+
+- $a$ is the stand's area in hectares
+
+- $r$ is the interest rate 
+
+- $S_T$ is the value of standing tree stock at the final time point $T$
+
+- $c_t$ is the per-hectare costs of stand treatment at time $t$
+
+- $LV$ is the bare land value of the stand, calculated for the interest rate $r$.
+
+
+(1) harvest revenues originate from `cross_cut_felled_trees`
+
+(2) stand value originates from `cross_cut_standing_trees`
+
+(3) currently, costs originate only from renewal operations
+
+(4) Bare land values are passed in as a file parameter for the NPV operation. These values are already discounted with the given interest rate, so no discounting happens here. See MELA 2016 reference manual p.175-176 for more information about this. 
 ## Testing
 
 To run unit test suites, run in the project root
