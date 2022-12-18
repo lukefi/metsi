@@ -90,6 +90,8 @@ def get_default_timber_price_table() -> str:
 
 def prepare_growth_test_stand():
     stand = ForestStand(
+        identifier="123",
+        area=20.3,
         soil_peatland_category=1,
         site_type_category=1,
         tax_class_reduction=1,

@@ -1,3 +1,4 @@
+from enum import Enum
 from importlib import import_module
 from itertools import repeat
 from functools import reduce, cache
@@ -90,6 +91,46 @@ def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T
     return input
 
 
+def property_collector(objects: list[object], properties: list[str]) -> list[list]:
+    result_rows = []
+    for o in objects:
+        row = []
+        for p in properties:
+            if not hasattr(o, p):
+                raise Exception(f"Unknown property {p} in {o.__class__}")
+            val = o.__getattribute__(p) or 0.0
+            if isinstance(val, Enum):
+                val = val.value
+            row.append(val)
+        result_rows.append(row)
+    return result_rows
+
+
+def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+    stand, aggr = input
+    result_rows = []
+    if not len(operation_parameters):
+        return input
+    for key, properties in operation_parameters.items():
+        objects: list[object]
+        if isinstance(properties, str):
+            properties = [properties]
+        elif not isinstance(properties, list):
+            raise Exception(f"Properties to collect must be a list of strings or a single string for {key}")
+        if key == "stand":
+            objects = [stand]
+        elif key == "tree":
+            objects = stand.reference_trees
+        elif key == "stratum":
+            objects = stand.tree_strata
+        else:
+            objects = aggr.get_list_result(key)
+        collected = property_collector(objects, properties)
+        result_rows.extend(collected)
+    aggr.store("collect_properties", result_rows)
+    return stand, aggr
+
+
 operation_lookup = {
     'grow_acta': grow_acta,
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
@@ -107,6 +148,7 @@ operation_lookup = {
     'report_collectives': report_collectives,
     'report_state': report_state,
     'calculate_npv': calculate_npv,
+    'collect_properties': collect_properties
 }
 
 def try_register(mod: str, func: str):

@@ -58,6 +58,8 @@ operation_params:
       timber_vol_birch_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
   calculate_npv: 
     - interest_rates: [1,2,3,4,5] # list of integers, '3' meaning 3%
+  collect_properties:
+    - tree: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
      
 preprocessing_params:
   generate_reference_trees:
@@ -112,6 +114,7 @@ simulation_events:
           - cross_cut_felled_trees
           - report_state
           - report_collectives
+          - collect_properties
   - time_points: [2020, 2025, 2030, 2035, 2040, 2045, 2050] # Grow at the end to transition assumed +5 years forwards
     generators:
       - sequence:
