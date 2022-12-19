@@ -6,7 +6,7 @@ from app.file_io import row_writer
 def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
     retval = []
     timber_events = derived_data.get('report_state')
-    tree_data = derived_data.get('collect_properties')
+    tree_data = derived_data.get('collect_standing_tree_properties')
     for year, report in timber_events.items():
         event_details = collect_timber_data_for_year(report, year)
 
@@ -22,7 +22,7 @@ def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
                     # TODO: Missing reference to tree data in cross cutting results
                     retval.append("N/A")
                 else:
-                    tree_rows = map(lambda row: " ".join(map(lambda item: str(item), row)), tree_data.get(year, [[]]))
+                    tree_rows = map(lambda row: " ".join(map(lambda item: str(round(item, 2)), row)), tree_data.get(year, [[]]))
                     retval.append(header)
                     retval.extend(tree_rows)
     return retval

@@ -45,8 +45,8 @@ operation_params:
       timber_vol_pine_energy: cross_cutting.volume_per_ha[  (cross_cutting.species==1) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
       timber_vol_spruce_energy: cross_cutting.volume_per_ha[(cross_cutting.species==2) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
       timber_vol_birch_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
-  collect_properties:
-    - tree: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
+  collect_standing_tree_properties:
+    - properties: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
 
 preprocessing_params:
   generate_reference_trees:
@@ -66,7 +66,8 @@ operation_file_params:
   clearcutting:
     clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt
     clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt
-    clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
+  planting:
+    planting_instructions: data/parameter_files/planting_instructions.txt
   calculate_npv:
     land_values: data/parameter_files/land_values_per_site_type_and_interest_rate.json
     renewal_costs: data/parameter_files/renewal_operation_pricing.csv
@@ -79,7 +80,7 @@ simulation_events:
           - cross_cut_standing_trees
           - report_biomass
           - report_state
-          - collect_properties
+          - collect_standing_tree_properties
   - time_points: [2030]
     generators:
       - sequence:
@@ -98,7 +99,7 @@ simulation_events:
           - cross_cut_felled_trees
           - report_state
           - report_collectives
-          - collect_properties
+          - collect_standing_tree_properties
   - time_points: [2020, 2025] # Grow at the end to transition assumed +5 years forwards
     generators:
       - sequence:
