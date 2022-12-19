@@ -1,4 +1,5 @@
 operation;cost_per_ha;SMK operation code;Finnish;
+planting;100;NA;Istutus;
 clearing;100;400;Raivaus;
 mechanical_clearing;100;410;Mekaaninen raivaus;
 mechanical_chemical_clearing;100;420;Mekaanis-kemiallinen raivaus;

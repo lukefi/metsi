@@ -14,9 +14,11 @@ from forestry.thinning import first_thinning, thinning_from_above, thinning_from
     even_thinning
 from forestry.collectives import autocollective, getvarfn, collect_all
 from sim.core_types import OpTuple
-from forestry.clearcut import clearcutting_and_planting
 from sim.operations import T
 from forestry.net_present_value import calculate_npv
+from forestry.clearcut import clearcutting
+from forestry.planting import planting
+
 
 def compute_volume(stand: ForestStand) -> float:
     """Debug level function. Does not reflect any real usable model computation.
@@ -111,8 +113,8 @@ operation_lookup = {
     'thinning_from_above': thinning_from_above,
     'first_thinning': first_thinning,
     'even_thinning': even_thinning,
-    #'clearcutting': clearcutting,
-    'clearcutting': clearcutting_and_planting,
+    'planting': planting,
+    'clearcutting': clearcutting,
     'report_biomass': report_biomass,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
