@@ -19,7 +19,7 @@ class CrossCutResult:
 
     #what's the right word here? "real", "absolute", something else?
     def get_real_volume(self) -> float:
-        return self.volume_per_ha*self.stand_area 
+        return self.volume_per_ha*self.stand_area
 
     def get_real_value(self) -> float:
         return self.value_per_ha*self.stand_area
@@ -40,9 +40,9 @@ class CrossCuttableTree:
 def cross_cuttable_trees_from_stand(stand: ForestStand, time_point: int) -> list[CrossCuttableTree]:
      return [
             CrossCuttableTree(
-                tree.stems_per_ha, 
-                tree.species, 
-                tree.breast_height_diameter, 
+                tree.stems_per_ha,
+                tree.species,
+                tree.breast_height_diameter,
                 tree.height,
                 'standing',
                 '',
@@ -53,12 +53,12 @@ def cross_cuttable_trees_from_stand(stand: ForestStand, time_point: int) -> list
 
 
 def _create_cross_cut_results(
-    stand_area: float, 
+    stand_area: float,
     species: TreeSpecies,
-    stems_removed_per_ha: float, 
-    unique_timber_grades, 
-    volumes: float, 
-    values: float, 
+    stems_removed_per_ha: float,
+    unique_timber_grades,
+    volumes: float,
+    values: float,
     tree_source: str,
     operation: str,
     time_point: int
@@ -82,10 +82,10 @@ def _create_cross_cut_results(
 
 def cross_cut_tree(
     tree: CrossCuttableTree,
-    stand_area: float, 
-    timber_price_table: np.ndarray, 
+    stand_area: float,
+    timber_price_table: np.ndarray,
     ) -> list[CrossCutResult]:
-    """ 
+    """
     :param tree: The tree to cross cut
     :returns: A list of CrossCutResult objects, whose length is given by the number of unique timber grades in the `timber_price_table`. In other words, the returned list contains the resulting quantities of each unique timber grade.
     """
@@ -97,18 +97,18 @@ def cross_cut_tree(
                             )
 
     res = _create_cross_cut_results(
-                        stand_area, 
-                        tree.species, 
-                        tree.stems_to_cut_per_ha, 
-                        unique_timber_grades, 
-                        volumes, 
+                        stand_area,
+                        tree.species,
+                        tree.stems_to_cut_per_ha,
+                        unique_timber_grades,
+                        volumes,
                         values,
                         tree.source,
                         tree.operation,
                         tree.time_point
-                        )    
+                        )
     return res
-    
+
 
 def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
@@ -123,7 +123,7 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
 
     felled_trees = simulation_aggregates.get_list_result("felled_trees")
     felled_trees_not_cut = filter(lambda x: not x.cross_cut_done, felled_trees)
-    
+
     for tree in felled_trees_not_cut:
         res = cross_cut_tree(tree, stand.area, timber_price_table)
         results.extend(res)
