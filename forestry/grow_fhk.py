@@ -6,7 +6,7 @@ from typing import Any, Callable, Generator, Optional
 from forestryfunctions.fhk import definevars
 from forestdatamodel.model import ForestStand
 import fhk
-from forestry.utils.file_io import update_stand_growth
+from forestry.utils.growth import update_stand_growth
 
 StrArg = str|list[str]
 StrArgOpt = Optional[StrArg]
