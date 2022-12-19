@@ -32,11 +32,12 @@ operation_params:
   report_biomass:
     - model_set: 1
   report_collectives:
-    - Ftot: reference_trees.stems_per_ha
-      Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
-      Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
-      npv_1_percent: net_present_value.value[net_present_value.interest_rate==1]
+    - npv_1_percent: net_present_value.value[net_present_value.interest_rate==1]
       npv_all_rates: list(net_present_value.value)
+      total_stock_volume: cross_cutting.volume_per_ha[cross_cutting.source == "standing"]
+      total_stock_value: cross_cutting.value_per_ha[cross_cutting.source == "standing"]
+      total_harvest_volume: cross_cutting.volume_per_ha[cross_cutting.source == "harvested"]
+      total_harvest_value: cross_cutting.value_per_ha[cross_cutting.source == "harvested"]
   grow_fhk:
     - package: pymotti_graph
   report_state:
@@ -147,10 +148,12 @@ export:
       - land_use_category
       - soil_peatland_category
     xvariables:
-      - Ftot
-      - Fpine
-      - 0 if site_type_category is None else int(site_type_category < 7) * sum(Fbirch)
       - npv_1_percent
       - npv_all_rates
+      - total_stock_volume
+      - total_stock_value
+      - total_harvest_volume
+      - total_harvest_value
+
   - format: rm_schedules_events_timber
     filename: timber_sums.txt
