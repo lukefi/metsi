@@ -14,9 +14,11 @@ from forestry.thinning import first_thinning, thinning_from_above, thinning_from
     even_thinning
 from forestry.collectives import autocollective, getvarfn, collect_all
 from sim.core_types import OpTuple
-from forestry.clearcut import clearcutting, planting
 from sim.operations import T
 from forestry.net_present_value import calculate_npv
+from forestry.clearcut import clearcutting
+from forestry.planting import planting
+
 
 def compute_volume(stand: ForestStand) -> float:
     """Debug level function. Does not reflect any real usable model computation.

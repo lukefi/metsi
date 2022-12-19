@@ -4,8 +4,10 @@ import forestry.clearcutting_limits as clearcutting_lim
 import forestry.clearcut as clearcut
 from forestryfunctions import forestry_utils as futil
 from forestdatamodel.enums.internal import TreeSpecies
-from forestry.thinning_limits import SiteTypeKey, SpeciesKey
+from forestry.thinning_limits import SpeciesKey
 from sim.core_types import AggregatedResults
+import forestry.planting as plnt 
+from forestry.utils.enums import SiteTypeKey, SoilPreparationKey
 
 class ClearcuttingTest(unittest.TestCase):
 
@@ -45,7 +47,7 @@ class ClearcuttingTest(unittest.TestCase):
         self.assertEqual(diameters[SiteTypeKey.CT][SpeciesKey.PINE],22.0)
     
     def test_get_regeneration_instructions_dict(self):
-        instructions = clearcutting_lim.get_planting_instructions_from_parameter_file_contents('data/parameter_files/planting_instructions.txt')
+        instructions = plnt.get_planting_instructions_from_parameter_file_contents('tests/resources/planting_test/planting_instructions.txt')
         self.assertEqual(instructions[SiteTypeKey.OMT]["species"],2)
 
     def test_get_clearcutting_limits(self):
@@ -60,7 +62,7 @@ class ClearcuttingTest(unittest.TestCase):
     def test_clearcut_with_output(self):
         stand = self.generate_stand_fixture()
         simulation_aggregates = AggregatedResults()
-        stand, simulation_aggregates = clearcut.clearcut_with_output(stand,simulation_aggregates,'clearcutting')
+        stand, simulation_aggregates = clearcut._clearcut_with_output(stand,simulation_aggregates,'clearcutting')
         self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha)
         self.assertEqual("clearcutting", simulation_aggregates.get_list_result("felled_trees")[-1].operation)
         self.assertEqual(33.0,simulation_aggregates.get_list_result("felled_trees")[-1].height)
@@ -80,23 +82,27 @@ class ClearcuttingTest(unittest.TestCase):
         simulation_aggregates = AggregatedResults()
         stand.site_type_category = 3
         stand.identifier = '1001'
-        regen = clearcutting_lim.get_planting_instructions(stand,'data/parameter_files/planting_instructions.txt')
-        (stand, output) = clearcut.plant(stand,simulation_aggregates,"regeneration",regen_species = regen['species'], rt_count = 10, rt_stems= regen['stems/ha'], 
+        regen = plnt.get_planting_instructions(stand.site_type_category, 'tests/resources/planting_test/planting_instructions.txt')
+        (stand, output) = plnt.plant(stand,simulation_aggregates, "regeneration",regen_species = regen['species'], rt_count = 10, rt_stems= regen['stems/ha'], 
             soil_preparation=regen['soil preparation'])
         self.assertEqual(220,stand.reference_trees[-1].stems_per_ha)
-        self.assertEqual(clearcut.SoilPreparationKey.PATCH_MOUNDING,output.prev("regeneration")['soil preparation'])
-        self.assertEqual(TreeSpecies.SPRUCE,output.prev("regeneration")['species'])
-        self.assertEqual('1001-9-tree',stand.reference_trees[-1].identifier)
+        self.assertEqual(SoilPreparationKey.PATCH_MOUNDING, output.prev("regeneration")['soil preparation'])
+        self.assertEqual(TreeSpecies.SPRUCE, output.prev("regeneration")['species'])
+        self.assertEqual('1001-9-tree', stand.reference_trees[-1].identifier)
 
     def test_planting(self):
         stand = ForestStand()
         simulation_aggregates = AggregatedResults()
         oper_input = (stand, simulation_aggregates)
-        operation_parameters = {'planting_instructions':'data/parameter_files/planting_instructions.txt'}
+        operation_parameters = {'planting_instructions':'tests/resources/planting_test/planting_instructions.txt'}
         stand.site_type_category = 4
         stand.identifier = '1011'
-        (stand, output) = clearcut.planting(oper_input, **operation_parameters)
-        self.assertEqual(200,stand.reference_trees[-1].stems_per_ha)
-        self.assertEqual(clearcut.SoilPreparationKey.SCALPING,output.prev("regeneration")['soil preparation'])
-        self.assertEqual(TreeSpecies.PINE,output.prev("regeneration")['species'])
-        self.assertEqual('1011-9-tree',stand.reference_trees[-1].identifier)
+        (stand, output) = plnt.planting(oper_input, **operation_parameters)
+        self.assertEqual(200, stand.reference_trees[-1].stems_per_ha)
+        self.assertEqual(SoilPreparationKey.SCALPING, output.prev("regeneration")['soil preparation'])
+        self.assertEqual(TreeSpecies.PINE, output.prev("regeneration")['species'])
+        self.assertEqual('1011-9-tree', stand.reference_trees[-1].identifier)
+        self.assertEqual(output.get_list_result("renewal")[-1].operation_name, "planting")
+        self.assertEqual(output.get_list_result("renewal")[-1].units, stand.area)
+        self.assertEqual(output.get_list_result("renewal")[-1].time_point, simulation_aggregates.current_time_point)
+

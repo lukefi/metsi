@@ -11,23 +11,16 @@ from bisect import bisect
 from forestdatamodel.model import ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
 from forestryfunctions import forestry_utils as futil
+from forestry.utils.enums import SiteTypeKey
+from forestry.utils.conversion import site_type_to_key
 
 class CountyKey(Enum):
     EASTERN_FINLAND = 'eastern_finland'
     SOUTHERN_FINLAND = 'southern_finland'
 
-
-class SiteTypeKey(Enum):
-    OMT = 'OMT'
-    MT = 'MT'
-    VT = 'VT'
-    CT = 'CT'
-
-
 class SoilPeatlandKey(Enum):
     MINERAL_SOIL = 'mineral_soil'
     PEATLAND = 'peatland'
-
 
 class SpeciesKey(Enum):
     PINE = 'pine'
@@ -413,34 +406,6 @@ THINNING_LIMITS = {
         }
     }
 }
-
-
-def site_type_to_key(value: int) -> str:
-    """  converts site type of stand into a key for thinning limist lookup table
-
-    site_type variable explanations:
-    (1) very rich sites (OMaT in South Finland)
-    (2) rich sites (OMT in South Finland)
-    (3) damp sites (MT in South Finland)
-    (4) sub-dry sites (VT in South Finland)
-    (5) dry sites (CT in South Finland)
-    (6) barren sites (ClT in South Finland)
-    (7) rocky or sandy areas
-    (8) open mountains
-
-    """
-    if value in (1,2):
-        return SiteTypeKey.OMT
-    elif value in (3,):
-        return SiteTypeKey.MT
-    elif value in (4,):
-        return SiteTypeKey.VT
-    elif value in (5, 6, 7, 8):
-        return SiteTypeKey.CT
-    elif value < 1 or value > 8:
-        return SiteTypeKey.MT
-    else:
-        raise UserWarning('Unable to spesify site type value {} as key for the thinning limits lookup table'.format(value))
 
 
 def soil_peatland_category_to_key(value: int) -> str:
