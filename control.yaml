@@ -35,6 +35,8 @@ operation_params:
     - Ftot: reference_trees.stems_per_ha
       Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
       Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
+      npv_1_percent: net_present_value.value[net_present_value.interest_rate==1]
+      npv_all_rates: list(net_present_value.value)
   grow_fhk:
     - package: pymotti_graph
   report_state:
@@ -95,6 +97,7 @@ simulation_events:
     generators:
       - sequence:
           - cross_cut_standing_trees
+          - calculate_npv
           - report_biomass
           - report_state
   - time_points: [2030, 2050]
@@ -148,5 +151,7 @@ export:
       - Ftot
       - Fpine
       - 0 if site_type_category is None else int(site_type_category < 7) * sum(Fbirch)
+      - npv_1_percent
+      - npv_all_rates
   - format: rm_schedules_events_timber
     filename: timber_sums.txt

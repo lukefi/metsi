@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from sim.core_types import AggregatedResults, OpTuple
 from forestdatamodel.model import ForestStand
 from forestry.cross_cutting import CrossCutResult
@@ -5,6 +6,11 @@ from forestry.renewal import PriceableOperationInfo
 from forestry.utils.file_io import get_renewal_costs_as_dict, get_land_values_as_dict
 
 
+@dataclass
+class NPVAggregate:
+    time_point: int
+    interest_rate: int
+    value: float
 
 def _get_bare_land_value(land_values: dict, soil_peatland_category: int, site_type: int, interest_rate: int) -> float:
     
@@ -93,12 +99,10 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
     land_values = get_land_values_as_dict(operation_parameters["land_values"])
     renewal_costs = get_renewal_costs_as_dict(operation_parameters["renewal_costs"])
     
-    NPVs_per_rate: dict[str, float] = {}
-
     for int_r in interest_rates:
-        NPVs_per_rate[int_r] = _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r)    
-
-    simulation_aggregates.store("net_present_value", NPVs_per_rate)
+        npv = _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r)    
+        aggr = NPVAggregate(simulation_aggregates.current_time_point, int_r, npv)
+        simulation_aggregates.extend_list_result("net_present_value", [aggr])
 
     return payload
 
