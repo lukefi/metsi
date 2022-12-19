@@ -30,7 +30,7 @@ def run_stands(
      (
         ForestOpPayload(
             simulation_state=stand,
-            aggregated_results=AggregatedResults(),
+            aggregated_results=AggregatedResults(initial_time_point=config.time_points[0]),
             operation_history=[],
         ),
         config

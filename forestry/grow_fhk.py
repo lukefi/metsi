@@ -6,15 +6,17 @@ from typing import Any, Callable, Generator, Optional
 from forestryfunctions.fhk import definevars
 from forestdatamodel.model import ForestStand
 import fhk
+from forestry.utils import update_stand_growth
 
 StrArg = str|list[str]
 StrArgOpt = Optional[StrArg]
 
-def simvars(graph: fhk.Graph):
+
+def simvars(graph: fhk.Graph, _step: float = 5):
 
     @graph.given("step")
     def step() -> float:
-        return 5
+        return _step
 
 @dataclass
 class Query:
@@ -33,7 +35,8 @@ def getquery(
     fname: StrArgOpt   = None,
     package: StrArgOpt = None,
     lpath: StrArgOpt   = None,
-    debug: bool        = False
+    debug: bool        = False,
+    step: float        = 5
 ) -> Callable[..., Query]:
     with fhk.Graph() as g:
         for p in iterargs(lpath):
@@ -45,7 +48,7 @@ def getquery(
         for f in iterargs(fname):
             g.read(f)
         definevars(g)
-        simvars(g)
+        simvars(g, step)
         q = g.query(Query)
     if debug:
         print(g.dump(color=True))
@@ -57,26 +60,21 @@ def getmem() -> fhk.Mem:
 
 def grow_fhk(input: tuple[ForestStand, Any], **args) -> tuple[ForestStand, None]:
     stand, _ = input
+    step = args.get('step', 5)
     query = getquery(
         fname   = args.get("graph"),
         package = args.get("package"),
         lpath   = args.get("luapath"),
-        debug   = args.get("debug")
+        debug   = args.get("debug"),
+        step    = step
     )
     mem = getmem()
     mem.reset()
     res = query(stand, mem=mem)
-    for i,t in enumerate(stand.reference_trees):
-        height_before_growth = t.height
-        t.breast_height_diameter = res.d[i]
-        t.height = res.h[i]
-        t.stems_per_ha = res.f[i]
-        t.biological_age += 5
-        if height_before_growth < 1.3 <= t.height:
-            t.breast_height_age = t.biological_age
-        if t.height >= 1.3 and t.sapling:
-            t.sapling = False
+    diameters = res.d
+    heights = res.h
+    stems = res.f
+    update_stand_growth(stand, diameters, heights, stems, step)
     # prune dead trees
-    stand.year += 5
     stand.reference_trees = [t for t in stand.reference_trees if t.stems_per_ha >= 1.0]
     return stand, None

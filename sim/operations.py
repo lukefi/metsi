@@ -1,7 +1,5 @@
-from functools import cache
 import typing
-from typing import Any, Optional, TypeVar
-from sim.collectives import collect_all, autocollective, getvarfn
+from typing import Optional, TypeVar
 from sim.core_types import OpTuple, OperationPayload
 from sim.util import get_or_default
 
@@ -15,39 +13,6 @@ def _get_operation_last_run(operation_history: list[tuple[int, str]], operation_
 
 def do_nothing(data: T, **kwargs) -> T:
     return data
-
-
-def _collector_wrapper(operation_parameters, *aliases, **named_aliases) -> dict[str, Any]:
-    getvar = cache(getvarfn(*aliases, **named_aliases))
-    return collect_all(operation_parameters, getvar=getvar)
-
-
-def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
-    state, aggr = input
-    res = _collector_wrapper(
-        collectives, 
-        lambda name: autocollective(getattr(state, name)),
-        state = state,
-        aggr = aggr.operation_results,
-        time = aggr.current_time_point
-        )
-    aggr.store('report_collectives', res)
-    return input
-
-
-def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
-    state, aggr = input
-    res = _collector_wrapper(
-        operation_parameters, 
-        lambda name: autocollective(getattr(state, name)),
-        lambda name: autocollective(
-                                    aggr.operation_results[name], 
-                                    time_point = aggr.current_time_point,
-                                    ),
-        state = state
-        )
-    aggr.store('report_state', res)
-    return input
 
 
 def prepared_operation(operation_entrypoint: typing.Callable, **operation_parameters):
@@ -102,7 +67,5 @@ def resolve_operation(tag: str, external_operation_lookup: dict) -> typing.Calla
 
 
 internal_operation_lookup = {
-    'do_nothing': do_nothing,
-    'report_collectives': report_collectives,
-    'report_state': report_state
+    'do_nothing': do_nothing
 }

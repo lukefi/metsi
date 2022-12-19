@@ -14,6 +14,7 @@ class CrossCutResult:
     value_per_ha: float
     stand_area: float
     source: str
+    operation: str
     time_point: int
 
     #what's the right word here? "real", "absolute", something else?
@@ -31,18 +32,20 @@ class CrossCuttableTree:
     breast_height_diameter: float
     height: float
     source: str
+    operation: str
     time_point: int
     cross_cut_done: bool = False
 
 
-def cross_cuttable_trees_from_stand(stand: ForestStand, source: str, time_point: int) -> list[CrossCuttableTree]:
+def cross_cuttable_trees_from_stand(stand: ForestStand, time_point: int) -> list[CrossCuttableTree]:
      return [
             CrossCuttableTree(
                 tree.stems_per_ha, 
                 tree.species, 
                 tree.breast_height_diameter, 
                 tree.height,
-                source,
+                'standing',
+                '',
                 time_point
                 )
                 for tree in stand.reference_trees
@@ -57,6 +60,7 @@ def _create_cross_cut_results(
     volumes: float, 
     values: float, 
     tree_source: str,
+    operation: str,
     time_point: int
     ) -> list[CrossCutResult]:
     results = []
@@ -69,6 +73,7 @@ def _create_cross_cut_results(
                     value_per_ha=value*stems_removed_per_ha,
                     stand_area=stand_area,
                     source=tree_source,
+                    operation=operation,
                     time_point=time_point
                 )
             )
@@ -99,6 +104,7 @@ def cross_cut_tree(
                         volumes, 
                         values,
                         tree.source,
+                        tree.operation,
                         tree.time_point
                         )    
     return res
@@ -133,9 +139,8 @@ def cross_cut_standing_trees(payload: OpTuple[ForestStand], **operation_paramete
     The results are stored in simulation_aggregates.
     """
     stand, simulation_aggregates = payload
-    tag = "standing_trees"
     timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
-    cross_cuttable_trees = cross_cuttable_trees_from_stand(stand, tag, simulation_aggregates.current_time_point)
+    cross_cuttable_trees = cross_cuttable_trees_from_stand(stand, simulation_aggregates.current_time_point)
 
     results = []
     for tree in cross_cuttable_trees:

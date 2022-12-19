@@ -19,7 +19,8 @@ def clearcut_with_output(
                 t.stems_per_ha, 
                 t.species, 
                 t.breast_height_diameter, 
-                t.height, 
+                t.height,
+                'harvested',
                 tag,
                 aggr.current_time_point
                 )
