@@ -92,7 +92,7 @@ def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T
 def report_period(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
     _, aggr = input
     last_period = aggr.prev('report_period')
-    t0 = 0 if last_period is None else list(aggr.get('report_period').keys())[-1]
+    t0 = aggr.initial_time_point if last_period is None else list(aggr.get('report_period').keys())[-1]
     res = _collector_wrapper(
         operation_parameters,
         lambda name: autocollective(
