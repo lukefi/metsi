@@ -102,7 +102,7 @@ class ClearcuttingTest(unittest.TestCase):
         self.assertEqual(SoilPreparationKey.SCALPING, output.prev("regeneration")['soil preparation'])
         self.assertEqual(TreeSpecies.PINE, output.prev("regeneration")['species'])
         self.assertEqual('1011-9-tree', stand.reference_trees[-1].identifier)
-        self.assertEqual(output.get_list_result("renewal")[-1].operation_name, "planting")
+        self.assertEqual(output.get_list_result("renewal")[-1].operation, "planting")
         self.assertEqual(output.get_list_result("renewal")[-1].units, stand.area)
         self.assertEqual(output.get_list_result("renewal")[-1].time_point, simulation_aggregates.current_time_point)
 

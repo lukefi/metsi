@@ -1,7 +1,7 @@
 from forestryfunctions.naturalprocess.grow_acta import grow_diameter_and_height
 from forestdatamodel.model import ForestStand, ReferenceTree
 
-from forestry.utils import update_stand_growth
+from forestry.utils.file_io import update_stand_growth
 
 
 def split_sapling_trees(trees: list[ReferenceTree]) -> tuple[list[ReferenceTree], list[ReferenceTree]]:

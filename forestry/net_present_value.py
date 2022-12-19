@@ -2,7 +2,7 @@ from sim.core_types import AggregatedResults, OpTuple
 from forestdatamodel.model import ForestStand
 from forestry.cross_cutting import CrossCutResult
 from forestry.renewal import PriceableOperationInfo
-from forestry.utils import get_renewal_costs_as_dict, get_land_values_as_dict
+from forestry.utils.file_io import get_renewal_costs_as_dict, get_land_values_as_dict
 
 
 
