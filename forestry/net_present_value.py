@@ -7,7 +7,7 @@ from forestry.utils.file_io import get_renewal_costs_as_dict, get_land_values_as
 
 
 @dataclass
-class NPVAggregate:
+class NPVResult:
     time_point: int
     interest_rate: int
     value: float
@@ -101,7 +101,7 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
     
     for int_r in interest_rates:
         npv = _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r)    
-        aggr = NPVAggregate(simulation_aggregates.current_time_point, int_r, npv)
+        aggr = NPVResult(simulation_aggregates.current_time_point, int_r, npv)
         simulation_aggregates.extend_list_result("net_present_value", [aggr])
 
     return payload
