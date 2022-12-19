@@ -4,48 +4,28 @@ app_configuration:
   state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
   #preprocessing_output_container: csv #options: pickle, json, csv, null, rsd (special case not usable as input container)
   #state_output_container: csv #options: pickle, json, csv, null
-  #derived_data_output_container: json #options: pickle, json, null
+  #derived_data_output_container: pickle #options: pickle, json, null
   strategy: partial
   run_modes: preprocess,simulate,postprocess,export
 
 run_constraints:
-  thinning_from_above:
-    minimum_time_interval: 20
-  thinning_from_below:
-    minimum_time_interval: 20
-  even_thinning:
-    minimum_time_interval: 20
   first_thinning:
     minimum_time_interval: 50
   clearcutting:
     minimum_time_interval: 50
 
 operation_params:
-  report_volume:
-    # Requires R dependency if true
-    - lmfor_volume: false
   first_thinning:
     - thinning_factor: 0.97
       e: 0.2
       dominant_height_lower_bound: 11
       dominant_height_upper_bound: 16
-  thinning_from_below:
-    - thinning_factor: 0.97
-      e: 0.2
-  thinning_from_above:
-    - thinning_factor: 0.98
-      e: 0.2
-  even_thinning:
-    - thinning_factor: 0.9
-      e: 0.2
   report_biomass:
     - model_set: 1
   report_collectives:
     - Ftot: reference_trees.stems_per_ha
       Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
       Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
-  grow_fhk:
-    - package: pymotti_graph
   report_state:
     - stock_vol_pine_log: cross_cutting.volume_per_ha[      (cross_cutting.species==1) & (cross_cutting.timber_grade==1) & (cross_cutting.source == "standing")]
       stock_vol_spruce_log: cross_cutting.volume_per_ha[    (cross_cutting.species==2) & (cross_cutting.timber_grade==1) & (cross_cutting.source == "standing")]
@@ -65,50 +45,61 @@ operation_params:
       timber_vol_pine_energy: cross_cutting.volume_per_ha[  (cross_cutting.species==1) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
       timber_vol_spruce_energy: cross_cutting.volume_per_ha[(cross_cutting.species==2) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
       timber_vol_birch_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
-
+  collect_properties:
+    - tree: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
 
 preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
 
 preprocessing_operations:
-  - generate_reference_trees
-  - compute_location_metadata
+  - generate_reference_trees # reference trees from strata, replaces existing reference trees
+  #- compute_location_metadata # required for using grow_motti, grow_fhk
 
 operation_file_params:
   thinning_from_above:
     thinning_limits: data/parameter_files/Thin.txt
-  thinning_from_below:
-    thinning_limits: data/parameter_files/Thin.txt
-  even_thinning:
-    thinning_limits: data/parameter_files/Thin.txt
-  clearcutting:
-    clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt  
-    clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt 
-    clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
   cross_cut_felled_trees:
     timber_price_table: data/parameter_files/timber_price_table.csv
   cross_cut_standing_trees:
     timber_price_table: data/parameter_files/timber_price_table.csv
+  clearcutting:
+    clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt
+    clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt
+    clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
+  calculate_npv:
+    land_values: data/parameter_files/land_values_per_site_type_and_interest_rate.json
+    renewal_costs: data/parameter_files/renewal_operation_pricing.csv
 
 simulation_events:
-  - time_points: [2022, 2027, 2032, 2037, 2042, 2052, 2057, 2062] # STATE YEARS
+  # we describe here objects with schedule for which time points they are active
+  - time_points: [2020, 2025, 2030]
     generators:
       - sequence:
-        - cross_cut_standing_trees
-        - report_state
-  - time_points: [2047, 2067] # EVENT YEARS
+          - cross_cut_standing_trees
+          - report_biomass
+          - report_state
+          - collect_properties
+  - time_points: [2030]
     generators:
       - sequence:
-        - cross_cut_standing_trees
+          - cross_cut_standing_trees
       - alternatives:
-        - do_nothing
-        - even_thinning
+          - do_nothing
+          # commented out to reduce the choices for default demo
+          #- thinning_from_below
+          #- thinning_from_above
+          - first_thinning
+          - sequence:
+              - clearcutting
+              - do_nothing
+            # operations for renewal after clearcutting go here
       - sequence:
-        - cross_cut_felled_trees
-        - report_state
-        - report_collectives
-  - time_points: [2022, 2027, 2032, 2037, 2042, 2047, 2052, 2057, 2062] # GROWTH YEARS, transition operation +5 years
+          - cross_cut_felled_trees
+          - report_state
+          - report_collectives
+          - collect_properties
+  - time_points: [2020, 2025] # Grow at the end to transition assumed +5 years forwards
     generators:
       - sequence:
           - grow_acta
@@ -136,4 +127,6 @@ export:
       - Fpine
       - int(site_type_category < 7) * sum(Fbirch)
   - format: rm_schedules_events_timber
-
+    filename: timber_sums.txt
+  - format: rm_schedules_events_trees
+    filename: trees.txt

@@ -4,7 +4,7 @@ from app.app_io import Mela2Configuration
 from app.app_types import SimResults
 from app.export_handlers.j import j_out, parse_j_config
 from app.console_logging import print_logline
-from app.export_handlers.rm_timber import rm_schedules_events_timber
+from app.export_handlers.rm_timber import rm_schedules_events_timber, rm_schedules_events_trees
 
 
 def export_files(config: Mela2Configuration, decl: list[dict], data: SimResults):
@@ -20,6 +20,11 @@ def export_files(config: Mela2Configuration, decl: list[dict], data: SimResults)
             target_path = Path(config.target_directory, filename)
             output_handlers.append((export_module,
                                     lambda: rm_schedules_events_timber(target_path, data)))
+        elif export_module == "rm_schedules_events_trees":
+            filename = export_module_declaration.get("filename", "rm_schedule_trees.txt")
+            target_path = Path(config.target_directory, filename)
+            output_handlers.append((export_module,
+                                    lambda: rm_schedules_events_trees(target_path, data)))
         else:
             print_logline("Unknown output format for export: '{}'".format(export_module))
     for export_module, handler in output_handlers:
