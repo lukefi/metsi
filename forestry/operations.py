@@ -82,11 +82,10 @@ def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T
         operation_parameters,
         lambda name: autocollective(getattr(state, name)),
         lambda name: autocollective(
-                                    aggr.operation_results[name],
-                                    time_point = aggr.current_time_point,
-                                    ),
-        state = state
-        )
+            aggr.operation_results[name],
+            time_point=[aggr.current_time_point]),
+        state=state
+    )
     aggr.store('report_state', res)
     return input
 
@@ -131,6 +130,21 @@ def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> O
     return stand, aggr
 
 
+def report_period(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
+    _, aggr = input
+    last_period = aggr.prev('report_period')
+    t0 = aggr.initial_time_point if last_period is None else list(aggr.get('report_period').keys())[-1]
+    res = _collector_wrapper(
+        operation_parameters,
+        lambda name: autocollective(
+            aggr.operation_results[name],
+            time_point=range(t0, aggr.current_time_point)
+        )
+    )
+    aggr.store('report_period', res)
+    return input
+
+
 operation_lookup = {
     'grow_acta': grow_acta,
     'grow': grow_acta,  # alias for now, maybe make it parametrizable later
@@ -147,8 +161,9 @@ operation_lookup = {
     'cross_cut_standing_trees': cross_cut_standing_trees,
     'report_collectives': report_collectives,
     'report_state': report_state,
-    'calculate_npv': calculate_npv,
-    'collect_properties': collect_properties
+    'collect_properties': collect_properties,
+    'report_period': report_period,
+    'calculate_npv': calculate_npv
 }
 
 def try_register(mod: str, func: str):
