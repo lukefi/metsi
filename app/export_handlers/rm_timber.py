@@ -1,5 +1,6 @@
 from pathlib import Path
 from app.app_types import SimResults
+from app.file_io import row_writer
 
 
 def format_timber_volume_in_event_rows(event: dict) -> list[str]:
@@ -42,5 +43,4 @@ def prepare_cross_cut_volumes_content(data: SimResults) -> list[str]:
 def rm_schedules_events_timber(filepath: Path, data: SimResults):
     """Produce output file collecting state and event year timber volumes for all schedules and stands"""
     content = prepare_cross_cut_volumes_content(data)
-    with open(filepath, "w") as f:
-        f.writelines(s + '\n' for s in content)
+    row_writer(filepath, content)
