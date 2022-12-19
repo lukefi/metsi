@@ -56,9 +56,11 @@ operation_params:
       timber_vol_pine_energy: cross_cutting.volume_per_ha[  (cross_cutting.species==1) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
       timber_vol_spruce_energy: cross_cutting.volume_per_ha[(cross_cutting.species==2) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
       timber_vol_birch_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
-  calculate_npv: 
+  report_period:
+    - overall_volume: cross_cutting.volume_per_ha
+  calculate_npv:
     - interest_rates: [1,2,3,4,5] # list of integers, '3' meaning 3%
-     
+
 preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
@@ -80,6 +82,7 @@ operation_file_params:
   clearcutting:
     clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt  
     clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt
+    clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
   planting: 
     planting_instructions: data/parameter_files/planting_instructions.txt
   calculate_npv:
@@ -121,6 +124,10 @@ simulation_events:
         #- grow_motti
         # requires fhk dependencies from fhk-requirements.txt
         #- grow_fhk
+  - time_points:  [2030, 2040, 2050, 2060]
+    generators:
+      - sequence:
+        - report_period
 
 post_processing:
   operation_params:
@@ -140,6 +147,6 @@ export:
     xvariables:
       - Ftot
       - Fpine
-      - int(site_type_category < 7) * sum(Fbirch)
+      - 0 if site_type_category is None else int(site_type_category < 7) * sum(Fbirch)
   - format: rm_schedules_events_timber
     filename: timber_sums.txt
