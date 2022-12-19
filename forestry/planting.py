@@ -115,7 +115,7 @@ def plant(
         "renewal", 
         [
             PriceableOperationInfo(
-                operation_name="planting",
+                operation="planting",
                 units=stand.area, #TODO: planting may not be priced per hectare 
                 time_point=aggr.current_time_point,
                 )
@@ -131,8 +131,8 @@ def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[F
     """
     stand, simulation_aggregates = payload
 
-    if len(stand.reference_trees)>0: 
-        raise UserWarning("No planting needed")
+    if len(stand.reference_trees)> 0: 
+        return payload 
     
     instructions_path = operation_parameters.get('renewal_instructions', None)
     regen = get_planting_instructions(stand.site_type_category, instructions_path)
