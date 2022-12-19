@@ -5,7 +5,7 @@ from sim.core_types import AggregatedResults
 from forestry.cross_cutting import CrossCutResult
 from forestry.renewal import PriceableOperationInfo
 from forestdatamodel.enums.internal import TreeSpecies
-from forestry.utils import get_land_values_as_dict, get_renewal_costs_as_dict
+from forestry.utils.file_io import get_land_values_as_dict, get_renewal_costs_as_dict
 
 class NPVTest(unittest.TestCase):
 

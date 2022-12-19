@@ -68,7 +68,7 @@ preprocessing_params:
     - n_trees: 10
   filter:
     - remove trees: sapling or stems_per_ha == 0
-      remove: not reference_trees
+      remove stands: site_type_category == 0 #not reference_trees
 
 preprocessing_operations:
   - generate_reference_trees # reference trees from strata, replaces existing reference trees
@@ -82,9 +82,10 @@ operation_file_params:
   cross_cut_standing_trees:
     timber_price_table: data/parameter_files/timber_price_table.csv
   clearcutting:
-    clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt
+    clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt  
     clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt
-    clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
+  planting: 
+    planting_instructions: data/parameter_files/planting_instructions.txt
   calculate_npv:
     land_values: data/parameter_files/land_values_per_site_type_and_interest_rate.json
     renewal_costs: data/parameter_files/renewal_operation_pricing.csv
@@ -108,9 +109,10 @@ simulation_events:
         #- thinning_from_above
         - first_thinning
         - even_thinning
+        - planting
         - sequence:
           - clearcutting
-          - do_nothing
+          - planting
           # operations for renewal after clearcutting go here
       - sequence:
           - cross_cut_felled_trees
