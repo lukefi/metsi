@@ -13,7 +13,7 @@ class PlantingTest(unittest.TestCase):
         stand.site_type_category = 3
         stand.identifier = '1001'
         regen = plnt.get_planting_instructions(stand.site_type_category, 'tests/resources/planting_test/planting_instructions.txt')
-        (stand, output) = plnt.plant(stand,simulation_aggregates, "regeneration",regen_species = regen['species'], rt_count = 10, rt_stems= regen['stems/ha'], 
+        (stand, output) = plnt.plant(stand,simulation_aggregates, "regeneration",regen_species = TreeSpecies(regen['species']), rt_count = 10, rt_stems= regen['stems/ha'],
             soil_preparation=regen['soil preparation'])
         self.assertEqual(220,stand.reference_trees[-1].stems_per_ha)
         self.assertEqual(SoilPreparationKey.PATCH_MOUNDING, output.prev("regeneration")['soil preparation'])
