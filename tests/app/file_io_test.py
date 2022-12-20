@@ -159,7 +159,7 @@ class TestFileReading(unittest.TestCase):
             state_input_container=""
         )
         stands = app.file_io.read_stands_from_file(config)
-        self.assertEqual(len(stands), 3)
+        self.assertEqual(len(stands), 2)
 
     def test_read_schedule_payload_from_directory(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory/0-023-002-02-1/1")
