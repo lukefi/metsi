@@ -158,7 +158,7 @@ def report_overall_removal(payload: OpTuple, **operation_parameters) -> OpTuple:
         if thinning_aggregates is None:
             new_aggregate = 0.0
         else:
-            new_aggregate = sum(y.stems_to_cut_per_ha for y in thinning_aggregates)
+            new_aggregate = sum(y.stems_per_ha for y in thinning_aggregates)
         report_removal_collection[tag] = new_aggregate
     simulation_aggregates.store('report_overall_removal', report_removal_collection)
     return payload
