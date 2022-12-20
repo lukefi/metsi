@@ -284,6 +284,36 @@ See table below for a quick reference of forestry operations usable in control.y
 | cross_cut_standing_trees     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 | [calculate_npv](#calculate_npv)           | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs.    |                 | native
 
+
+### report_biomass
+
+Compute total biomass tonnages of a single forest stand.
+
+#### **parameters**
+| parameter name        | type | location in control.yaml   | notes          |
+|-----------------------|------|----------------------------|----------------|
+| model_set             | int | operation_params            | accepted values: 1 and 2 |
+
+#### **additional information**
+
+- model_set accepts following values 1 and 2
+  - if value is 1 wood, bark, living and dead branches, foliage, stumps and roots are collected
+  with model set Y
+  - if value is 2 wood, bark, living and dead branches, foliage, stumps and roots are collected with model set X
+
+#### **output**
+Attributes of the BiomassData object
+| attribute name        | type |
+|-----------------------|------|
+| stem_wood       | float |
+| stem_bark       | float |
+| stem_waste      | float |
+| living_branches | float |
+| dead_branches   | float |
+| foliage         | float |
+| stumps          | float |
+| roots           | float |
+
 ### calculate_npv
 
 Calculates the Net Present Value (NPV) of a given schedule.
