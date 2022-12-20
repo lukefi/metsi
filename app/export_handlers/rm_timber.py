@@ -4,6 +4,7 @@ from app.file_io import row_writer
 
 
 def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
+    """Create rows for events in a single schedule"""
     retval = []
     timber_events = derived_data.get('report_state')
     standing_tree_data = derived_data.get('collect_standing_tree_properties')
@@ -30,6 +31,7 @@ def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
 
 
 def collect_timber_data_for_year(report: dict, year: int) -> list[dict]:
+    """Compose collection objects for timber volume details"""
     retval = []
     stock = list(report.values())[0:8]
     stocksum = sum(stock)
@@ -44,7 +46,15 @@ def collect_timber_data_for_year(report: dict, year: int) -> list[dict]:
     return retval
 
 
-def prepare_schedule_content(data: SimResults, data_source: str) -> list[str]:
+def prepare_schedules_file_content(data: SimResults, data_source: str) -> list[str]:
+    """
+    Create the content rows for Reijo Mykkänen output files for all stands divided into schedules and state/node/event
+    years within.
+
+    :param data: SimResults package
+    :param data_source: "trees" for standing/harvested tree variables content, "timber" for standing/harvested timber volume content
+    :return: list of strings representing file rows
+    """
     output_rows = []
     for stand_id, payload in data.items():
         output_rows.append(f"Stand {stand_id} Area {payload[0].simulation_state.area}")
@@ -59,11 +69,11 @@ def prepare_schedule_content(data: SimResults, data_source: str) -> list[str]:
 
 def rm_schedules_events_timber(filepath: Path, data: SimResults):
     """Produce output file collecting state and event year timber volumes for all schedules and stands"""
-    content = prepare_schedule_content(data, "timber")
+    content = prepare_schedules_file_content(data, "timber")
     row_writer(filepath, content)
 
 
 def rm_schedules_events_trees(filepath: Path, data: SimResults):
-    """Produce output file collecting state and event year timber volumes for all schedules and stands"""
-    content = prepare_schedule_content(data, "trees")
+    """Produce output file collecting state and event year tree parameters for all schedules and stands"""
+    content = prepare_schedules_file_content(data, "trees")
     row_writer(filepath, content)
