@@ -353,14 +353,53 @@ Attributes of the BiomassData object
 | stumps          | float |
 | roots           | float |
 
-
 ### cross_cut_felled_trees
 
-Calcualtes the overall volume and price of harvested stock.
+Calculates the volume and value of harvested trees using Annika Kangas' cross cutting algorithm. Whenever this operation is called, it cross cuts all thinning and clearcutting results that have been produced before it, but have not yet been cross cut. Given this, it is enough to call this operation once before cross cutting results are needed. 
+
+#### **additional information**
+The `time_point` attribute of the resulting CrossCutResult objects will be determined by the tree's havest year, not the year when this operation is called.
+#### **parameters**
+| parameter name        | type       | location in control.yaml   | notes          |
+|-----------------------|------------|----------------------------|----------------|
+| timber_price_table    | file (csv) |   operation_file_params    | timber grades must be given as integers  |
+
+
+#### **output**
+Attributes of the CrossCutResult object
+| attribute name      | type |
+|---------------------|------|
+|   species           | TreeSpecies    | 
+|   timber_grade      | int |
+|   volume_per_ha     | float |
+|   value_per_ha      | float |
+|   stand_area        | float |
+|   source            | str (either "felled" or "standing") |
+|   operation         | str |
+|   time_point        | int |
 
 ### cross_cut_standing_trees
 
-Calculates the overall volume and price of standing stock.
+Calculates the volume and value of standing trees using Annika Kangas' cross cutting algorithm at the time of the operation call. This operation does not actually harvest the stand, but rather evaluates the the volume and value of its trees if they were cross cut. Therefore, this operation is different from [clearcutting](###clearcutting).
+
+#### **parameters**
+| parameter name        | type       | location in control.yaml   | notes          |
+|-----------------------|------------|----------------------------|----------------|
+| timber_price_table    | file (csv) |   operation_file_params    | timber grades must be given as integers  |
+
+
+#### **output**
+Attributes of the CrossCutResult object
+| attribute name      | type |
+|---------------------|------|
+|   species           | TreeSpecies    | 
+|   timber_grade      | int |
+|   volume_per_ha     | float |
+|   value_per_ha      | float |
+|   stand_area        | float |
+|   source            | str (either "felled" or "standing") |
+|   operation         | str |
+|   time_point        | int |
 
 ### calculate_npv
 
