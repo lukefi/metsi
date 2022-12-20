@@ -27,7 +27,7 @@ class CrossCutResult:
 
 @dataclass
 class CrossCuttableTree:
-    stems_to_cut_per_ha: float
+    stems_per_ha: float
     species: TreeSpecies
     breast_height_diameter: float
     height: float
@@ -99,7 +99,7 @@ def cross_cut_tree(
     res = _create_cross_cut_results(
                         stand_area,
                         tree.species,
-                        tree.stems_to_cut_per_ha,
+                        tree.stems_per_ha,
                         unique_timber_grades,
                         volumes,
                         values,

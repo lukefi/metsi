@@ -21,7 +21,7 @@ class CrossCuttingTest(unittest.TestCase):
                 operation_results={
                     "felled_trees": [
                         CrossCuttableTree(
-                                stems_to_cut_per_ha = 0.006261167484111818,
+                                stems_per_ha= 0.006261167484111818,
                                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                 breast_height_diameter = 15.57254199723247,
                                 height = 18.293846547993535,
@@ -31,7 +31,7 @@ class CrossCuttingTest(unittest.TestCase):
                                 cross_cut_done=True
                         ),
                         CrossCuttableTree(
-                                stems_to_cut_per_ha = 0.006261167484111818,
+                                stems_per_ha= 0.006261167484111818,
                                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                 breast_height_diameter = 15.57254199723247,
                                 height = 18.293846547993535,
@@ -69,7 +69,7 @@ class CrossCuttingTest(unittest.TestCase):
             AggregatedResults(
                 operation_results={
                     "felled_trees": [CrossCuttableTree(
-                                    stems_to_cut_per_ha = 0.006261167484111818,
+                                    stems_per_ha= 0.006261167484111818,
                                     species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                     breast_height_diameter = 15.57254199723247,
                                     height = 18.293846547993535,
@@ -89,7 +89,7 @@ class CrossCuttingTest(unittest.TestCase):
         # after the first cross cutting (above), add new thinning results, which need to be cross cut
         aggrs.operation_results["felled_trees"].append(
             CrossCuttableTree(
-                stems_to_cut_per_ha = 0.006261167484111818,
+                stems_per_ha= 0.006261167484111818,
                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                 breast_height_diameter = 15.57254199723247,
                 height = 18.293846547993535,
@@ -181,7 +181,7 @@ class CrossCuttingTest(unittest.TestCase):
         stand_area = 1.93
         thinned_trees = [
                             CrossCuttableTree(
-                                stems_to_cut_per_ha = 0.006261167484111818,
+                                stems_per_ha= 0.006261167484111818,
                                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                 breast_height_diameter = 15.57254199723247,
                                 height = 18.293846547993535,
@@ -190,7 +190,7 @@ class CrossCuttingTest(unittest.TestCase):
                                 time_point=0
                             ),
                             CrossCuttableTree(
-                                stems_to_cut_per_ha = 0.003917869416142222,
+                                stems_per_ha= 0.003917869416142222,
                                 species = TreeSpecies.PINE,
                                 breast_height_diameter = 16.071397406682646,
                                 height = 23.617432525999664,
@@ -199,7 +199,7 @@ class CrossCuttingTest(unittest.TestCase):
                                 time_point=0
                             ),
                             CrossCuttableTree(
-                                stems_to_cut_per_ha = 0.008092431491823593,
+                                stems_per_ha= 0.008092431491823593,
                                 species = TreeSpecies.SPRUCE,
                                 breast_height_diameter = 17.721245087039236,
                                 height = 16.353742669109522,
@@ -221,7 +221,7 @@ class CrossCuttingTest(unittest.TestCase):
         stand_area = 1.93
         thinning_output = [
                             CrossCuttableTree(
-                                stems_to_cut_per_ha = 0.006261167484111818,
+                                stems_per_ha= 0.006261167484111818,
                                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
                                 breast_height_diameter = 15.57254199723247,
                                 height = 18.293846547993535,
@@ -230,7 +230,7 @@ class CrossCuttingTest(unittest.TestCase):
                                 time_point=0
                             ),
                             CrossCuttableTree(
-                                stems_to_cut_per_ha = 0.003917869416142222,
+                                stems_per_ha= 0.003917869416142222,
                                 species = TreeSpecies.PINE,
                                 breast_height_diameter = 16.071397406682646,
                                 height = 23.617432525999664,
@@ -239,7 +239,7 @@ class CrossCuttingTest(unittest.TestCase):
                                 time_point=0
                             ),
                             CrossCuttableTree(
-                                stems_to_cut_per_ha = 0.008092431491823593,
+                                stems_per_ha= 0.008092431491823593,
                                 species = TreeSpecies.SPRUCE,
                                 breast_height_diameter = 17.721245087039236,
                                 height = 16.353742669109522,
@@ -276,7 +276,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
         self.assertEqual(res[0].species, TreeSpecies.PINE)
         self.assertEqual(res[0].breast_height_diameter, 45.678)
         self.assertEqual(res[0].height, 28.43)
-        self.assertAlmostEqual(res[0].stems_to_cut_per_ha, 22.3, places=6)
+        self.assertAlmostEqual(res[0].stems_per_ha, 22.3, places=6)
 
 
     def test_modifying_cross_cut_done_attribute_does_not_modify_other_branch_results(self):
@@ -294,7 +294,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
                 {
                     "felled_trees": [
                         CrossCuttableTree(
-                            stems_to_cut_per_ha = 0.008092431491823593,
+                            stems_per_ha= 0.008092431491823593,
                             species = TreeSpecies.SPRUCE,
                             breast_height_diameter = 17.721245087039236,
                             height = 16.353742669109522,

@@ -63,7 +63,7 @@ class ClearcuttingTest(unittest.TestCase):
         stand = self.generate_stand_fixture()
         simulation_aggregates = AggregatedResults()
         stand, simulation_aggregates = clearcut._clearcut_with_output(stand,simulation_aggregates,'clearcutting')
-        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha)
+        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_per_ha)
         self.assertEqual("clearcutting", simulation_aggregates.get_list_result("felled_trees")[-1].operation)
         self.assertEqual(33.0,simulation_aggregates.get_list_result("felled_trees")[-1].height)
     
@@ -75,4 +75,4 @@ class ClearcuttingTest(unittest.TestCase):
         stand, aggr = clearcut.clearcutting(oper_input, **operation_parameters)
         self.assertEqual(0, futil.overall_stems_per_ha(stand.reference_trees))
         self.assertEqual(0, futil.mean_age_stand(stand))
-        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha)
+        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_per_ha)
