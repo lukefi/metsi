@@ -33,7 +33,7 @@ def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
 def collect_timber_data_for_year(report: dict, year: int) -> list[dict]:
     """Compose collection objects for timber volume details"""
     retval = []
-    stock = list(report.values())[0:8]
+    stock = list(report.values())[0:9]
     stocksum = sum(stock)
     timber = list(report.values())[9:18]
     timbersum = sum(timber)
