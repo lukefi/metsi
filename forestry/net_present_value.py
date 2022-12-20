@@ -52,8 +52,8 @@ def _calculate_npv_for_rate(
     int_r: int
     ) -> float:
     
-    cc_results = simulation_aggregates.get("cross_cutting")
-    renewal_results = simulation_aggregates.get("renewal")
+    cc_results = simulation_aggregates.get_list_result("cross_cutting")
+    renewal_results = simulation_aggregates.get_list_result("renewal")
     current_time_point = simulation_aggregates.current_time_point
     initial_time_point = simulation_aggregates.initial_time_point
 
