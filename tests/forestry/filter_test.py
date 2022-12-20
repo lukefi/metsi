@@ -1,5 +1,5 @@
 import unittest
-from forestry.filter import applyfilter
+from forestry.utils.filter import applyfilter
 from forestdatamodel.model import ForestStand, ReferenceTree, TreeSpecies, TreeStratum
 
 from forestry.pre_ops import preproc_filter

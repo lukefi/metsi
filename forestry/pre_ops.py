@@ -2,7 +2,7 @@ from forestdatamodel.model import ForestStand
 from forestryfunctions.preprocessing import tree_generation, pre_util
 from forestryfunctions.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from forestryfunctions.preprocessing.naslund import naslund_height
-from forestry.filter import applyfilter
+from forestry.utils.filter import applyfilter
 
 
 def preproc_filter(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
