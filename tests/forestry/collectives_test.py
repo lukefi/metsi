@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 import unittest
-from forestry.collectives import CollectibleNDArray, autocollective, collect_all, compile, getvarfn
+from forestry.utils.collectives import CollectibleNDArray, autocollective, collect_all, compile, getvarfn
 import numpy as np
 
 

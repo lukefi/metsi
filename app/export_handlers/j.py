@@ -5,7 +5,7 @@ from typing import TypeVar, Generic, Any, Union, Iterator, IO
 
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults
-from forestry.collectives import CollectFn, GetVarFn, compile, getvarfn, autocollective
+from forestry.utils.collectives import CollectFn, GetVarFn, compile, getvarfn, autocollective
 from sim.core_types import OperationPayload
 
 T = TypeVar("T")

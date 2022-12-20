@@ -1,5 +1,5 @@
 import unittest
-import forestry.net_present_value as npv
+import forestry.data_collection.net_present_value as npv
 from forestdatamodel.model import ForestStand
 from sim.core_types import AggregatedResults
 from forestry.types import CrossCutResult, PriceableOperationInfo

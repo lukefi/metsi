@@ -1,7 +1,10 @@
 import math
+from itertools import repeat
+
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
-from forestry.types import BiomassData
+from forestry.types import BiomassData, BiomassAggregate
+from sim.core_types import OpTuple
 
 
 # Sources
@@ -370,3 +373,25 @@ def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, 
         fn = tree_biomass if tree.height >= 1.3 else small_tree_biomass
         biomasses.append(fn(tree, stand, treevolumes[i], wastevolumes[i], models) * tree.stems_per_ha)
     return sum(biomasses)
+
+
+def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
+    """For the given ForestStand, this operation computes and stores the current biomass tonnage and difference to last
+    calculation into the aggregate structure."""
+    stand, aggregates = input
+    models = operation_params.get('model_set', 1)
+
+    # TODO: need proper functionality to find tree volumes, model_set 2
+    volumes = list(repeat(100.0, len(stand.reference_trees)))
+    # TODO: need proper functionality to find waste volumes, model_set 2
+    wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
+
+    biomass = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
+    prev = aggregates.prev('report_biomass')
+    aggregates.store(
+        'report_biomass',
+        BiomassAggregate.initial(biomass) if prev is None
+        else BiomassAggregate.from_prev(prev, biomass)
+    )
+
+    return input

@@ -1,5 +1,5 @@
 import unittest
-from forestry.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
+from forestry.data_collection.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
 from forestry.types import CrossCutResult, CrossCuttableTree
 from sim.core_types import AggregatedResults, OperationPayload, Step
 from forestdatamodel.model import ForestStand, ReferenceTree

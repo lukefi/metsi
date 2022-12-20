@@ -2,9 +2,7 @@ import unittest
 
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
-import pandas as pd
-import forestry.biomass_repola as biomass
-import os
+import forestry.data_collection.biomass_repola as biomass
 
 import forestry.types
 

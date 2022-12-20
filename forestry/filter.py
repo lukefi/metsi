@@ -1,6 +1,6 @@
 from typing import Any, Literal
 from forestdatamodel.model import ForestStand
-from forestry.collectives import GetVarFn, compile, getvarfn
+from forestry.utils.collectives import GetVarFn, compile, getvarfn
 
 Verb = Literal["select", "remove"]
 Object = Literal["stands", "trees", "strata"]
