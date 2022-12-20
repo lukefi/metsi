@@ -1,6 +1,6 @@
 
 import unittest
-import forestry.preprocessing as preprocessing
+import forestry.pre_ops as preprocessing
 from forestdatamodel.model import ForestStand, ReferenceTree, TreeStratum
 from forestdatamodel.enums.internal import TreeSpecies
 

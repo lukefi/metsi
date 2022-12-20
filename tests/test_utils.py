@@ -9,8 +9,7 @@ import numpy as np
 import yaml
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
-
-from forestry.preprocessing import compute_location_metadata
+from forestry.pre_ops import compute_location_metadata
 from sim.core_types import OpTuple, OperationPayload
 
 

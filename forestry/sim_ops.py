@@ -37,7 +37,7 @@ def try_register(mod: str, func: str):
     except ImportError:
         pass
 
-# only register grow_motti or grow_fhk when pymotti is installed
 
+# only register grow_motti or grow_fhk when pymotti is installed
 try_register("forestry.natural_processes.grow_motti", "grow_motti")
 try_register("forestry.natural_processes.grow_fhk", "grow_fhk")

@@ -1,7 +1,7 @@
 import os
 import queue
 import multiprocessing
-import forestry.operations
+import forestry.sim_ops
 import sim.generators
 from app.app_io import Mela2Configuration
 from app.app_types import ForestOpPayload
@@ -85,7 +85,7 @@ def resolve_strategy_runner(source: str) -> StrategyRunner[ForestOpPayload]:
 
 def simulate_alternatives(config: Mela2Configuration, control, stands: StandList):
     simconfig = SimConfiguration(
-        operation_lookup=forestry.operations.operation_lookup,
+        operation_lookup=forestry.sim_ops.operation_lookup,
         generator_lookup=sim.generators.GENERATOR_LOOKUP,
         **control)
     strategy_runner = resolve_strategy_runner(config.strategy)

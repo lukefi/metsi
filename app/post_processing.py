@@ -1,6 +1,6 @@
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults
-from forestry.operations import operation_lookup
+from forestry.post_ops import operation_lookup
 from sim.core_types import OperationPayload
 from sim.generators import simple_processable_chain
 from sim.runners import evaluate_sequence
