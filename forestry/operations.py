@@ -109,7 +109,7 @@ def property_collector(objects: list[object], properties: list[str]) -> list[lis
 
 def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     stand, aggr = input
-    tag = operation_parameters.get('tag', 'collect_properties')
+    output_name = operation_parameters.get('output_name', 'collect_properties')
     result_rows = []
     if not len(operation_parameters):
         return input
@@ -126,16 +126,21 @@ def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> O
         elif key == "stratum":
             objects = stand.tree_strata
         else:
-            objects = aggr.get_list_result(key)
+            objects = list(filter(lambda obj: obj.time_point == aggr.current_time_point, aggr.get_list_result(key)))
         collected = property_collector(objects, properties)
         result_rows.extend(collected)
-    aggr.store(tag, result_rows)
+    aggr.store(output_name, result_rows)
     return stand, aggr
 
 
 def collect_standing_tree_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     properties = operation_parameters.get("properties")
-    return collect_properties(input, tree=properties, tag="collect_standing_tree_properties")
+    return collect_properties(input, tree=properties, output_name="collect_standing_tree_properties")
+
+
+def collect_felled_tree_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+    properties = operation_parameters.get("properties")
+    return collect_properties(input, felled_trees=properties, output_name="collect_felled_tree_properties")
 
 
 def report_period(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
@@ -171,6 +176,7 @@ operation_lookup = {
     'report_state': report_state,
     'collect_properties': collect_properties,
     'collect_standing_tree_properties': collect_standing_tree_properties,
+    'collect_felled_tree_properties': collect_felled_tree_properties,
     'report_period': report_period,
     'calculate_npv': calculate_npv
 }

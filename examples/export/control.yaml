@@ -20,6 +20,9 @@ operation_params:
       e: 0.2
       dominant_height_lower_bound: 11
       dominant_height_upper_bound: 16
+  even_thinning:
+    - thinning_factor: 0.97
+      e: 0.2
   report_biomass:
     - model_set: 1
   report_collectives:
@@ -47,6 +50,8 @@ operation_params:
       timber_vol_birch_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
   collect_standing_tree_properties:
     - properties: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
+  collect_felled_tree_properties:
+    - properties: [stems_per_ha, species, breast_height_diameter, height]
 
 preprocessing_params:
   generate_reference_trees:
@@ -74,33 +79,31 @@ operation_file_params:
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
-  - time_points: [2020, 2025, 2030]
+  - time_points: [2020, 2025, 2035, 2040, 2045]
     generators:
       - sequence:
           - cross_cut_standing_trees
           - report_biomass
           - report_state
           - collect_standing_tree_properties
-  - time_points: [2030]
+  - time_points: [2030, 2050]
     generators:
       - sequence:
           - cross_cut_standing_trees
+          - collect_standing_tree_properties
       - alternatives:
           - do_nothing
-          # commented out to reduce the choices for default demo
-          #- thinning_from_below
-          #- thinning_from_above
-          - first_thinning
+          - even_thinning
           - sequence:
               - clearcutting
-              - do_nothing
+              - planting
             # operations for renewal after clearcutting go here
       - sequence:
           - cross_cut_felled_trees
+          - collect_felled_tree_properties
           - report_state
           - report_collectives
-          - collect_standing_tree_properties
-  - time_points: [2020, 2025] # Grow at the end to transition assumed +5 years forwards
+  - time_points: [2020, 2025, 2030, 2035, 2040, 2045] # Grow at the end to transition assumed +5 years forwards
     generators:
       - sequence:
           - grow_acta
