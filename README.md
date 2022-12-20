@@ -13,7 +13,7 @@ Prepared **operation chains** are generated from the step tree and are run with 
 
 To get started:
 
-* Install Python 3.10 for your platform. 
+* Install Python 3.10 for your platform.
 * Install git for your platform.
 * Ensure that the commands `python`, `pip` and `git` are available in your command line interface (CLI). We assume a UNIX-like shell CLI such as Git Bash for Windows users.
 * Initialize the project with the commands below.
@@ -200,7 +200,7 @@ CLI arguments override the settings in the control file.
 **TODO: at the time of writing this, there are no post-processing operations ready to be used. Post-processing will `do_nothing`**
 **TODO: at the time of writing this, export is not readily usable with the default control.yaml to produce proper output**
 
-All examples below default to `control.yaml` in the working directory as the control file source unless otherwise specified in the command line. 
+All examples below default to `control.yaml` in the working directory as the control file source unless otherwise specified in the command line.
 
 Preprocessing, simulation and post-processing phases do not produce output files by default.
 Configuration for preprocessing output container, state output container and derived data output container need to be set to produce output files.
@@ -335,7 +335,7 @@ Compute total biomass tonnages of a single forest stand.
 
 #### **additional information**
 
-- model_set accepts following values 1 and 2
+- model_set accepts following values 1, 2, 3 or 4
   - if value is 1 wood, bark, living and dead branches, foliage, stumps and roots are collected
   with model set Y
   - if value is 2 wood, bark, living and dead branches, foliage, stumps and roots are collected with model set X
@@ -365,7 +365,7 @@ Calculates the overall volume and price of standing stock.
 ### calculate_npv
 
 Calculates the Net Present Value (NPV) of a given schedule.
-#### **parameters** 
+#### **parameters**
 | parameter name        | type | location in control.yaml   | notes         |
 |-----------------------|------|----------------------------|---------------|
 | interest_rates        | list of int | operation_params    | e.g. [3], where 3 stands for 3% |
@@ -374,8 +374,8 @@ Calculates the Net Present Value (NPV) of a given schedule.
 
 
 #### **additional information**
-- This operation expects that ``cross_cut_felled_trees`` has been called previously to cross cut any previous thinning output. 
-- This operation expects that ``cross_cut_standing_trees`` has been called in the same time point, so that the present value of the standing trees can be evaluated correctly. 
+- This operation expects that ``cross_cut_felled_trees`` has been called previously to cross cut any previous thinning output.
+- This operation expects that ``cross_cut_standing_trees`` has been called in the same time point, so that the present value of the standing trees can be evaluated correctly.
 
 
 #### **formula**
@@ -395,7 +395,7 @@ where:
 
 - $a$ is the stand's area in hectares
 
-- $r$ is the interest rate 
+- $r$ is the interest rate
 
 - $S_T$ is the value of standing tree stock at the final time point $T$
 
@@ -410,7 +410,7 @@ where:
 
 (3) currently, costs originate only from renewal operations
 
-(4) Bare land values are passed in as a file parameter for the NPV operation. These values are already discounted with the given interest rate, so no discounting happens here. See MELA 2016 reference manual p.175-176 for more information about this. 
+(4) Bare land values are passed in as a file parameter for the NPV operation. These values are already discounted with the given interest rate, so no discounting happens here. See MELA 2016 reference manual p.175-176 for more information about this.
 ## Testing
 
 To run unit test suites, run in the project root
@@ -449,9 +449,9 @@ A run is declared in the YAML file `control.yaml`.
    2. `generators` is a list of chained generator functions (see section on step generators)
       1. `sequence` a list of operations to be executed as a chain
       2. `alternatives` a list of operations which represent alternative branches
-5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional) arguments under `preprocessing_params` as key-value pairs. 
-6. Operation parameters that **exist in files** can be passed in `operation_file_params` as demonstated below: 
-   ```yaml 
+5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional) arguments under `preprocessing_params` as key-value pairs.
+6. Operation parameters that **exist in files** can be passed in `operation_file_params` as demonstated below:
+   ```yaml
    operation_file_params:
      first_thinning:
        thinning_limits: /path/to/file/thinning-limits.txt
@@ -606,7 +606,7 @@ The generators are chainable and nestable such that they can expand the step tre
 The `NestableGenerator` represents a tree structure for nested generator declarations.
 It is constructed from the `simulation_events` structure given from a configuration source.
 A `SimConfiguration` structure, likewise populated from a configuration source is used as a template for binding the created generator functions with prepared domain operation functions.
-The control source is an application's `control.yaml` file's dict structure or another compatible source. 
+The control source is an application's `control.yaml` file's dict structure or another compatible source.
 
 `compose_nested` function executes the given `NestableGenerator` which in turn utilizes its prepared `sequence` and `alternatives` calls to build a complete simulation step tree.
 
