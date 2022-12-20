@@ -280,8 +280,8 @@ See table below for a quick reference of forestry operations usable in control.y
 | report_thinning           | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
 | report_collectives        | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
 | filter                    | [Filter](#filters) stands, trees and strata                                                    |                             | native                    |
-| cross_cut_felled_trees | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
-| cross_cut_standing_trees     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
+| [cross_cut_felled_trees](#cross_cut_felled_trees) | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
+| [cross_cut_standing_trees](#cross_cut_standing_trees)     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 | [calculate_npv](#calculate_npv)           | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs.    |                 | native
 
 ### thinning_from_below
@@ -310,7 +310,7 @@ Operation outputs a list of CrossCuttableTree objects
 Attributes of CrossCuttableTree object
 | attribute name        | description                                | type        |
 |-----------------------|--------------------------------------------|-------------|
-| stems_to_cut_per_ha   | number of removed stems                    | float       |
+| stems_per_ha          | number of removed stems                    | float       |
 | species               | tree species of removed reference tree     | TreeSpecies |
 | breast_height_diameter| trees diameter at breast height            | float       |
 | height                | trees height                               | float       |
@@ -380,7 +380,7 @@ Attributes of the CrossCutResult object
 
 ### cross_cut_standing_trees
 
-Calculates the volume and value of standing trees using Annika Kangas' cross cutting algorithm at the time of the operation call. This operation does not actually harvest the stand, but rather evaluates the the volume and value of its trees if they were cross cut. Therefore, this operation is different from [clearcutting](###clearcutting).
+Calculates the volume and value of standing trees using Annika Kangas' cross cutting algorithm at the time of the operation call. This operation does not actually harvest the stand, but rather evaluates the the volume and value of its trees if they were cross cut. Therefore, this operation is different from [clearcutting](#clearcutting).
 
 #### **parameters**
 | parameter name        | type       | location in control.yaml   | notes          |
