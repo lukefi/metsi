@@ -113,6 +113,10 @@ operation_file_params:
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
+  - time_points: [2020]
+    generators:
+      - sequence:
+          - planting
   - time_points: [2020, 2025, 2030, 2035, 2040, 2045, 2050]
     generators:
       - sequence:
@@ -130,7 +134,6 @@ simulation_events:
         #- thinning_from_above
         - first_thinning
         - even_thinning
-        - planting
         - sequence:
           - clearcutting
           - planting
