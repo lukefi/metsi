@@ -285,6 +285,39 @@ See table below for a quick reference of forestry operations usable in control.y
 | [calculate_npv](#calculate_npv)           | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs.    |                 | native
 
 
+### first_thinning
+
+Calculates removal based on stem count as bounds
+
+#### **parameters**
+| parameter name        | type | location in control.yaml   | notes               |
+|-----------------------|------|----------------------------|---------------------|
+| dominant_height_lower_bound | float | operation_params    |                     |
+| dominant_height_upper_bound | float | operation_params    |                     |
+| e                           | float | operation_params    | residue constant    |
+| thinning_factor             | float | operation_params    | removal intensity   |
+
+#### **output**
+
+Operation outputs a list of CrossCuttableTree objects
+
+Attributes of CrossCuttableTree object
+| attribute name        | description                                | type        |
+|-----------------------|--------------------------------------------|-------------|
+| stems_to_cut_per_ha   | number of removed stems                    | float       |
+| species               | tree species of removed reference tree     | TreeSpecies |
+| breast_height_diameter| trees diameter at breast height            | float       |
+| height                | trees height                               | float       |
+| source                | standing or harveste                       | string      |
+| operation             | operation that produced such output        | string      |
+| time_point            | time point of operation execution          | int         |
+| cross_cut_done        | cross cut operation executed               | bool       |
+
+#### **additional information**
+
+- parameter e is a residue constant so that the removal ratio would not go under the lower limit.
+  - For example e=0.2
+
 ### report_biomass
 
 Compute total biomass tonnages of a single forest stand.
