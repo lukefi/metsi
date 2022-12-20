@@ -37,9 +37,7 @@ def collect_timber_data_for_year(report: dict, year: int) -> list[dict]:
     timbersum = sum(timber)
     # TODO: At this moment we have no explicit flag to disambiguate the "State Year" from "Node before Event"
     stock_year_type = 'Node' if timbersum > 0 else 'State'
-    if stocksum > 0:
-        retval.append(
-            {'year': year, 'event_type': stock_year_type, 'total': stocksum, 'values': stock, 'source': 'Stock'})
+    retval.append({'year': year, 'event_type': stock_year_type, 'total': stocksum, 'values': stock, 'source': 'Stock'})
     if timbersum > 0:
         # TODO: at this moment we can't get the operation type from results
         retval.append({'year': year, 'event_type': 'Event', 'total': timbersum, 'values': timber, 'source': 'thinning'})
