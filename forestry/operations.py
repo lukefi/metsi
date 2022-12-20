@@ -48,9 +48,9 @@ def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[F
     stand, aggregates = input
     models = operation_params.get('model_set', 1)
 
-    # TODO: need proper functionality to find tree volumes, model_set 2 and 3 don't work properly otherwise
+    # TODO: need proper functionality to find tree volumes, model_set 2
     volumes = list(repeat(100.0, len(stand.reference_trees)))
-    # TODO: need proper functionality to find waste volumes, model_set 2 and 3 don't work properly otherwise
+    # TODO: need proper functionality to find waste volumes, model_set 2
     wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
 
     biomass = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
