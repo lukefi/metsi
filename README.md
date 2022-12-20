@@ -284,6 +284,12 @@ See table below for a quick reference of forestry operations usable in control.y
 | cross_cut_standing_trees     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 | [calculate_npv](#calculate_npv)           | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs.    |                 | native
 
+### thinning_from_below
+
+
+
+### thinning_from_above
+
 
 ### first_thinning
 
@@ -346,6 +352,15 @@ Attributes of the BiomassData object
 | foliage         | float |
 | stumps          | float |
 | roots           | float |
+
+
+### cross_cut_felled_trees
+
+Calcualtes the overall volume and price of harvested stock.
+
+### cross_cut_standing_trees
+
+Calculates the overall volume and price of standing stock.
 
 ### calculate_npv
 
