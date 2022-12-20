@@ -266,23 +266,21 @@ python -m app.mela2 -r export outdir outdir2 my_project/export_control.yaml
 
 See table below for a quick reference of forestry operations usable in control.yaml.
 
-| operation                 | description                                                                                    | source                      | model library             |
-|---------------------------|------------------------------------------------------------------------------------------------|-----------------------------|---------------------------|
-| do_nothing                | This operation is no-op utility operation to simulate rest                                     |                             | native                    |
-| grow_acta                 | A simple ReferenceTree diameter and height growth operation                                    | Acta Forestalia Fennica 163 | forestry-function-library |
-| grow_motti                | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.              | Luke Motti group            | pymotti                   |
-| grow_fhk                  | A growth operation using an arbitrary fhk graph.                                               |                             | native/forestry-function-library |
-| first_thinning            | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest        | Reijo Mykkänen              | forestry-function-library |
-| thinning_from_below       | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees | Reijo Mykkänen              | forestry-function-library |
-| thinning_from_above       | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees | Reijo Mykkänen              | forestry-function-library |
-| even_thinning             | An operation reducing the stem count of ReferenceTrees evenly regardless of tree size          | Reijo Mykkänen              | forestry-function-library |
-| report_volume             | Collect tree volume data from ForestStand state                                                |                             | native                    |
-| report_thinning           | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
-| report_collectives        | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
-| filter                    | [Filter](#filters) stands, trees and strata                                                    |                             | native                    |
-| cross_cut_felled_trees | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
-| cross_cut_standing_trees     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
-| [calculate_npv](#calculate_npv)           | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs.    |                 | native
+| operation                       | description                                                                                      | source                      | model library                    |
+|---------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------|----------------------------------|
+| do_nothing                      | This operation is no-op utility operation to simulate rest                                       |                             | native                           |
+| grow_acta                       | A simple ReferenceTree diameter and height growth operation                                      | Acta Forestalia Fennica 163 | forestry-function-library        |
+| grow_motti                      | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.                | Luke Motti group            | pymotti                          |
+| grow_fhk                        | grow_motti as a Lua + FHK graph implementation. Requires `pymotti`.                              |                             | native/forestry-function-library |
+| first_thinning                  | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest          | Reijo Mykkänen              | forestry-function-library        |
+| thinning_from_below             | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees   | Reijo Mykkänen              | forestry-function-library        |
+| thinning_from_above             | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees   | Reijo Mykkänen              | forestry-function-library        |
+| even_thinning                   | An operation reducing the stem count of ReferenceTrees evenly regardless of tree size            | Reijo Mykkänen              | forestry-function-library        |
+| report_collectives              | Save the values of [collective variables](#collective-variables)                                 |                             | native                           |
+| filter                          | [Filter](#filters) stands, trees and strata                                                      |                             | native                           |
+| cross_cut_felled_trees          | Perform cross cut operation to results of previous thinning operations                           | Annika Kangas               | forestry-function-library        |
+| cross_cut_standing_trees        | Perform cross cut operation to all standing trees on a stand                                     | Annika Kangas               | forestry-function-library        |
+| [calculate_npv](#calculate_npv) | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs. |                             | native                           |
 
 ### calculate_npv
 
@@ -600,6 +598,8 @@ A solution that doesn't require breaking functional purity can most certainly be
 * Coordinate with simulator creators about the parameters names and structures that can be passed from control.yaml file.
 
 ### Using R functions
+
+TODO: this section is no longer current and will need to be rewritten when a new implementation for R wrapping is made. report_volume no longer exists and the R codes are in forestry-function-library.
 
 To run operations using the R functions you need R available in the local environment.
 You must additionally install the Python `rpy2` package for the necessary API.

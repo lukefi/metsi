@@ -1,13 +1,10 @@
 from enum import Enum
 from importlib import import_module
 from itertools import repeat
-from functools import reduce, cache
+from functools import cache
 from typing import Any
-
 from forestdatamodel.model import ForestStand
-from forestry.types import BiomassAggregate, VolumeAggregate
-from forestryfunctions import forestry_utils as futil
-from forestryfunctions.r_utils import lmfor_volume
+from forestry.types import BiomassAggregate
 from forestry.biomass_repola import biomasses_by_component_stand
 from forestry.cross_cutting import cross_cut_felled_trees, cross_cut_standing_trees
 from forestry.natural_processes.grow_acta import grow_acta
@@ -19,28 +16,6 @@ from sim.operations import T
 from forestry.net_present_value import calculate_npv
 from forestry.forestry_operations.clearcut import clearcutting
 from forestry.forestry_operations.planting import planting
-
-
-def compute_volume(stand: ForestStand) -> float:
-    """Debug level function. Does not reflect any real usable model computation.
-
-    Return the sum of the product of basal area and height for all reference trees in the stand"""
-    return reduce(lambda acc, cur: futil.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
-
-
-def report_volume(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = payload
-    volume_function = compute_volume
-    if operation_parameters.get('lmfor_volume'):
-        volume_function = lmfor_volume
-    result = volume_function(stand)
-    prev = simulation_aggregates.prev('report_volume')
-    simulation_aggregates.store(
-        'report_volume',
-        VolumeAggregate.initial(result) if prev is None
-        else VolumeAggregate.from_prev(prev, result),
-    )
-    return payload
 
 
 def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
@@ -169,7 +144,6 @@ operation_lookup = {
     'planting': planting,
     'clearcutting': clearcutting,
     'report_biomass': report_biomass,
-    'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
     'cross_cut_felled_trees': cross_cut_felled_trees,
     'cross_cut_standing_trees': cross_cut_standing_trees,
