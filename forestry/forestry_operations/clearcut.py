@@ -1,5 +1,5 @@
 from forestdatamodel.model import ForestStand
-from forestry.clearcutting_limits import *
+from forestry.forestry_operations.clearcutting_limits import *
 from forestryfunctions import forestry_utils as futil
 import enum
 from forestry.cross_cutting import CrossCuttableTree

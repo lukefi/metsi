@@ -11,14 +11,14 @@ from forestryfunctions.r_utils import lmfor_volume
 from forestry.biomass_repola import biomasses_by_component_stand
 from forestry.cross_cutting import cross_cut_felled_trees, cross_cut_standing_trees
 from forestry.natural_processes.grow_acta import grow_acta
-from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
+from forestry.forestry_operations.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
 from forestry.collectives import autocollective, getvarfn, collect_all
 from sim.core_types import OpTuple
 from sim.operations import T
 from forestry.net_present_value import calculate_npv
-from forestry.clearcut import clearcutting
-from forestry.planting import planting
+from forestry.forestry_operations.clearcut import clearcutting
+from forestry.forestry_operations.planting import planting
 
 
 def compute_volume(stand: ForestStand) -> float:

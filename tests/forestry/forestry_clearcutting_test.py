@@ -1,12 +1,12 @@
 import unittest
 from forestdatamodel.model import ReferenceTree,ForestStand
-import forestry.clearcutting_limits as clearcutting_lim
-import forestry.clearcut as clearcut
+import forestry.forestry_operations.clearcutting_limits as clearcutting_lim
+import forestry.forestry_operations.clearcut as clearcut
 from forestryfunctions import forestry_utils as futil
 from forestdatamodel.enums.internal import TreeSpecies
-from forestry.thinning_limits import SpeciesKey
+from forestry.forestry_operations.thinning_limits import SpeciesKey
 from sim.core_types import AggregatedResults
-import forestry.planting as plnt 
+import forestry.forestry_operations.planting as plnt
 from forestry.utils.enums import SiteTypeKey
 
 class ClearcuttingTest(unittest.TestCase):

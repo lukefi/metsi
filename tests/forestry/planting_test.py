@@ -3,7 +3,7 @@ import unittest
 from forestdatamodel.model import ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
 from sim.core_types import AggregatedResults
-import forestry.planting as plnt 
+import forestry.forestry_operations.planting as plnt
 from forestry.utils.enums import SoilPreparationKey
 
 class PlantingTest(unittest.TestCase):

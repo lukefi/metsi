@@ -4,7 +4,7 @@ from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
 from forestry.utils.conversion import site_type_to_key
-from forestry.renewal import PriceableOperationInfo
+from forestry.forestry_operations.renewal import PriceableOperationInfo
 
 DEFAULT_INSTRUCTIONS = {
         SiteTypeKey.OMT: {

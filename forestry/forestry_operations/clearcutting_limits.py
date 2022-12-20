@@ -14,7 +14,7 @@ from typing import List, Tuple
 from forestdatamodel.model import ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
 from forestryfunctions import forestry_utils as futil
-from forestry.thinning_limits import SiteTypeKey,SpeciesKey,site_type_to_key
+from forestry.forestry_operations.thinning_limits import SiteTypeKey, SpeciesKey, site_type_to_key
 
 RENEWAL_DIAMETERS = {
         SiteTypeKey.OMT: {

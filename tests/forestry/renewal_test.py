@@ -1,7 +1,7 @@
 from copy import deepcopy
 import unittest
 from forestdatamodel.model import ForestStand
-from forestry.renewal import *
+from forestry.forestry_operations.renewal import *
 
 from sim.core_types import AggregatedResults
 
