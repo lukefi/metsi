@@ -69,6 +69,9 @@ def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
     res = _collector_wrapper(
         collectives,
         lambda name: autocollective(getattr(state, name)),
+        lambda name: autocollective(
+            aggr.operation_results[name],
+            time_point=[aggr.current_time_point]),
         state = state,
         aggr = aggr.operation_results,
         time = aggr.current_time_point
