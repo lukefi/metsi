@@ -1,12 +1,12 @@
 import unittest
 
-from forestry.grow_acta import grow_acta
-from forestry.grow_motti import grow_motti
+from forestry.natural_processes.grow_acta import grow_acta
+from forestry.natural_processes.grow_motti import grow_motti
 from tests.test_utils import prepare_growth_test_stand
 
 try:
     import fhk
-    from forestry.grow_fhk import grow_fhk
+    from forestry.natural_processes.grow_fhk import grow_fhk
 except ImportError:
     fhk = None
 

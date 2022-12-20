@@ -10,7 +10,7 @@ from forestryfunctions import forestry_utils as futil
 from forestryfunctions.r_utils import lmfor_volume
 from forestry.biomass_repola import biomasses_by_component_stand
 from forestry.cross_cutting import cross_cut_felled_trees, cross_cut_standing_trees
-from forestry.grow_acta import grow_acta
+from forestry.natural_processes.grow_acta import grow_acta
 from forestry.thinning import first_thinning, thinning_from_above, thinning_from_below, report_overall_removal, \
     even_thinning
 from forestry.collectives import autocollective, getvarfn, collect_all
@@ -190,11 +190,11 @@ def try_register(mod: str, func: str):
 
 # only register grow_motti when pymotti is installed
 
-try_register("forestry.grow_motti", "grow_motti")
+try_register("forestry.natural_processes.grow_motti", "grow_motti")
 
 # only register grow_fhk when fhk is installed
 
-try_register("forestry.grow_fhk", "grow_fhk")
+try_register("forestry.natural_processes.grow_fhk", "grow_fhk")
 
 
 def _collector_wrapper(operation_parameters, *aliases, **named_aliases) -> dict[str, Any]:
