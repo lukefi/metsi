@@ -248,13 +248,18 @@ def json_writer(filepath: Path, data: ObjectLike):
 
 
 def csv_writer(filepath: Path, data: StandList):
-    with open(filepath, 'w', newline='\n') as file:
-        file.writelines('\n'.join(stands_to_csv(data, ';')))
+    row_writer(filepath, stands_to_csv(data, ';'))
 
 
 def rsd_writer(filepath: Path, data: StandList):
+    row_writer(filepath, rsd_rows(data))
+
+
+def row_writer(filepath: Path, rows: list[str]):
     with open(filepath, 'w', newline='\n') as file:
-        file.writelines('\n'.join(rsd_rows(data)))
+        for row in rows:
+            file.write(row)
+            file.write('\n')
 
 
 def json_reader(file_path: str) -> ObjectLike:

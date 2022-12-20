@@ -140,7 +140,7 @@ def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[F
                                     stand,
                                     simulation_aggregates,
                                     "regeneration",
-                                    regen['species'],
+                                    TreeSpecies(regen['species']),
                                     10,
                                     regen['stems/ha'],
                                     regen['soil preparation']
