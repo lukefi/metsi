@@ -1,6 +1,6 @@
 from forestryfunctions.naturalprocess.grow_motti import MottiGrowthPredictor
 from forestdatamodel.model import ForestStand
-from forestry.utils.growth import update_stand_growth
+from forestry.natural_processes.util import update_stand_growth
 
 
 def grow_motti(input: tuple[ForestStand, None], **operation_parameters) -> tuple[ForestStand, None]:
