@@ -80,8 +80,10 @@ operation_params:
     - overall_volume: cross_cutting.volume_per_ha
   calculate_npv:
     - interest_rates: [1,2,3,4,5] # list of integers, '3' meaning 3%
-  collect_properties:
-    - tree: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
+  collect_standing_tree_properties:
+    - properties: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
+  collect_felled_tree_properties:
+    - properties: [stems_per_ha, species, breast_height_diameter, height]
 
 preprocessing_params:
   generate_reference_trees:
@@ -116,13 +118,12 @@ simulation_events:
     generators:
       - sequence:
           - cross_cut_standing_trees
+          - collect_standing_tree_properties
           - calculate_npv
           - report_biomass
           - report_state
   - time_points: [2030, 2050]
     generators:
-      - sequence:
-        - cross_cut_standing_trees
       - alternatives:
         - do_nothing
         # commented out to reduce the choices for default demo
@@ -139,7 +140,7 @@ simulation_events:
           - cross_cut_felled_trees
           - report_state
           - report_collectives
-          - collect_properties
+          - collect_felled_tree_properties
   - time_points:  [2030, 2040, 2050, 2060]
     generators:
       - sequence:
@@ -190,9 +191,7 @@ export:
       - total_harvest_value_2040
       - total_harvest_value_2050
       - total_harvest_value_2060
-
-
-
-
   - format: rm_schedules_events_timber
     filename: timber_sums.txt
+  - format: rm_schedules_events_trees
+    filename: trees.txt
