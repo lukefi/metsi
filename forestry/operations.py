@@ -1,3 +1,4 @@
+from enum import Enum
 from importlib import import_module
 from itertools import repeat
 from functools import reduce, cache
@@ -14,9 +15,11 @@ from forestry.thinning import first_thinning, thinning_from_above, thinning_from
     even_thinning
 from forestry.collectives import autocollective, getvarfn, collect_all
 from sim.core_types import OpTuple
-from forestry.clearcut import clearcutting_and_planting
 from sim.operations import T
 from forestry.net_present_value import calculate_npv
+from forestry.clearcut import clearcutting
+from forestry.planting import planting
+
 
 def compute_volume(stand: ForestStand) -> float:
     """Debug level function. Does not reflect any real usable model computation.
@@ -46,9 +49,9 @@ def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[F
     stand, aggregates = input
     models = operation_params.get('model_set', 1)
 
-    # TODO: need proper functionality to find tree volumes, model_set 2 and 3 don't work properly otherwise
+    # TODO: need proper functionality to find tree volumes, model_set 2
     volumes = list(repeat(100.0, len(stand.reference_trees)))
-    # TODO: need proper functionality to find waste volumes, model_set 2 and 3 don't work properly otherwise
+    # TODO: need proper functionality to find waste volumes, model_set 2
     wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
 
     biomass = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
@@ -67,6 +70,7 @@ def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
     res = _collector_wrapper(
         collectives,
         lambda name: autocollective(getattr(state, name)),
+        lambda name: autocollective(aggr.operation_results[name]),
         state = state,
         aggr = aggr.operation_results,
         time = aggr.current_time_point
@@ -83,10 +87,61 @@ def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T
         lambda name: autocollective(
             aggr.operation_results[name],
             time_point=[aggr.current_time_point]),
-        state = state
+        state=state
     )
     aggr.store('report_state', res)
     return input
+
+
+def property_collector(objects: list[object], properties: list[str]) -> list[list]:
+    result_rows = []
+    for o in objects:
+        row = []
+        for p in properties:
+            if not hasattr(o, p):
+                raise Exception(f"Unknown property {p} in {o.__class__}")
+            val = o.__getattribute__(p) or 0.0
+            if isinstance(val, Enum):
+                val = val.value
+            row.append(val)
+        result_rows.append(row)
+    return result_rows
+
+
+def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+    stand, aggr = input
+    output_name = operation_parameters.get('output_name', 'collect_properties')
+    result_rows = []
+    if not len(operation_parameters):
+        return input
+    for key, properties in operation_parameters.items():
+        objects: list[object]
+        if isinstance(properties, str):
+            properties = [properties]
+        elif not isinstance(properties, list):
+            raise Exception(f"Properties to collect must be a list of strings or a single string for {key}")
+        if key == "stand":
+            objects = [stand]
+        elif key == "tree":
+            objects = stand.reference_trees
+        elif key == "stratum":
+            objects = stand.tree_strata
+        else:
+            objects = list(filter(lambda obj: obj.time_point == aggr.current_time_point, aggr.get_list_result(key)))
+        collected = property_collector(objects, properties)
+        result_rows.extend(collected)
+    aggr.store(output_name, result_rows)
+    return stand, aggr
+
+
+def collect_standing_tree_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+    properties = operation_parameters.get("properties")
+    return collect_properties(input, tree=properties, output_name="collect_standing_tree_properties")
+
+
+def collect_felled_tree_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+    properties = operation_parameters.get("properties")
+    return collect_properties(input, felled_trees=properties, output_name="collect_felled_tree_properties")
 
 
 def report_period(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
@@ -111,8 +166,8 @@ operation_lookup = {
     'thinning_from_above': thinning_from_above,
     'first_thinning': first_thinning,
     'even_thinning': even_thinning,
-    #'clearcutting': clearcutting,
-    'clearcutting': clearcutting_and_planting,
+    'planting': planting,
+    'clearcutting': clearcutting,
     'report_biomass': report_biomass,
     'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
@@ -120,6 +175,9 @@ operation_lookup = {
     'cross_cut_standing_trees': cross_cut_standing_trees,
     'report_collectives': report_collectives,
     'report_state': report_state,
+    'collect_properties': collect_properties,
+    'collect_standing_tree_properties': collect_standing_tree_properties,
+    'collect_felled_tree_properties': collect_felled_tree_properties,
     'report_period': report_period,
     'calculate_npv': calculate_npv
 }

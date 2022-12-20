@@ -4,8 +4,10 @@ import forestry.clearcutting_limits as clearcutting_lim
 import forestry.clearcut as clearcut
 from forestryfunctions import forestry_utils as futil
 from forestdatamodel.enums.internal import TreeSpecies
-from forestry.thinning_limits import SiteTypeKey, SpeciesKey
+from forestry.thinning_limits import SpeciesKey
 from sim.core_types import AggregatedResults
+import forestry.planting as plnt 
+from forestry.utils.enums import SiteTypeKey
 
 class ClearcuttingTest(unittest.TestCase):
 
@@ -45,7 +47,7 @@ class ClearcuttingTest(unittest.TestCase):
         self.assertEqual(diameters[SiteTypeKey.CT][SpeciesKey.PINE],22.0)
     
     def test_get_regeneration_instructions_dict(self):
-        instructions = clearcutting_lim.get_clearcutting_instructions_from_parameter_file_contents('data/parameter_files/clearcut_instructions.txt')
+        instructions = plnt.get_planting_instructions_from_parameter_file_contents('tests/resources/planting_test/planting_instructions.txt')
         self.assertEqual(instructions[SiteTypeKey.OMT]["species"],2)
 
     def test_get_clearcutting_limits(self):
@@ -60,48 +62,17 @@ class ClearcuttingTest(unittest.TestCase):
     def test_clearcut_with_output(self):
         stand = self.generate_stand_fixture()
         simulation_aggregates = AggregatedResults()
-        stand, simulation_aggregates = clearcut.clearcut_with_output(stand,simulation_aggregates,'clearcutting')
-        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha)
+        stand, simulation_aggregates = clearcut._clearcut_with_output(stand,simulation_aggregates,'clearcutting')
+        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_per_ha)
         self.assertEqual("clearcutting", simulation_aggregates.get_list_result("felled_trees")[-1].operation)
         self.assertEqual(33.0,simulation_aggregates.get_list_result("felled_trees")[-1].height)
     
     def test_clearcutting(self):
         stand = self.generate_stand_fixture()
-        operation_parameters = {'clearcutting_limits_ages': 'data/parameter_files/renewal_ages_southernFI.txt','clearcutting_limits_diameters':'data/parameter_files/renewal_diameters_southernFI.txt',
-        'clearcutting_instructions':'data/parameter_files/clearcut_instructions.txt'}
+        operation_parameters = {'clearcutting_limits_ages': 'data/parameter_files/renewal_ages_southernFI.txt','clearcutting_limits_diameters':'data/parameter_files/renewal_diameters_southernFI.txt'}
         simulation_aggregates = AggregatedResults()
         oper_input = (stand, simulation_aggregates)
         stand, aggr = clearcut.clearcutting(oper_input, **operation_parameters)
         self.assertEqual(0, futil.overall_stems_per_ha(stand.reference_trees))
         self.assertEqual(0, futil.mean_age_stand(stand))
-        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha)
-    
-    def test_planting(self):
-        stand = ForestStand
-        simulation_aggregates = AggregatedResults()
-        stand.reference_trees = []
-        stand.site_type_category = 3
-        stand.identifier = '1001'
-        regen = clearcutting_lim.get_clearcutting_instructions(stand,'data/parameter_files/clearcut_instructions.txt')
-        (stand, output) = clearcut.plant(stand,simulation_aggregates,"regeneration",regen_species = regen['species'], rt_count = 10, rt_stems= regen['stems/ha'], 
-            soil_preparation=regen['soil preparation'])
-        self.assertEqual(220,stand.reference_trees[-1].stems_per_ha)
-        self.assertEqual(clearcut.SoilPreparationKey.PATCH_MOUNDING,output.prev("regeneration")['soil preparation'])
-        self.assertEqual(TreeSpecies.SPRUCE,output.prev("regeneration")['species'])
-        self.assertEqual('1001-9-tree',stand.reference_trees[-1].identifier)
-
-    def test_clearcutting_and_planting(self):
-        stand = self.generate_stand_fixture()
-        stand.identifier = '1001'
-        operation_parameters = {'clearcutting_limits_ages': 'data/parameter_files/renewal_ages_southernFI.txt','clearcutting_limits_diameters':'data/parameter_files/renewal_diameters_southernFI.txt',
-        'clearcutting_instructions':'data/parameter_files/clearcut_instructions.txt'}
-        simulation_aggregates = AggregatedResults()
-        oper_input = (stand, simulation_aggregates)
-        stand, aggr = clearcut.clearcutting_and_planting(oper_input,**operation_parameters)
-        self.assertEqual(2,aggr.prev("regeneration")['species'])
-        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_to_cut_per_ha)
-        self.assertEqual(220,stand.reference_trees[-1].stems_per_ha)
-        self.assertEqual(TreeSpecies.SPRUCE,stand.reference_trees[-1].species)
-        self.assertEqual('1001-9-tree',stand.reference_trees[-1].identifier)
-
-    
+        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_per_ha)

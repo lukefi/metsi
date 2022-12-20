@@ -32,9 +32,28 @@ operation_params:
   report_biomass:
     - model_set: 1
   report_collectives:
-    - Ftot: reference_trees.stems_per_ha
-      Fpine: reference_trees.stems_per_ha[reference_trees.species==1]
-      Fbirch: reference_trees.stems_per_ha[(reference_trees.species==3)|(reference_trees.species==4)]
+    - identifier: identifier
+      npv_1_percent: net_present_value.value[(net_present_value.interest_rate==1) & (net_present_value.time_point == 2050)]
+      npv_2_percent: net_present_value.value[(net_present_value.interest_rate==2) & (net_present_value.time_point == 2050)]
+      npv_3_percent: net_present_value.value[(net_present_value.interest_rate==3) & (net_present_value.time_point == 2050)]
+      npv_4_percent: net_present_value.value[(net_present_value.interest_rate==4) & (net_present_value.time_point == 2050)]
+      npv_5_percent: net_present_value.value[(net_present_value.interest_rate==5) & (net_present_value.time_point == 2050)]
+
+      # stock volumes at state years
+      stock_2020: cross_cutting.volume_per_ha[(cross_cutting.source == "standing") & (cross_cutting.time_point == 2020)]
+      stock_2030: cross_cutting.volume_per_ha[(cross_cutting.source == "standing") & (cross_cutting.time_point == 2030)]
+      stock_2040: cross_cutting.volume_per_ha[(cross_cutting.source == "standing") & (cross_cutting.time_point == 2040)]
+      stock_2050: cross_cutting.volume_per_ha[(cross_cutting.source == "standing") & (cross_cutting.time_point == 2050)]
+
+      # harvest volumes at event years
+      harvest_2035: cross_cutting.volume_per_ha[(cross_cutting.source == "harvested") & (cross_cutting.time_point == 2035)]
+      harvest_2045: cross_cutting.volume_per_ha[(cross_cutting.source == "harvested") & (cross_cutting.time_point == 2045)]
+
+      # harvest volumes in period (by end year)
+      harvest_period_2030: cross_cutting.volume_per_ha[(cross_cutting.source == "harvested") & (cross_cutting.time_point >= 2020) & (cross_cutting.time_point < 2030)]
+      harvest_period_2040: cross_cutting.volume_per_ha[(cross_cutting.source == "harvested") & (cross_cutting.time_point >= 2030) & (cross_cutting.time_point < 2040)]
+      harvest_period_2050: cross_cutting.volume_per_ha[(cross_cutting.source == "harvested") & (cross_cutting.time_point >= 2040) & (cross_cutting.time_point < 2050)]
+
   grow_fhk:
     - package: pymotti_graph
   report_state:
@@ -60,13 +79,17 @@ operation_params:
     - overall_volume: cross_cutting.volume_per_ha
   calculate_npv:
     - interest_rates: [1,2,3,4,5] # list of integers, '3' meaning 3%
+  collect_standing_tree_properties:
+    - properties: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
+  collect_felled_tree_properties:
+    - properties: [stems_per_ha, species, breast_height_diameter, height]
 
 preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
   filter:
     - remove trees: sapling or stems_per_ha == 0
-      remove: not reference_trees
+      remove stands: site_type_category == 0 #not reference_trees
 
 preprocessing_operations:
   - generate_reference_trees # reference trees from strata, replaces existing reference trees
@@ -80,25 +103,30 @@ operation_file_params:
   cross_cut_standing_trees:
     timber_price_table: data/parameter_files/timber_price_table.csv
   clearcutting:
-    clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt
+    clearcutting_limits_ages: data/parameter_files/renewal_ages_southernFI.txt  
     clearcutting_limits_diameters: data/parameter_files/renewal_diameters_southernFI.txt
-    clearcutting_instructions: data/parameter_files/clearcut_instructions.txt
+  planting: 
+    planting_instructions: data/parameter_files/planting_instructions.txt
   calculate_npv:
     land_values: data/parameter_files/land_values_per_site_type_and_interest_rate.json
     renewal_costs: data/parameter_files/renewal_operation_pricing.csv
 
 simulation_events:
   # we describe here objects with schedule for which time points they are active
+  - time_points: [2020]
+    generators:
+      - sequence:
+          - planting
   - time_points: [2020, 2025, 2030, 2035, 2040, 2045, 2050]
     generators:
       - sequence:
           - cross_cut_standing_trees
+          - collect_standing_tree_properties
+          - calculate_npv
           - report_biomass
           - report_state
-  - time_points: [2030, 2050]
+  - time_points: [2035, 2045]
     generators:
-      - sequence:
-        - cross_cut_standing_trees
       - alternatives:
         - do_nothing
         # commented out to reduce the choices for default demo
@@ -108,11 +136,19 @@ simulation_events:
         - even_thinning
         - sequence:
           - clearcutting
-          - do_nothing
+          - planting
           # operations for renewal after clearcutting go here
       - sequence:
           - cross_cut_felled_trees
+          - collect_felled_tree_properties
           - report_state
+  - time_points: [2020, 2030, 2040, 2050]
+    generators:
+      - sequence:
+          - report_period
+  - time_points: [2050]
+    generators:
+      - sequence:
           - report_collectives
   - time_points: [2020, 2025, 2030, 2035, 2040, 2045, 2050] # Grow at the end to transition assumed +5 years forwards
     generators:
@@ -121,10 +157,6 @@ simulation_events:
         #- grow_motti
         # requires fhk dependencies from fhk-requirements.txt
         #- grow_fhk
-  - time_points:  [2030, 2040, 2050, 2060]
-    generators:
-      - sequence:
-        - report_period
 
 post_processing:
   operation_params:
@@ -142,8 +174,25 @@ export:
       - land_use_category
       - soil_peatland_category
     xvariables:
-      - Ftot
-      - Fpine
-      - 0 if site_type_category is None else int(site_type_category < 7) * sum(Fbirch)
+      - identifier
+      - npv_1_percent
+      - npv_2_percent
+      - npv_3_percent
+      - npv_4_percent
+      - npv_5_percent
+      # stock volumes at state years
+      - stock_2020
+      - stock_2030
+      - stock_2040
+      - stock_2050
+      # harvest volumes at event years
+      - harvest_2035
+      - harvest_2045
+      # harvest volumes in period (by end year)
+      - harvest_period_2030
+      - harvest_period_2040
+      - harvest_period_2050
   - format: rm_schedules_events_timber
     filename: timber_sums.txt
+  - format: rm_schedules_events_trees
+    filename: trees.txt

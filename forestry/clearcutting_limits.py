@@ -10,13 +10,10 @@ regional tables have columns by dominant species (Scots Pine,
 Norway Spruce, Silver Birch, Downy Birch) and rows by site type 
 (OMT, MT, VT, CT). 
 """
-from typing import Dict, List, Tuple
-from enum import Enum
-from forestdatamodel.model import ForestStand, ReferenceTree
+from typing import List, Tuple
+from forestdatamodel.model import ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
 from forestryfunctions import forestry_utils as futil
-import pandas as pd
-import os
 from forestry.thinning_limits import SiteTypeKey,SpeciesKey,site_type_to_key
 
 RENEWAL_DIAMETERS = {
@@ -73,34 +70,12 @@ RENEWAL_AGES = {
         }
     }
 
-INSTRUCTIONS = {
-        SiteTypeKey.OMT: {
-            'species':2,
-            'stems/ha':2200,
-            'soil preparation':3
-        },
-        SiteTypeKey.MT: {
-            'species':2,
-            'stems/ha':2200,
-            'soil preparation':3
-        },
-        SiteTypeKey.VT: {
-            'species':1,
-            'stems/ha':2000,
-            'soil preparation':1
-        },
-        SiteTypeKey.CT: {
-            'species':1,
-            'stems/ha':2000,
-            'soil preparation':1
-        }
-    }
+
 
 def create_clearcutting_limits_table(file_path: str) -> List:
     contents = None
     with open(file_path, "r") as f:
         contents = f.read()
-    # read thinning_limits into a list of lists
     table = contents.split('\n')
     table = [row.split() for row in table]
     
@@ -109,18 +84,6 @@ def create_clearcutting_limits_table(file_path: str) -> List:
     else:
         return table
 
-def create_clearcutting_instructions_table(file_path: str) -> List:
-    contents = None
-    with open(file_path, "r") as f:
-        contents = f.read()
-    # read thinning_limits into a list of lists
-    table = contents.split('\n')
-    table = [row.split() for row in table]
-    
-    if len(table) != 4 or len(table[0]) != 3:
-        raise Exception('Clearcutting limits file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
-    else:
-        return table
 
 def get_clearcutting_agelimits_from_parameter_file_contents(
     file_path: str,
@@ -192,36 +155,7 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
     }
     return RENEWAL_DIAMETERS
 
-def get_clearcutting_instructions_from_parameter_file_contents(
-    file_path: str,
-    ) -> dict:
-    """
-    Creates a table from :clearcutting_agelimits
-    """
-    instructions = create_clearcutting_instructions_table(file_path)
-    INSTRUCTIONS = {
-        SiteTypeKey.OMT: {
-            'species':int(instructions[0][0]),
-            'stems/ha':int(instructions[0][1]),
-            'soil preparation':int(instructions[0][2])
-        },
-        SiteTypeKey.MT: {
-            'species':int(instructions[1][0]),
-            'stems/ha':int(instructions[1][1]),
-            'soil preparation':int(instructions[1][2])
-        },
-        SiteTypeKey.VT: {
-            'species':int(instructions[2][0]),
-            'stems/ha':int(instructions[2][1]),
-            'soil preparation':int(instructions[2][2])
-        },
-        SiteTypeKey.CT: {
-            'species':int(instructions[3][0]),
-            'stems/ha':int(instructions[3][1]),
-            'soil preparation':int(instructions[3][2])
-        }
-    }
-    return INSTRUCTIONS
+
 
 def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None, file_path_diameters: str = None) -> Tuple[int, float]:
     """ Finds minimum age and and minimum mean diameter for clearcutting
@@ -242,14 +176,6 @@ def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None, file
         diameter_limit = RENEWAL_DIAMETERS[site_type_key][species_key]
     return (age_limit,diameter_limit)
 
-def get_clearcutting_instructions(stand: ForestStand,file_path_instructions: str = None) -> dict:
-    site_type_key = site_type_to_key(stand.site_type_category)
-    if file_path_instructions is not None:
-        instructions =get_clearcutting_instructions_from_parameter_file_contents(file_path_instructions)
-        regen = instructions[site_type_key]
-    else:
-         regen = INSTRUCTIONS[site_type_key]
-    return regen
 
 def species_to_key_clearcut(stand:ForestStand) -> str:
     """ converts tree species to into a key for clearcut lookup table """
@@ -276,4 +202,3 @@ def species_to_key_clearcut(stand:ForestStand) -> str:
         return SpeciesKey.DOWNY_BIRCH
     else:
         raise UserWarning("Unable to spesify tree species value {} as key for the thinning limits lookup table".format(value))
-
