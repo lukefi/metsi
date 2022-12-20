@@ -159,7 +159,7 @@ class TestFileReading(unittest.TestCase):
             state_input_container=""
         )
         stands = app.file_io.read_stands_from_file(config)
-        self.assertEqual(len(stands), 3)
+        self.assertEqual(len(stands), 2)
 
     @unittest.skip("Will be fixed in another PR")
     def test_read_schedule_payload_from_directory(self):
