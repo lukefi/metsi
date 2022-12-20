@@ -1,40 +1,10 @@
 import numpy as np
+from forestry.types import CrossCutResult, CrossCuttableTree
 from sim.core_types import OpTuple
 from forestdatamodel.model import ForestStand
 from forestry.utils.file_io import get_timber_price_table
 from forestryfunctions.cross_cutting.cross_cutting import cross_cut
-from dataclasses import dataclass
 from forestdatamodel.enums.internal import TreeSpecies
-
-@dataclass
-class CrossCutResult:
-    species: TreeSpecies
-    timber_grade: int
-    volume_per_ha: float
-    value_per_ha: float
-    stand_area: float
-    source: str
-    operation: str
-    time_point: int
-
-    #what's the right word here? "real", "absolute", something else?
-    def get_real_volume(self) -> float:
-        return self.volume_per_ha*self.stand_area
-
-    def get_real_value(self) -> float:
-        return self.value_per_ha*self.stand_area
-
-
-@dataclass
-class CrossCuttableTree:
-    stems_per_ha: float
-    species: TreeSpecies
-    breast_height_diameter: float
-    height: float
-    source: str
-    operation: str
-    time_point: int
-    cross_cut_done: bool = False
 
 
 def cross_cuttable_trees_from_stand(stand: ForestStand, time_point: int) -> list[CrossCuttableTree]:

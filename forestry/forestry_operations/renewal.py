@@ -1,15 +1,6 @@
-from dataclasses import dataclass
+from forestry.types import PriceableOperationInfo
 from sim.core_types import OpTuple
 from forestdatamodel.model import ForestStand
-
-@dataclass
-class PriceableOperationInfo:
-     operation: str
-     units: float
-     time_point: int
-
-     def get_real_cost(self, unit_cost: float) -> float:
-         return self.units * unit_cost
 
 
 def _store_renewal_aggregate(payload: OpTuple[ForestStand], op_tag: str):

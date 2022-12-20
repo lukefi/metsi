@@ -1,8 +1,7 @@
-from dataclasses import dataclass
-
 import math
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
+from forestry.types import BiomassData
 
 
 # Sources
@@ -305,79 +304,6 @@ def roots_biomass_1(tree: ReferenceTree) -> float:
     # to tons:
     bm = bm / 1000
     return bm
-
-
-@dataclass
-class BiomassData:
-    stem_wood: float = 0.0
-    stem_bark: float = 0.0
-    stem_waste: float = 0.0
-    living_branches: float = 0.0
-    dead_branches: float = 0.0
-    foliage: float = 0.0
-    stumps: float = 0.0
-    roots: float = 0.0
-
-    def total(self):
-        return sum([
-            self.stem_wood,
-            self.stem_bark,
-            self.stem_waste,
-            self.living_branches,
-            self.dead_branches,
-            self.foliage,
-            self.stumps,
-            self.roots
-        ])
-
-    def __add__(self, other):
-        return self.__radd__(other)
-
-    def __radd__(self, other: 'BiomassData' or float or int):
-        if isinstance(other, (float, int)):
-            return BiomassData(
-                stem_wood=self.stem_wood + other,
-                stem_bark=self.stem_bark + other,
-                stem_waste=self.stem_waste + other,
-                living_branches=self.living_branches + other,
-                dead_branches=self.dead_branches + other,
-                foliage=self.foliage + other,
-                stumps=self.stumps + other,
-                roots=self.roots + other
-            )
-        elif type(other) == BiomassData:
-            return BiomassData(
-                stem_wood=self.stem_wood + other.stem_wood,
-                stem_bark=self.stem_bark + other.stem_bark,
-                stem_waste=self.stem_waste + other.stem_waste,
-                living_branches=self.living_branches + other.living_branches,
-                dead_branches=self.dead_branches + other.dead_branches,
-                foliage=self.foliage + other.foliage,
-                stumps=self.stumps + other.stumps,
-                roots=self.roots + other.roots
-            )
-        else:
-            raise Exception("Can only do addition between numbers and BiomassData, not {}".format(type(other)))
-
-    def __sub__(self, other):
-        return self + (other * - 1)
-
-    def __mul__(self, factor):
-        return self.__rmul__(factor)
-
-    def __rmul__(self, factor):
-        if not isinstance(factor, (int, float)):
-            raise Exception("Can multiply BiomassData only with float or int, not {}".format(type(factor)))
-        return BiomassData(
-            stem_wood=self.stem_wood * factor,
-            stem_bark=self.stem_bark * factor,
-            stem_waste=self.stem_waste * factor,
-            living_branches=self.living_branches * factor,
-            dead_branches=self.dead_branches * factor,
-            foliage=self.foliage * factor,
-            stumps=self.stumps * factor,
-            roots=self.roots * factor
-        )
 
 
 def tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> BiomassData:

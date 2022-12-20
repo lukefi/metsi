@@ -1,4 +1,4 @@
-from forestry.cross_cutting import CrossCuttableTree
+from forestry.types import CrossCuttableTree
 from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ReferenceTree
 from forestry.forestry_operations.thinning_limits import *

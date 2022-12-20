@@ -2,8 +2,7 @@ import unittest
 import forestry.net_present_value as npv
 from forestdatamodel.model import ForestStand
 from sim.core_types import AggregatedResults
-from forestry.cross_cutting import CrossCutResult
-from forestry.forestry_operations.renewal import PriceableOperationInfo
+from forestry.types import CrossCutResult, PriceableOperationInfo
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.utils.file_io import get_land_values_as_dict, get_renewal_costs_as_dict
 

@@ -1,16 +1,8 @@
-from dataclasses import dataclass
 from sim.core_types import AggregatedResults, OpTuple
 from forestdatamodel.model import ForestStand
-from forestry.cross_cutting import CrossCutResult
-from forestry.forestry_operations.renewal import PriceableOperationInfo
+from forestry.types import CrossCutResult, NPVResult, PriceableOperationInfo
 from forestry.utils.file_io import get_renewal_costs_as_dict, get_land_values_as_dict
 
-
-@dataclass
-class NPVResult:
-    time_point: int
-    interest_rate: int
-    value: float
 
 def _get_bare_land_value(land_values: dict, soil_peatland_category: int, site_type: int, interest_rate: int) -> float:
     
