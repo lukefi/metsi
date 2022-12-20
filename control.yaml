@@ -187,9 +187,5 @@ export:
       - total_harvest_value_2040
       - total_harvest_value_2050
       - total_harvest_value_2060
-
-
-
-
   - format: rm_schedules_events_timber
     filename: timber_sums.txt
