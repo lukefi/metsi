@@ -5,7 +5,7 @@ from functools import reduce, cache
 from typing import Any
 
 from forestdatamodel.model import ForestStand
-from forestry.aggregates import BiomassAggregate, VolumeAggregate
+from forestry.types import BiomassAggregate, VolumeAggregate
 from forestryfunctions import forestry_utils as futil
 from forestryfunctions.r_utils import lmfor_volume
 from forestry.biomass_repola import biomasses_by_component_stand
