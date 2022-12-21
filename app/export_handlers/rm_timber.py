@@ -49,9 +49,9 @@ def find_volumes_for_source(results: list[CrossCutResult], year: int, source: st
         sum(f.volume_per_ha[(f.time_point == year) & (f.species == 2) & (f.timber_grade == 1) & (f.source == source)]),
         sum(f.volume_per_ha[(f.time_point == year) & (f.species == 2) & (f.timber_grade == 2) & (f.source == source)]),
         sum(f.volume_per_ha[(f.time_point == year) & (f.species == 2) & (f.timber_grade == 3) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 3) & (f.timber_grade == 1) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 3) & (f.timber_grade == 2) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 3) & (f.timber_grade == 3) & (f.source == source)])
+        sum(f.volume_per_ha[(f.time_point == year) & ((f.species != 1) & (f.species !=2)) & (f.timber_grade == 1) & (f.source == source)]),
+        sum(f.volume_per_ha[(f.time_point == year) & ((f.species != 1) & (f.species !=2)) & (f.timber_grade == 2) & (f.source == source)]),
+        sum(f.volume_per_ha[(f.time_point == year) & ((f.species != 1) & (f.species !=2)) & (f.timber_grade == 3) & (f.source == source)])
     ]
 
 
