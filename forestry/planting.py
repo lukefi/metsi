@@ -8,13 +8,13 @@ from forestry.renewal import PriceableOperationInfo
 
 DEFAULT_INSTRUCTIONS = {
         SiteTypeKey.OMT: {
-            'species':2,
-            'stems/ha':2200,
+            'species':1,
+            'stems/ha':2000,
             'soil preparation':3
         },
         SiteTypeKey.MT: {
-            'species':2,
-            'stems/ha':2200,
+            'species':1,
+            'stems/ha':2000,
             'soil preparation':3
         },
         SiteTypeKey.VT: {
@@ -96,7 +96,7 @@ def plant(
                              species=regen_species,
                              breast_height_diameter=0,
                              breast_height_age=0,
-                             biological_age=1,
+                             biological_age=3,
                              height=0.3,
                              sapling=True)
         stand.reference_trees.append(tree)
@@ -134,7 +134,7 @@ def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[F
     if len(stand.reference_trees)> 0: 
         return payload 
     
-    instructions_path = operation_parameters.get('renewal_instructions', None)
+    instructions_path = operation_parameters.get('planting_instructions', None)
     regen = get_planting_instructions(stand.site_type_category, instructions_path)
     stand, output_planting = plant(
                                     stand,
