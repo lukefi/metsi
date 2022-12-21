@@ -149,7 +149,6 @@ operation_lookup = {
     'planting': planting,
     'clearcutting': clearcutting,
     'calculate_biomass': calculate_biomass,
-    'report_volume': report_volume,
     'report_overall_removal': report_overall_removal,
     'cross_cut_felled_trees': cross_cut_felled_trees,
     'cross_cut_standing_trees': cross_cut_standing_trees,

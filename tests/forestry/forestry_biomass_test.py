@@ -138,3 +138,7 @@ class ForestryOperationsTest(unittest.TestCase):
             stumps=0.2649429105180369,
             roots=0.7614991804052376),
             result)
+
+    def test_calculate_biomass_no_trees(self):
+        result = biomass.biomasses_by_component_stand(ForestStand(), None, None, None)
+        self.assertEqual(biomass.BiomassData(), result)

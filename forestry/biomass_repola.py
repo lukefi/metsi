@@ -440,7 +440,7 @@ def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, 
     :param models: pre-set integer value for a model set to use. See tree_biomass function for details.
     :return: a BiomassData object for biomass tonnages
     """
-    biomasses = []
+    biomasses = [BiomassData()]
     for i, tree in enumerate(stand.reference_trees):
         fn = tree_biomass if tree.height >= 1.3 else small_tree_biomass
         biomasses.append(fn(tree, stand, treevolumes[i], wastevolumes[i], models) * tree.stems_per_ha)
