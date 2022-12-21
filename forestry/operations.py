@@ -5,7 +5,6 @@ from functools import reduce, cache
 from typing import Any
 
 from forestdatamodel.model import ForestStand
-from forestry.aggregates import BiomassAggregate, VolumeAggregate
 from forestryfunctions import forestry_utils as futil
 from forestryfunctions.r_utils import lmfor_volume
 from forestry.biomass_repola import biomasses_by_component_stand
@@ -26,21 +25,6 @@ def compute_volume(stand: ForestStand) -> float:
 
     Return the sum of the product of basal area and height for all reference trees in the stand"""
     return reduce(lambda acc, cur: futil.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
-
-
-def report_volume(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = payload
-    volume_function = compute_volume
-    if operation_parameters.get('lmfor_volume'):
-        volume_function = lmfor_volume
-    result = volume_function(stand)
-    prev = simulation_aggregates.prev('report_volume')
-    simulation_aggregates.store(
-        'report_volume',
-        VolumeAggregate.initial(result) if prev is None
-        else VolumeAggregate.from_prev(prev, result),
-    )
-    return payload
 
 
 def calculate_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
