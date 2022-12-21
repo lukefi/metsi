@@ -5,7 +5,6 @@ from functools import reduce, cache
 from typing import Any
 
 from forestdatamodel.model import ForestStand
-from forestry.aggregates import BiomassAggregate, VolumeAggregate
 from forestryfunctions import forestry_utils as futil
 from forestryfunctions.r_utils import lmfor_volume
 from forestry.biomass_repola import biomasses_by_component_stand
@@ -28,25 +27,10 @@ def compute_volume(stand: ForestStand) -> float:
     return reduce(lambda acc, cur: futil.calculate_basal_area(cur) * cur.height, stand.reference_trees, 0.0)
 
 
-def report_volume(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = payload
-    volume_function = compute_volume
-    if operation_parameters.get('lmfor_volume'):
-        volume_function = lmfor_volume
-    result = volume_function(stand)
-    prev = simulation_aggregates.prev('report_volume')
-    simulation_aggregates.store(
-        'report_volume',
-        VolumeAggregate.initial(result) if prev is None
-        else VolumeAggregate.from_prev(prev, result),
-    )
-    return payload
-
-
-def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
+def calculate_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
     """For the given ForestStand, this operation computes and stores the current biomass tonnage and difference to last
     calculation into the aggregate structure."""
-    stand, aggregates = input
+    stand, aggr = input
     models = operation_params.get('model_set', 1)
 
     # TODO: need proper functionality to find tree volumes, model_set 2
@@ -54,13 +38,9 @@ def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[F
     # TODO: need proper functionality to find waste volumes, model_set 2
     wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
 
-    biomass = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
-    prev = aggregates.prev('report_biomass')
-    aggregates.store(
-        'report_biomass',
-        BiomassAggregate.initial(biomass) if prev is None
-        else BiomassAggregate.from_prev(prev, biomass)
-    )
+    result = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
+    result.time_point = aggr.current_time_point
+    aggr.extend_list_result('calculate_biomass', [result])
 
     return input
 
@@ -168,8 +148,8 @@ operation_lookup = {
     'even_thinning': even_thinning,
     'planting': planting,
     'clearcutting': clearcutting,
-    'report_biomass': report_biomass,
-    'report_volume': report_volume,
+    'calculate_biomass': calculate_biomass,
+    'report_biomass': calculate_biomass,
     'report_overall_removal': report_overall_removal,
     'cross_cut_felled_trees': cross_cut_felled_trees,
     'cross_cut_standing_trees': cross_cut_standing_trees,
