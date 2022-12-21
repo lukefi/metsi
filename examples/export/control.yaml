@@ -23,7 +23,7 @@ operation_params:
   even_thinning:
     - thinning_factor: 0.97
       e: 0.2
-  report_biomass:
+  calculate_biomass:
     - model_set: 1
   report_collectives:
     - Ftot: reference_trees.stems_per_ha
@@ -83,7 +83,7 @@ simulation_events:
     generators:
       - sequence:
           - cross_cut_standing_trees
-          - report_biomass
+          - calculate_biomass
           - report_state
           - collect_standing_tree_properties
   - time_points: [2030, 2050]

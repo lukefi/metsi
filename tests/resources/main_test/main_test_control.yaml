@@ -16,7 +16,7 @@ operation_params:
       e: 0.2
     - thinning_factor: 0.8
       e: 0.16
-  report_biomass:
+  calculate_biomass:
     - model_set: 1
   report_collectives:
     - Ftot: reference_trees.stems_per_ha
@@ -40,7 +40,7 @@ simulation_events:
   - time_points: [0]
     generators:
       - sequence:
-          - report_biomass
+          - calculate_biomass
   - time_points: [5, 10, 15, 20]
     generators:
       - sequence:
@@ -55,5 +55,5 @@ simulation_events:
   - time_points: [20]
     generators:
       - sequence:
-          - report_biomass
+          - calculate_biomass
           - cross_cut_felled_trees

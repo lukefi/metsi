@@ -165,7 +165,7 @@ class TestFileReading(unittest.TestCase):
         dir = Path("tests/resources/file_io_test/testing_output_directory/0-023-002-02-1/1")
         result = app.file_io.read_schedule_payload_from_directory(dir)
         self.assertEqual("0-023-002-02-1", result.simulation_state.identifier)
-        self.assertEqual(2, len(result.aggregated_results.get("report_biomass")))
+        self.assertEqual(2, len(result.aggregated_results.get("calculate_biomass")))
 
     def test_read_simulation_result_dirtree(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory")
@@ -173,9 +173,9 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(1, len(result.items()))
         self.assertEqual(2, len(result["0-023-002-02-1"]))
         self.assertEqual("0-023-002-02-1", result["0-023-002-02-1"][0].simulation_state.identifier)
-        self.assertEqual(2, len(result["0-023-002-02-1"][0].aggregated_results.get("report_biomass")))
+        self.assertEqual(2, len(result["0-023-002-02-1"][0].aggregated_results.get("calculate_biomass")))
         self.assertEqual("0-023-002-02-1", result["0-023-002-02-1"][1].simulation_state.identifier)
-        self.assertEqual(2, len(result["0-023-002-02-1"][1].aggregated_results.get("report_biomass")))
+        self.assertEqual(2, len(result["0-023-002-02-1"][1].aggregated_results.get("calculate_biomass")))
 
     def test_read_stands_from_nonexisting_file(self):
         config = Mela2Configuration(
@@ -184,4 +184,3 @@ class TestFileReading(unittest.TestCase):
             state_input_container="pickle"
         )
         self.assertRaises(Exception, app.file_io.read_stands_from_file, config)
-        
