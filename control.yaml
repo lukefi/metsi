@@ -149,6 +149,7 @@ post_processing:
 export:
   - format: J
     cvariables:
+      - identifier
       - year
       - site_type_category
       - land_use_category
