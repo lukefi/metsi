@@ -46,7 +46,7 @@ def report_volume(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
 def calculate_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
     """For the given ForestStand, this operation computes and stores the current biomass tonnage and difference to last
     calculation into the aggregate structure."""
-    stand, aggregates = input
+    stand, aggr = input
     models = operation_params.get('model_set', 1)
 
     # TODO: need proper functionality to find tree volumes, model_set 2
@@ -54,13 +54,9 @@ def calculate_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTupl
     # TODO: need proper functionality to find waste volumes, model_set 2
     wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
 
-    biomass = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
-    prev = aggregates.prev('calculate_biomass')
-    aggregates.store(
-        'calculate_biomass',
-        BiomassAggregate.initial(biomass) if prev is None
-        else BiomassAggregate.from_prev(prev, biomass)
-    )
+    result = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
+    result.time_point = aggr.current_time_point
+    aggr.extend_list_result('calculate_biomass', [result])
 
     return input
 

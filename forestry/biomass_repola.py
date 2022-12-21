@@ -309,6 +309,7 @@ def roots_biomass_1(tree: ReferenceTree) -> float:
 
 @dataclass
 class BiomassData:
+    time_point: int = None
     stem_wood: float = 0.0
     stem_bark: float = 0.0
     stem_waste: float = 0.0
