@@ -1,6 +1,15 @@
 from pathlib import Path
 from app.app_types import SimResults
 from app.file_io import row_writer
+from forestry.cross_cutting import CrossCutResult
+
+
+def scan_operation_type_for_event(year: int, cross_cut: list[CrossCutResult]) -> str:
+    try:
+        val = next(filter(lambda r: r.time_point == year and r.source == "harvested", cross_cut)).operation
+        return val
+    except:
+        return 'unknown_operation'
 
 
 def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
@@ -9,8 +18,9 @@ def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
     timber_events = derived_data.get('report_state')
     standing_tree_data = derived_data.get('collect_standing_tree_properties')
     felled_tree_data = derived_data.get('collect_felled_tree_properties')
+    cross_cut_results = derived_data.get('cross_cutting')
     for year, report in timber_events.items():
-        event_details = collect_timber_data_for_year(report, year)
+        event_details = collect_timber_data_for_year(report, year, cross_cut_results)
 
         for event in event_details:
             header = " ".join([str(event['event_type']), str(event['year']), str(event['source']), str(round(event['total'], 2)), "m3/ha"])
@@ -29,8 +39,7 @@ def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
                     retval.extend(tree_rows)
     return retval
 
-
-def collect_timber_data_for_year(report: dict, year: int) -> list[dict]:
+def collect_timber_data_for_year(report: dict, year: int, cross_cut_results: list[CrossCutResult]) -> list[dict]:
     """Compose collection objects for timber volume details"""
     retval = []
     stock = list(report.values())[0:9]
@@ -41,8 +50,8 @@ def collect_timber_data_for_year(report: dict, year: int) -> list[dict]:
     stock_year_type = 'Node' if timbersum > 0 else 'State'
     retval.append({'year': year, 'event_type': stock_year_type, 'total': stocksum, 'values': stock, 'source': 'Stock'})
     if timbersum > 0:
-        # TODO: at this moment we can't get the operation type from results
-        retval.append({'year': year, 'event_type': 'Event', 'total': timbersum, 'values': timber, 'source': 'thinning'})
+        operation = scan_operation_type_for_event(year, cross_cut_results)
+        retval.append({'year': year, 'event_type': 'Event', 'total': timbersum, 'values': timber, 'source': operation})
     return retval
 
 
