@@ -56,25 +56,6 @@ operation_params:
 
   grow_fhk:
     - package: pymotti_graph
-  report_state:
-    - stock_vol_pine_log: cross_cutting.volume_per_ha[      (cross_cutting.species==1) & (cross_cutting.timber_grade==1) & (cross_cutting.source == "standing")]
-      stock_vol_spruce_log: cross_cutting.volume_per_ha[    (cross_cutting.species==2) & (cross_cutting.timber_grade==1) & (cross_cutting.source == "standing")]
-      stock_vol_birch_log: cross_cutting.volume_per_ha[     (cross_cutting.species==3) & (cross_cutting.timber_grade==1) & (cross_cutting.source == "standing")]
-      stock_vol_pine_pulp: cross_cutting.volume_per_ha[     (cross_cutting.species==1) & (cross_cutting.timber_grade==2) & (cross_cutting.source == "standing")]
-      stock_vol_spruce_pulp: cross_cutting.volume_per_ha[   (cross_cutting.species==2) & (cross_cutting.timber_grade==2) & (cross_cutting.source == "standing")]
-      stock_vol_birch_pulp: cross_cutting.volume_per_ha[    (cross_cutting.species==3) & (cross_cutting.timber_grade==2) & (cross_cutting.source == "standing")]
-      stock_vol_pine_energy: cross_cutting.volume_per_ha[   (cross_cutting.species==1) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "standing")]
-      stock_vol_spruce_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==2) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "standing")]
-      stock_vol_birch_energy: cross_cutting.volume_per_ha[  (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "standing")]
-      timber_vol_pine_log: cross_cutting.volume_per_ha[     (cross_cutting.species==1) & (cross_cutting.timber_grade==1) & (cross_cutting.source == "harvested")]
-      timber_vol_spruce_log: cross_cutting.volume_per_ha[   (cross_cutting.species==2) & (cross_cutting.timber_grade==1) & (cross_cutting.source == "harvested")]
-      timber_vol_birch_log: cross_cutting.volume_per_ha[    (cross_cutting.species==3) & (cross_cutting.timber_grade==1) & (cross_cutting.source == "harvested")]
-      timber_vol_pine_pulp: cross_cutting.volume_per_ha[    (cross_cutting.species==1) & (cross_cutting.timber_grade==2) & (cross_cutting.source == "harvested")]
-      timber_vol_spruce_pulp: cross_cutting.volume_per_ha[  (cross_cutting.species==2) & (cross_cutting.timber_grade==2) & (cross_cutting.source == "harvested")]
-      timber_vol_birch_pulp: cross_cutting.volume_per_ha[   (cross_cutting.species==3) & (cross_cutting.timber_grade==2) & (cross_cutting.source == "harvested")]
-      timber_vol_pine_energy: cross_cutting.volume_per_ha[  (cross_cutting.species==1) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
-      timber_vol_spruce_energy: cross_cutting.volume_per_ha[(cross_cutting.species==2) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
-      timber_vol_birch_energy: cross_cutting.volume_per_ha[ (cross_cutting.species==3) & (cross_cutting.timber_grade==3) & (cross_cutting.source == "harvested")]
   report_period:
     - overall_volume: cross_cutting.volume_per_ha
   calculate_npv:
@@ -124,7 +105,6 @@ simulation_events:
           - collect_standing_tree_properties
           - calculate_npv
           - report_biomass
-          - report_state
   - time_points: [2035, 2045]
     generators:
       - alternatives:
@@ -141,7 +121,6 @@ simulation_events:
       - sequence:
           - cross_cut_felled_trees
           - collect_felled_tree_properties
-          - report_state
   - time_points: [2020, 2030, 2040, 2050]
     generators:
       - sequence:
