@@ -1,4 +1,5 @@
 import bisect
+import typing
 from functools import cache
 from pathlib import Path
 from typing import TypeVar, Generic, Any, Union, Iterator, IO
@@ -57,13 +58,11 @@ def j_row(out: IO, fns: list[CollectFn], getvar: GetVarFn):
     buf = []
     for f in fns:
         v = f(getvar)
-        try:
-            it = iter(v)
-        except TypeError:
-            # not iterable
+        if isinstance(v, str) or not isinstance(v, typing.Iterable):
             n = 1
             buf.append(v)
-        else:
+        elif isinstance(v, typing.Iterable):
+            it = iter(v)
             l = len(buf)
             buf.extend(it)
             n = len(buf) - l
