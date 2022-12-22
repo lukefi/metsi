@@ -1,6 +1,10 @@
 import os
 import sys
 
+# TODO: find out what triggers FutureWarning behaviour in numpy
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 import app.preprocessor
 from app.app_io import parse_cli_arguments, Mela2Configuration, generate_program_configuration, RunMode
 from app.app_types import SimResults
