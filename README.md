@@ -279,6 +279,7 @@ See table below for a quick reference of forestry operations usable in control.y
 | report_volume             | Collect tree volume data from ForestStand state                                                |                             | native                    |
 | report_thinning           | Collect thinning operation details from data accrued from thinning operations                  |                             | native                    |
 | report_collectives        | Save the values of [collective variables](#collective-variables)                               |                             | native                    |
+| [report_state](#report_state) | save the values of state variables at the current time point |  | native |
 | filter                    | [Filter](#filters) stands, trees and strata                                                    |                             | native                    |
 | [cross_cut_felled_trees](#cross_cut_felled_trees) | Perform cross cut operation to results of previous thinning operations                         | Annika Kangas               | forestry-function-library |
 | [cross_cut_standing_trees](#cross_cut_standing_trees)     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
@@ -353,6 +354,52 @@ Attributes of the BiomassData object
 | stumps          | float |
 | roots           | float |
 
+
+### report_state
+
+Enables collecting the states of user-defined variables at the time of the operation call. 
+
+#### **parameters**
+The parameters passed to the operation are the variables that the user wants to report. The parameters are key-value pairs, where the key defines the name of the variable, and the value defines how the variable is constructed. 
+
+The operation makes available a set of collections that can be used in the definition of desired variables. These collections are:
+
+| name              | description                                 | class whose attributes are available        |
+|-------------------|---------------------------------------------|---------------------------------------------|
+| state             | forest stand                                | `ForestStand`                               |
+| reference_trees   | stand's reference trees                     | `ReferenceTrees`                            |
+| felled_trees      | trees that have been thinned/clearcut       | `CrossCuttableTree`                         |
+| cross_cutting     | results of cross cutting                    | `CrossCutResult`                            |
+| renewal           | results of renewal operations               | `PriceableOperationInfo`                    |
+| net_present_value | results of net present value calculations   | `NPVResult`                                 |
+
+
+#### **additional information**
+For example, to get the total stems per hectare in the years the operation is defined for, one would define ``report_state``'s operation parameters as:
+
+```yaml
+report_state:
+  - total_stems_per_ha: reference_trees.stems_per_ha
+```
+
+The stand's reference trees are stored under the name ``reference_trees``, and the attributes defined for that name can be used to get values. The returned `total_stems_per_ha` is the sum of the stand's trees' `stems_per_ha`s.
+
+However, often one needs more detailed information about the state, and therefore filter only certain variables. For example, to get the stems per hectare of pines:
+
+```yaml 
+report_state:
+  - total_stems_per_ha: reference_trees.stems_per_ha[reference_trees.species == 1]
+```
+
+or, to be even more fine-grained, get the stems_per_ha of pines that are not saplings:
+
+```yaml 
+report_state:
+  - total_stems_per_ha: reference_trees.stems_per_ha[(reference_trees.species == 1) & (reference_trees.sapling == False)]
+```
+Notice the parentheses around the filter conditions, when using multiple conditions.
+
+
 ### cross_cut_felled_trees
 
 Calculates the volume and value of harvested trees using Annika Kangas' cross cutting algorithm. Whenever this operation is called, it cross cuts all thinning and clearcutting results that have been produced before it, but have not yet been cross cut. Given this, it is enough to call this operation once before cross cutting results are needed. 
@@ -374,8 +421,8 @@ Attributes of the CrossCutResult object
 |   volume_per_ha     | float |
 |   value_per_ha      | float |
 |   stand_area        | float |
-|   source            | str (either "felled" or "standing") |
-|   operation         | str |
+|   source            | str (either "harvested" or "standing") |
+|   operation         | str (if source=="harvested", this has the name of the thinning/clearcutting operation that produced the trees. Otherwise contains empty string.)|
 |   time_point        | int |
 
 ### cross_cut_standing_trees
