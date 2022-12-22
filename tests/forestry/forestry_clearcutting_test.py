@@ -48,7 +48,7 @@ class ClearcuttingTest(unittest.TestCase):
     
     def test_get_regeneration_instructions_dict(self):
         instructions = plnt.get_planting_instructions_from_parameter_file_contents('tests/resources/planting_test/planting_instructions.txt')
-        self.assertEqual(instructions[SiteTypeKey.OMT]["species"],2)
+        self.assertEqual(instructions[SiteTypeKey.OMT]["species"],1)
 
     def test_get_clearcutting_limits(self):
         stand = self.generate_stand_fixture()

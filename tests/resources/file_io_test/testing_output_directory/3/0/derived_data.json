@@ -1,7 +1,7 @@
 {
   "py/object": "sim.core_types.AggregatedResults",
   "operation_results": {
-    "report_biomass": {
+    "calculate_biomass": {
       "py/reduce": [
         {
           "py/type": "collections.OrderedDict"

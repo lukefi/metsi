@@ -1,9 +1,8 @@
 import math
 from itertools import repeat
-
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
-from forestry.types import BiomassData, BiomassAggregate
+from forestry.types import BiomassData
 from sim.core_types import OpTuple
 
 
@@ -368,17 +367,16 @@ def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, 
     :param models: pre-set integer value for a model set to use. See tree_biomass function for details.
     :return: a BiomassData object for biomass tonnages
     """
-    biomasses = []
+    biomasses = [BiomassData()]
     for i, tree in enumerate(stand.reference_trees):
         fn = tree_biomass if tree.height >= 1.3 else small_tree_biomass
         biomasses.append(fn(tree, stand, treevolumes[i], wastevolumes[i], models) * tree.stems_per_ha)
     return sum(biomasses)
 
-
-def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
+def calculate_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
     """For the given ForestStand, this operation computes and stores the current biomass tonnage and difference to last
     calculation into the aggregate structure."""
-    stand, aggregates = input
+    stand, aggr = input
     models = operation_params.get('model_set', 1)
 
     # TODO: need proper functionality to find tree volumes, model_set 2
@@ -386,12 +384,8 @@ def report_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[F
     # TODO: need proper functionality to find waste volumes, model_set 2
     wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
 
-    biomass = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
-    prev = aggregates.prev('report_biomass')
-    aggregates.store(
-        'report_biomass',
-        BiomassAggregate.initial(biomass) if prev is None
-        else BiomassAggregate.from_prev(prev, biomass)
-    )
+    result = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
+    result.time_point = aggr.current_time_point
+    aggr.extend_list_result('calculate_biomass', [result])
 
     return input

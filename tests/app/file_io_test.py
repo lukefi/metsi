@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from forestdatamodel.model import ForestStand, ReferenceTree
 
 from app.app_io import Mela2Configuration
-from sim.core_types import OperationPayload
 
 
 @dataclass
@@ -165,7 +164,7 @@ class TestFileReading(unittest.TestCase):
         dir = Path("tests/resources/file_io_test/testing_output_directory/3/0")
         result = app.file_io.read_schedule_payload_from_directory(dir)
         self.assertEqual("3", result.simulation_state.identifier)
-        self.assertEqual(2, len(result.aggregated_results.get("report_biomass")))
+        self.assertEqual(2, len(result.aggregated_results.get_list_result("calculate_biomass")))
 
     def test_read_simulation_result_dirtree(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory")
@@ -173,7 +172,7 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(1, len(result.items()))
         self.assertEqual(1, len(result["3"]))
         self.assertEqual("3", result["3"][0].simulation_state.identifier)
-        self.assertEqual(2, len(result["3"][0].aggregated_results.get("report_biomass")))
+        self.assertEqual(2, len(result["3"][0].aggregated_results.get_list_result("calculate_biomass")))
 
     def test_read_stands_from_nonexisting_file(self):
         config = Mela2Configuration(
@@ -182,4 +181,3 @@ class TestFileReading(unittest.TestCase):
             state_input_container="pickle"
         )
         self.assertRaises(Exception, app.file_io.read_stands_from_file, config)
-        

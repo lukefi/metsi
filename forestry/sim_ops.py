@@ -1,5 +1,5 @@
 from importlib import import_module
-from forestry.data_collection.biomass_repola import report_biomass
+from forestry.data_collection.biomass_repola import calculate_biomass
 from forestry.data_collection.cross_cutting import cross_cut_felled_trees, cross_cut_standing_trees
 from forestry.data_collection.net_present_value import calculate_npv
 from forestry.data_collection.marshalling import report_collectives, report_state, collect_properties, \
@@ -18,7 +18,8 @@ operation_lookup = {
     'even_thinning': even_thinning,
     'planting': planting,
     'clearcutting': clearcutting,
-    'report_biomass': report_biomass,
+    'calculate_biomass': calculate_biomass,
+    'report_biomass': calculate_biomass,
     'report_overall_removal': report_overall_removal,
     'cross_cut_felled_trees': cross_cut_felled_trees,
     'cross_cut_standing_trees': cross_cut_standing_trees,

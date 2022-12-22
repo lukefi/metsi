@@ -103,7 +103,7 @@ def prepare_growth_test_stand():
         ],
         year=2025
     )
-    return compute_location_metadata([stand])[0]
+    return stand
 
 
 DEFAULT_TIMBER_PRICE_TABLE = np.array(
