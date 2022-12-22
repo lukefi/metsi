@@ -64,6 +64,8 @@ operation_params:
     - properties: [stems_per_ha, species, breast_height_diameter, height, breast_height_age, biological_age, saw_log_volume_reduction_factor]
   collect_felled_tree_properties:
     - properties: [stems_per_ha, species, breast_height_diameter, height]
+  planting:
+    - tree_count: 10
 
 preprocessing_params:
   generate_reference_trees:

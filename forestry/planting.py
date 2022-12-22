@@ -130,6 +130,7 @@ def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[F
     function plant is called
     """
     stand, simulation_aggregates = payload
+    tree_count = operation_parameters.get('tree_count', 10)
 
     if len(stand.reference_trees)> 0: 
         return payload 
@@ -141,7 +142,7 @@ def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[F
                                     simulation_aggregates,
                                     "regeneration",
                                     TreeSpecies(regen['species']),
-                                    10,
+                                    tree_count,
                                     regen['stems/ha'],
                                     regen['soil preparation']
                                     )
