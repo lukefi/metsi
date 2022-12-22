@@ -1,4 +1,4 @@
 pyyaml==6.0
-jsonpickle==2.2.0
+jsonpickle==3.0.*
 forestryfunctions @ git+https://github.com/menu-hanke/forestry-function-library@0.12.1
 forestdatamodel @ git+https://github.com/menu-hanke/forest-data-model@0.4.7
