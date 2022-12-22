@@ -1,0 +1,3 @@
+pymotti_graph @ git+https://github.com/menu-hanke/pymotti@v0.0.5#subdirectory=graph
+pymotti @ git+https://github.com/menu-hanke/pymotti@v0.0.5
+fhk -f https://github.com/menu-hanke/fhk/releases/expanded_assets/v4.0.0
