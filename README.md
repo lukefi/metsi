@@ -489,6 +489,31 @@ report_state:
 ```
 Notice the parentheses around the filter conditions, when using multiple conditions.
 
+### clearcut
+
+Clears the stands reference tree list and stores them as a list of `CrossCuttableTree` objects into derived data with the `felled_trees` keyword.
+
+#### **parameters**
+| parameter name                  | type     | description                                  | location in control.yaml   | notes |
+|---------------------------------|----------|----------------------------------------------|----------------------------|-------|
+| clearcutting_limits_ages        | string   | In file the rows represent site type values and colums represent tree species and the values represent the smallest possible age enabled.  | operation_file_params      | example file data/parameter_files/renewal_ages_southernFI.txt |
+| clearcutting_limits_diameters   | string   |In file the rows represent site type values and colums represent tree species and the values represent smallest possible breast height diameters enabled. | operation_file_params      | example file data/parameter_files/renewal_diameters_southernFI.txt  |
+| minimum_time_interval           | int      | After the operation is executed it will not be executed again until the `minimum_time_interval` is reached. | run_constrains             |   |
+
+
+#### **output**
+Output object attributes:
+| attribute name        | type        | description or value                    |
+|-----------------------|-------------|-----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                 |
+| species               | TreeSpecies | tree species of removed reference tree  |
+| breast_height_diameter| float       | trees diameter at breast height         |
+| height                | float       | trees height                            |
+| source                | string      | value: `harvested`                    |
+| operation             | string      | value: `clearcutting`                 |
+| time_point            | int         | time point of operation execution       |
+| cross_cut_done        | bool        | cross cut operation executed or not     |
+
 
 ### cross_cut_felled_trees
 
