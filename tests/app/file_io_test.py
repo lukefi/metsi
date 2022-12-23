@@ -2,7 +2,7 @@ import unittest
 import os
 import shutil
 from pathlib import Path
-from forestdatamodel.enums.internal import TreeSpecies
+from forestdatamodel.enums.internal import *
 import app.file_io
 from dataclasses import dataclass
 from forestdatamodel.model import ForestStand, ReferenceTree
@@ -68,7 +68,7 @@ class TestFileReading(unittest.TestCase):
         ]
         app.file_io.prepare_target_directory("outdir")
         app.file_io.csv_writer(Path("outdir", "output.csv"), data)
-        result = app.file_io.csv_to_stands("outdir/output.csv", ";")
+        result = app.file_io.csv_content_to_stands(app.file_io.csv_file_reader(Path("outdir/output.csv")))
         self.assertListEqual(data, result)
         shutil.rmtree('outdir')
 
@@ -77,7 +77,11 @@ class TestFileReading(unittest.TestCase):
             ForestStand(
                 identifier="123-234",
                 geo_location=(600000.0, 300000.0, 30.0, "EPSG:3067"),
-                land_use_category=2,
+                land_use_category=LandUseCategory.FOREST,
+                owner_category=OwnerCategory.PRIVATE,
+                soil_peatland_category=SoilPeatlandCategory.MINERAL_SOIL,
+                site_type_category=SiteType.RICH_SITE,
+                drainage_category=DrainageCategory.DITCHED_MINERAL_SOIL,
                 fra_category="1",
                 auxiliary_stand=False,
                 reference_trees=[

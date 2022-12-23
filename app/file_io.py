@@ -1,3 +1,4 @@
+import csv
 import os
 import pickle
 from pathlib import Path
@@ -5,7 +6,7 @@ import jsonpickle
 from typing import Any, Callable, Iterator, Optional
 import yaml
 from forestdatamodel.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
-from forestdatamodel.formats.file_io import vmi_file_reader, xml_file_reader, stands_to_csv, csv_to_stands, rsd_rows
+from forestdatamodel.formats.io_utils import stands_to_csv_content, csv_content_to_stands, stands_to_rsd_content
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults, ForestOpPayload
 from forestry.forestry_types import StandList
@@ -77,7 +78,7 @@ def fdm_reader(container_format: str) -> StandReader:
     elif container_format == "json":
         return json_reader
     elif container_format == "csv":
-        return lambda path: csv_to_stands(path, ';')
+        return lambda path: csv_content_to_stands(csv_file_reader(path))
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
@@ -248,11 +249,11 @@ def json_writer(filepath: Path, data: ObjectLike):
 
 
 def csv_writer(filepath: Path, data: StandList):
-    row_writer(filepath, stands_to_csv(data, ';'))
+    row_writer(filepath, stands_to_csv_content(data, ';'))
 
 
 def rsd_writer(filepath: Path, data: StandList):
-    row_writer(filepath, rsd_rows(data))
+    row_writer(filepath, stands_to_rsd_content(data))
 
 
 def row_writer(filepath: Path, rows: list[str]):
@@ -267,3 +268,16 @@ def json_reader(file_path: str) -> ObjectLike:
     return res
 
 
+def vmi_file_reader(file: Path) -> list[str]:
+    with open(file, 'r', encoding='utf-8') as input_file:
+        return input_file.readlines()
+
+
+def xml_file_reader(file: Path) -> str:
+    with open(file, 'r', encoding='utf-8') as input_file:
+        return input_file.read()
+
+
+def csv_file_reader(file: Path) -> list[list[str]]:
+    with open(file, 'r', encoding='utf-8') as input_file:
+        return list(csv.reader(input_file, delimiter=';'))

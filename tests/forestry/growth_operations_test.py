@@ -12,6 +12,7 @@ except ImportError:
 
 try:
     from forestry.natural_processes.grow_motti import grow_motti
+    pymotti = True
 except ImportError:
     pymotti = None
 
