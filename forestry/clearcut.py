@@ -14,9 +14,9 @@ def _clearcut_with_output(
     """
     trees = [
             CrossCuttableTree(
-                t.stems_per_ha, 
-                t.species, 
-                t.breast_height_diameter, 
+                t.stems_per_ha,
+                t.species,
+                t.breast_height_diameter,
                 t.height,
                 'harvested',
                 tag,
@@ -31,26 +31,28 @@ def _clearcut_with_output(
 
 
 def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    """checks if either stand mean age or stand basal area weighted mean 
-    diameter is over limits given in separate files. 
-    If yes, function clearcut is called 
+    """checks if either stand mean age or stand basal area weighted mean
+    diameter is over limits given in separate files.
+    If yes, function clearcut is called
     """
     stand, simulation_aggregates = input
-    
-    if len(stand.reference_trees)>0 and sum(x.breast_height_diameter for x in stand.reference_trees)>0:
+
+    if len(stand.reference_trees) > 0 and sum(x.breast_height_diameter for x in stand.reference_trees) > 0:
         age_limits_path = operation_parameters.get('clearcutting_limits_ages', None)
         diameter_limits_path = operation_parameters.get('clearcutting_limits_diameters', None)
-        (age_limit, diameter_limit) = get_clearcutting_limits(stand,age_limits_path, diameter_limits_path)
-        age_limit_reached = futil.mean_age_stand(stand)>= age_limit
-        diameter_limit_reached = futil.calculate_basal_area_weighted_attribute_sum(stand.reference_trees,
-        f=lambda x: x.breast_height_diameter*futil.calculate_basal_area(x))>=diameter_limit
+
+        (age_limit, diameter_limit) = get_clearcutting_limits(stand, age_limits_path, diameter_limits_path)
+        age_limit_reached = age_limit <= futil.mean_age_stand(stand)
+        diameter_limit_reached = diameter_limit <= futil.calculate_basal_area_weighted_attribute_sum(
+            stand.reference_trees,
+            f=lambda x: x.breast_height_diameter * futil.calculate_basal_area(x))
+
         if age_limit_reached or diameter_limit_reached:
-            stand, aggr= _clearcut_with_output(stand,simulation_aggregates,'clearcutting')
-            return (stand,aggr)
+            stand, aggr = _clearcut_with_output(stand, simulation_aggregates,'clearcutting')
+            return (stand, aggr)
         else:
             raise UserWarning("Unable to perform clearcutting")
     else:
         raise UserWarning("Unable to perform clearcutting")
 
 
-    
