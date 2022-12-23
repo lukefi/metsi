@@ -285,6 +285,30 @@ See table below for a quick reference of forestry operations usable in control.y
 | [cross_cut_standing_trees](#cross_cut_standing_trees)     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 | [calculate_npv](#calculate_npv)           | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs.    |                 | native
 
+### planting
+
+Performes renewal operation planting which plants saplings on a empty stand.
+
+#### **parameters**
+| parameter name              | type   | description | location in control.yaml  | notes               |
+|-----------------------------|--------|-------------|---------------------------|---------------------|
+| planting_instructions       | string | In file rows represent site types, first column contains the tree species, second column the stems per hectar value and third column is the soil preparation type. |operation_file_params      | optional            |
+| tree_count        | int | Number of sapling trees to be plante.| operation_params      | optional, default 10            |
+
+#### **output**
+
+The output is written into the derived data container with two keys `renewal` and `regeneration`.
+
+Output of renewal is a regeneration description python dictionary containing following values
+regeneration key, soil prepration type, tree species and stem count.
+
+Output of regeneration is is a list of `PriceableOperationInfo` ovbjects:
+| attribute name        | type        | description                                 |
+|-----------------------|-------------|---------------------------------------------|
+| operation             | string      | renewal operation name                      |
+| units                 | float       | stand area                                  |
+| time_point            | int         | time point of operation execution timepoint |
+
 ### even_thinning
 
 Performs even thinning which removes stems evenly from all reference tree classes. Removal bounds are defined by basal area.
