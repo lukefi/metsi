@@ -489,6 +489,14 @@ report_state:
 ```
 Notice the parentheses around the filter conditions, when using multiple conditions.
 
+### report_period
+
+Operation makes it possible to collect sums of derived data collections between periods.
+
+For example in a 30 year long simulation one could define three 10-year periods by defining report_period on time points 10, 20 and 30. As the simulation executes the report_period operation collects user-defined derived data between years 0-9, 10-19 and 20-29.
+
+See documentation of report_state operation for definition and usage.
+
 ### clearcut
 
 Clears the stands reference tree list and stores them as a list of `CrossCuttableTree` objects into derived data with the `felled_trees` keyword.
