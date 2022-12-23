@@ -284,16 +284,106 @@ See table below for a quick reference of forestry operations usable in control.y
 | [cross_cut_standing_trees](#cross_cut_standing_trees)     | Perform cross cut operation to all standing trees on a stand                                   | Annika Kangas               | forestry-function-library |
 | [calculate_npv](#calculate_npv)           | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs.    |                 | native
 
+### even_thinning
+
+Performs even thinning which removes stems evenly from all reference tree classes. Removal bounds are defined by basal area.
+
+#### **parameters**
+| parameter name              | type  | location in control.yaml   | notes               |
+|-----------------------------|-------|----------------------------|---------------------|
+| thinning_limits             | float | operation_file_params      | optional parameter  |
+| e                           | float | operation_params           | residue constant    |
+| thinning_factor             | float | operation_params           | removal intensity   |
+
+#### **output**
+
+Operation outputs a list of CrossCuttableTree objects
+
+Object attributes:
+| attribute name        | type        | description                            |
+|-----------------------|-------------|----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                |
+| species               | TreeSpecies | tree species of removed reference tree |
+| breast_height_diameter| float       | trees diameter at breast height        |
+| height                | float       | trees height                           |
+| source                | string      | standing or harveste                   |
+| operation             | string      | operation that produced such output    |
+| time_point            | int         | time point of operation execution      |
+| cross_cut_done        | bool        | cross cut operation executed           |
+
+#### **additional information**
+
+- parameter e is a residue constant so that the removal ratio would not go under the lower limit.
+  - For example e=0.2
+
+
 ### thinning_from_below
 
+Performs thinning from below which primarily removes trees with a smaller diameter. Removal bounds are defined by basal area.
 
+#### **parameters**
+| parameter name              | type  | location in control.yaml   | notes               |
+|-----------------------------|-------|----------------------------|---------------------|
+| thinning_limits             | float | operation_file_params      | optional parameter  |
+| e                           | float | operation_params           | residue constant    |
+| thinning_factor             | float | operation_params           | removal intensity   |
+
+#### **output**
+
+Operation outputs a list of CrossCuttableTree objects
+
+Object attributes:
+| attribute name        | type        | description                            |
+|-----------------------|-------------|----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                |
+| species               | TreeSpecies | tree species of removed reference tree |
+| breast_height_diameter| float       | trees diameter at breast height        |
+| height                | float       | trees height                           |
+| source                | string      | standing or harveste                   |
+| operation             | string      | operation that produced such output    |
+| time_point            | int         | time point of operation execution      |
+| cross_cut_done        | bool        | cross cut operation executed           |
+
+#### **additional information**
+
+- parameter e is a residue constant so that the removal ratio would not go under the lower limit.
+  - For example e=0.2
 
 ### thinning_from_above
 
+Performs thinning from above which primarily removes trees with a larger diameter. Removal bounds are defined by basal area.
+
+#### **parameters**
+| parameter name              | type  | location in control.yaml   | notes               |
+|-----------------------------|-------|----------------------------|---------------------|
+| thinning_limits             | float | operation_file_params      | optional parameter  |
+| e                           | float | operation_params           | residue constant    |
+| thinning_factor             | float | operation_params           | removal intensity   |
+
+#### **output**
+
+Operation outputs a list of CrossCuttableTree objects
+
+Object attributes:
+| attribute name        | type        | description                            |
+|-----------------------|-------------|----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                |
+| species               | TreeSpecies | tree species of removed reference tree |
+| breast_height_diameter| float       | trees diameter at breast height        |
+| height                | float       | trees height                           |
+| source                | string      | standing or harveste                   |
+| operation             | string      | operation that produced such output    |
+| time_point            | int         | time point of operation execution      |
+| cross_cut_done        | bool        | cross cut operation executed           |
+
+#### **additional information**
+
+- parameter e is a residue constant so that the removal ratio would not go under the lower limit.
+  - For example e=0.2
 
 ### first_thinning
 
-Calculates removal based on stem count as bounds
+Performs first thinning which primarily removes trees with a smaller diameter. Removal bounds are defined by number of stems.
 
 #### **parameters**
 | parameter name        | type | location in control.yaml   | notes               |
@@ -307,17 +397,17 @@ Calculates removal based on stem count as bounds
 
 Operation outputs a list of CrossCuttableTree objects
 
-Attributes of CrossCuttableTree object
-| attribute name        | description                                | type        |
-|-----------------------|--------------------------------------------|-------------|
-| stems_per_ha          | number of removed stems                    | float       |
-| species               | tree species of removed reference tree     | TreeSpecies |
-| breast_height_diameter| trees diameter at breast height            | float       |
-| height                | trees height                               | float       |
-| source                | standing or harveste                       | string      |
-| operation             | operation that produced such output        | string      |
-| time_point            | time point of operation execution          | int         |
-| cross_cut_done        | cross cut operation executed               | bool       |
+Object attributes:
+| attribute name        | type        | description                            |
+|-----------------------|-------------|----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                |
+| species               | TreeSpecies | tree species of removed reference tree |
+| breast_height_diameter| float       | trees diameter at breast height        |
+| height                | float       | trees height                           |
+| source                | string      | standing or harveste                   |
+| operation             | string      | operation that produced such output    |
+| time_point            | int         | time point of operation execution      |
+| cross_cut_done        | bool        | cross cut operation executed           |
 
 #### **additional information**
 
@@ -355,7 +445,7 @@ Attributes of the BiomassData object
 
 ### cross_cut_felled_trees
 
-Calculates the volume and value of harvested trees using Annika Kangas' cross cutting algorithm. Whenever this operation is called, it cross cuts all thinning and clearcutting results that have been produced before it, but have not yet been cross cut. Given this, it is enough to call this operation once before cross cutting results are needed. 
+Calculates the volume and value of harvested trees using Annika Kangas' cross cutting algorithm. Whenever this operation is called, it cross cuts all thinning and clearcutting results that have been produced before it, but have not yet been cross cut. Given this, it is enough to call this operation once before cross cutting results are needed.
 
 #### **additional information**
 The `time_point` attribute of the resulting CrossCutResult objects will be determined by the tree's havest year, not the year when this operation is called.
@@ -369,7 +459,7 @@ The `time_point` attribute of the resulting CrossCutResult objects will be deter
 Attributes of the CrossCutResult object
 | attribute name      | type |
 |---------------------|------|
-|   species           | TreeSpecies    | 
+|   species           | TreeSpecies    |
 |   timber_grade      | int |
 |   volume_per_ha     | float |
 |   value_per_ha      | float |
@@ -392,7 +482,7 @@ Calculates the volume and value of standing trees using Annika Kangas' cross cut
 Attributes of the CrossCutResult object
 | attribute name      | type |
 |---------------------|------|
-|   species           | TreeSpecies    | 
+|   species           | TreeSpecies    |
 |   timber_grade      | int |
 |   volume_per_ha     | float |
 |   value_per_ha      | float |
