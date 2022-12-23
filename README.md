@@ -447,10 +447,10 @@ Attributes of the BiomassData object
 
 ### report_state
 
-Enables collecting the states of user-defined variables at the time of the operation call. 
+Enables collecting the states of user-defined variables at the time of the operation call.
 
 #### **parameters**
-The parameters passed to the operation are the variables that the user wants to report. The parameters are key-value pairs, where the key defines the name of the variable, and the value defines how the variable is constructed. 
+The parameters passed to the operation are the variables that the user wants to report. The parameters are key-value pairs, where the key defines the name of the variable, and the value defines how the variable is constructed.
 
 The operation makes available a set of collections that can be used in the definition of desired variables. These collections are:
 
@@ -476,14 +476,14 @@ The stand's reference trees are stored under the name ``reference_trees``, and t
 
 However, often one needs more detailed information about the state, and therefore filter only certain variables. For example, to get the stems per hectare of pines:
 
-```yaml 
+```yaml
 report_state:
   - total_stems_per_ha: reference_trees.stems_per_ha[reference_trees.species == 1]
 ```
 
 or, to be even more fine-grained, get the stems_per_ha of pines that are not saplings:
 
-```yaml 
+```yaml
 report_state:
   - total_stems_per_ha: reference_trees.stems_per_ha[(reference_trees.species == 1) & (reference_trees.sapling == False)]
 ```
