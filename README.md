@@ -13,7 +13,7 @@ Prepared **operation chains** are generated from the step tree and are run with 
 
 To get started:
 
-* Install Python 3.10 for your platform. 
+* Install Python 3.10 for your platform.
 * Install git for your platform.
 * Ensure that the commands `python`, `pip` and `git` are available in your command line interface (CLI). We assume a UNIX-like shell CLI such as Git Bash for Windows users.
 * Initialize the project with the commands below.
@@ -200,7 +200,7 @@ CLI arguments override the settings in the control file.
 **TODO: at the time of writing this, there are no post-processing operations ready to be used. Post-processing will `do_nothing`**
 **TODO: at the time of writing this, export is not readily usable with the default control.yaml to produce proper output**
 
-All examples below default to `control.yaml` in the working directory as the control file source unless otherwise specified in the command line. 
+All examples below default to `control.yaml` in the working directory as the control file source unless otherwise specified in the command line.
 
 Preprocessing, simulation and post-processing phases do not produce output files by default.
 Configuration for preprocessing output container, state output container and derived data output container need to be set to produce output files.
@@ -266,26 +266,340 @@ python -m app.mela2 -r export outdir outdir2 my_project/export_control.yaml
 
 See table below for a quick reference of forestry operations usable in control.yaml.
 
-| operation                       | description                                                                                      | source                      | model library                    |
-|---------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------|----------------------------------|
-| do_nothing                      | This operation is no-op utility operation to simulate rest                                       |                             | native                           |
-| grow_acta                       | A simple ReferenceTree diameter and height growth operation                                      | Acta Forestalia Fennica 163 | forestry-function-library        |
-| grow_motti                      | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.                | Luke Motti group            | pymotti                          |
-| grow_fhk                        | grow_motti as a Lua + FHK graph implementation. Requires `pymotti`.                              |                             | native/forestry-function-library |
-| first_thinning                  | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest          | Reijo Mykkänen              | forestry-function-library        |
-| thinning_from_below             | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees   | Reijo Mykkänen              | forestry-function-library        |
-| thinning_from_above             | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees   | Reijo Mykkänen              | forestry-function-library        |
-| even_thinning                   | An operation reducing the stem count of ReferenceTrees evenly regardless of tree size            | Reijo Mykkänen              | forestry-function-library        |
-| report_collectives              | Save the values of [collective variables](#collective-variables)                                 |                             | native                           |
-| filter                          | [Filter](#filters) stands, trees and strata                                                      |                             | native                           |
-| cross_cut_felled_trees          | Perform cross cut operation to results of previous thinning operations                           | Annika Kangas               | forestry-function-library        |
-| cross_cut_standing_trees        | Perform cross cut operation to all standing trees on a stand                                     | Annika Kangas               | forestry-function-library        |
-| [calculate_npv](#calculate_npv) | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs. |                             | native                           |
+| operation                                             | description                                                                                      | source                      | model library                    |
+|-------------------------------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------|----------------------------------|
+| do_nothing                                            | This operation is no-op utility operation to simulate rest                                       |                             | native                           |
+| grow_acta                                             | A simple ReferenceTree diameter and height growth operation                                      | Acta Forestalia Fennica 163 | forestry-function-library        |
+| grow_motti                                            | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.                | Luke Motti group            | pymotti                          |
+| grow_fhk                                              | grow_motti as a Lua + FHK graph implementation. Requires `pymotti`.                              |                             | native/forestry-function-library |
+| first_thinning                                        | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest          | Reijo Mykkänen              | forestry-function-library        |
+| thinning_from_below                                   | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees   | Reijo Mykkänen              | forestry-function-library        |
+| thinning_from_above                                   | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees   | Reijo Mykkänen              | forestry-function-library        |
+| even_thinning                                         | An operation reducing the stem count of ReferenceTrees evenly regardless of tree size            | Reijo Mykkänen              | forestry-function-library        |
+| report_volume                                         | Collect tree volume data from ForestStand state                                                  |                             | native                           |
+| report_thinning                                       | Collect thinning operation details from data accrued from thinning operations                    |                             | native                           |
+| report_collectives                                    | Save the values of [collective variables](#collective-variables)                                 |                             | native                           |
+| calculate_biomass                                     | Calculate biomass accruals from the current reference tree properties                            | Laura Jaakkola              | native                           |
+| [report_state](#report_state)                         | save the values of state variables at the current time point                                     |                             | native                           |
+| filter                                                | [Filter](#filters) stands, trees and strata                                                      |                             | native                           |
+| [cross_cut_felled_trees](#cross_cut_felled_trees)     | Perform cross cut operation to results of previous thinning operations                           | Annika Kangas               | forestry-function-library        |
+| [cross_cut_standing_trees](#cross_cut_standing_trees) | Perform cross cut operation to all standing trees on a stand                                     | Annika Kangas               | forestry-function-library        |
+| [calculate_npv](#calculate_npv)                       | Calculate net present value of stand and harvest revenues subtracted by renewal operation costs. |                             | native                           |
+
+### planting
+
+Performes renewal operation planting which plants saplings on a empty stand.
+
+#### **parameters**
+| parameter name              | type   | description | location in control.yaml  | notes               |
+|-----------------------------|--------|-------------|---------------------------|---------------------|
+| planting_instructions       | string | In file rows represent site types, first column contains the tree species, second column the stems per hectar value and third column is the soil preparation type. |operation_file_params      | optional            |
+| tree_count        | int | Number of sapling trees to be plante.| operation_params      | optional, default 10            |
+
+#### **output**
+
+The output is written into the derived data container with two keys `renewal` and `regeneration`.
+
+Output of renewal is a regeneration description python dictionary containing following values
+regeneration key, soil prepration type, tree species and stem count.
+
+Output of regeneration is is a list of `PriceableOperationInfo` ovbjects:
+| attribute name        | type        | description                                 |
+|-----------------------|-------------|---------------------------------------------|
+| operation             | string      | renewal operation name                      |
+| units                 | float       | stand area                                  |
+| time_point            | int         | time point of operation execution timepoint |
+
+### even_thinning
+
+Performs even thinning which removes stems evenly from all reference tree classes. Removal bounds are defined by basal area.
+
+#### **parameters**
+| parameter name              | type  | location in control.yaml   | notes               |
+|-----------------------------|-------|----------------------------|---------------------|
+| thinning_limits             | float | operation_file_params      | optional parameter  |
+| e                           | float | operation_params           | residue constant    |
+| thinning_factor             | float | operation_params           | removal intensity   |
+
+#### **output**
+
+Operation outputs a list of CrossCuttableTree objects
+
+Object attributes:
+| attribute name        | type        | description                            |
+|-----------------------|-------------|----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                |
+| species               | TreeSpecies | tree species of removed reference tree |
+| breast_height_diameter| float       | trees diameter at breast height        |
+| height                | float       | trees height                           |
+| source                | string      | standing or harveste                   |
+| operation             | string      | operation that produced such output    |
+| time_point            | int         | time point of operation execution      |
+| cross_cut_done        | bool        | cross cut operation executed           |
+
+#### **additional information**
+
+- parameter e is a residue constant so that the removal ratio would not go under the lower limit.
+  - For example e=0.2
+
+
+### thinning_from_below
+
+Performs thinning from below which primarily removes trees with a smaller diameter. Removal bounds are defined by basal area.
+
+#### **parameters**
+| parameter name              | type  | location in control.yaml   | notes               |
+|-----------------------------|-------|----------------------------|---------------------|
+| thinning_limits             | float | operation_file_params      | optional parameter  |
+| e                           | float | operation_params           | residue constant    |
+| thinning_factor             | float | operation_params           | removal intensity   |
+
+#### **output**
+
+Operation outputs a list of CrossCuttableTree objects
+
+Object attributes:
+| attribute name        | type        | description                            |
+|-----------------------|-------------|----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                |
+| species               | TreeSpecies | tree species of removed reference tree |
+| breast_height_diameter| float       | trees diameter at breast height        |
+| height                | float       | trees height                           |
+| source                | string      | standing or harveste                   |
+| operation             | string      | operation that produced such output    |
+| time_point            | int         | time point of operation execution      |
+| cross_cut_done        | bool        | cross cut operation executed           |
+
+#### **additional information**
+
+- parameter e is a residue constant so that the removal ratio would not go under the lower limit.
+  - For example e=0.2
+
+### thinning_from_above
+
+Performs thinning from above which primarily removes trees with a larger diameter. Removal bounds are defined by basal area.
+
+#### **parameters**
+| parameter name              | type  | location in control.yaml   | notes               |
+|-----------------------------|-------|----------------------------|---------------------|
+| thinning_limits             | float | operation_file_params      | optional parameter  |
+| e                           | float | operation_params           | residue constant    |
+| thinning_factor             | float | operation_params           | removal intensity   |
+
+#### **output**
+
+Operation outputs a list of CrossCuttableTree objects
+
+Object attributes:
+| attribute name        | type        | description                            |
+|-----------------------|-------------|----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                |
+| species               | TreeSpecies | tree species of removed reference tree |
+| breast_height_diameter| float       | trees diameter at breast height        |
+| height                | float       | trees height                           |
+| source                | string      | standing or harveste                   |
+| operation             | string      | operation that produced such output    |
+| time_point            | int         | time point of operation execution      |
+| cross_cut_done        | bool        | cross cut operation executed           |
+
+#### **additional information**
+
+- parameter e is a residue constant so that the removal ratio would not go under the lower limit.
+  - For example e=0.2
+
+### first_thinning
+
+Performs first thinning which primarily removes trees with a smaller diameter. Removal bounds are defined by number of stems.
+
+#### **parameters**
+| parameter name        | type | location in control.yaml   | notes               |
+|-----------------------|------|----------------------------|---------------------|
+| dominant_height_lower_bound | float | operation_params    |                     |
+| dominant_height_upper_bound | float | operation_params    |                     |
+| e                           | float | operation_params    | residue constant    |
+| thinning_factor             | float | operation_params    | removal intensity   |
+
+#### **output**
+
+Operation outputs a list of CrossCuttableTree objects
+
+Object attributes:
+| attribute name        | type        | description                            |
+|-----------------------|-------------|----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                |
+| species               | TreeSpecies | tree species of removed reference tree |
+| breast_height_diameter| float       | trees diameter at breast height        |
+| height                | float       | trees height                           |
+| source                | string      | standing or harveste                   |
+| operation             | string      | operation that produced such output    |
+| time_point            | int         | time point of operation execution      |
+| cross_cut_done        | bool        | cross cut operation executed           |
+
+#### **additional information**
+
+- parameter e is a residue constant so that the removal ratio would not go under the lower limit.
+  - For example e=0.2
+
+### report_biomass
+
+Compute total biomass tonnages of a single forest stand.
+
+#### **parameters**
+| parameter name        | type | location in control.yaml   | notes          |
+|-----------------------|------|----------------------------|----------------|
+| model_set             | int | operation_params            | accepted values: 1 and 2 |
+
+#### **additional information**
+
+- model_set accepts following values 1, 2, 3 or 4
+  - if value is 1 wood, bark, living and dead branches, foliage, stumps and roots are collected
+  with model set Y
+  - if value is 2 wood, bark, living and dead branches, foliage, stumps and roots are collected with model set X
+
+#### **output**
+Attributes of the BiomassData object
+| attribute name        | type |
+|-----------------------|------|
+| stem_wood       | float |
+| stem_bark       | float |
+| stem_waste      | float |
+| living_branches | float |
+| dead_branches   | float |
+| foliage         | float |
+| stumps          | float |
+| roots           | float |
+
+
+### report_state
+
+Enables collecting the states of user-defined variables at the time of the operation call.
+
+#### **parameters**
+The parameters passed to the operation are the variables that the user wants to report. The parameters are key-value pairs, where the key defines the name of the variable, and the value defines how the variable is constructed.
+
+The operation makes available a set of collections that can be used in the definition of desired variables. These collections are:
+
+| name              | description                                 | class whose attributes are available        |
+|-------------------|---------------------------------------------|---------------------------------------------|
+| state             | forest stand                                | `ForestStand`                               |
+| reference_trees   | stand's reference trees                     | `ReferenceTrees`                            |
+| felled_trees      | trees that have been thinned/clearcut       | `CrossCuttableTree`                         |
+| cross_cutting     | results of cross cutting                    | `CrossCutResult`                            |
+| renewal           | results of renewal operations               | `PriceableOperationInfo`                    |
+| net_present_value | results of net present value calculations   | `NPVResult`                                 |
+
+
+#### **additional information**
+For example, to get the total stems per hectare in the years the operation is defined for, one would define ``report_state``'s operation parameters as:
+
+```yaml
+report_state:
+  - total_stems_per_ha: reference_trees.stems_per_ha
+```
+
+The stand's reference trees are stored under the name ``reference_trees``, and the attributes defined for that name can be used to get values. The returned `total_stems_per_ha` is the sum of the stand's trees' `stems_per_ha`s.
+
+However, often one needs more detailed information about the state, and therefore filter only certain variables. For example, to get the stems per hectare of pines:
+
+```yaml
+report_state:
+  - total_stems_per_ha: reference_trees.stems_per_ha[reference_trees.species == 1]
+```
+
+or, to be even more fine-grained, get the stems_per_ha of pines that are not saplings:
+
+```yaml
+report_state:
+  - total_stems_per_ha: reference_trees.stems_per_ha[(reference_trees.species == 1) & (reference_trees.sapling == False)]
+```
+Notice the parentheses around the filter conditions, when using multiple conditions.
+
+### report_period
+
+Operation makes it possible to collect sums of derived data collections between periods.
+
+For example in a 30 year long simulation one could define three 10-year periods by defining report_period on time points 10, 20 and 30. As the simulation executes the report_period operation collects user-defined derived data between years 0-9, 10-19 and 20-29.
+
+See documentation of report_state operation for definition and usage.
+
+### clearcut
+
+Clears the stands reference tree list and stores them as a list of `CrossCuttableTree` objects into derived data with the `felled_trees` keyword.
+
+#### **parameters**
+| parameter name                  | type     | description                                  | location in control.yaml   | notes |
+|---------------------------------|----------|----------------------------------------------|----------------------------|-------|
+| clearcutting_limits_ages        | string   | In file the rows represent site type values and colums represent tree species and the values represent the smallest possible age enabled.  | operation_file_params      | example file data/parameter_files/renewal_ages_southernFI.txt |
+| clearcutting_limits_diameters   | string   |In file the rows represent site type values and colums represent tree species and the values represent smallest possible breast height diameters enabled. | operation_file_params      | example file data/parameter_files/renewal_diameters_southernFI.txt  |
+| minimum_time_interval           | int      | After the operation is executed it will not be executed again until the `minimum_time_interval` is reached. | run_constrains             |   |
+
+
+#### **output**
+Output object attributes:
+| attribute name        | type        | description or value                    |
+|-----------------------|-------------|-----------------------------------------|
+| stems_per_ha          | float       | number of removed stems                 |
+| species               | TreeSpecies | tree species of removed reference tree  |
+| breast_height_diameter| float       | trees diameter at breast height         |
+| height                | float       | trees height                            |
+| source                | string      | value: `harvested`                    |
+| operation             | string      | value: `clearcutting`                 |
+| time_point            | int         | time point of operation execution       |
+| cross_cut_done        | bool        | cross cut operation executed or not     |
+
+
+### cross_cut_felled_trees
+
+Calculates the volume and value of harvested trees using Annika Kangas' cross cutting algorithm. Whenever this operation is called, it cross cuts all thinning and clearcutting results that have been produced before it, but have not yet been cross cut. Given this, it is enough to call this operation once before cross cutting results are needed.
+
+#### **additional information**
+The `time_point` attribute of the resulting CrossCutResult objects will be determined by the tree's havest year, not the year when this operation is called.
+#### **parameters**
+| parameter name        | type       | location in control.yaml   | notes          |
+|-----------------------|------------|----------------------------|----------------|
+| timber_price_table    | file (csv) |   operation_file_params    | timber grades must be given as integers  |
+
+
+#### **output**
+Attributes of the CrossCutResult object
+| attribute name      | type |
+|---------------------|------|
+|   species           | TreeSpecies    |
+|   timber_grade      | int |
+|   volume_per_ha     | float |
+|   value_per_ha      | float |
+|   stand_area        | float |
+|   source            | str (either "harvested" or "standing") |
+|   operation         | str (if source=="harvested", this has the name of the thinning/clearcutting operation that produced the trees. Otherwise contains empty string.)|
+|   time_point        | int |
+
+### cross_cut_standing_trees
+
+Calculates the volume and value of standing trees using Annika Kangas' cross cutting algorithm at the time of the operation call. This operation does not actually harvest the stand, but rather evaluates the the volume and value of its trees if they were cross cut. Therefore, this operation is different from [clearcutting](#clearcutting).
+
+#### **parameters**
+| parameter name        | type       | location in control.yaml   | notes          |
+|-----------------------|------------|----------------------------|----------------|
+| timber_price_table    | file (csv) |   operation_file_params    | timber grades must be given as integers  |
+
+
+#### **output**
+Attributes of the CrossCutResult object
+| attribute name      | type |
+|---------------------|------|
+|   species           | TreeSpecies    |
+|   timber_grade      | int |
+|   volume_per_ha     | float |
+|   value_per_ha      | float |
+|   stand_area        | float |
+|   source            | str (either "felled" or "standing") |
+|   operation         | str |
+|   time_point        | int |
 
 ### calculate_npv
 
 Calculates the Net Present Value (NPV) of a given schedule.
-#### **parameters** 
+#### **parameters**
 | parameter name        | type | location in control.yaml   | notes         |
 |-----------------------|------|----------------------------|---------------|
 | interest_rates        | list of int | operation_params    | e.g. [3], where 3 stands for 3% |
@@ -294,8 +608,8 @@ Calculates the Net Present Value (NPV) of a given schedule.
 
 
 #### **additional information**
-- This operation expects that ``cross_cut_felled_trees`` has been called previously to cross cut any previous thinning output. 
-- This operation expects that ``cross_cut_standing_trees`` has been called in the same time point, so that the present value of the standing trees can be evaluated correctly. 
+- This operation expects that ``cross_cut_felled_trees`` has been called previously to cross cut any previous thinning output.
+- This operation expects that ``cross_cut_standing_trees`` has been called in the same time point, so that the present value of the standing trees can be evaluated correctly.
 
 
 #### **formula**
@@ -315,7 +629,7 @@ where:
 
 - $a$ is the stand's area in hectares
 
-- $r$ is the interest rate 
+- $r$ is the interest rate
 
 - $S_T$ is the value of standing tree stock at the final time point $T$
 
@@ -330,7 +644,7 @@ where:
 
 (3) currently, costs originate only from renewal operations
 
-(4) Bare land values are passed in as a file parameter for the NPV operation. These values are already discounted with the given interest rate, so no discounting happens here. See MELA 2016 reference manual p.175-176 for more information about this. 
+(4) Bare land values are passed in as a file parameter for the NPV operation. These values are already discounted with the given interest rate, so no discounting happens here. See MELA 2016 reference manual p.175-176 for more information about this.
 ## Testing
 
 To run unit test suites, run in the project root
@@ -369,9 +683,9 @@ A run is declared in the YAML file `control.yaml`.
    2. `generators` is a list of chained generator functions (see section on step generators)
       1. `sequence` a list of operations to be executed as a chain
       2. `alternatives` a list of operations which represent alternative branches
-5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional) arguments under `preprocessing_params` as key-value pairs. 
-6. Operation parameters that **exist in files** can be passed in `operation_file_params` as demonstated below: 
-   ```yaml 
+5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional) arguments under `preprocessing_params` as key-value pairs.
+6. Operation parameters that **exist in files** can be passed in `operation_file_params` as demonstated below:
+   ```yaml
    operation_file_params:
      first_thinning:
        thinning_limits: /path/to/file/thinning-limits.txt
@@ -526,7 +840,7 @@ The generators are chainable and nestable such that they can expand the step tre
 The `NestableGenerator` represents a tree structure for nested generator declarations.
 It is constructed from the `simulation_events` structure given from a configuration source.
 A `SimConfiguration` structure, likewise populated from a configuration source is used as a template for binding the created generator functions with prepared domain operation functions.
-The control source is an application's `control.yaml` file's dict structure or another compatible source. 
+The control source is an application's `control.yaml` file's dict structure or another compatible source.
 
 `compose_nested` function executes the given `NestableGenerator` which in turn utilizes its prepared `sequence` and `alternatives` calls to build a complete simulation step tree.
 
