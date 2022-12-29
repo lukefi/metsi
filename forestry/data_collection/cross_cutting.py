@@ -4,6 +4,7 @@ from sim.core_types import OpTuple
 from forestdatamodel.model import ForestStand
 from forestry.utils.file_io import get_timber_price_table
 from forestryfunctions.cross_cutting.cross_cutting import cross_cut
+from forestryfunctions.cross_cutting.cross_cutting_fhk import cross_cut_func
 from forestdatamodel.enums.internal import TreeSpecies
 
 
@@ -54,17 +55,21 @@ def cross_cut_tree(
     tree: CrossCuttableTree,
     stand_area: float,
     timber_price_table: np.ndarray,
+    mode: str = "py"
     ) -> list[CrossCutResult]:
     """
     :param tree: The tree to cross cut
+    :param stand_area: Stand area
+    :param timber_price_table: Timber price table
+    :param mode: implementation to use (py, lua)
     :returns: A list of CrossCutResult objects, whose length is given by the number of unique timber grades in the `timber_price_table`. In other words, the returned list contains the resulting quantities of each unique timber grade.
     """
-    unique_timber_grades, volumes, values = cross_cut(
-                            tree.species,
-                            tree.breast_height_diameter,
-                            tree.height,
-                            timber_price_table
-                            )
+    if mode == "lua":
+        cross_cut_fn = lambda: cross_cut_func(timber_price_table)(tree.species, tree.breast_height_diameter, tree.height)
+    else:
+        cross_cut_fn = lambda: cross_cut(tree.species, tree.breast_height_diameter, tree.height, timber_price_table)
+
+    unique_timber_grades, volumes, values = cross_cut_fn()
 
     res = _create_cross_cut_results(
                         stand_area,
@@ -87,6 +92,7 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
     """
     stand, simulation_aggregates = payload
     timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
+    impl = operation_parameters.get('implementation', 'py')
 
     results = []
 
@@ -95,7 +101,7 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
     felled_trees_not_cut = filter(lambda x: not x.cross_cut_done, felled_trees)
 
     for tree in felled_trees_not_cut:
-        res = cross_cut_tree(tree, stand.area, timber_price_table)
+        res = cross_cut_tree(tree, stand.area, timber_price_table, impl)
         results.extend(res)
         tree.cross_cut_done = True
 
@@ -111,10 +117,11 @@ def cross_cut_standing_trees(payload: OpTuple[ForestStand], **operation_paramete
     stand, simulation_aggregates = payload
     timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
     cross_cuttable_trees = cross_cuttable_trees_from_stand(stand, simulation_aggregates.current_time_point)
+    impl = operation_parameters.get('implementation', 'py')
 
     results = []
     for tree in cross_cuttable_trees:
-        res = cross_cut_tree(tree, stand.area, timber_price_table)
+        res = cross_cut_tree(tree, stand.area, timber_price_table, impl)
         results.extend(res)
 
     simulation_aggregates.extend_list_result("cross_cutting", results)
