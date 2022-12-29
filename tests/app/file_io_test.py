@@ -5,7 +5,7 @@ from pathlib import Path
 from forestdatamodel.enums.internal import *
 import app.file_io
 from dataclasses import dataclass
-from forestdatamodel.model import ForestStand, ReferenceTree
+from forestdatamodel.model import ForestStand, ReferenceTree, TreeStratum
 
 from app.app_io import Mela2Configuration
 
@@ -107,48 +107,49 @@ class TestFileReading(unittest.TestCase):
 
     def test_read_stands_from_pickle_file(self):
         config = Mela2Configuration(
-            input_path="tests/resources/file_io_test/two_ffc_stands.pickle",
+            input_path="tests/resources/file_io_test/forest_centre.pickle",
             state_format="fdm",
             state_input_container="pickle"
         )
         unpickled_stands = app.file_io.read_stands_from_file(config)
         self.assertEqual(len(unpickled_stands), 2)
         self.assertEqual(type(unpickled_stands[0]), ForestStand)
+        self.assertEqual(type(unpickled_stands[0].tree_strata[0]), TreeStratum)
 
     def test_read_stands_from_json_file(self):
         config = Mela2Configuration(
-            input_path="tests/resources/file_io_test/two_vmi12_stands_as_jsonpickle.json",
+            input_path="tests/resources/file_io_test/forest_centre.json",
             state_format="fdm",
             state_input_container="json"
         )
         stands_from_json = app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands_from_json), 2)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
-        self.assertEqual(type(stands_from_json[1].reference_trees[0]), ReferenceTree)
+        self.assertEqual(type(stands_from_json[0].tree_strata[0]), TreeStratum)
 
     def test_read_stands_from_csv_file(self):
         config = Mela2Configuration(
-            input_path="tests/resources/file_io_test/preprocessing_result.csv",
+            input_path="tests/resources/file_io_test/forest_centre.csv",
             state_format="fdm",
             state_input_container="csv"
         )
         stands_from_csv = app.file_io.read_stands_from_file(config)
-        self.assertEqual(len(stands_from_csv), 1)
+        self.assertEqual(len(stands_from_csv), 2)
         self.assertEqual(type(stands_from_csv[0]), ForestStand)
-        self.assertEqual(type(stands_from_csv[0].reference_trees[0]), ReferenceTree)
+        self.assertEqual(type(stands_from_csv[0].tree_strata[0]), TreeStratum)
 
     def test_read_stands_from_vmi12_file(self):
         config = Mela2Configuration(
-            input_path="tests/resources/file_io_test/VMI12_source_mini.dat",
+            input_path="tests/resources/file_io_test/vmi12.dat",
             state_format="vmi12",
             state_input_container=""
         )
         stands = app.file_io.read_stands_from_file(config)
-        self.assertEqual(len(stands), 7)
+        self.assertEqual(len(stands), 4)
 
     def test_read_stands_from_vmi13_file(self):
         config = Mela2Configuration(
-            input_path="tests/resources/file_io_test/VMI13_source_mini.dat",
+            input_path="tests/resources/file_io_test/vmi13.dat",
             state_format="vmi13",
             state_input_container=""
         )
@@ -157,7 +158,7 @@ class TestFileReading(unittest.TestCase):
 
     def test_read_stands_from_xml_file(self):
         config = Mela2Configuration(
-            input_path="tests/resources/file_io_test/SMK_source.xml",
+            input_path="tests/resources/file_io_test/forest_centre.xml",
             state_format="forest_centre",
             state_input_container=""
         )

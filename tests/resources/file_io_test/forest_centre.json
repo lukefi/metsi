@@ -1,0 +1,295 @@
+[
+  {
+    "py/object": "forestdatamodel.model.ForestStand",
+    "reference_trees": [],
+    "tree_strata": [
+      {
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "stand": null,
+        "identifier": "100-331-stratum",
+        "species": {
+          "py/reduce": [
+            {
+              "py/type": "forestdatamodel.enums.internal.TreeSpecies"
+            },
+            {
+              "py/tuple": [
+                2
+              ]
+            }
+          ]
+        },
+        "origin": null,
+        "stems_per_ha": null,
+        "mean_diameter": 2.0,
+        "mean_height": 2.3,
+        "breast_height_age": null,
+        "biological_age": 10.0,
+        "basal_area": null,
+        "saw_log_volume_reduction_factor": null,
+        "cutting_year": null,
+        "age_when_10cm_diameter_at_breast_height": null,
+        "tree_number": 1,
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "lowest_living_branch_height": null,
+        "management_category": null,
+        "sapling_stems_per_ha": null,
+        "sapling_stratum": false
+      },
+      {
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "stand": null,
+        "identifier": "100-332-stratum",
+        "species": {
+          "py/id": 5
+        },
+        "origin": null,
+        "stems_per_ha": null,
+        "mean_diameter": 13.1,
+        "mean_height": 12.2,
+        "breast_height_age": null,
+        "biological_age": 48.0,
+        "basal_area": 5.2,
+        "saw_log_volume_reduction_factor": null,
+        "cutting_year": null,
+        "age_when_10cm_diameter_at_breast_height": null,
+        "tree_number": 2,
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "lowest_living_branch_height": null,
+        "management_category": null,
+        "sapling_stems_per_ha": null,
+        "sapling_stratum": false
+      },
+      {
+        "py/object": "forestdatamodel.model.TreeStratum",
+        "stand": null,
+        "identifier": "100-333-stratum",
+        "species": {
+          "py/reduce": [
+            {
+              "py/type": "forestdatamodel.enums.internal.TreeSpecies"
+            },
+            {
+              "py/tuple": [
+                1
+              ]
+            }
+          ]
+        },
+        "origin": null,
+        "stems_per_ha": null,
+        "mean_diameter": 14.5,
+        "mean_height": 14.6,
+        "breast_height_age": null,
+        "biological_age": 41.0,
+        "basal_area": 4.3,
+        "saw_log_volume_reduction_factor": null,
+        "cutting_year": null,
+        "age_when_10cm_diameter_at_breast_height": null,
+        "tree_number": 3,
+        "stand_origin_relative_position": {
+          "py/tuple": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "lowest_living_branch_height": null,
+        "management_category": null,
+        "sapling_stems_per_ha": null,
+        "sapling_stratum": false
+      }
+    ],
+    "identifier": "100",
+    "management_unit_id": null,
+    "stand_id": null,
+    "year": 2020,
+    "area": 0.28,
+    "area_weight": 0.28,
+    "geo_location": {
+      "py/tuple": [
+        6542843.0,
+        532437.0,
+        null,
+        "EPSG:3067"
+      ]
+    },
+    "degree_days": null,
+    "owner_category": {
+      "py/reduce": [
+        {
+          "py/type": "forestdatamodel.enums.internal.OwnerCategory"
+        },
+        {
+          "py/tuple": [
+            1
+          ]
+        }
+      ]
+    },
+    "land_use_category": {
+      "py/reduce": [
+        {
+          "py/type": "forestdatamodel.enums.internal.LandUseCategory"
+        },
+        {
+          "py/tuple": [
+            1
+          ]
+        }
+      ]
+    },
+    "soil_peatland_category": {
+      "py/reduce": [
+        {
+          "py/type": "forestdatamodel.enums.internal.SoilPeatlandCategory"
+        },
+        {
+          "py/tuple": [
+            3
+          ]
+        }
+      ]
+    },
+    "site_type_category": {
+      "py/reduce": [
+        {
+          "py/type": "forestdatamodel.enums.internal.SiteType"
+        },
+        {
+          "py/tuple": [
+            3
+          ]
+        }
+      ]
+    },
+    "tax_class_reduction": 0,
+    "tax_class": 0,
+    "drainage_category": {
+      "py/reduce": [
+        {
+          "py/type": "forestdatamodel.enums.internal.DrainageCategory"
+        },
+        {
+          "py/tuple": [
+            8
+          ]
+        }
+      ]
+    },
+    "drainage_feasibility": true,
+    "drainage_year": null,
+    "fertilization_year": null,
+    "soil_surface_preparation_year": null,
+    "natural_regeneration_feasibility": false,
+    "regeneration_area_cleaning_year": null,
+    "development_class": 0,
+    "artificial_regeneration_year": null,
+    "young_stand_tending_year": null,
+    "pruning_year": null,
+    "cutting_year": null,
+    "forestry_centre_id": null,
+    "forest_management_category": 1,
+    "method_of_last_cutting": null,
+    "municipality_id": null,
+    "stems_per_ha_scaling_factors": {
+      "py/tuple": [
+        1.0,
+        1.0
+      ]
+    },
+    "fra_category": null,
+    "land_use_category_detail": null,
+    "auxiliary_stand": false,
+    "monthly_temperatures": null,
+    "monthly_rainfall": null,
+    "sea_effect": null,
+    "lake_effect": null
+  },
+  {
+    "py/object": "forestdatamodel.model.ForestStand",
+    "reference_trees": [],
+    "tree_strata": [],
+    "identifier": "101",
+    "management_unit_id": null,
+    "stand_id": null,
+    "year": 2020,
+    "area": 0.45,
+    "area_weight": 0.45,
+    "geo_location": {
+      "py/tuple": [
+        6532843.0,
+        536437.0,
+        null,
+        "EPSG:3067"
+      ]
+    },
+    "degree_days": null,
+    "owner_category": {
+      "py/id": 9
+    },
+    "land_use_category": {
+      "py/id": 10
+    },
+    "soil_peatland_category": {
+      "py/id": 11
+    },
+    "site_type_category": {
+      "py/reduce": [
+        {
+          "py/type": "forestdatamodel.enums.internal.SiteType"
+        },
+        {
+          "py/tuple": [
+            4
+          ]
+        }
+      ]
+    },
+    "tax_class_reduction": 0,
+    "tax_class": 0,
+    "drainage_category": {
+      "py/id": 13
+    },
+    "drainage_feasibility": true,
+    "drainage_year": null,
+    "fertilization_year": null,
+    "soil_surface_preparation_year": null,
+    "natural_regeneration_feasibility": false,
+    "regeneration_area_cleaning_year": null,
+    "development_class": 0,
+    "artificial_regeneration_year": null,
+    "young_stand_tending_year": null,
+    "pruning_year": null,
+    "cutting_year": null,
+    "forestry_centre_id": null,
+    "forest_management_category": 1,
+    "method_of_last_cutting": null,
+    "municipality_id": null,
+    "stems_per_ha_scaling_factors": {
+      "py/tuple": [
+        1.0,
+        1.0
+      ]
+    },
+    "fra_category": null,
+    "land_use_category_detail": null,
+    "auxiliary_stand": false,
+    "monthly_temperatures": null,
+    "monthly_rainfall": null,
+    "sea_effect": null,
+    "lake_effect": null
+  }
+]

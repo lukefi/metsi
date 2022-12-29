@@ -1,0 +1,5 @@
+stand;100;None;2020;0.28;0.28;6542843.0;532437.0;None;EPSG:3067;None;OwnerCategory.PRIVATE;LandUseCategory.FOREST;SoilPeatlandCategory.PINE_MIRE;SiteType.DAMP_SITE;0;0;DrainageCategory.TRANSFORMED_MIRE;True;None;None;None;False;None;0;None;None;None;None;-1;1;None;None;None;None;False;1.0;1.0;None
+stratum;100-331-stratum;TreeSpecies.SPRUCE;None;None;2.0;2.3;None;10.0;None;None;None;None;1;0.0;0.0;0.0;None;None;None;False
+stratum;100-332-stratum;TreeSpecies.SPRUCE;None;None;13.1;12.2;None;48.0;5.2;None;None;None;2;0.0;0.0;0.0;None;None;None;False
+stratum;100-333-stratum;TreeSpecies.PINE;None;None;14.5;14.6;None;41.0;4.3;None;None;None;3;0.0;0.0;0.0;None;None;None;False
+stand;101;None;2020;0.45;0.45;6532843.0;536437.0;None;EPSG:3067;None;OwnerCategory.PRIVATE;LandUseCategory.FOREST;SoilPeatlandCategory.PINE_MIRE;SiteType.SUB_DRY_SITE;0;0;DrainageCategory.TRANSFORMED_MIRE;True;None;None;None;False;None;0;None;None;None;None;-1;1;None;None;None;None;False;1.0;1.0;None

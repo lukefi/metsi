@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ForestPropertyData xsi:schemaLocation="http://standardit.tapio.fi/schemas/forestData ForestData.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" xmlns:gdt="http://standardit.tapio.fi/schemas/forestData/common/geometricDataTypes" xmlns:co="http://standardit.tapio.fi/schemas/forestData/common" xmlns:sf="http://standardit.tapio.fi/schemas/forestData/specialFeature" xmlns:op="http://standardit.tapio.fi/schemas/forestData/operation" xmlns:dts="http://standardit.tapio.fi/schemas/forestData/deadTreeStrata" xmlns:tss="http://standardit.tapio.fi/schemas/forestData/treeStandSummary" xmlns:tst="http://standardit.tapio.fi/schemas/forestData/treeStratum" xmlns:ts="http://standardit.tapio.fi/schemas/forestData/treeStand" xmlns:st="http://standardit.tapio.fi/schemas/forestData/Stand" xmlns="http://standardit.tapio.fi/schemas/forestData">
+    <st:Stands>
+        <st:Stand id="100">
+            <st:StandBasicData>
+                <st:StandNumber>10</st:StandNumber>
+                <st:MainGroup>1</st:MainGroup>
+                <st:SubGroup>3</st:SubGroup>
+                <st:FertilityClass>3</st:FertilityClass>
+                <st:SoilType>60</st:SoilType>
+                <st:DrainageState>9</st:DrainageState>
+                <st:DitchingYear>1980</st:DitchingYear>
+                <st:DevelopmentClass>03</st:DevelopmentClass>
+                <st:StandQuality>0</st:StandQuality>
+                <st:MainTreeSpecies>29</st:MainTreeSpecies>
+                <st:Accessibility>4</st:Accessibility>
+                <st:CuttingRestriction>0</st:CuttingRestriction>
+                <st:SilvicultureRestriction>0</st:SilvicultureRestriction>
+                <st:StandBasicDataDate>2020-05-20</st:StandBasicDataDate>
+                <co:DataSource>11</co:DataSource>
+                <st:GrowthPlaceDataSource>1</st:GrowthPlaceDataSource>
+                <st:Area>0.28</st:Area>
+                <st:AreaDecrease>0.00</st:AreaDecrease>
+                <gdt:PolygonGeometry>
+                    <gml:pointProperty>
+                        <gml:Point srsName="EPSG:3067">
+                            <gml:coordinates>532437,6542843</gml:coordinates>
+                        </gml:Point>
+                    </gml:pointProperty>
+                </gdt:PolygonGeometry>
+            </st:StandBasicData>
+            <ts:TreeStandData>
+                <ts:TreeStandDataDate type="1" date="2020-05-20">
+                    <tst:TreeStrata>
+                        <tst:TreeStratum id="331">
+                            <tst:StratumNumber>1</tst:StratumNumber>
+                            <tst:TreeSpecies>2</tst:TreeSpecies>
+                            <tst:Storey>5</tst:Storey>
+                            <tst:Age>10</tst:Age>
+                            <tst:MeanDiameter>2</tst:MeanDiameter>
+                            <tst:MeanHeight>2.3</tst:MeanHeight>
+                            <co:DataSource>2</co:DataSource>
+                        </tst:TreeStratum>
+                        <tst:TreeStratum id="332">
+                            <tst:StratumNumber>2</tst:StratumNumber>
+                            <tst:TreeSpecies>2</tst:TreeSpecies>
+                            <tst:Storey>5</tst:Storey>
+                            <tst:Age>48</tst:Age>
+                            <tst:BasalArea>5.2</tst:BasalArea>
+                            <tst:MeanDiameter>13.1</tst:MeanDiameter>
+                            <tst:MeanHeight>12.2</tst:MeanHeight>
+                            <co:DataSource>2</co:DataSource>
+                        </tst:TreeStratum>
+                        <tst:TreeStratum id="333">
+                            <tst:StratumNumber>3</tst:StratumNumber>
+                            <tst:TreeSpecies>1</tst:TreeSpecies>
+                            <tst:Storey>5</tst:Storey>
+                            <tst:Age>41</tst:Age>
+                            <tst:BasalArea>4.3</tst:BasalArea>
+                            <tst:MeanDiameter>14.5</tst:MeanDiameter>
+                            <tst:MeanHeight>14.6</tst:MeanHeight>
+                            <tst:Volume>34.3</tst:Volume>
+                            <co:DataSource>2</co:DataSource>
+                        </tst:TreeStratum>
+                    </tst:TreeStrata>
+                </ts:TreeStandDataDate>
+                <ts:TreeStandDataDate type="2" date="2020-05-20">
+                    <tst:TreeStrata>
+                        <tst:TreeStratum id="331">
+                            <tst:StratumNumber>1</tst:StratumNumber>
+                            <tst:TreeSpecies>2</tst:TreeSpecies>
+                            <tst:Storey>5</tst:Storey>
+                            <tst:Age>10</tst:Age>
+                            <tst:MeanDiameter>2</tst:MeanDiameter>
+                            <tst:MeanHeight>2.3</tst:MeanHeight>
+                            <co:DataSource>2</co:DataSource>
+                        </tst:TreeStratum>
+                        <tst:TreeStratum id="332">
+                            <tst:StratumNumber>2</tst:StratumNumber>
+                            <tst:TreeSpecies>2</tst:TreeSpecies>
+                            <tst:Storey>5</tst:Storey>
+                            <tst:Age>48</tst:Age>
+                            <tst:BasalArea>5.2</tst:BasalArea>
+                            <tst:MeanDiameter>13.1</tst:MeanDiameter>
+                            <tst:MeanHeight>12.2</tst:MeanHeight>
+                            <co:DataSource>2</co:DataSource>
+                        </tst:TreeStratum>
+                    </tst:TreeStrata>
+                </ts:TreeStandDataDate>
+            </ts:TreeStandData>
+        </st:Stand>
+        <st:Stand id="101">
+            <st:StandBasicData>
+                <st:CompleteState>1</st:CompleteState>
+                <st:StandNumber>15</st:StandNumber>
+                <st:MainGroup>1</st:MainGroup>
+                <st:SubGroup>3</st:SubGroup>
+                <st:FertilityClass>4</st:FertilityClass>
+                <st:SoilType>60</st:SoilType>
+                <st:DrainageState>9</st:DrainageState>
+                <st:DitchingYear>1970</st:DitchingYear>
+                <st:DevelopmentClass>03</st:DevelopmentClass>
+                <st:StandQuality>0</st:StandQuality>
+                <st:MainTreeSpecies>2</st:MainTreeSpecies>
+                <st:Accessibility>4</st:Accessibility>
+                <st:CuttingRestriction>0</st:CuttingRestriction>
+                <st:SilvicultureRestriction>0</st:SilvicultureRestriction>
+                <st:StandBasicDataDate>2020-03-21</st:StandBasicDataDate>
+                <co:DataSource>11</co:DataSource>
+                <st:GrowthPlaceDataSource>1</st:GrowthPlaceDataSource>
+                <st:Area>0.45</st:Area>
+                <st:AreaDecrease>0.00</st:AreaDecrease>
+                <gdt:PolygonGeometry>
+                    <gml:pointProperty>
+                        <gml:Point srsName="EPSG:3067">
+                            <gml:coordinates>536437,6532843</gml:coordinates>
+                        </gml:Point>
+                    </gml:pointProperty>
+                </gdt:PolygonGeometry>
+            </st:StandBasicData>
+        </st:Stand>
+    </st:Stands>
+</ForestPropertyData>

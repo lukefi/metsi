@@ -21,7 +21,7 @@ class MainTest(unittest.TestCase):
             'csv',
             '-r',
             'preprocess,simulate,postprocess,export',
-            'data/SMK_source.xml',
+            'tests/resources/file_io_test/forest_centre.xml',
             'test_outdir'
         ]
         mela2.main()
