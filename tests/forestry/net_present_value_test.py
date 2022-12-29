@@ -1,9 +1,8 @@
 import unittest
-import forestry.net_present_value as npv
+import forestry.data_collection.net_present_value as npv
 from forestdatamodel.model import ForestStand
 from sim.core_types import AggregatedResults
-from forestry.cross_cutting import CrossCutResult
-from forestry.renewal import PriceableOperationInfo
+from forestry.collected_types import CrossCutResult, PriceableOperationInfo
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.utils.file_io import get_land_values_as_dict, get_renewal_costs_as_dict
 
@@ -20,11 +19,11 @@ class NPVTest(unittest.TestCase):
     default_rate = 3
 
     def test_get_bare_land_value(self):
-        
+
         blv = npv._get_bare_land_value(
             self.land_values,
             soil_peatland_category = 1,
-            site_type = 1, 
+            site_type = 1,
             interest_rate = 5
             )
         self.assertEqual(blv, 332)
@@ -48,9 +47,9 @@ class NPVTest(unittest.TestCase):
         )
         actual = npv._calculate_npv_for_rate(self.stand, aggrs, self.land_values, self.renewal_costs, self.default_rate)
         expected = npv._get_bare_land_value(
-                        self.land_values, 
+                        self.land_values,
                         soil_peatland_category = 1,
-                        site_type = 1, 
+                        site_type = 1,
                         interest_rate = self.default_rate
                         )
         self.assertAlmostEqual(actual, expected)
@@ -64,7 +63,7 @@ class NPVTest(unittest.TestCase):
                         species=TreeSpecies.PINE,
                         timber_grade=1,
                         volume_per_ha=2,
-                        value_per_ha=100, 
+                        value_per_ha=100,
                         stand_area=self.stand.area,
                         source="harvested",
                         operation="thin1",
@@ -87,7 +86,7 @@ class NPVTest(unittest.TestCase):
                         species=TreeSpecies.PINE,
                         timber_grade=1,
                         volume_per_ha=2,
-                        value_per_ha=100, 
+                        value_per_ha=100,
                         stand_area=self.stand.area,
                         source="harvested",
                         operation="clearcutting",
@@ -117,7 +116,7 @@ class NPVTest(unittest.TestCase):
                         species=TreeSpecies.PINE,
                         timber_grade=1,
                         volume_per_ha=2,
-                        value_per_ha=100, 
+                        value_per_ha=100,
                         stand_area=self.stand.area,
                         source="standing",
                         operation="",
@@ -128,7 +127,7 @@ class NPVTest(unittest.TestCase):
                         species=TreeSpecies.PINE,
                         timber_grade=1,
                         volume_per_ha=2,
-                        value_per_ha=100, 
+                        value_per_ha=100,
                         stand_area=self.stand.area,
                         source="standing",
                         operation="",

@@ -2,9 +2,9 @@ import unittest
 
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
-import pandas as pd
-import forestry.biomass_repola as biomass
-import os
+import forestry.data_collection.biomass_repola as biomass
+
+import forestry.collected_types
 
 
 class ForestryOperationsTest(unittest.TestCase):
@@ -98,7 +98,7 @@ class ForestryOperationsTest(unittest.TestCase):
         wastevolumes = [10.0, 1.0]
 
         result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 1)
-        self.assertEqual(biomass.BiomassData(
+        self.assertEqual(forestry.collected_types.BiomassData(
             stem_wood=2.901904782670537,
             stem_bark=0.2621029279780194,
             stem_waste=0.0,
@@ -128,7 +128,7 @@ class ForestryOperationsTest(unittest.TestCase):
         wastevolumes = [10.0, 1.0]
 
         result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 2)
-        self.assertEqual(biomass.BiomassData(
+        self.assertEqual(forestry.collected_types.BiomassData(
             stem_wood=2.6943581559391907,
             stem_bark=0.26525277171872336,
             stem_waste=0.0,
@@ -138,3 +138,7 @@ class ForestryOperationsTest(unittest.TestCase):
             stumps=0.2649429105180369,
             roots=0.7614991804052376),
             result)
+
+    def test_calculate_biomass_no_trees(self):
+        result = biomass.biomasses_by_component_stand(ForestStand(), None, None, None)
+        self.assertEqual(biomass.BiomassData(), result)

@@ -1,0 +1,65 @@
+{
+  "py/object": "sim.core_types.AggregatedResults",
+  "operation_results": {
+    "calculate_biomass": {
+      "py/reduce": [
+        {
+          "py/type": "collections.OrderedDict"
+        },
+        {
+          "py/tuple": []
+        },
+        null,
+        null,
+        {
+          "py/tuple": [
+            {
+              "py/tuple": [
+                0,
+                {
+                  "py/object": "forestry.types.BiomassAggregate",
+                  "difference": {
+                    "py/object": "forestry.biomass_repola.BiomassData",
+                    "stem_wood": 0.0,
+                    "stem_bark": 0.0,
+                    "stem_waste": 0.0,
+                    "living_branches": 0.0,
+                    "dead_branches": 0.0,
+                    "foliage": 0.0,
+                    "stumps": 0.0,
+                    "roots": 0.0
+                  },
+                  "current": 0
+                }
+              ]
+            },
+            {
+              "py/tuple": [
+                20,
+                {
+                  "py/object": "forestry.types.BiomassAggregate",
+                  "difference": {
+                    "py/object": "forestry.biomass_repola.BiomassData",
+                    "stem_wood": 0.0,
+                    "stem_bark": 0.0,
+                    "stem_waste": 0.0,
+                    "living_branches": 0.0,
+                    "dead_branches": 0.0,
+                    "foliage": 0.0,
+                    "stumps": 0.0,
+                    "roots": 0.0
+                  },
+                  "current": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "felled_trees": [],
+    "cross_cutting": []
+  },
+  "current_time_point": 20,
+  "initial_time_point": 0
+}

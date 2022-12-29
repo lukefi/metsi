@@ -9,8 +9,7 @@ import numpy as np
 import yaml
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
-
-from forestry.preprocessing import compute_location_metadata
+from forestry.pre_ops import compute_location_metadata
 from sim.core_types import OpTuple, OperationPayload
 
 
@@ -104,7 +103,7 @@ def prepare_growth_test_stand():
         ],
         year=2025
     )
-    return compute_location_metadata([stand])[0]
+    return stand
 
 
 DEFAULT_TIMBER_PRICE_TABLE = np.array(

@@ -1,9 +1,9 @@
-from forestry.cross_cutting import CrossCuttableTree
+from forestry.collected_types import CrossCuttableTree
 from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ReferenceTree
-from forestry.thinning_limits import *
+from forestry.forestry_operations.thinning_limits import *
 from sim.core_types import AggregatedResults
-import forestry.thinning as thin
+import forestry.forestry_operations.thinning as thin
 import numpy as np
 from forestry.utils.file_io import get_timber_price_table
 
@@ -70,7 +70,7 @@ class ThinningsTest(ConverterTestSuite):
         operation_tag = 'thinning_from_above'
         simulation_aggregates = AggregatedResults()
         operation_parameters = {
-            'thinning_factor': 0.97, 
+            'thinning_factor': 0.97,
             'e': 0.2,
             }
 
@@ -99,7 +99,7 @@ class ThinningsTest(ConverterTestSuite):
 
         simulation_aggregates = AggregatedResults()
         operation_parameters = {
-            'thinning_factor': 0.97, 
+            'thinning_factor': 0.97,
             'e': 0.2,
             }
 
@@ -128,7 +128,7 @@ class ThinningsTest(ConverterTestSuite):
 
         simulation_aggregates = AggregatedResults()
         operation_parameters = {
-            'thinning_factor': 0.50, 
+            'thinning_factor': 0.50,
             'e': 0.2,
             }
 

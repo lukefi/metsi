@@ -1,5 +1,6 @@
 import unittest
-from forestry.cross_cutting import CrossCutResult, CrossCuttableTree, cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
+from forestry.data_collection.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
+from forestry.collected_types import CrossCutResult, CrossCuttableTree
 from sim.core_types import AggregatedResults, OperationPayload, Step
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
@@ -9,14 +10,14 @@ from sim.runners import run_chains_iteratively
 from tests.test_utils import DEFAULT_TIMBER_PRICE_TABLE, TIMBER_PRICE_TABLE_THREE_GRADES
 
 class CrossCuttingTest(unittest.TestCase):
-    
+
     def test_cross_cut_thinning_output_cross_cuts_only_uncut_trees(self):
         """
         First CrossCuttableTrees object has already been cross cut, but the second one has not been cross cut yet.
         The operation should only cross cut the second one.
         """
         payload = (
-            ForestStand(area=2.0), 
+            ForestStand(area=2.0),
             AggregatedResults(
                 operation_results={
                     "felled_trees": [
@@ -65,7 +66,7 @@ class CrossCuttingTest(unittest.TestCase):
         operation_parameters = {'timber_price_table': "tests/resources/timber_price_table.csv"}
 
         payload = (
-            ForestStand(area=2.0), 
+            ForestStand(area=2.0),
             AggregatedResults(
                 operation_results={
                     "felled_trees": [CrossCuttableTree(
@@ -142,10 +143,10 @@ class CrossCuttingTest(unittest.TestCase):
         res = aggrs.get_list_result("cross_cutting")
         self.assertEqual(len(res), 6)
         self.assertEqual(res[0].source, "standing")
-        
+
         # test that cross_cut_whole_stand has not modified the trees
         self.assertEqual(
-            [rt.stems_per_ha for rt in stand.reference_trees], 
+            [rt.stems_per_ha for rt in stand.reference_trees],
             [rt.stems_per_ha for rt in new_stand.reference_trees]
             )
 
@@ -248,7 +249,7 @@ class CrossCuttingTest(unittest.TestCase):
                                 time_point=0
                             )
                         ]
-        
+
         results = []
         for tree in thinning_output:
             results.extend(cross_cut_tree(tree, stand_area, TIMBER_PRICE_TABLE_THREE_GRADES))
@@ -283,7 +284,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
         """
         cross_cut_felled_trees modifies the operation_results' `CrossCuttableTrees.cross_cut_done` attribute.
         This test ensures that the modification does not affect other branches' CrossCuttableTrees.
-        In other words, this ensures that deepcopying operation_results copies the `CrossCuttableTree`s values, not the references. 
+        In other words, this ensures that deepcopying operation_results copies the `CrossCuttableTree`s values, not the references.
         """
 
         payload = OperationPayload(
@@ -303,7 +304,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
                             time_point=0,
                             cross_cut_done=False
 
-                        )            
+                        )
                     ]
                 }
             ),
@@ -317,7 +318,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
             operation=lambda state2: cross_cut_felled_trees(state2, **operation_parameters),
             operation_tag ="cross_cut_felled_trees",
             time_point=1,
-            operation_run_constraints=None, 
+            operation_run_constraints=None,
             operation_parameters=operation_parameters
         )
         do_nothing_processor = lambda state: processor(
@@ -325,7 +326,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
             operation=lambda state2: do_nothing(state2, **operation_parameters),
             operation_tag ="do_nothing",
             time_point=1,
-            operation_run_constraints=None, 
+            operation_run_constraints=None,
             operation_parameters=operation_parameters
         )
         # the two processors are alternatives, meaning the first branch will run cross_cut_felled_trees and the second branch will run do_nothing.
@@ -341,7 +342,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
         chains = root.operation_chains()
 
         results = run_chains_iteratively(payload, chains)
-        # running the two branches (chains) should result in one branch having the felled trees cross_cut==True, but not in the other one. 
+        # running the two branches (chains) should result in one branch having the felled trees cross_cut==True, but not in the other one.
         self.assertTrue(results[0].aggregated_results.operation_results["felled_trees"][0].cross_cut_done)
         self.assertFalse(results[1].aggregated_results.operation_results["felled_trees"][0].cross_cut_done)
 

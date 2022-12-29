@@ -2,13 +2,12 @@ import unittest
 import os
 import shutil
 from pathlib import Path
-from forestdatamodel.enums.internal import TreeSpecies
+from forestdatamodel.enums.internal import *
 import app.file_io
 from dataclasses import dataclass
 from forestdatamodel.model import ForestStand, ReferenceTree
 
 from app.app_io import Mela2Configuration
-from sim.core_types import OperationPayload
 
 
 @dataclass
@@ -69,7 +68,7 @@ class TestFileReading(unittest.TestCase):
         ]
         app.file_io.prepare_target_directory("outdir")
         app.file_io.csv_writer(Path("outdir", "output.csv"), data)
-        result = app.file_io.csv_to_stands("outdir/output.csv", ";")
+        result = app.file_io.csv_content_to_stands(app.file_io.csv_file_reader(Path("outdir/output.csv")))
         self.assertListEqual(data, result)
         shutil.rmtree('outdir')
 
@@ -78,7 +77,11 @@ class TestFileReading(unittest.TestCase):
             ForestStand(
                 identifier="123-234",
                 geo_location=(600000.0, 300000.0, 30.0, "EPSG:3067"),
-                land_use_category=2,
+                land_use_category=LandUseCategory.FOREST,
+                owner_category=OwnerCategory.PRIVATE,
+                soil_peatland_category=SoilPeatlandCategory.MINERAL_SOIL,
+                site_type_category=SiteType.RICH_SITE,
+                drainage_category=DrainageCategory.DITCHED_MINERAL_SOIL,
                 fra_category="1",
                 auxiliary_stand=False,
                 reference_trees=[
@@ -159,23 +162,21 @@ class TestFileReading(unittest.TestCase):
             state_input_container=""
         )
         stands = app.file_io.read_stands_from_file(config)
-        self.assertEqual(len(stands), 3)
+        self.assertEqual(len(stands), 2)
 
     def test_read_schedule_payload_from_directory(self):
-        dir = Path("tests/resources/file_io_test/testing_output_directory/0-023-002-02-1/1")
+        dir = Path("tests/resources/file_io_test/testing_output_directory/3/0")
         result = app.file_io.read_schedule_payload_from_directory(dir)
-        self.assertEqual("0-023-002-02-1", result.simulation_state.identifier)
-        self.assertEqual(2, len(result.aggregated_results.get("report_biomass")))
+        self.assertEqual("3", result.simulation_state.identifier)
+        self.assertEqual(2, len(result.aggregated_results.get_list_result("calculate_biomass")))
 
     def test_read_simulation_result_dirtree(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory")
         result = app.file_io.read_full_simulation_result_dirtree(dir)
         self.assertEqual(1, len(result.items()))
-        self.assertEqual(2, len(result["0-023-002-02-1"]))
-        self.assertEqual("0-023-002-02-1", result["0-023-002-02-1"][0].simulation_state.identifier)
-        self.assertEqual(2, len(result["0-023-002-02-1"][0].aggregated_results.get("report_biomass")))
-        self.assertEqual("0-023-002-02-1", result["0-023-002-02-1"][1].simulation_state.identifier)
-        self.assertEqual(2, len(result["0-023-002-02-1"][1].aggregated_results.get("report_biomass")))
+        self.assertEqual(1, len(result["3"]))
+        self.assertEqual("3", result["3"][0].simulation_state.identifier)
+        self.assertEqual(2, len(result["3"][0].aggregated_results.get_list_result("calculate_biomass")))
 
     def test_read_stands_from_nonexisting_file(self):
         config = Mela2Configuration(
@@ -184,4 +185,3 @@ class TestFileReading(unittest.TestCase):
             state_input_container="pickle"
         )
         self.assertRaises(Exception, app.file_io.read_stands_from_file, config)
-        

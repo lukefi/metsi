@@ -1,8 +1,9 @@
-from dataclasses import dataclass
-
 import math
+from itertools import repeat
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
+from forestry.collected_types import BiomassData
+from sim.core_types import OpTuple
 
 
 # Sources
@@ -307,79 +308,6 @@ def roots_biomass_1(tree: ReferenceTree) -> float:
     return bm
 
 
-@dataclass
-class BiomassData:
-    stem_wood: float = 0.0
-    stem_bark: float = 0.0
-    stem_waste: float = 0.0
-    living_branches: float = 0.0
-    dead_branches: float = 0.0
-    foliage: float = 0.0
-    stumps: float = 0.0
-    roots: float = 0.0
-
-    def total(self):
-        return sum([
-            self.stem_wood,
-            self.stem_bark,
-            self.stem_waste,
-            self.living_branches,
-            self.dead_branches,
-            self.foliage,
-            self.stumps,
-            self.roots
-        ])
-
-    def __add__(self, other):
-        return self.__radd__(other)
-
-    def __radd__(self, other: 'BiomassData' or float or int):
-        if isinstance(other, (float, int)):
-            return BiomassData(
-                stem_wood=self.stem_wood + other,
-                stem_bark=self.stem_bark + other,
-                stem_waste=self.stem_waste + other,
-                living_branches=self.living_branches + other,
-                dead_branches=self.dead_branches + other,
-                foliage=self.foliage + other,
-                stumps=self.stumps + other,
-                roots=self.roots + other
-            )
-        elif type(other) == BiomassData:
-            return BiomassData(
-                stem_wood=self.stem_wood + other.stem_wood,
-                stem_bark=self.stem_bark + other.stem_bark,
-                stem_waste=self.stem_waste + other.stem_waste,
-                living_branches=self.living_branches + other.living_branches,
-                dead_branches=self.dead_branches + other.dead_branches,
-                foliage=self.foliage + other.foliage,
-                stumps=self.stumps + other.stumps,
-                roots=self.roots + other.roots
-            )
-        else:
-            raise Exception("Can only do addition between numbers and BiomassData, not {}".format(type(other)))
-
-    def __sub__(self, other):
-        return self + (other * - 1)
-
-    def __mul__(self, factor):
-        return self.__rmul__(factor)
-
-    def __rmul__(self, factor):
-        if not isinstance(factor, (int, float)):
-            raise Exception("Can multiply BiomassData only with float or int, not {}".format(type(factor)))
-        return BiomassData(
-            stem_wood=self.stem_wood * factor,
-            stem_bark=self.stem_bark * factor,
-            stem_waste=self.stem_waste * factor,
-            living_branches=self.living_branches * factor,
-            dead_branches=self.dead_branches * factor,
-            foliage=self.foliage * factor,
-            stumps=self.stumps * factor,
-            roots=self.roots * factor
-        )
-
-
 def tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> BiomassData:
     """
     list of tree biomass weights in tons by biomass component
@@ -439,8 +367,25 @@ def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, 
     :param models: pre-set integer value for a model set to use. See tree_biomass function for details.
     :return: a BiomassData object for biomass tonnages
     """
-    biomasses = []
+    biomasses = [BiomassData()]
     for i, tree in enumerate(stand.reference_trees):
         fn = tree_biomass if tree.height >= 1.3 else small_tree_biomass
         biomasses.append(fn(tree, stand, treevolumes[i], wastevolumes[i], models) * tree.stems_per_ha)
     return sum(biomasses)
+
+def calculate_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
+    """For the given ForestStand, this operation computes and stores the current biomass tonnage and difference to last
+    calculation into the aggregate structure."""
+    stand, aggr = input
+    models = operation_params.get('model_set', 1)
+
+    # TODO: need proper functionality to find tree volumes, model_set 2
+    volumes = list(repeat(100.0, len(stand.reference_trees)))
+    # TODO: need proper functionality to find waste volumes, model_set 2
+    wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
+
+    result = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
+    result.time_point = aggr.current_time_point
+    aggr.extend_list_result('calculate_biomass', [result])
+
+    return input

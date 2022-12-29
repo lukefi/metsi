@@ -1,15 +1,20 @@
 import unittest
 
-from forestry.grow_acta import grow_acta
-from forestry.grow_motti import grow_motti
+from forestry.natural_processes.grow_acta import grow_acta
+from forestry.pre_ops import compute_location_metadata
 from tests.test_utils import prepare_growth_test_stand
 
 try:
     import fhk
-    from forestry.grow_fhk import grow_fhk
+    from forestry.natural_processes.grow_fhk import grow_fhk
 except ImportError:
     fhk = None
 
+try:
+    from forestry.natural_processes.grow_motti import grow_motti
+    pymotti = True
+except ImportError:
+    pymotti = None
 
 class GrowthOperationsTest(unittest.TestCase):
 
@@ -30,6 +35,7 @@ class GrowthOperationsTest(unittest.TestCase):
     @unittest.skipIf(fhk is None, "fhk not installed")
     def test_grow_fhk(self):
         stand = prepare_growth_test_stand()
+        stand = compute_location_metadata([stand])[0]
         grow_fhk(
             (stand, None),
             graph="tests/resources/graph.g.lua",
@@ -56,8 +62,10 @@ class GrowthOperationsTest(unittest.TestCase):
         self.assertEqual(stand.reference_trees[2].biological_age, 11)
         self.assertEqual(stand.reference_trees[2].breast_height_age, 11)
 
+    @unittest.skipIf(pymotti is None, "pymotti not installed")
     def test_grow_motti(self):
         stand = prepare_growth_test_stand()
+        stand = compute_location_metadata([stand])[0]
         grow_motti((stand, None))
         self.assert_domain_sensibility(stand)
         self.assertFalse(stand.reference_trees[2].sapling)

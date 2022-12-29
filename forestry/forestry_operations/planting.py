@@ -4,17 +4,17 @@ from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
 from forestry.utils.conversion import site_type_to_key
-from forestry.renewal import PriceableOperationInfo
+from forestry.collected_types import PriceableOperationInfo
 
 DEFAULT_INSTRUCTIONS = {
         SiteTypeKey.OMT: {
-            'species': 2,
-            'stems/ha': 2200,
+            'species': 1,
+            'stems/ha': 2000,
             'soil preparation': 3
         },
         SiteTypeKey.MT: {
-            'species': 2,
-            'stems/ha': 2200,
+            'species': 1,
+            'stems/ha': 2000,
             'soil preparation': 3
         },
         SiteTypeKey.VT: {
@@ -124,18 +124,19 @@ def plant(
 def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """ Checks weather stand has reference trees, if not function plant is called """
     stand, simulation_aggregates = payload
+    tree_count = operation_parameters.get('tree_count', 10)
 
     if len(stand.reference_trees) > 0:
         return payload
 
-    instructions_path = operation_parameters.get('renewal_instructions', None)
+    instructions_path = operation_parameters.get('planting_instructions', None)
     regen = get_planting_instructions(stand.site_type_category, instructions_path)
     stand, output_planting = plant(
         stand,
         simulation_aggregates,
         "regeneration",
         TreeSpecies(regen['species']),
-        10,
+        tree_count,
         regen['stems/ha'],
         regen['soil preparation'])
     return (stand,output_planting)

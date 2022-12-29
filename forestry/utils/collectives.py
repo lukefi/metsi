@@ -1,5 +1,6 @@
 import builtins
-from functools import lru_cache
+from enum import Enum
+from functools import lru_cache, cache
 from typing import Any, Callable, Iterator, Optional
 import numpy as np
 
@@ -124,3 +125,23 @@ def autocollective(x: Any, **list_filters) -> Any:
                 x = [item for item in x if getattr(item, key) in values]
         return LazyListDataFrame(x)
     return x
+
+
+def _collector_wrapper(operation_parameters, *aliases, **named_aliases) -> dict[str, Any]:
+    getvar = cache(getvarfn(*aliases, **named_aliases))
+    return collect_all(operation_parameters, getvar=getvar)
+
+
+def property_collector(objects: list[object], properties: list[str]) -> list[list]:
+    result_rows = []
+    for o in objects:
+        row = []
+        for p in properties:
+            if not hasattr(o, p):
+                raise Exception(f"Unknown property {p} in {o.__class__}")
+            val = o.__getattribute__(p) or 0.0
+            if isinstance(val, Enum):
+                val = val.value
+            row.append(val)
+        result_rows.append(row)
+    return result_rows
