@@ -16,7 +16,7 @@ class TestExport(unittest.TestCase):
         data = {
             "1": [
                 OperationPayload(
-                    simulation_state = SimpleNamespace(a=1, b=2),
+                    computational_unit = SimpleNamespace(a=1, b=2),
                     collected_data = CollectedData(
                         operation_results = {
                             "report_collectives": OrderedDict({
@@ -30,7 +30,7 @@ class TestExport(unittest.TestCase):
             ],
             "2": [
                 OperationPayload(
-                    simulation_state = SimpleNamespace(a=-1, b=-2),
+                    computational_unit = SimpleNamespace(a=-1, b=-2),
                     collected_data = CollectedData(
                         operation_results = {
                             "report_collectives": OrderedDict({
@@ -42,7 +42,7 @@ class TestExport(unittest.TestCase):
                     )
                 ),
                 OperationPayload(
-                    simulation_state = SimpleNamespace(a=-1, b=-2),
+                    computational_unit = SimpleNamespace(a=-1, b=-2),
                     collected_data = CollectedData(
                         operation_results = {
                             "report_collectives": OrderedDict({

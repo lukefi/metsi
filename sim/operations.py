@@ -36,14 +36,14 @@ def processor(payload: OperationPayload, operation: typing.Callable[[OpTuple], O
 
     payload.collected_data.current_time_point = time_point
     try:
-        new_state, new_collected_data = operation((payload.simulation_state, payload.collected_data))
+        new_state, new_collected_data = operation((payload.computational_unit, payload.collected_data))
     except UserWarning as e:
         raise UserWarning("Unable to perform operation {}, at time point {}; reason: {}".format(operation_tag, time_point, e))
 
     payload.operation_history.append((time_point, operation_tag, operation_parameters))
 
     newpayload = OperationPayload(
-        simulation_state=new_state,
+        computational_unit=new_state,
         collected_data=payload.collected_data if new_collected_data is None else new_collected_data,
         operation_history=payload.operation_history
     )

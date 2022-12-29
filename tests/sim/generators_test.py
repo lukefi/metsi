@@ -47,13 +47,13 @@ class TestGenerators(unittest.TestCase):
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
-            simulation_state=0,
+            computational_unit=0,
             collected_data=CollectedData(),
             operation_history=[]
             )
         computation_result = run_sequence(payload, *chain)
         self.assertEqual(5, len(chain))
-        self.assertEqual(4, computation_result.simulation_state)
+        self.assertEqual(4, computation_result.computational_unit)
 
     def test_operation_run_constraints_success(self):
         declaration = """
@@ -71,13 +71,13 @@ class TestGenerators(unittest.TestCase):
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
-            simulation_state=0,
+            computational_unit=0,
             collected_data=CollectedData(),
             operation_history=[]
             )
         computation_result = run_sequence(payload, *chain)
         self.assertEqual(3, len(chain))
-        self.assertEqual(2, computation_result.simulation_state)
+        self.assertEqual(2, computation_result.computational_unit)
 
     def test_operation_run_constraints_fail(self):
         declaration = """
@@ -95,7 +95,7 @@ class TestGenerators(unittest.TestCase):
         generator = sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, operation_history=[], collected_data=CollectedData())
+        payload = OperationPayload(computational_unit=0, operation_history=[], collected_data=CollectedData())
         self.assertRaises(Exception, run_sequence, payload, *chain)
 
     def test_tree_generators_by_time_point(self):
@@ -167,11 +167,11 @@ class TestGenerators(unittest.TestCase):
         for chain in chains:
             value = evaluate_sequence(
                 OperationPayload(
-                    simulation_state=0,
+                    computational_unit=0,
                     operation_history=[],
                     collected_data=CollectedData()),
                 *chain
-            ).simulation_state
+            ).computational_unit
             results.append(value)
             lengths.append(len(chain))
 
@@ -210,11 +210,11 @@ class TestGenerators(unittest.TestCase):
         for chain in chains:
             value = evaluate_sequence(
                 OperationPayload(
-                    simulation_state=0,
+                    computational_unit=0,
                     operation_history=[],
                     collected_data=CollectedData()),
                 *chain
-            ).simulation_state
+            ).computational_unit
             results.append(value)
             lengths.append(len(chain))
 
@@ -280,11 +280,11 @@ class TestGenerators(unittest.TestCase):
             for chain in chains:
                 value = evaluate_sequence(
                     OperationPayload(
-                        simulation_state=0,
+                        computational_unit=0,
                         operation_history=[],
                         collected_data=CollectedData()),
                     *chain
-                ).simulation_state
+                ).computational_unit
                 results[i].append(value)
         self.assertListEqual(results[0], results[1])
 

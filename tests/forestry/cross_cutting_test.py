@@ -288,7 +288,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
         """
 
         payload = OperationPayload(
-            simulation_state=ForestStand(
+            computational_unit=ForestStand(
                 area=1
             ),
             collected_data=CollectedData(

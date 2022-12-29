@@ -167,13 +167,13 @@ CUType = TypeVar("CUType")  # CU for Computational Unit
 class OperationPayload(SimpleNamespace, Generic[CUType]):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
-    simulation_state: CUType
+    computational_unit: CUType
     collected_data: CollectedData
     operation_history: list[tuple[int, str, dict[str, dict]]]
 
     def __deepcopy__(self, memo: dict) -> "OperationPayload":
         return OperationPayload(
-            simulation_state = deepcopy(self.simulation_state, memo),
+            computational_unit = deepcopy(self.computational_unit, memo),
             collected_data = deepcopy(self.collected_data, memo),
             operation_history = list(self.operation_history)
         )

@@ -151,14 +151,14 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload
     Utilizes a scanner function to resolve the files with known container formats. Files may not exist.
 
     :param schedule_path: Path for a schedule directory
-    :return: OperationPayload with simulation_state and collected_data if found
+    :return: OperationPayload with computational_unit and collected_data if found
     """
     unit_state_file, input_container = scan_dir_for_file(schedule_path, "unit_state", ["csv", "json", "pickle"])
     derived_data_file, derived_data_container = scan_dir_for_file(schedule_path, "derived_data", ["json", "pickle"])
     stands = [] if unit_state_file is None else parse_file_or_default(unit_state_file, fdm_reader(input_container), [])
     derived_data = None if derived_data_file is None else parse_file_or_default(derived_data_file, object_reader(derived_data_container))
     return ForestOpPayload(
-        simulation_state=None if stands == [] else stands[0],
+        computational_unit=None if stands == [] else stands[0],
         collected_data=derived_data,
         operation_history=[]
     )
@@ -220,7 +220,7 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mela
             if app_arguments.state_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
                 filepath = determine_file_path(schedule_dir, f"unit_state.{app_arguments.state_output_container}")
-                write_stands_to_file([schedule.simulation_state], filepath, app_arguments.state_output_container)
+                write_stands_to_file([schedule.computational_unit], filepath, app_arguments.state_output_container)
             if app_arguments.derived_data_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
                 filepath = determine_file_path(schedule_dir, f"derived_data.{app_arguments.derived_data_output_container}")

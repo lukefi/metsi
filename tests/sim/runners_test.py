@@ -7,7 +7,7 @@ from tests.test_utils import raises, identity, none, collect_results, load_yaml,
 
 class TestOperations(unittest.TestCase):
     def test_sequence_success(self):
-        payload = OperationPayload(simulation_state=1)
+        payload = OperationPayload(computational_unit=1)
         result = evaluate_sequence(
             payload,
             identity,
@@ -16,7 +16,7 @@ class TestOperations(unittest.TestCase):
         self.assertEqual(None, result)
 
     def test_sequence_failure(self):
-        payload = OperationPayload(simulation_state=1)
+        payload = OperationPayload(computational_unit=1)
         prepared_function = lambda: evaluate_sequence(
             payload,
             identity,
@@ -30,7 +30,7 @@ class TestOperations(unittest.TestCase):
         config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
         initial = OperationPayload(
-            simulation_state=1,
+            computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
         )
@@ -45,7 +45,7 @@ class TestOperations(unittest.TestCase):
         config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
         initial = OperationPayload(
-            simulation_state=1,
+            computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
         )
@@ -60,7 +60,7 @@ class TestOperations(unittest.TestCase):
         config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
         initial = OperationPayload(
-            simulation_state=1,
+            computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
         )
@@ -74,7 +74,7 @@ class TestOperations(unittest.TestCase):
         declaration = load_yaml('runners_test/parameters_branching.yaml')
         config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         initial = OperationPayload(
-            simulation_state=1,
+            computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
         )

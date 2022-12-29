@@ -72,7 +72,7 @@ def parametrized_operation_using_file_parameter(x, **kwargs):
         return x
 
 def collect_results(payloads: list[OperationPayload]) -> list:
-    return list(map(lambda payload: payload.simulation_state, payloads))
+    return list(map(lambda payload: payload.computational_unit, payloads))
 
 
 def file_contents(file_path: str) -> str:

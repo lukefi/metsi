@@ -14,7 +14,7 @@ from sim.core_types import CollectedData, StrategyRunner, SimConfiguration
 def run_strategy_multiprocessing_wrapper(payload: ForestOpPayload, config: SimConfiguration, run_strategy: StrategyRunner,  queue: queue.Queue) -> None:
     """Wrapper function for running a simulation strategy in a multiprocessing context. The result is placed in the given queue"""
     result = run_strategy(payload, config)
-    queue.put((payload.simulation_state.identifier, result))
+    queue.put((payload.computational_unit.identifier, result))
 
 
 def run_stands(
@@ -29,7 +29,7 @@ def run_stands(
     args = [
      (
         ForestOpPayload(
-            simulation_state=stand,
+            computational_unit=stand,
             collected_data=CollectedData(initial_time_point=config.time_points[0]),
             operation_history=[],
         ),
@@ -65,7 +65,7 @@ def run_stands(
     else:
         for arg in args:
             schedule_payloads = run_strategy(*arg)
-            id = arg[0].simulation_state.identifier
+            id = arg[0].computational_unit.identifier
             print_logline(f"Alternatives for stand {id}: {len(schedule_payloads)}")
             retval[id] = schedule_payloads
         return retval

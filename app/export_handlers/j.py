@@ -92,7 +92,7 @@ def j_xda(out: IO, data: SimResults, xvariables: list[str]):
                 getvar = cache(getvarfn(
                     lambda name: (
                         getseries(s, name) if name in collectives
-                        else autocollective(getattr(s.simulation_state, name))
+                        else autocollective(getattr(s.computational_unit, name))
                     )
                 ))
             )
@@ -106,7 +106,7 @@ def j_cda(out: IO, data: SimResults, cvariables: list[str]):
             out = out,
             fns = cvars,
             getvar = cache(getvarfn(
-                lambda name: autocollective(getattr(schedules[0].simulation_state, name)),
+                lambda name: autocollective(getattr(schedules[0].computational_unit, name)),
                 schedules = schedules
             ))
         )
