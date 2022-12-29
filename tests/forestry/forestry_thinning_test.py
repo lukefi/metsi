@@ -1,4 +1,4 @@
-from forestry.types import CrossCuttableTree
+from forestry.collected_types import CrossCuttableTree
 from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ReferenceTree
 from forestry.forestry_operations.thinning_limits import *
@@ -70,7 +70,7 @@ class ThinningsTest(ConverterTestSuite):
         operation_tag = 'thinning_from_above'
         simulation_aggregates = AggregatedResults()
         operation_parameters = {
-            'thinning_factor': 0.97, 
+            'thinning_factor': 0.97,
             'e': 0.2,
             }
 
@@ -99,7 +99,7 @@ class ThinningsTest(ConverterTestSuite):
 
         simulation_aggregates = AggregatedResults()
         operation_parameters = {
-            'thinning_factor': 0.97, 
+            'thinning_factor': 0.97,
             'e': 0.2,
             }
 
@@ -128,7 +128,7 @@ class ThinningsTest(ConverterTestSuite):
 
         simulation_aggregates = AggregatedResults()
         operation_parameters = {
-            'thinning_factor': 0.50, 
+            'thinning_factor': 0.50,
             'e': 0.2,
             }
 

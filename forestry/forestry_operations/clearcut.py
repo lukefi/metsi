@@ -2,7 +2,7 @@ from forestdatamodel.model import ForestStand
 from forestry.forestry_operations.clearcutting_limits import *
 from forestryfunctions import forestry_utils as futil
 import enum
-from forestry.types import CrossCuttableTree
+from forestry.collected_types import CrossCuttableTree
 from sim.core_types import AggregatedResults, OpTuple
 
 def _clearcut_with_output(
@@ -14,9 +14,9 @@ def _clearcut_with_output(
     """
     trees = [
             CrossCuttableTree(
-                t.stems_per_ha, 
-                t.species, 
-                t.breast_height_diameter, 
+                t.stems_per_ha,
+                t.species,
+                t.breast_height_diameter,
                 t.height,
                 'harvested',
                 tag,
@@ -31,12 +31,12 @@ def _clearcut_with_output(
 
 
 def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    """checks if either stand mean age or stand basal area weighted mean 
-    diameter is over limits given in separate files. 
-    If yes, function clearcut is called 
+    """checks if either stand mean age or stand basal area weighted mean
+    diameter is over limits given in separate files.
+    If yes, function clearcut is called
     """
     stand, simulation_aggregates = input
-    
+
     if len(stand.reference_trees)>0 and sum(x.breast_height_diameter for x in stand.reference_trees)>0:
         age_limits_path = operation_parameters.get('clearcutting_limits_ages', None)
         diameter_limits_path = operation_parameters.get('clearcutting_limits_diameters', None)
@@ -53,4 +53,3 @@ def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple
         raise UserWarning("Unable to perform clearcutting")
 
 
-    

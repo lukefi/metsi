@@ -1,5 +1,5 @@
 import numpy as np
-from forestry.types import CrossCutResult, CrossCuttableTree
+from forestry.collected_types import CrossCutResult, CrossCuttableTree
 from sim.core_types import OpTuple
 from forestdatamodel.model import ForestStand
 from forestry.utils.file_io import get_timber_price_table

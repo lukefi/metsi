@@ -1,11 +1,11 @@
 from sim.core_types import AggregatedResults, OpTuple
 from forestdatamodel.model import ForestStand
-from forestry.types import CrossCutResult, NPVResult, PriceableOperationInfo
+from forestry.collected_types import CrossCutResult, NPVResult, PriceableOperationInfo
 from forestry.utils.file_io import get_renewal_costs_as_dict, get_land_values_as_dict
 
 
 def _get_bare_land_value(land_values: dict, soil_peatland_category: int, site_type: int, interest_rate: int) -> float:
-    
+
     SOIL_PEATLAND_CATEGORY_MAPPING = {
         1: "mineral_soils",
         2: "spruce_mires",
@@ -24,11 +24,11 @@ def _get_bare_land_value(land_values: dict, soil_peatland_category: int, site_ty
         7: "rocky_or_sandy",
         8: "open_mountains"
     }
-    
+
     soil_peatland_key = SOIL_PEATLAND_CATEGORY_MAPPING.get(soil_peatland_category)
     site_type_key = SITE_TYPE_MAPPING.get(site_type)
     land_value = land_values[soil_peatland_key][site_type_key][str(interest_rate)]
-    return land_value      
+    return land_value
 
 
 def _discount_factor(r: float, current_time_point: int, initial_time_point) -> float:
@@ -37,13 +37,13 @@ def _discount_factor(r: float, current_time_point: int, initial_time_point) -> f
 
 
 def _calculate_npv_for_rate(
-    stand: ForestStand, 
-    simulation_aggregates: AggregatedResults, 
-    land_values: dict, 
-    renewal_costs: dict, 
+    stand: ForestStand,
+    simulation_aggregates: AggregatedResults,
+    land_values: dict,
+    renewal_costs: dict,
     int_r: int
     ) -> float:
-    
+
     cc_results = simulation_aggregates.get_list_result("cross_cutting")
     renewal_results = simulation_aggregates.get_list_result("renewal")
     current_time_point = simulation_aggregates.current_time_point
@@ -57,7 +57,7 @@ def _calculate_npv_for_rate(
     for x in filter(lambda x: x.source == "harvested", cc_results):
         discounted_revenue = x.get_real_value() / _discount_factor(r, x.time_point, initial_time_point)
         npv += discounted_revenue
-    
+
     # 2. add discounted value of standing tree stock at the current time point.
     standing_cc_results = list(filter(lambda x: x.source == "standing" and x.time_point == current_time_point, cc_results))
     if len(stand.reference_trees) > 0 and len(standing_cc_results) == 0:
@@ -67,14 +67,14 @@ def _calculate_npv_for_rate(
         for y in standing_cc_results:
             discounted_revenue = y.get_real_value() / _discount_factor(r, current_time_point, initial_time_point)
             npv += discounted_revenue
-        
+
     # 3. subtract costs
     z: PriceableOperationInfo
     for z in renewal_results:
         unit_cost = renewal_costs[z.operation]
         discounted_cost = z.get_real_cost(unit_cost) / _discount_factor(r, z.time_point, initial_time_point)
         npv -= discounted_cost
-        
+
     # 4. add discounted bare land value
     npv += _get_bare_land_value(land_values, stand.soil_peatland_category, stand.site_type_category, int_r)
     return npv
@@ -90,9 +90,9 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
     interest_rates: list = operation_parameters["interest_rates"]
     land_values = get_land_values_as_dict(operation_parameters["land_values"])
     renewal_costs = get_renewal_costs_as_dict(operation_parameters["renewal_costs"])
-    
+
     for int_r in interest_rates:
-        npv = _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r)    
+        npv = _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r)
         aggr = NPVResult(simulation_aggregates.current_time_point, int_r, npv)
         simulation_aggregates.extend_list_result("net_present_value", [aggr])
 

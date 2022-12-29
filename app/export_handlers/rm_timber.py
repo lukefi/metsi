@@ -2,7 +2,7 @@ from pathlib import Path
 from app.app_types import SimResults
 from app.file_io import row_writer
 from forestry.utils.collectives import LazyListDataFrame
-from forestry.types import CrossCutResult
+from forestry.collected_types import CrossCutResult
 
 
 def scan_operation_type_for_event(year: int, cross_cut: list[CrossCutResult]) -> str:

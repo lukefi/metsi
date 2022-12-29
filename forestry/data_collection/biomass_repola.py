@@ -2,7 +2,7 @@ import math
 from itertools import repeat
 from forestdatamodel.enums.internal import TreeSpecies
 from forestdatamodel.model import ForestStand, ReferenceTree
-from forestry.types import BiomassData
+from forestry.collected_types import BiomassData
 from sim.core_types import OpTuple
 
 

@@ -4,7 +4,7 @@ from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
 from forestry.utils.conversion import site_type_to_key
-from forestry.types import PriceableOperationInfo
+from forestry.collected_types import PriceableOperationInfo
 
 DEFAULT_INSTRUCTIONS = {
         SiteTypeKey.OMT: {
@@ -36,7 +36,7 @@ def create_planting_instructions_table(file_path: str) -> list:
         contents = f.read()
     table = contents.split('\n')
     table = [row.split() for row in table]
-    
+
     if len(table) != 4 or len(table[0]) != 3:
         raise Exception('planting instructions file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
     else:
@@ -80,12 +80,12 @@ def get_planting_instructions(site_type_category: int, file_path_instructions: s
     return regen
 
 def plant(
-    stand: ForestStand, 
-    aggr: AggregatedResults, 
+    stand: ForestStand,
+    aggr: AggregatedResults,
     tag: str,
-    regen_species: TreeSpecies, 
+    regen_species: TreeSpecies,
     rt_count: int,
-    rt_stems: int, 
+    rt_stems: int,
     soil_preparation: SoilPreparationKey
     ) -> OpTuple[ForestStand]:
 
@@ -100,7 +100,7 @@ def plant(
                              height=0.3,
                              sapling=True)
         stand.reference_trees.append(tree)
-    
+
     regeneration_description = {
         'regeneration': RegenerationKey.PLANTED,
         'soil preparation': soil_preparation,
@@ -110,31 +110,31 @@ def plant(
     aggr.store(
         tag, regeneration_description
     )
-    
+
     aggr.extend_list_result(
-        "renewal", 
+        "renewal",
         [
             PriceableOperationInfo(
                 operation="planting",
-                units=stand.area, #TODO: planting may not be priced per hectare 
+                units=stand.area, #TODO: planting may not be priced per hectare
                 time_point=aggr.current_time_point,
                 )
         ]
-    ) 
+    )
 
     return (stand, aggr)
 
 
 def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    """checks weather stand has reference trees, if not 
+    """checks weather stand has reference trees, if not
     function plant is called
     """
     stand, simulation_aggregates = payload
     tree_count = operation_parameters.get('tree_count', 10)
 
-    if len(stand.reference_trees)> 0: 
-        return payload 
-    
+    if len(stand.reference_trees)> 0:
+        return payload
+
     instructions_path = operation_parameters.get('planting_instructions', None)
     regen = get_planting_instructions(stand.site_type_category, instructions_path)
     stand, output_planting = plant(

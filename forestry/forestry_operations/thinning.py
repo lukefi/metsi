@@ -1,6 +1,6 @@
 from forestdatamodel.model import ForestStand
 from typing import Callable
-from forestry.types import CrossCuttableTree
+from forestry.collected_types import CrossCuttableTree
 from forestry.forestry_operations.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
 from forestryfunctions.harvest import thinning
 from forestryfunctions import forestry_utils as futil
@@ -25,9 +25,9 @@ def iterative_thinning_with_output(
 
     thinning_output = [
             CrossCuttableTree(
-                f-t.stems_per_ha, 
-                t.species, 
-                t.breast_height_diameter, 
+                f-t.stems_per_ha,
+                t.species,
+                t.breast_height_diameter,
                 t.height,
                 'harvested',
                 tag,
