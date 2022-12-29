@@ -8,7 +8,7 @@ from app.app_types import ForestOpPayload
 from app.console_logging import print_logline
 from forestry.forestry_types import StandList
 from sim.runners import run_full_tree_strategy, run_partial_tree_strategy
-from sim.core_types import AggregatedResults, StrategyRunner, SimConfiguration
+from sim.core_types import CollectedData, StrategyRunner, SimConfiguration
 
 
 def run_strategy_multiprocessing_wrapper(payload: ForestOpPayload, config: SimConfiguration, run_strategy: StrategyRunner,  queue: queue.Queue) -> None:
@@ -30,7 +30,7 @@ def run_stands(
      (
         ForestOpPayload(
             simulation_state=stand,
-            aggregated_results=AggregatedResults(initial_time_point=config.time_points[0]),
+            collected_data=CollectedData(initial_time_point=config.time_points[0]),
             operation_history=[],
         ),
         config
@@ -39,7 +39,7 @@ def run_stands(
     ]
 
     # Each stand can be simulated independently from each other, therefore they can be run in parallel in separate processes.
-    # pool.starmap() will allocate simulation work to available processes. 
+    # pool.starmap() will allocate simulation work to available processes.
     if using_multiprocessing:
         #manager is used to create a shared Queue into which each process can put their result.
         manager = multiprocessing.Manager()

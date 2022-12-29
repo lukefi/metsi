@@ -1,10 +1,10 @@
 import unittest
 import sim.generators
 import yaml
-from sim.core_types import AggregatedResults, Step, OperationPayload, SimConfiguration
+from sim.core_types import CollectedData, Step, OperationPayload, SimConfiguration
 from sim.generators import sequence, compose_nested, alternatives
 from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
-from tests.test_utils import inc, dec, aggregating_increment, parametrized_operation
+from tests.test_utils import inc, dec, collecting_increment, parametrized_operation
 
 
 class TestGenerators(unittest.TestCase):
@@ -42,13 +42,13 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         generator = sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             simulation_state=0,
-            aggregated_results=AggregatedResults(),
+            collected_data=CollectedData(),
             operation_history=[]
             )
         computation_result = run_sequence(payload, *chain)
@@ -66,13 +66,13 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         generator = sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             simulation_state=0,
-            aggregated_results=AggregatedResults(),
+            collected_data=CollectedData(),
             operation_history=[]
             )
         computation_result = run_sequence(payload, *chain)
@@ -95,7 +95,7 @@ class TestGenerators(unittest.TestCase):
         generator = sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
-        payload = OperationPayload(simulation_state=0, operation_history=[], aggregated_results=AggregatedResults())
+        payload = OperationPayload(simulation_state=0, operation_history=[], collected_data=CollectedData())
         self.assertRaises(Exception, run_sequence, payload, *chain)
 
     def test_tree_generators_by_time_point(self):
@@ -155,7 +155,7 @@ class TestGenerators(unittest.TestCase):
                 - inc # 4, 5, 6, 7
                 - inc # 5, 6, 7, 8
         """
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         generator = sim.generators.full_tree_generators(config)
         tree = compose_nested(generator)
         chains = tree.operation_chains()
@@ -169,7 +169,7 @@ class TestGenerators(unittest.TestCase):
                 OperationPayload(
                     simulation_state=0,
                     operation_history=[],
-                    aggregated_results=AggregatedResults()),
+                    collected_data=CollectedData()),
                 *chain
             ).simulation_state
             results.append(value)
@@ -197,7 +197,7 @@ class TestGenerators(unittest.TestCase):
                 - inc
         """
         config = SimConfiguration(
-            operation_lookup={'inc_param': aggregating_increment, 'inc': aggregating_increment},
+            operation_lookup={'inc_param': collecting_increment, 'inc': collecting_increment},
             generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         generator = sim.generators.full_tree_generators(config)
         tree = compose_nested(generator)
@@ -212,7 +212,7 @@ class TestGenerators(unittest.TestCase):
                 OperationPayload(
                     simulation_state=0,
                     operation_history=[],
-                    aggregated_results=AggregatedResults()),
+                    collected_data=CollectedData()),
                 *chain
             ).simulation_state
             results.append(value)
@@ -264,10 +264,10 @@ class TestGenerators(unittest.TestCase):
               - inc
         """
         configs = [
-            SimConfiguration(operation_lookup={'inc_param': aggregating_increment, 'inc': aggregating_increment},
+            SimConfiguration(operation_lookup={'inc_param': collecting_increment, 'inc': collecting_increment},
                              generator_lookup=sim.generators.GENERATOR_LOOKUP,
                              **yaml.load(declaration_one, Loader=yaml.CLoader)),
-            SimConfiguration(operation_lookup={'inc_param': aggregating_increment, 'inc': aggregating_increment},
+            SimConfiguration(operation_lookup={'inc_param': collecting_increment, 'inc': collecting_increment},
                              generator_lookup=sim.generators.GENERATOR_LOOKUP,
                              **yaml.load(declaration_two, Loader=yaml.CLoader))
         ]
@@ -282,7 +282,7 @@ class TestGenerators(unittest.TestCase):
                     OperationPayload(
                         simulation_state=0,
                         operation_history=[],
-                        aggregated_results=AggregatedResults()),
+                        collected_data=CollectedData()),
                     *chain
                 ).simulation_state
                 results[i].append(value)
@@ -300,7 +300,7 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc 
         """
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         self.assertRaises(Exception, sim.generators.full_tree_generators, config)
 
     def test_simple_processable_chain(self):

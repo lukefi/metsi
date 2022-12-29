@@ -34,9 +34,9 @@ def processor(payload: OperationPayload, operation: typing.Callable[[OpTuple], O
         current_operation_last_run_time_point = _get_operation_last_run(payload.operation_history, operation_tag)
         check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_constraints, current_operation_last_run_time_point)
 
-    payload.aggregated_results.current_time_point = time_point
+    payload.collected_data.current_time_point = time_point
     try:
-        new_state, new_aggregated_results = operation((payload.simulation_state, payload.aggregated_results))
+        new_state, new_collected_data = operation((payload.simulation_state, payload.collected_data))
     except UserWarning as e:
         raise UserWarning("Unable to perform operation {}, at time point {}; reason: {}".format(operation_tag, time_point, e))
 
@@ -44,7 +44,7 @@ def processor(payload: OperationPayload, operation: typing.Callable[[OpTuple], O
 
     newpayload = OperationPayload(
         simulation_state=new_state,
-        aggregated_results=payload.aggregated_results if new_aggregated_results is None else new_aggregated_results,
+        collected_data=payload.collected_data if new_collected_data is None else new_collected_data,
         operation_history=payload.operation_history
     )
     return newpayload

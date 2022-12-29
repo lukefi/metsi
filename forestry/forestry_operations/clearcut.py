@@ -3,11 +3,11 @@ from forestry.forestry_operations.clearcutting_limits import *
 from forestryfunctions import forestry_utils as futil
 import enum
 from forestry.collected_types import CrossCuttableTree
-from sim.core_types import AggregatedResults, OpTuple
+from sim.core_types import CollectedData, OpTuple
 
 def _clearcut_with_output(
     stand:ForestStand,
-    aggr: AggregatedResults,
+    collected_data: CollectedData,
     tag: str) -> OpTuple[ForestStand]:
     """Clears the stand's reference tree list
     :returns: clearcut stand and removed trees as CrosCuttableTrees
@@ -20,14 +20,14 @@ def _clearcut_with_output(
                 t.height,
                 'harvested',
                 tag,
-                aggr.current_time_point
+                collected_data.current_time_point
                 )
                 for t in stand.reference_trees
             ]
-    aggr.extend_list_result("felled_trees", trees)
+    collected_data.extend_list_result("felled_trees", trees)
     stand.reference_trees = []
 
-    return stand, aggr
+    return stand, collected_data
 
 
 def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
@@ -35,7 +35,7 @@ def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple
     diameter is over limits given in separate files.
     If yes, function clearcut is called
     """
-    stand, simulation_aggregates = input
+    stand, collected_data = input
 
     if len(stand.reference_trees) > 0 and sum(x.breast_height_diameter for x in stand.reference_trees) > 0:
         age_limits_path = operation_parameters.get('clearcutting_limits_ages', None)
@@ -48,8 +48,8 @@ def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple
             f=lambda x: x.breast_height_diameter * futil.calculate_basal_area(x))
 
         if age_limit_reached or diameter_limit_reached:
-            stand, aggr = _clearcut_with_output(stand, simulation_aggregates,'clearcutting')
-            return (stand, aggr)
+            stand, collected_data = _clearcut_with_output(stand, collected_data,'clearcutting')
+            return (stand, collected_data)
         else:
             raise UserWarning("Unable to perform clearcutting")
     else:

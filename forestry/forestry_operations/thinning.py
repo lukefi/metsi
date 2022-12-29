@@ -4,7 +4,7 @@ from forestry.collected_types import CrossCuttableTree
 from forestry.forestry_operations.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
 from forestryfunctions.harvest import thinning
 from forestryfunctions import forestry_utils as futil
-from sim.core_types import AggregatedResults, OpTuple
+from sim.core_types import CollectedData, OpTuple
 
 def evaluate_thinning_conditions(predicates):
     return all(f() for f in predicates)
@@ -12,7 +12,7 @@ def evaluate_thinning_conditions(predicates):
 
 def iterative_thinning_with_output(
     stand: ForestStand,
-    aggr: AggregatedResults,
+    collected_data: CollectedData,
     thinning_factor: float,
     thin_predicate: Callable[[ForestStand], bool],
     extra_factor_solver: Callable[[int, int, float], float],
@@ -31,19 +31,19 @@ def iterative_thinning_with_output(
                 t.height,
                 'harvested',
                 tag,
-                aggr.current_time_point
+                collected_data.current_time_point
             )
             for t,f in zip(stand.reference_trees, f0)
             if f > t.stems_per_ha
         ]
 
-    aggr.extend_list_result("felled_trees", thinning_output)
+    collected_data.extend_list_result("felled_trees", thinning_output)
 
-    return stand, aggr
+    return stand, collected_data
 
 
 def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = input
+    stand, collected_data = input
     if len(stand.reference_trees) == 0:
         raise UserWarning("Unable to perform first thinning. No trees exist.")
     epsilon = operation_parameters['e']
@@ -62,7 +62,7 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
         stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter)
         return iterative_thinning_with_output(
             stand = stand,
-            aggr = simulation_aggregates,
+            collected_data = collected_data,
             thinning_factor = operation_parameters['thinning_factor'],
             thin_predicate = lambda s: (residue_stems + epsilon) <= futil.overall_stems_per_ha(s.reference_trees),
             extra_factor_solver = lambda i, n, c: (1.0-c) * i/n,
@@ -73,7 +73,7 @@ def first_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTup
 
 
 def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = input
+    stand, collected_data = input
     if len(stand.reference_trees) == 0:
         raise UserWarning("Unable to perform thinning from above. No trees exist.")
     epsilon = operation_parameters['e']
@@ -88,7 +88,7 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
     if evaluate_thinning_conditions(predicates):
         return iterative_thinning_with_output(
             stand = stand,
-            aggr = simulation_aggregates,
+            collected_data = collected_data,
             thinning_factor = operation_parameters['thinning_factor'],
             thin_predicate = lambda s: (lower_limit + epsilon) <= futil.overall_basal_area(s.reference_trees),
             extra_factor_solver = lambda i, n, c: (1.0-c) * i/n,
@@ -99,7 +99,7 @@ def thinning_from_above(input: OpTuple[ForestStand], **operation_parameters) -> 
 
 
 def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = input
+    stand, collected_data = input
     if len(stand.reference_trees) == 0:
         raise UserWarning("Unable to perform thinning from below. No trees exist.")
     epsilon = operation_parameters['e']
@@ -114,7 +114,7 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
     if evaluate_thinning_conditions(predicates):
         return iterative_thinning_with_output(
             stand = stand,
-            aggr = simulation_aggregates,
+            collected_data = collected_data,
             thinning_factor = operation_parameters['thinning_factor'],
             thin_predicate = lambda s: (lower_limit + epsilon) <= futil.overall_basal_area(s.reference_trees),
             extra_factor_solver = lambda i, n, c: (1.0-c) * i/n,
@@ -125,7 +125,7 @@ def thinning_from_below(input: OpTuple[ForestStand], **operation_parameters) -> 
 
 
 def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, simulation_aggregates = input
+    stand, collected_data = input
     if len(stand.reference_trees) == 0:
         raise UserWarning("Unable to perform even thinning. No trees exist.")
     epsilon = operation_parameters['e']
@@ -138,7 +138,7 @@ def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTupl
     if evaluate_thinning_conditions(predicates):
         return iterative_thinning_with_output(
             stand = stand,
-            aggr = simulation_aggregates,
+            collected_data = collected_data,
             thinning_factor = operation_parameters['thinning_factor'],
             thin_predicate = lambda s: (lower_limit + epsilon) <= futil.overall_basal_area(s.reference_trees),
             extra_factor_solver = lambda i, n, c: 0,
@@ -149,16 +149,16 @@ def even_thinning(input: OpTuple[ForestStand], **operation_parameters) -> OpTupl
 
 
 def report_overall_removal(payload: OpTuple, **operation_parameters) -> OpTuple:
-    _, simulation_aggregates = payload
+    _, collected_data = payload
     operation_tags = operation_parameters['thinning_method']
 
     report_removal_collection = {}
     for tag in operation_tags:
-        thinning_aggregates = [x for x in simulation_aggregates.get_list_result("felled_trees") if x.operation == tag]
-        if thinning_aggregates is None:
-            new_aggregate = 0.0
+        thinning_collection = [x for x in collected_data.get_list_result("felled_trees") if x.operation == tag]
+        if thinning_collection is None:
+            new_sum = 0.0
         else:
-            new_aggregate = sum(y.stems_per_ha for y in thinning_aggregates)
-        report_removal_collection[tag] = new_aggregate
-    simulation_aggregates.store('report_overall_removal', report_removal_collection)
+            new_sum = sum(y.stems_per_ha for y in thinning_collection)
+        report_removal_collection[tag] = new_sum
+    collected_data.store('report_overall_removal', report_removal_collection)
     return payload

@@ -10,12 +10,12 @@ from forestdatamodel.formats.io_utils import stands_to_csv_content, csv_content_
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults, ForestOpPayload
 from forestry.forestry_types import StandList
-from sim.core_types import AggregatedResults
+from sim.core_types import CollectedData
 
 
 StandReader = Callable[[str], StandList]
 StandWriter = Callable[[Path, StandList], None]
-ObjectLike = StandList or SimResults or AggregatedResults
+ObjectLike = StandList or SimResults or CollectedData
 ObjectWriter = Callable[[Path, ObjectLike], None]
 
 
@@ -151,7 +151,7 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload
     Utilizes a scanner function to resolve the files with known container formats. Files may not exist.
 
     :param schedule_path: Path for a schedule directory
-    :return: OperationPayload with simulation_state and aggregated_results if found
+    :return: OperationPayload with simulation_state and collected_data if found
     """
     unit_state_file, input_container = scan_dir_for_file(schedule_path, "unit_state", ["csv", "json", "pickle"])
     derived_data_file, derived_data_container = scan_dir_for_file(schedule_path, "derived_data", ["json", "pickle"])
@@ -159,7 +159,7 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload
     derived_data = None if derived_data_file is None else parse_file_or_default(derived_data_file, object_reader(derived_data_container))
     return ForestOpPayload(
         simulation_state=None if stands == [] else stands[0],
-        aggregated_results=derived_data,
+        collected_data=derived_data,
         operation_history=[]
     )
 
@@ -198,7 +198,7 @@ def write_stands_to_file(result: StandList, filepath: Path, state_output_contain
     writer(filepath, result)
 
 
-def write_derived_data_to_file(result: AggregatedResults, filepath: Path, derived_data_output_container: str):
+def write_derived_data_to_file(result: CollectedData, filepath: Path, derived_data_output_container: str):
     """Resolve a writer function for AggregatedResults matching the given derived_data_output_container. Invokes write."""
     writer = object_writer(derived_data_output_container)
     writer(filepath, result)
@@ -224,7 +224,7 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mela
             if app_arguments.derived_data_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
                 filepath = determine_file_path(schedule_dir, f"derived_data.{app_arguments.derived_data_output_container}")
-                write_derived_data_to_file(schedule.aggregated_results, filepath, app_arguments.derived_data_output_container)
+                write_derived_data_to_file(schedule.collected_data, filepath, app_arguments.derived_data_output_container)
 
 
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:

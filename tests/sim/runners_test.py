@@ -1,8 +1,8 @@
 import unittest
 from sim.generators import GENERATOR_LOOKUP
-from sim.core_types import AggregatedResults, OperationPayload, SimConfiguration
+from sim.core_types import CollectedData, OperationPayload, SimConfiguration
 from sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy
-from tests.test_utils import raises, identity, none, collect_results, load_yaml, aggregating_increment
+from tests.test_utils import raises, identity, none, collect_results, load_yaml, collecting_increment
 
 
 class TestOperations(unittest.TestCase):
@@ -27,11 +27,11 @@ class TestOperations(unittest.TestCase):
 
     def test_strategies_by_comparison(self):
         declaration = load_yaml('runners_test/branching.yaml')
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
         initial = OperationPayload(
             simulation_state=1,
-            aggregated_results=AggregatedResults(),
+            collected_data=CollectedData(),
             operation_history=[]
         )
         results_full = collect_results(run_full_tree_strategy(initial, config))
@@ -42,11 +42,11 @@ class TestOperations(unittest.TestCase):
 
     def test_no_parameters_propagation(self):
         declaration = load_yaml('runners_test/no_parameters.yaml')
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
         initial = OperationPayload(
             simulation_state=1,
-            aggregated_results=AggregatedResults(),
+            collected_data=CollectedData(),
             operation_history=[]
         )
 
@@ -57,11 +57,11 @@ class TestOperations(unittest.TestCase):
 
     def test_parameters_propagation(self):
         declaration = load_yaml('runners_test/parameters.yaml')
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
         initial = OperationPayload(
             simulation_state=1,
-            aggregated_results=AggregatedResults(),
+            collected_data=CollectedData(),
             operation_history=[]
         )
 
@@ -72,10 +72,10 @@ class TestOperations(unittest.TestCase):
 
     def test_parameters_branching(self):
         declaration = load_yaml('runners_test/parameters_branching.yaml')
-        config = SimConfiguration(operation_lookup={'inc': aggregating_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         initial = OperationPayload(
             simulation_state=1,
-            aggregated_results=AggregatedResults(),
+            collected_data=CollectedData(),
             operation_history=[]
         )
 

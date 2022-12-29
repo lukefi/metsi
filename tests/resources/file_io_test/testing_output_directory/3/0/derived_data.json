@@ -1,5 +1,5 @@
 {
-  "py/object": "sim.core_types.AggregatedResults",
+  "py/object": "sim.core_types.CollectedData",
   "operation_results": {
     "calculate_biomass": {
       "py/reduce": [

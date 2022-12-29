@@ -3,7 +3,7 @@ from types import SimpleNamespace
 from typing import OrderedDict
 import unittest
 from app.export_handlers.j import j_xda, j_cda
-from sim.core_types import AggregatedResults, OperationPayload
+from sim.core_types import CollectedData, OperationPayload
 
 
 class TestExport(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestExport(unittest.TestCase):
             "1": [
                 OperationPayload(
                     simulation_state = SimpleNamespace(a=1, b=2),
-                    aggregated_results = AggregatedResults(
+                    collected_data = CollectedData(
                         operation_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": 1, "y": 2, "z": 3 },
@@ -31,7 +31,7 @@ class TestExport(unittest.TestCase):
             "2": [
                 OperationPayload(
                     simulation_state = SimpleNamespace(a=-1, b=-2),
-                    aggregated_results = AggregatedResults(
+                    collected_data = CollectedData(
                         operation_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": 10, "y": 20, "z": 30 },
@@ -43,7 +43,7 @@ class TestExport(unittest.TestCase):
                 ),
                 OperationPayload(
                     simulation_state = SimpleNamespace(a=-1, b=-2),
-                    aggregated_results = AggregatedResults(
+                    collected_data = CollectedData(
                         operation_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": -1, "y": -2, "z": -3 },

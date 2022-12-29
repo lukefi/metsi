@@ -16,10 +16,10 @@ def post_process_alternatives(config: Mela2Configuration, control: dict, input_d
     for identifier, schedules in input_data.items():
         result[identifier] = []
         for schedule in schedules:
-            payload = (schedule.simulation_state, schedule.aggregated_results)
+            payload = (schedule.simulation_state, schedule.collected_data)
             processed_schedule = evaluate_sequence(payload, *chain)
             result[identifier].append(
                 OperationPayload(
                     simulation_state=processed_schedule[0],
-                    aggregated_results=processed_schedule[1]))
+                    collected_data=processed_schedule[1]))
     return result

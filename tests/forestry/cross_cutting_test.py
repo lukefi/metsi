@@ -1,7 +1,7 @@
 import unittest
 from forestry.data_collection.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
 from forestry.collected_types import CrossCutResult, CrossCuttableTree
-from sim.core_types import AggregatedResults, OperationPayload, Step
+from sim.core_types import CollectedData, OperationPayload, Step
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 from sim.generators import alternatives
@@ -18,7 +18,7 @@ class CrossCuttingTest(unittest.TestCase):
         """
         payload = (
             ForestStand(area=2.0),
-            AggregatedResults(
+            CollectedData(
                 operation_results={
                     "felled_trees": [
                         CrossCuttableTree(
@@ -48,12 +48,12 @@ class CrossCuttingTest(unittest.TestCase):
 
         operation_parameters = {'timber_price_table': "tests/resources/timber_price_table.csv"}
 
-        _, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
-        res = aggrs.get_list_result("cross_cutting")
+        _, collected_data = cross_cut_felled_trees(payload, **operation_parameters)
+        res = collected_data.get_list_result("cross_cutting")
         self.assertEqual(res[0].time_point, 20)
         self.assertEqual(len(res), 2)
         self.assertEqual(res[0].operation, "thinning_from_below")
-        self.assertEqual(aggrs.get_list_result('felled_trees')[1].cross_cut_done, True)
+        self.assertEqual(collected_data.get_list_result('felled_trees')[1].cross_cut_done, True)
 
 
     def test_cross_cut_thinning_output_called_twice(self):
@@ -67,7 +67,7 @@ class CrossCuttingTest(unittest.TestCase):
 
         payload = (
             ForestStand(area=2.0),
-            AggregatedResults(
+            CollectedData(
                 operation_results={
                     "felled_trees": [CrossCuttableTree(
                                     stems_per_ha= 0.006261167484111818,
@@ -83,12 +83,12 @@ class CrossCuttingTest(unittest.TestCase):
             ),
         )
 
-        stand, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
-        res = aggrs.get_list_result("cross_cutting")
+        stand, collected_data = cross_cut_felled_trees(payload, **operation_parameters)
+        res = collected_data.get_list_result("cross_cutting")
         self.assertEqual(len(res), 2)
 
         # after the first cross cutting (above), add new thinning results, which need to be cross cut
-        aggrs.operation_results["felled_trees"].append(
+        collected_data.operation_results["felled_trees"].append(
             CrossCuttableTree(
                 stems_per_ha= 0.006261167484111818,
                 species = TreeSpecies.UNKNOWN_CONIFEROUS,
@@ -101,10 +101,10 @@ class CrossCuttingTest(unittest.TestCase):
             ),
         )
 
-        payload = (stand, aggrs)
+        payload = (stand, collected_data)
 
-        _, aggrs = cross_cut_felled_trees(payload, **operation_parameters)
-        res = aggrs.get_list_result("cross_cutting")
+        _, collected_data = cross_cut_felled_trees(payload, **operation_parameters)
+        res = collected_data.get_list_result("cross_cutting")
         # test that the results of both cross cut operations are in thinned_trees_cross_cut
         self.assertEqual([r.time_point for r in res], [20, 20, 30, 30])
         self.assertEqual(len(res), 4)
@@ -135,12 +135,12 @@ class CrossCuttingTest(unittest.TestCase):
                 ),
             ]
         )
-        payload = (stand, AggregatedResults())
+        payload = (stand, CollectedData())
 
         operation_parameters = {'timber_price_table': 'tests/resources/timber_price_table.csv'}
 
-        new_stand, aggrs = cross_cut_standing_trees(payload, **operation_parameters)
-        res = aggrs.get_list_result("cross_cutting")
+        new_stand, collected_data = cross_cut_standing_trees(payload, **operation_parameters)
+        res = collected_data.get_list_result("cross_cutting")
         self.assertEqual(len(res), 6)
         self.assertEqual(res[0].source, "standing")
 
@@ -166,14 +166,14 @@ class CrossCuttingTest(unittest.TestCase):
                 ),
             ]
         )
-        payload = (stand, AggregatedResults(current_time_point=1))
+        payload = (stand, CollectedData(current_time_point=1))
 
         operation_parameters = {'timber_price_table': 'tests/resources/timber_price_table.csv'}
 
-        stand, aggrs = cross_cut_standing_trees(payload, **operation_parameters)
-        aggrs.current_time_point=2
-        _, aggrs = cross_cut_standing_trees((stand, aggrs), **operation_parameters)
-        res = aggrs.get_list_result("cross_cutting")
+        stand, collected_data = cross_cut_standing_trees(payload, **operation_parameters)
+        collected_data.current_time_point=2
+        _, collected_data = cross_cut_standing_trees((stand, collected_data), **operation_parameters)
+        res = collected_data.get_list_result("cross_cutting")
         self.assertEqual(len(res), 4)
         self.assertEqual([r.time_point for r in res], [1, 1, 2, 2])
 
@@ -291,7 +291,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
             simulation_state=ForestStand(
                 area=1
             ),
-            aggregated_results=AggregatedResults(
+            collected_data=CollectedData(
                 {
                     "felled_trees": [
                         CrossCuttableTree(
@@ -343,8 +343,8 @@ class CrossCuttableTreesTest(unittest.TestCase):
 
         results = run_chains_iteratively(payload, chains)
         # running the two branches (chains) should result in one branch having the felled trees cross_cut==True, but not in the other one.
-        self.assertTrue(results[0].aggregated_results.operation_results["felled_trees"][0].cross_cut_done)
-        self.assertFalse(results[1].aggregated_results.operation_results["felled_trees"][0].cross_cut_done)
+        self.assertTrue(results[0].collected_data.operation_results["felled_trees"][0].cross_cut_done)
+        self.assertFalse(results[1].collected_data.operation_results["felled_trees"][0].cross_cut_done)
 
 class CrossCutResultTest(unittest.TestCase):
     fixture = CrossCutResult(

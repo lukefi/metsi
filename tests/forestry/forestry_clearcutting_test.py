@@ -5,7 +5,7 @@ import forestry.forestry_operations.clearcut as clearcut
 from forestryfunctions import forestry_utils as futil
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.forestry_operations.thinning_limits import SpeciesKey
-from sim.core_types import AggregatedResults
+from sim.core_types import CollectedData
 import forestry.forestry_operations.planting as plnt
 from forestry.utils.enums import SiteTypeKey
 
@@ -27,25 +27,25 @@ class ClearcuttingTest(unittest.TestCase):
             for id,s, d, f, a,h in zip(ids,species, diameters, stems, ages,heights)
         ]
         return stand
-   
-    
+
+
     def test_create_clearcutting_limits_table(self):
         # thinning_limits = open('tests/resources/thinning_limits.txt', 'r').read()
         table_ages = clearcutting_lim.create_clearcutting_limits_table('data/parameter_files/renewal_ages_southernFI.txt')
         self.assertEqual(len(table_ages), 4)
         self.assertEqual(len(table_ages[0]), 5)
         self.assertEqual(int(table_ages[1][3]), 50)
-    
+
     def test_get_clearcutting_limits_dict_ages(self):
         ages = clearcutting_lim.get_clearcutting_agelimits_from_parameter_file_contents('data/parameter_files/renewal_ages_southernFI.txt')
         self.assertEqual(ages[SiteTypeKey.OMT][SpeciesKey.DOWNY_BIRCH],50)
         self.assertEqual(ages[SiteTypeKey.CT][SpeciesKey.PINE],90)
-    
+
     def test_get_clearcutting_limits_dict_diameters(self):
         diameters = clearcutting_lim.get_clearcutting_diameterlimits_from_parameter_file_contents('data/parameter_files/renewal_diameters_southernFI.txt')
         self.assertEqual(diameters[SiteTypeKey.OMT][SpeciesKey.DOWNY_BIRCH],23.0)
         self.assertEqual(diameters[SiteTypeKey.CT][SpeciesKey.PINE],22.0)
-    
+
     def test_get_regeneration_instructions_dict(self):
         instructions = plnt.get_planting_instructions_from_parameter_file_contents('tests/resources/planting_test/planting_instructions.txt')
         self.assertEqual(instructions[SiteTypeKey.OMT]["species"],1)
@@ -58,21 +58,21 @@ class ClearcuttingTest(unittest.TestCase):
         self.assertEqual(93.96598639455782, futil.mean_age_stand(stand))
         self.assertEqual(70, clearcutting_lim.get_clearcutting_limits(stand,'data/parameter_files/renewal_ages_southernFI.txt','data/parameter_files/renewal_diameters_southernFI.txt')[0])
         self.assertEqual(26, clearcutting_lim.get_clearcutting_limits(stand,'data/parameter_files/renewal_ages_southernFI.txt','data/parameter_files/renewal_diameters_southernFI.txt')[1])
-    
+
     def test_clearcut_with_output(self):
         stand = self.generate_stand_fixture()
-        simulation_aggregates = AggregatedResults()
-        stand, simulation_aggregates = clearcut._clearcut_with_output(stand,simulation_aggregates,'clearcutting')
-        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_per_ha)
-        self.assertEqual("clearcutting", simulation_aggregates.get_list_result("felled_trees")[-1].operation)
-        self.assertEqual(33.0,simulation_aggregates.get_list_result("felled_trees")[-1].height)
-    
+        collected_data = CollectedData()
+        stand, collected_data = clearcut._clearcut_with_output(stand,collected_data,'clearcutting')
+        self.assertEqual(192, collected_data.get_list_result("felled_trees")[-1].stems_per_ha)
+        self.assertEqual("clearcutting", collected_data.get_list_result("felled_trees")[-1].operation)
+        self.assertEqual(33.0,collected_data.get_list_result("felled_trees")[-1].height)
+
     def test_clearcutting(self):
         stand = self.generate_stand_fixture()
         operation_parameters = {'clearcutting_limits_ages': 'data/parameter_files/renewal_ages_southernFI.txt','clearcutting_limits_diameters':'data/parameter_files/renewal_diameters_southernFI.txt'}
-        simulation_aggregates = AggregatedResults()
-        oper_input = (stand, simulation_aggregates)
-        stand, aggr = clearcut.clearcutting(oper_input, **operation_parameters)
+        collected_data = CollectedData()
+        oper_input = (stand, collected_data)
+        stand, collected_data = clearcut.clearcutting(oper_input, **operation_parameters)
         self.assertEqual(0, futil.overall_stems_per_ha(stand.reference_trees))
         self.assertEqual(0, futil.mean_age_stand(stand))
-        self.assertEqual(192, simulation_aggregates.get_list_result("felled_trees")[-1].stems_per_ha)
+        self.assertEqual(192, collected_data.get_list_result("felled_trees")[-1].stems_per_ha)

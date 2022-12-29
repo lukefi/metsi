@@ -2,7 +2,7 @@ from forestry.collected_types import CrossCuttableTree
 from tests.test_utils import ConverterTestSuite
 from forestdatamodel.model import ReferenceTree
 from forestry.forestry_operations.thinning_limits import *
-from sim.core_types import AggregatedResults
+from sim.core_types import CollectedData
 import forestry.forestry_operations.thinning as thin
 import numpy as np
 from forestry.utils.file_io import get_timber_price_table
@@ -37,20 +37,20 @@ class ThinningsTest(ConverterTestSuite):
             for spe, d, f, h in zip(species, diameters, stems, heights)
         ]
         operation_tag = 'first_thinning'
-        simulation_aggregates = AggregatedResults()
+        collected_data = CollectedData()
         operation_parameters = {
             'thinning_factor': 0.97,
             'e': 10,
             'dominant_height_lower_bound': 11,
             'dominant_height_upper_bound': 16,
         }
-        payload = (stand, simulation_aggregates)
-        result_stand, collected_aggregates = thin.first_thinning(payload, **operation_parameters)
-        self.assertEqual(3, len(result_stand.reference_trees))
-        self.assertAlmostEqual(257.6202, result_stand.reference_trees[0].stems_per_ha, places=4)
-        self.assertAlmostEqual(180.7842, result_stand.reference_trees[1].stems_per_ha, places=4)
-        self.assertAlmostEqual(570.594, result_stand.reference_trees[2].stems_per_ha, places=4)
-        self.assertAlmostEqual(600 - 570.594, collected_aggregates.get_list_result("felled_trees")[-1].stems_per_ha, places=4)
+        payload = (stand, collected_data)
+        new_stand, new_collected_data = thin.first_thinning(payload, **operation_parameters)
+        self.assertEqual(3, len(new_stand.reference_trees))
+        self.assertAlmostEqual(257.6202, new_stand.reference_trees[0].stems_per_ha, places=4)
+        self.assertAlmostEqual(180.7842, new_stand.reference_trees[1].stems_per_ha, places=4)
+        self.assertAlmostEqual(570.594, new_stand.reference_trees[2].stems_per_ha, places=4)
+        self.assertAlmostEqual(600 - 570.594, new_collected_data.get_list_result("felled_trees")[-1].stems_per_ha, places=4)
 
 
     def test_thinning_from_above(self):
@@ -68,20 +68,20 @@ class ThinningsTest(ConverterTestSuite):
         ]
 
         operation_tag = 'thinning_from_above'
-        simulation_aggregates = AggregatedResults()
+        collected_data = CollectedData()
         operation_parameters = {
             'thinning_factor': 0.97,
             'e': 0.2,
             }
 
-        oper_input = (stand, simulation_aggregates)
-        result_stand, collected_aggregates = thin.thinning_from_above(oper_input, **operation_parameters)
-        self.assertEqual(3, len(result_stand.reference_trees))
+        oper_input = (stand, collected_data)
+        new_stand, new_collected_data = thin.thinning_from_above(oper_input, **operation_parameters)
+        self.assertEqual(3, len(new_stand.reference_trees))
         self.assertEqual([22.0, 21.0, 20.0], [rt.breast_height_diameter for rt in stand.reference_trees])
-        self.assertAlmostEqual(124.0792, result_stand.reference_trees[0].stems_per_ha, places=4)
-        self.assertAlmostEqual(145.4833, result_stand.reference_trees[1].stems_per_ha, places=4)
-        self.assertAlmostEqual(170.2916, result_stand.reference_trees[2].stems_per_ha, places=4)
-        self.assertAlmostEqual(200 - 170.2916, collected_aggregates.get_list_result("felled_trees")[-1].stems_per_ha, places=4)
+        self.assertAlmostEqual(124.0792, new_stand.reference_trees[0].stems_per_ha, places=4)
+        self.assertAlmostEqual(145.4833, new_stand.reference_trees[1].stems_per_ha, places=4)
+        self.assertAlmostEqual(170.2916, new_stand.reference_trees[2].stems_per_ha, places=4)
+        self.assertAlmostEqual(200 - 170.2916, new_collected_data.get_list_result("felled_trees")[-1].stems_per_ha, places=4)
 
     def test_thinning_from_below(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -97,20 +97,20 @@ class ThinningsTest(ConverterTestSuite):
             for s, d, f, h in zip(species, diameters, stems, heights)
         ]
 
-        simulation_aggregates = AggregatedResults()
+        collected_data = CollectedData()
         operation_parameters = {
             'thinning_factor': 0.97,
             'e': 0.2,
             }
 
-        oper_input = (stand, simulation_aggregates)
-        result_stand, collected_aggregates = thin.thinning_from_below(oper_input, **operation_parameters)
-        self.assertEqual(3, len(result_stand.reference_trees))
+        oper_input = (stand, collected_data)
+        new_stand, new_collected_data = thin.thinning_from_below(oper_input, **operation_parameters)
+        self.assertEqual(3, len(new_stand.reference_trees))
         self.assertEqual([20.0, 21.0, 22.0], [rt.breast_height_diameter for rt in stand.reference_trees])
-        self.assertAlmostEqual(119.1652, result_stand.reference_trees[0].stems_per_ha, places=4)
-        self.assertAlmostEqual(142.5737, result_stand.reference_trees[1].stems_per_ha, places=4)
-        self.assertAlmostEqual(170.2745, result_stand.reference_trees[2].stems_per_ha, places=4)
-        self.assertAlmostEqual(202 - 170.2745, collected_aggregates.get_list_result("felled_trees")[-1].stems_per_ha, places=4)
+        self.assertAlmostEqual(119.1652, new_stand.reference_trees[0].stems_per_ha, places=4)
+        self.assertAlmostEqual(142.5737, new_stand.reference_trees[1].stems_per_ha, places=4)
+        self.assertAlmostEqual(170.2745, new_stand.reference_trees[2].stems_per_ha, places=4)
+        self.assertAlmostEqual(202 - 170.2745, new_collected_data.get_list_result("felled_trees")[-1].stems_per_ha, places=4)
 
     def test_even_thinning(self):
         species = [TreeSpecies(i) for i in [1, 2, 3]]
@@ -126,20 +126,20 @@ class ThinningsTest(ConverterTestSuite):
             for s, d, f, h in zip(species, diameters, stems, heights)
         ]
 
-        simulation_aggregates = AggregatedResults()
+        collected_data = CollectedData()
         operation_parameters = {
             'thinning_factor': 0.50,
             'e': 0.2,
             }
 
-        oper_input = (stand, simulation_aggregates)
-        result_stand, collected_aggregates = thin.even_thinning(oper_input, **operation_parameters)
-        self.assertEqual(3, len(result_stand.reference_trees))
+        oper_input = (stand, collected_data)
+        new_stand, new_collected_data = thin.even_thinning(oper_input, **operation_parameters)
+        self.assertEqual(3, len(new_stand.reference_trees))
         self.assertEqual([20.0, 21.0, 22.0], [rt.breast_height_diameter for rt in stand.reference_trees])
-        self.assertAlmostEqual(100.0, result_stand.reference_trees[0].stems_per_ha, places=4)
-        self.assertAlmostEqual(100.5, result_stand.reference_trees[1].stems_per_ha, places=4)
-        self.assertAlmostEqual(101.0, result_stand.reference_trees[2].stems_per_ha, places=4)
-        self.assertAlmostEqual(202 - 101.0, collected_aggregates.get_list_result("felled_trees")[-1].stems_per_ha, places=4)
+        self.assertAlmostEqual(100.0, new_stand.reference_trees[0].stems_per_ha, places=4)
+        self.assertAlmostEqual(100.5, new_stand.reference_trees[1].stems_per_ha, places=4)
+        self.assertAlmostEqual(101.0, new_stand.reference_trees[2].stems_per_ha, places=4)
+        self.assertAlmostEqual(202 - 101.0, new_collected_data.get_list_result("felled_trees")[-1].stems_per_ha, places=4)
 
     def test_report_overall_removal(self):
         operation_results = {
@@ -174,11 +174,11 @@ class ThinningsTest(ConverterTestSuite):
             ]
         }
 
-        simulation_aggregates = AggregatedResults(
+        collected_data = CollectedData(
             operation_results = operation_results,
             current_time_point = 30
         )
-        payload = (None, simulation_aggregates)
+        payload = (None, collected_data)
         (_, result) = thin.report_overall_removal(payload, thinning_method=['thin1', 'thin2'])
         overall_removals = result.prev('report_overall_removal')
         overall_removal = sum(x for x in overall_removals.values())

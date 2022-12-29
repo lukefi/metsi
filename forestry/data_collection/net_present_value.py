@@ -1,4 +1,4 @@
-from sim.core_types import AggregatedResults, OpTuple
+from sim.core_types import CollectedData, OpTuple
 from forestdatamodel.model import ForestStand
 from forestry.collected_types import CrossCutResult, NPVResult, PriceableOperationInfo
 from forestry.utils.file_io import get_renewal_costs_as_dict, get_land_values_as_dict
@@ -38,16 +38,16 @@ def _discount_factor(r: float, current_time_point: int, initial_time_point) -> f
 
 def _calculate_npv_for_rate(
     stand: ForestStand,
-    simulation_aggregates: AggregatedResults,
+    collected_data: CollectedData,
     land_values: dict,
     renewal_costs: dict,
     int_r: int
     ) -> float:
 
-    cc_results = simulation_aggregates.get_list_result("cross_cutting")
-    renewal_results = simulation_aggregates.get_list_result("renewal")
-    current_time_point = simulation_aggregates.current_time_point
-    initial_time_point = simulation_aggregates.initial_time_point
+    cc_results = collected_data.get_list_result("cross_cutting")
+    renewal_results = collected_data.get_list_result("renewal")
+    current_time_point = collected_data.current_time_point
+    initial_time_point = collected_data.initial_time_point
 
     r = int_r/100
     npv = 0.0
@@ -85,16 +85,16 @@ def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTu
     Expects that the relevant cross cut operations have been done before this.
     Expects interest rates to be given as integers (e.g. 5) and that the interest rates in the land values file correspond to these values.
     """
-    stand, simulation_aggregates = payload
+    stand, collected_data = payload
 
     interest_rates: list = operation_parameters["interest_rates"]
     land_values = get_land_values_as_dict(operation_parameters["land_values"])
     renewal_costs = get_renewal_costs_as_dict(operation_parameters["renewal_costs"])
 
     for int_r in interest_rates:
-        npv = _calculate_npv_for_rate(stand, simulation_aggregates, land_values, renewal_costs, int_r)
-        aggr = NPVResult(simulation_aggregates.current_time_point, int_r, npv)
-        simulation_aggregates.extend_list_result("net_present_value", [aggr])
+        npv = _calculate_npv_for_rate(stand, collected_data, land_values, renewal_costs, int_r)
+        npv_data = NPVResult(collected_data.current_time_point, int_r, npv)
+        collected_data.extend_list_result("net_present_value", [npv_data])
 
     return payload
 

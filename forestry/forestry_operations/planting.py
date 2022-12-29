@@ -1,5 +1,5 @@
 from functools import cache
-from sim.core_types import AggregatedResults, OpTuple
+from sim.core_types import CollectedData, OpTuple
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
 from forestry.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
@@ -81,7 +81,7 @@ def get_planting_instructions(site_type_category: int, file_path_instructions: s
 
 def plant(
     stand: ForestStand,
-    aggr: AggregatedResults,
+    collected_data: CollectedData,
     tag: str,
     regen_species: TreeSpecies,
     rt_count: int,
@@ -109,21 +109,21 @@ def plant(
         for i in range(rt_count)
     ]
 
-    aggr.store(tag, regeneration_description)
-    aggr.extend_list_result(
+    collected_data.store(tag, regeneration_description)
+    collected_data.extend_list_result(
         "renewal",
         [ PriceableOperationInfo(
             operation="planting",
             units=stand.area, #TODO: planting may not be priced per hectare
-            time_point=aggr.current_time_point) ]
+            time_point=collected_data.current_time_point) ]
     )
 
-    return (stand, aggr)
+    return (stand, collected_data)
 
 
 def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """ Checks weather stand has reference trees, if not function plant is called """
-    stand, simulation_aggregates = payload
+    stand, collected_data = payload
     tree_count = operation_parameters.get('tree_count', 10)
 
     if len(stand.reference_trees) > 0:
@@ -133,7 +133,7 @@ def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[F
     regen = get_planting_instructions(stand.site_type_category, instructions_path)
     stand, output_planting = plant(
         stand,
-        simulation_aggregates,
+        collected_data,
         "regeneration",
         TreeSpecies(regen['species']),
         tree_count,

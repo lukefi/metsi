@@ -6,35 +6,35 @@ from sim.operations import T
 
 
 def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
-    state, aggr = input
+    state, collected_data = input
     res = _collector_wrapper(
         collectives,
         lambda name: autocollective(getattr(state, name)),
-        lambda name: autocollective(aggr.operation_results[name]),
+        lambda name: autocollective(collected_data.operation_results[name]),
         state = state,
-        aggr = aggr.operation_results,
-        time = aggr.current_time_point
+        collected_data = collected_data.operation_results,
+        time = collected_data.current_time_point
     )
-    aggr.store('report_collectives', res)
+    collected_data.store('report_collectives', res)
     return input
 
 
 def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
-    state, aggr = input
+    state, collected_data = input
     res = _collector_wrapper(
         operation_parameters,
         lambda name: autocollective(getattr(state, name)),
         lambda name: autocollective(
-            aggr.operation_results[name],
-            time_point=[aggr.current_time_point]),
+            collected_data.operation_results[name],
+            time_point=[collected_data.current_time_point]),
         state=state
     )
-    aggr.store('report_state', res)
+    collected_data.store('report_state', res)
     return input
 
 
 def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, aggr = input
+    stand, collected_data = input
     output_name = operation_parameters.get('output_name', 'collect_properties')
     result_rows = []
     if not len(operation_parameters):
@@ -52,11 +52,11 @@ def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> O
         elif key == "stratum":
             objects = stand.tree_strata
         else:
-            objects = list(filter(lambda obj: obj.time_point == aggr.current_time_point, aggr.get_list_result(key)))
+            objects = list(filter(lambda obj: obj.time_point == collected_data.current_time_point, collected_data.get_list_result(key)))
         collected = property_collector(objects, properties)
         result_rows.extend(collected)
-    aggr.store(output_name, result_rows)
-    return stand, aggr
+    collected_data.store(output_name, result_rows)
+    return stand, collected_data
 
 
 def collect_standing_tree_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
@@ -70,15 +70,15 @@ def collect_felled_tree_properties(input: OpTuple[ForestStand], **operation_para
 
 
 def report_period(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
-    _, aggr = input
-    last_period = aggr.prev('report_period')
-    t0 = aggr.initial_time_point if last_period is None else list(aggr.get('report_period').keys())[-1]
+    _, collected_data = input
+    last_period = collected_data.prev('report_period')
+    t0 = collected_data.initial_time_point if last_period is None else list(collected_data.get('report_period').keys())[-1]
     res = _collector_wrapper(
         operation_parameters,
         lambda name: autocollective(
-            aggr.operation_results[name],
-            time_point=range(t0, aggr.current_time_point)
+            collected_data.operation_results[name],
+            time_point=range(t0, collected_data.current_time_point)
         )
     )
-    aggr.store('report_period', res)
+    collected_data.store('report_period', res)
     return input

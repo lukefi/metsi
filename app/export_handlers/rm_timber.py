@@ -84,7 +84,7 @@ def prepare_schedules_file_content(data: SimResults, data_source: str) -> list[s
     output_rows = []
     for stand_id, payload in data.items():
         output_rows.append(f"Stand {stand_id} Area {payload[0].simulation_state.area}")
-        for schedule_number, schedule_derived_data in enumerate(map(lambda x: x.aggregated_results, payload)):
+        for schedule_number, schedule_derived_data in enumerate(map(lambda x: x.collected_data, payload)):
             output_rows.append(f"Schedule {schedule_number}")
             prepared = collect_rows_for_events(schedule_derived_data, data_source)
             output_rows.extend(prepared)

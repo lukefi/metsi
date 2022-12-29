@@ -88,16 +88,16 @@ def cross_cut_tree(
 def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
     Calculates cross cutting volumes and values for CrossCuttableTrees that haven't yet been cross cut.
-    :returns: the same payload as was given as input, but with cross cutting results stored in the simulation_aggregates.
+    :returns: the same payload as was given as input, but with cross cutting results stored in the collected_data.
     """
-    stand, simulation_aggregates = payload
+    stand, collected_data = payload
     timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
     impl = operation_parameters.get('implementation', 'py')
 
     results = []
 
 
-    felled_trees = simulation_aggregates.get_list_result("felled_trees")
+    felled_trees = collected_data.get_list_result("felled_trees")
     felled_trees_not_cut = filter(lambda x: not x.cross_cut_done, felled_trees)
 
     for tree in felled_trees_not_cut:
@@ -105,18 +105,18 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
         results.extend(res)
         tree.cross_cut_done = True
 
-    simulation_aggregates.extend_list_result("cross_cutting", results)
+    collected_data.extend_list_result("cross_cutting", results)
     return payload
 
 
 def cross_cut_standing_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
     """
     Cross cuts the `payload`'s stand at its current state. Does not modify the state, only calculates and stores the result of cross cutting.
-    The results are stored in simulation_aggregates.
+    The results are stored in collected_data.
     """
-    stand, simulation_aggregates = payload
+    stand, collected_data = payload
     timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
-    cross_cuttable_trees = cross_cuttable_trees_from_stand(stand, simulation_aggregates.current_time_point)
+    cross_cuttable_trees = cross_cuttable_trees_from_stand(stand, collected_data.current_time_point)
     impl = operation_parameters.get('implementation', 'py')
 
     results = []
@@ -124,7 +124,7 @@ def cross_cut_standing_trees(payload: OpTuple[ForestStand], **operation_paramete
         res = cross_cut_tree(tree, stand.area, timber_price_table, impl)
         results.extend(res)
 
-    simulation_aggregates.extend_list_result("cross_cutting", results)
+    collected_data.extend_list_result("cross_cutting", results)
 
     return payload
 

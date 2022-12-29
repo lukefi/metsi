@@ -1,6 +1,6 @@
 import unittest
 from forestry.collected_types import CrossCutResult
-from sim.core_types import AggregatedResults
+from sim.core_types import CollectedData
 from forestry.data_collection.marshalling import report_period, report_state
 from forestdatamodel.model import ForestStand, ReferenceTree
 from forestdatamodel.enums.internal import TreeSpecies
@@ -9,7 +9,7 @@ from types import SimpleNamespace
 class ReportStateTest(unittest.TestCase):
 
     def test_report_state_considers_only_current_time_point(self):
-        aggr = AggregatedResults(
+        collected_data = CollectedData(
             operation_results={
                 "cross_cutting": [
                     CrossCutResult(
@@ -41,8 +41,8 @@ class ReportStateTest(unittest.TestCase):
          "cross_cut_volume": 'cross_cutting.volume_per_ha'
         }
 
-        _, aggrs = report_state((ForestStand(), aggr), **collectives)
-        self.assertEqual(aggrs.operation_results["report_state"][1]["cross_cut_volume"], 1)
+        _, collected_data = report_state((ForestStand(), collected_data), **collectives)
+        self.assertEqual(collected_data.operation_results["report_state"][1]["cross_cut_volume"], 1)
 
 
 
@@ -54,14 +54,14 @@ class ReportStateTest(unittest.TestCase):
                 ReferenceTree(species = TreeSpecies.PINE, stems_per_ha = 1),
                 ]
         )
-        aggr = AggregatedResults(current_time_point=2)
+        collected_data = CollectedData(current_time_point=2)
 
         collectives = {
          "spruce_per_ha": 'reference_trees.stems_per_ha[reference_trees.species == 2]'
         }
 
-        _, aggrs = report_state((stand, aggr), **collectives)
-        self.assertEqual(aggrs.operation_results["report_state"][2]["spruce_per_ha"], 20)
+        _, collected_data = report_state((stand, collected_data), **collectives)
+        self.assertEqual(collected_data.operation_results["report_state"][2]["spruce_per_ha"], 20)
 
 
     def test_report_period(self):
@@ -69,7 +69,7 @@ class ReportStateTest(unittest.TestCase):
         Test setup is as follows:
         We are accumulating the variable a in operX at time points 10 and 20
         """
-        aggr = AggregatedResults(
+        collected_data = CollectedData(
             operation_results={
                 'operX': [
                     SimpleNamespace(
@@ -91,10 +91,10 @@ class ReportStateTest(unittest.TestCase):
             'accumulate_a': 'operX.a'
         }
         # period reporting for years 0-9
-        aggr.current_time_point = 10
-        res = report_period((None, aggr), **collectives)
-        self.assertEqual(res[1].operation_results['report_period'][aggr.current_time_point]['accumulate_a'], 40)
+        collected_data.current_time_point = 10
+        res = report_period((None, collected_data), **collectives)
+        self.assertEqual(res[1].operation_results['report_period'][collected_data.current_time_point]['accumulate_a'], 40)
         # period for years 10-19
-        aggr.current_time_point = 20
-        res = report_period((None, aggr), **collectives)
-        self.assertEqual(res[1].operation_results['report_period'][aggr.current_time_point]['accumulate_a'], 100)
+        collected_data.current_time_point = 20
+        res = report_period((None, collected_data), **collectives)
+        self.assertEqual(res[1].operation_results['report_period'][collected_data.current_time_point]['accumulate_a'], 100)

@@ -32,13 +32,13 @@ def none(x: Any) -> None:
     return None
 
 
-def aggregating_increment(input: OpTuple[int], **operation_params) -> OpTuple[int]:
+def collecting_increment(input: OpTuple[int], **operation_params) -> OpTuple[int]:
     incrementation = operation_params.get('incrementation', 1)
-    state, aggregates = input
-    latest_aggregate = aggregates.prev('aggregating_increment')
-    aggregate = {'run_count': 1} if latest_aggregate is None else {'run_count': latest_aggregate['run_count'] + 1}
-    aggregates.store('aggregating_increment', aggregate)
-    return state + incrementation, aggregates
+    state, collected_data = input
+    previous_collected_data = collected_data.prev('collecting_increment')
+    new_collected_data = {'run_count': 1} if previous_collected_data is None else {'run_count': previous_collected_data['run_count'] + 1}
+    collected_data.store('collecting_increment', new_collected_data)
+    return state + incrementation, collected_data
 
 
 def inc(x: int) -> int:

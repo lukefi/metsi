@@ -83,7 +83,8 @@ class Step:
     def add_branch_from_operation(self, operation: Callable):
         self.add_branch(Step(operation, self))
 
-class AggregatedResults:
+
+class CollectedData:
 
     def __init__(
         self,
@@ -95,8 +96,8 @@ class AggregatedResults:
         self.current_time_point: int = current_time_point or initial_time_point or 0
         self.initial_time_point: int = initial_time_point or 0
 
-    def __deepcopy__(self, memo: dict) -> "AggregatedResults":
-        return AggregatedResults(
+    def __deepcopy__(self, memo: dict) -> "CollectedData":
+        return CollectedData(
             operation_results=deepcopy(self.operation_results, memo),
             current_time_point=self.current_time_point,
             initial_time_point=self.initial_time_point
@@ -115,8 +116,8 @@ class AggregatedResults:
             self.operation_results[tag] = OrderedDict()
             return self.operation_results[tag]
 
-    def store(self, tag: str, aggr: Any):
-        self.get(tag)[self.current_time_point] = aggr
+    def store(self, tag: str, collected_data: Any):
+        self.get(tag)[self.current_time_point] = collected_data
 
     def get_list_result(self, tag: str) -> list[Any]:
         try:
@@ -125,15 +126,15 @@ class AggregatedResults:
             self.operation_results[tag] = []
             return self.operation_results[tag]
 
-    def extend_list_result(self, tag: str, aggr: list[Any]):
-        self.get_list_result(tag).extend(aggr)
+    def extend_list_result(self, tag: str, collected_data: list[Any]):
+        self.get_list_result(tag).extend(collected_data)
 
     def upsert_nested(self, value, *keys):
         """
         Upsert a value under a key path in a nested dictionary (under self.operation_results).
         :param value: The value to upsert.
-        :param keys: The key path to the value to be upserted. Lenght of keys must be 
-        larger than 1; this method is not intended to be used for upserting values  directly 
+        :param keys: The key path to the value to be upserted. Lenght of keys must be
+        larger than 1; this method is not intended to be used for upserting values  directly
         under operation_results.
         """
         def _upsert(d:dict, value: dict, *keys):
@@ -143,7 +144,7 @@ class AggregatedResults:
                         # a dictionary will be updated with a dictionary, but other types will overrider the existing value
                         if isinstance(value, dict) and isinstance(d[keys[0]], dict):
                             d.get(keys[0]).update(value)
-                        else: 
+                        else:
                             d[keys[0]] = value
                     else:
                         d[keys[0]] = value
@@ -167,18 +168,18 @@ class OperationPayload(SimpleNamespace, Generic[CUType]):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
     simulation_state: CUType
-    aggregated_results: AggregatedResults
+    collected_data: CollectedData
     operation_history: list[tuple[int, str, dict[str, dict]]]
 
     def __deepcopy__(self, memo: dict) -> "OperationPayload":
         return OperationPayload(
             simulation_state = deepcopy(self.simulation_state, memo),
-            aggregated_results = deepcopy(self.aggregated_results, memo),
+            collected_data = deepcopy(self.collected_data, memo),
             operation_history = list(self.operation_history)
         )
 
 
-OpTuple = tuple[CUType, AggregatedResults]
+OpTuple = tuple[CUType, CollectedData]
 SourceData = list[CUType]
 StrategyRunner = Callable[[OperationPayload[CUType], dict, dict], list[OperationPayload[CUType]]]
 GeneratorFn = Callable[[Optional[list[Step]]], list[Step]]

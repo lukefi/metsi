@@ -857,7 +857,7 @@ A single `ForestStand` instance fully represents a forestry simulation state.
 
 Operations are functions which take two arguments
 
-* A tuple of a `ForestStand` instance and a `dict` containing aggregated data collected during the simulation run
+* A tuple of a `ForestStand` instance and a `CollectedData` containing derived/computed data during the simulation run
 * Python `dict` containing parameters for this operation
 
 By convention (since Python as a language does not allow us to properly enforce this), these functions must remain pure and not trigger side-effectful program logic.

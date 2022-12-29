@@ -2,18 +2,18 @@
 import unittest
 from forestdatamodel.model import ForestStand
 from forestdatamodel.enums.internal import TreeSpecies
-from sim.core_types import AggregatedResults
+from sim.core_types import CollectedData
 import forestry.forestry_operations.planting as plnt
 from forestry.utils.enums import SoilPreparationKey
 
 class PlantingTest(unittest.TestCase):
     def test_plant(self):
         stand = ForestStand()
-        simulation_aggregates = AggregatedResults()
+        collected_data = CollectedData()
         stand.site_type_category = 3
         stand.identifier = '1001'
         regen = plnt.get_planting_instructions(stand.site_type_category, 'tests/resources/planting_test/planting_instructions.txt')
-        (stand, output) = plnt.plant(stand,simulation_aggregates, "regeneration",regen_species = TreeSpecies(regen['species']), rt_count = 10, rt_stems= regen['stems/ha'],
+        (stand, output) = plnt.plant(stand,collected_data, "regeneration",regen_species = TreeSpecies(regen['species']), rt_count = 10, rt_stems= regen['stems/ha'],
             soil_preparation=regen['soil preparation'])
         self.assertEqual(200,stand.reference_trees[-1].stems_per_ha)
         self.assertEqual(SoilPreparationKey.PATCH_MOUNDING, output.prev("regeneration")['soil preparation'])
@@ -22,8 +22,8 @@ class PlantingTest(unittest.TestCase):
 
     def test_planting(self):
         stand = ForestStand()
-        simulation_aggregates = AggregatedResults()
-        oper_input = (stand, simulation_aggregates)
+        collected_data = CollectedData()
+        oper_input = (stand, collected_data)
         operation_parameters = {'planting_instructions':'tests/resources/planting_test/planting_instructions.txt'}
         stand.site_type_category = 4
         stand.identifier = '1011'
@@ -34,5 +34,5 @@ class PlantingTest(unittest.TestCase):
         self.assertEqual('1011-9-tree', stand.reference_trees[-1].identifier)
         self.assertEqual(output.get_list_result("renewal")[-1].operation, "planting")
         self.assertEqual(output.get_list_result("renewal")[-1].units, stand.area)
-        self.assertEqual(output.get_list_result("renewal")[-1].time_point, simulation_aggregates.current_time_point)
+        self.assertEqual(output.get_list_result("renewal")[-1].time_point, collected_data.current_time_point)
 
