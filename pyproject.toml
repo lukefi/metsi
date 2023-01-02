@@ -1,0 +1,39 @@
+[project]
+name = "lukefi.metsi"
+description = "Metsi forestry simulator."
+version = "1.0.0"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Juho-Petteri Yliuntinen", email = "juho-petteri.yliuntinen@luke.fi"},
+    { name = "Daniel Melander", email = "daniel.melander@luke.fi"},
+    { name = "Arto Haara", email = "arto.haara@luke.fi"},
+    { name = "Laura Jaakkola", email = "laura.jaakkola@luke.fi"},
+    { name = "Tapio Lempinen"},
+    { name = "Urho Niemelä"}
+]
+dependencies = [
+    "pyyaml==6.0",
+    "jsonpickle==3.0.1",
+    "lukefi.metsi.data @ https://github.com/lukefi/metsi-data/archive/refs/tags/1.0.0.zip",
+    "lukefi.metsi.forestry @ https://github.com/lukefi/metsi-forestry/archive/refs/tags/1.0.0.zip",
+    #TODO: there is no way to include multiwheels from a directory over HTTPS in pyproject.toml
+    #Still need to use pip install -r requirements-fhk.txt
+    #"https://github.com/menu-hanke/fhk/releases/expanded_assets/v4.0.0"
+]
+
+
+[project.optional-dependencies]
+tests = [
+    "pytest"
+]
+rpy = [
+    "rpy2==3.5.2"
+]
+
+[project.scripts]
+metsi = "lukefi.metsi.app.metsi:main"
+
+[tool.setuptools.package-dir]
+lukefi = "lukefi"
+
