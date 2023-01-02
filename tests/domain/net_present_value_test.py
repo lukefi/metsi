@@ -1,10 +1,10 @@
 import unittest
-import domain.data_collection.net_present_value as npv
+import lukefi.metsi.domain.data_collection.net_present_value as npv
 from lukefi.metsi.data.model import ForestStand
-from sim.core_types import CollectedData
-from domain.collected_types import CrossCutResult, PriceableOperationInfo
+from lukefi.metsi.sim.core_types import CollectedData
+from lukefi.metsi.domain.collected_types import CrossCutResult, PriceableOperationInfo
 from lukefi.metsi.data.enums.internal import TreeSpecies
-from domain.utils.file_io import get_land_values_as_dict, get_renewal_costs_as_dict
+from lukefi.metsi.domain.utils.file_io import get_land_values_as_dict, get_renewal_costs_as_dict
 
 class NPVTest(unittest.TestCase):
 

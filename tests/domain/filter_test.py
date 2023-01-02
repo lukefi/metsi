@@ -1,8 +1,8 @@
 import unittest
-from domain.utils.filter import applyfilter
+from lukefi.metsi.domain.utils.filter import applyfilter
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeSpecies, TreeStratum
 
-from domain.pre_ops import preproc_filter
+from lukefi.metsi.domain.pre_ops import preproc_filter
 
 class FilterTest(unittest.TestCase):
 

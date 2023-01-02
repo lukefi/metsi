@@ -3,11 +3,11 @@ import os
 import shutil
 from pathlib import Path
 from lukefi.metsi.data.enums.internal import *
-import app.file_io
+import lukefi.metsi.app.file_io
 from dataclasses import dataclass
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
-from app.app_io import Mela2Configuration
+from lukefi.metsi.app.app_io import Mela2Configuration
 
 
 @dataclass
@@ -21,12 +21,12 @@ class Test:
 class TestFileReading(unittest.TestCase):
     def test_file_contents(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "test_dummy")
-        result = app.file_io.file_contents(input_file_path)
+        result = lukefi.metsi.app.file_io.file_contents(input_file_path)
         self.assertEqual("kissa123\n", result)
 
     def test_simulation_declaration_from_yaml_file(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "control.yaml")
-        result = app.file_io.simulation_declaration_from_yaml_file(input_file_path)
+        result = lukefi.metsi.app.file_io.simulation_declaration_from_yaml_file(input_file_path)
         self.assertEqual(1, len(result.keys()))
 
     def test_pickle(self):
@@ -34,9 +34,9 @@ class TestFileReading(unittest.TestCase):
             Test(a=1),
             Test(a=2)
         ]
-        app.file_io.prepare_target_directory('outdir')
-        app.file_io.pickle_writer(Path('outdir', 'output.pickle'), data)
-        result = app.file_io.pickle_reader('outdir/output.pickle')
+        lukefi.metsi.app.file_io.prepare_target_directory('outdir')
+        lukefi.metsi.app.file_io.pickle_writer(Path('outdir', 'output.pickle'), data)
+        result = lukefi.metsi.app.file_io.pickle_reader('outdir/output.pickle')
         self.assertListEqual(data, result)
         os.remove('outdir/output.pickle')
         shutil.rmtree('outdir')
@@ -46,9 +46,9 @@ class TestFileReading(unittest.TestCase):
             Test(a=1),
             Test(a=2)
         ]
-        app.file_io.prepare_target_directory('outdir')
-        app.file_io.json_writer(Path('outdir', 'output.json'), data)
-        result = app.file_io.json_reader('outdir/output.json')
+        lukefi.metsi.app.file_io.prepare_target_directory('outdir')
+        lukefi.metsi.app.file_io.json_writer(Path('outdir', 'output.json'), data)
+        result = lukefi.metsi.app.file_io.json_reader('outdir/output.json')
         self.assertListEqual(data, result)
         os.remove('outdir/output.json')
         shutil.rmtree('outdir')
@@ -66,9 +66,10 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
-        app.file_io.prepare_target_directory("outdir")
-        app.file_io.csv_writer(Path("outdir", "output.csv"), data)
-        result = app.file_io.csv_content_to_stands(app.file_io.csv_file_reader(Path("outdir/output.csv")))
+        lukefi.metsi.app.file_io.prepare_target_directory("outdir")
+        lukefi.metsi.app.file_io.csv_writer(Path("outdir", "output.csv"), data)
+        result = lukefi.metsi.app.file_io.csv_content_to_stands(
+            lukefi.metsi.app.file_io.csv_file_reader(Path("outdir/output.csv")))
         self.assertListEqual(data, result)
         shutil.rmtree('outdir')
 
@@ -94,9 +95,9 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
-        app.file_io.prepare_target_directory("outdir")
+        lukefi.metsi.app.file_io.prepare_target_directory("outdir")
         target = Path("outdir", "output.rsd")
-        app.file_io.rsd_writer(target, data)
+        lukefi.metsi.app.file_io.rsd_writer(target, data)
 
         #There is no rsd input so check sanity just by file existence and non-emptiness
         exists = os.path.exists(target)
@@ -111,7 +112,7 @@ class TestFileReading(unittest.TestCase):
             state_format="fdm",
             state_input_container="pickle"
         )
-        unpickled_stands = app.file_io.read_stands_from_file(config)
+        unpickled_stands = lukefi.metsi.app.file_io.read_stands_from_file(config)
         self.assertEqual(len(unpickled_stands), 2)
         self.assertEqual(type(unpickled_stands[0]), ForestStand)
         self.assertEqual(type(unpickled_stands[0].tree_strata[0]), TreeStratum)
@@ -122,7 +123,7 @@ class TestFileReading(unittest.TestCase):
             state_format="fdm",
             state_input_container="json"
         )
-        stands_from_json = app.file_io.read_stands_from_file(config)
+        stands_from_json = lukefi.metsi.app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands_from_json), 2)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
         self.assertEqual(type(stands_from_json[0].tree_strata[0]), TreeStratum)
@@ -133,7 +134,7 @@ class TestFileReading(unittest.TestCase):
             state_format="fdm",
             state_input_container="csv"
         )
-        stands_from_csv = app.file_io.read_stands_from_file(config)
+        stands_from_csv = lukefi.metsi.app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands_from_csv), 2)
         self.assertEqual(type(stands_from_csv[0]), ForestStand)
         self.assertEqual(type(stands_from_csv[0].tree_strata[0]), TreeStratum)
@@ -144,7 +145,7 @@ class TestFileReading(unittest.TestCase):
             state_format="vmi12",
             state_input_container=""
         )
-        stands = app.file_io.read_stands_from_file(config)
+        stands = lukefi.metsi.app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands), 4)
 
     def test_read_stands_from_vmi13_file(self):
@@ -153,7 +154,7 @@ class TestFileReading(unittest.TestCase):
             state_format="vmi13",
             state_input_container=""
         )
-        stands = app.file_io.read_stands_from_file(config)
+        stands = lukefi.metsi.app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands), 3)
 
     def test_read_stands_from_xml_file(self):
@@ -162,18 +163,18 @@ class TestFileReading(unittest.TestCase):
             state_format="forest_centre",
             state_input_container=""
         )
-        stands = app.file_io.read_stands_from_file(config)
+        stands = lukefi.metsi.app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands), 2)
 
     def test_read_schedule_payload_from_directory(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory/3/0")
-        result = app.file_io.read_schedule_payload_from_directory(dir)
+        result = lukefi.metsi.app.file_io.read_schedule_payload_from_directory(dir)
         self.assertEqual("3", result.computational_unit.identifier)
         self.assertEqual(2, len(result.collected_data.get_list_result("calculate_biomass")))
 
     def test_read_simulation_result_dirtree(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory")
-        result = app.file_io.read_full_simulation_result_dirtree(dir)
+        result = lukefi.metsi.app.file_io.read_full_simulation_result_dirtree(dir)
         self.assertEqual(1, len(result.items()))
         self.assertEqual(1, len(result["3"]))
         self.assertEqual("3", result["3"][0].computational_unit.identifier)
@@ -185,4 +186,4 @@ class TestFileReading(unittest.TestCase):
             state_format="fdm",
             state_input_container="pickle"
         )
-        self.assertRaises(Exception, app.file_io.read_stands_from_file, config)
+        self.assertRaises(Exception, lukefi.metsi.app.file_io.read_stands_from_file, config)

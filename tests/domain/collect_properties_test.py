@@ -1,8 +1,8 @@
 import unittest
 from types import SimpleNamespace
 
-from domain.data_collection.marshalling import collect_properties
-from sim.core_types import CollectedData
+from lukefi.metsi.domain.data_collection.marshalling import collect_properties
+from lukefi.metsi.sim.core_types import CollectedData
 from tests.test_utils import prepare_growth_test_stand
 
 

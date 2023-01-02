@@ -1,17 +1,17 @@
 import unittest
 
-from domain.natural_processes.grow_acta import grow_acta
-from domain.pre_ops import compute_location_metadata
+from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
+from lukefi.metsi.domain.pre_ops import compute_location_metadata
 from tests.test_utils import prepare_growth_test_stand
 
 try:
     import fhk
-    from domain.natural_processes.grow_fhk import grow_fhk
+    from lukefi.metsi.domain.natural_processes.grow_fhk import grow_fhk
 except ImportError:
     fhk = None
 
 try:
-    from domain.natural_processes.grow_motti import grow_motti
+    from lukefi.metsi.domain.natural_processes.grow_motti import grow_motti
     pymotti = True
 except ImportError:
     pymotti = None

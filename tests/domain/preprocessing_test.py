@@ -1,6 +1,6 @@
 
 import unittest
-import domain.pre_ops as preprocessing
+import lukefi.metsi.domain.pre_ops as preprocessing
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.enums.internal import TreeSpecies
 

@@ -1,8 +1,8 @@
 import unittest
 
-import app.app_io
-from app import app_io as aio
-from app.app_io import set_default_arguments, RunMode
+import lukefi.metsi.app.app_io
+from lukefi.metsi.app import app_io as aio
+from lukefi.metsi.app.app_io import set_default_arguments, RunMode
 
 
 class TestAppIO(unittest.TestCase):
@@ -61,16 +61,16 @@ class TestAppIO(unittest.TestCase):
         ]
 
         for case in successes:
-            result = app.app_io.Mela2Configuration(run_modes=case[0]).run_modes
+            result = lukefi.metsi.app.app_io.Mela2Configuration(run_modes=case[0]).run_modes
             self.assertEqual(case[1], result)
         for case in failures:
-            self.assertRaises(Exception, app.app_io.Mela2Configuration, **{'run_modes': case})
+            self.assertRaises(Exception, lukefi.metsi.app.app_io.Mela2Configuration, **{'run_modes': case})
 
     def test_mela2_configuration(self):
         args = ['cli_input', 'cli_output', 'cli_control.yaml', '-s', 'full', '--state-format', 'vmi12', '--state-output-container', 'json']
         cli_args = aio.parse_cli_arguments(args)
         control_args = {'state_output_container': 'pickle', 'preprocessing_output_container': 'json', 'run_modes': 'preprocess'}
-        result = app.app_io.generate_program_configuration(cli_args, control_args)
+        result = lukefi.metsi.app.app_io.generate_program_configuration(cli_args, control_args)
         self.assertEqual('cli_input', result.input_path)
         self.assertEqual('cli_control.yaml', result.control_file)
         self.assertEqual('cli_output', result.target_directory)

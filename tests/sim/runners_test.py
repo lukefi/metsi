@@ -1,7 +1,7 @@
 import unittest
-from sim.generators import GENERATOR_LOOKUP
-from sim.core_types import CollectedData, OperationPayload, SimConfiguration
-from sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy
+from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
+from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, SimConfiguration
+from lukefi.metsi.sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy
 from tests.test_utils import raises, identity, none, collect_results, load_yaml, collecting_increment
 
 

@@ -1,13 +1,13 @@
 import unittest
 from lukefi.metsi.data.model import ReferenceTree,ForestStand
-import domain.forestry_operations.clearcutting_limits as clearcutting_lim
-import domain.forestry_operations.clearcut as clearcut
+import lukefi.metsi.domain.forestry_operations.clearcutting_limits as clearcutting_lim
+import lukefi.metsi.domain.forestry_operations.clearcut as clearcut
 from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.data.enums.internal import TreeSpecies
-from domain.forestry_operations.thinning_limits import SpeciesKey
-from sim.core_types import CollectedData
-import domain.forestry_operations.planting as plnt
-from domain.utils.enums import SiteTypeKey
+from lukefi.metsi.domain.forestry_operations.thinning_limits import SpeciesKey
+from lukefi.metsi.sim.core_types import CollectedData
+import lukefi.metsi.domain.forestry_operations.planting as plnt
+from lukefi.metsi.domain.utils.enums import SiteTypeKey
 
 class ClearcuttingTest(unittest.TestCase):
 
@@ -62,7 +62,7 @@ class ClearcuttingTest(unittest.TestCase):
     def test_clearcut_with_output(self):
         stand = self.generate_stand_fixture()
         collected_data = CollectedData()
-        stand, collected_data = clearcut._clearcut_with_output(stand,collected_data,'clearcutting')
+        stand, collected_data = clearcut._clearcut_with_output(stand, collected_data, 'clearcutting')
         self.assertEqual(192, collected_data.get_list_result("felled_trees")[-1].stems_per_ha)
         self.assertEqual("clearcutting", collected_data.get_list_result("felled_trees")[-1].operation)
         self.assertEqual(33.0,collected_data.get_list_result("felled_trees")[-1].height)

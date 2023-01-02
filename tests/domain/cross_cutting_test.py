@@ -1,12 +1,12 @@
 import unittest
-from domain.data_collection.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
-from domain.collected_types import CrossCutResult, CrossCuttableTree
-from sim.core_types import CollectedData, OperationPayload, Step
+from lukefi.metsi.domain.data_collection.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
+from lukefi.metsi.domain.collected_types import CrossCutResult, CrossCuttableTree
+from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, Step
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.data.enums.internal import TreeSpecies
-from sim.generators import alternatives
-from sim.operations import processor, do_nothing
-from sim.runners import run_chains_iteratively
+from lukefi.metsi.sim.generators import alternatives
+from lukefi.metsi.sim.operations import processor, do_nothing
+from lukefi.metsi.sim.runners import run_chains_iteratively
 from tests.test_utils import DEFAULT_TIMBER_PRICE_TABLE, TIMBER_PRICE_TABLE_THREE_GRADES
 
 class CrossCuttingTest(unittest.TestCase):

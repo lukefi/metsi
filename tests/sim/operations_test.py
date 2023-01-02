@@ -1,7 +1,7 @@
 import unittest
-from sim.util import merge_operation_params, get_operation_file_params
+from lukefi.metsi.sim.util import merge_operation_params, get_operation_file_params
 import tests.test_utils
-from sim.operations import prepared_operation, _get_operation_last_run
+from lukefi.metsi.sim.operations import prepared_operation, _get_operation_last_run
 
 
 class OperationsTest(unittest.TestCase):

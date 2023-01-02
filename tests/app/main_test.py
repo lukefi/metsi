@@ -8,7 +8,7 @@ import os
 import sys
 import shutil
 import unittest
-from app import mela2
+from lukefi.metsi.app import mela2
 
 
 class MainTest(unittest.TestCase):

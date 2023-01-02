@@ -2,8 +2,8 @@ import io
 from types import SimpleNamespace
 from typing import OrderedDict
 import unittest
-from app.export_handlers.j import j_xda, j_cda
-from sim.core_types import CollectedData, OperationPayload
+from lukefi.metsi.app.export_handlers.j import j_xda, j_cda
+from lukefi.metsi.sim.core_types import CollectedData, OperationPayload
 
 
 class TestExport(unittest.TestCase):

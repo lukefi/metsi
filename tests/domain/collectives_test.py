@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 import unittest
-from domain.utils.collectives import CollectibleNDArray, autocollective, collect_all, compile, getvarfn
+from lukefi.metsi.domain.utils.collectives import CollectibleNDArray, autocollective, collect_all, compile, getvarfn
 import numpy as np
 
 

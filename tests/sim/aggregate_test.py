@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import unittest
 from collections import OrderedDict
 from copy import deepcopy
-from sim.core_types import CollectedData
+from lukefi.metsi.sim.core_types import CollectedData
 
 class AggregateUtilsTest(unittest.TestCase):
 

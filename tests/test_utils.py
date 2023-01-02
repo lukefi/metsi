@@ -9,7 +9,7 @@ import numpy as np
 import yaml
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
-from sim.core_types import OpTuple, OperationPayload
+from lukefi.metsi.sim.core_types import OpTuple, OperationPayload
 
 
 class ConverterTestSuite(unittest.TestCase):

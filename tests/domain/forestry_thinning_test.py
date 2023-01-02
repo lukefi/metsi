@@ -1,11 +1,11 @@
-from domain.collected_types import CrossCuttableTree
+from lukefi.metsi.domain.collected_types import CrossCuttableTree
 from tests.test_utils import ConverterTestSuite
 from lukefi.metsi.data.model import ReferenceTree
-from domain.forestry_operations.thinning_limits import *
-from sim.core_types import CollectedData
-import domain.forestry_operations.thinning as thin
+from lukefi.metsi.domain.forestry_operations.thinning_limits import *
+from lukefi.metsi.sim.core_types import CollectedData
+import lukefi.metsi.domain.forestry_operations.thinning as thin
 import numpy as np
-from domain.utils.file_io import get_timber_price_table
+from lukefi.metsi.domain.utils.file_io import get_timber_price_table
 
 class ThinningsTest(ConverterTestSuite):
 

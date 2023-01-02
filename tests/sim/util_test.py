@@ -1,5 +1,5 @@
 import unittest
-import sim.util as util
+import lukefi.metsi.sim.util as util
 
 class UtilTest(unittest.TestCase):
 

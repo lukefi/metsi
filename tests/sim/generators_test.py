@@ -1,10 +1,10 @@
 import unittest
-import sim.generators
+import lukefi.metsi.sim.generators
 import yaml
-from sim.core_types import CollectedData, Step, OperationPayload, SimConfiguration
-from sim.generators import sequence, compose_nested, alternatives
-from sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
-from tests.test_utils import inc, dec, collecting_increment, parametrized_operation
+from lukefi.metsi.sim.core_types import CollectedData, Step, OperationPayload, SimConfiguration
+from lukefi.metsi.sim.generators import sequence, compose_nested, alternatives
+from lukefi.metsi.sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
+from tests.test_utils import inc, collecting_increment, parametrized_operation
 
 
 class TestGenerators(unittest.TestCase):
@@ -42,8 +42,8 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
-        generator = sim.generators.full_tree_generators(config)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
@@ -66,8 +66,8 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
-        generator = sim.generators.full_tree_generators(config)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
@@ -91,8 +91,8 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': inc}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
-        generator = sim.generators.full_tree_generators(config)
+        config = SimConfiguration(operation_lookup={'inc': inc}, generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(computational_unit=0, operation_history=[], collected_data=CollectedData())
@@ -107,9 +107,9 @@ class TestGenerators(unittest.TestCase):
                 - inc
                 - inc
         """
-        config = SimConfiguration(operation_lookup={'inc': inc}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        config = SimConfiguration(operation_lookup={'inc': inc}, generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
         # generators for 2 time points'
-        generators = sim.generators.partial_tree_generators_by_time_point(config)
+        generators = lukefi.metsi.sim.generators.partial_tree_generators_by_time_point(config)
         self.assertEqual(2, len(generators.values()))
 
         # 1 sequence generators in each time point
@@ -155,8 +155,8 @@ class TestGenerators(unittest.TestCase):
                 - inc # 4, 5, 6, 7
                 - inc # 5, 6, 7, 8
         """
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
-        generator = sim.generators.full_tree_generators(config)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         tree = compose_nested(generator)
         chains = tree.operation_chains()
         self.assertEqual(4, len(chains))
@@ -198,8 +198,8 @@ class TestGenerators(unittest.TestCase):
         """
         config = SimConfiguration(
             operation_lookup={'inc_param': collecting_increment, 'inc': collecting_increment},
-            generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
-        generator = sim.generators.full_tree_generators(config)
+            generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         tree = compose_nested(generator)
         chains = tree.operation_chains()
         self.assertEqual(3, len(chains))
@@ -265,13 +265,13 @@ class TestGenerators(unittest.TestCase):
         """
         configs = [
             SimConfiguration(operation_lookup={'inc_param': collecting_increment, 'inc': collecting_increment},
-                             generator_lookup=sim.generators.GENERATOR_LOOKUP,
+                             generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
                              **yaml.load(declaration_one, Loader=yaml.CLoader)),
             SimConfiguration(operation_lookup={'inc_param': collecting_increment, 'inc': collecting_increment},
-                             generator_lookup=sim.generators.GENERATOR_LOOKUP,
+                             generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
                              **yaml.load(declaration_two, Loader=yaml.CLoader))
         ]
-        generators = [sim.generators.full_tree_generators(config) for config in configs]
+        generators = [lukefi.metsi.sim.generators.full_tree_generators(config) for config in configs]
         trees = [compose_nested(generator) for generator in generators]
         chains_sets = [tree.operation_chains() for tree in trees]
 
@@ -300,14 +300,14 @@ class TestGenerators(unittest.TestCase):
               - sequence:
                 - inc 
         """
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
-        self.assertRaises(Exception, sim.generators.full_tree_generators, config)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP, **yaml.load(declaration, Loader=yaml.CLoader))
+        self.assertRaises(Exception, lukefi.metsi.sim.generators.full_tree_generators, config)
 
     def test_simple_processable_chain(self):
         operation_tags = ['inc', 'inc', 'inc', 'param_oper']
         operation_params = {'param_oper': [{'amplify': True}]}
         operation_lookup = {'inc': inc, 'param_oper': parametrized_operation}
-        chain = sim.generators.simple_processable_chain(operation_tags, operation_params, operation_lookup)
+        chain = lukefi.metsi.sim.generators.simple_processable_chain(operation_tags, operation_params, operation_lookup)
         self.assertEqual(len(operation_tags), len(chain))
         result = evaluate_sequence(1, *chain)
         self.assertEqual(4000, result)
@@ -316,7 +316,7 @@ class TestGenerators(unittest.TestCase):
         operation_tags = ['param_oper']
         operation_params = {'param_oper': [{'amplify': True}, {'kissa123': 123}]}
         operation_lookup = {'param_oper': parametrized_operation}
-        self.assertRaises(Exception, sim.generators.simple_processable_chain, operation_tags, operation_params, operation_lookup)
+        self.assertRaises(Exception, lukefi.metsi.sim.generators.simple_processable_chain, operation_tags, operation_params, operation_lookup)
 
     def test_generate_time_series(self):
         declaration = """

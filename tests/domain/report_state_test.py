@@ -1,7 +1,7 @@
 import unittest
-from domain.collected_types import CrossCutResult
-from sim.core_types import CollectedData
-from domain.data_collection.marshalling import report_period, report_state
+from lukefi.metsi.domain.collected_types import CrossCutResult
+from lukefi.metsi.sim.core_types import CollectedData
+from lukefi.metsi.domain.data_collection.marshalling import report_period, report_state
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from types import SimpleNamespace

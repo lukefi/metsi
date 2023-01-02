@@ -1,9 +1,8 @@
 import unittest
 
-from sim.generators import sequence, alternatives
-from sim.operations import do_nothing
-from sim.runners import evaluate_sequence
-from sim.core_types import Step, SimConfiguration
+from lukefi.metsi.sim.generators import sequence, alternatives
+from lukefi.metsi.sim.runners import evaluate_sequence
+from lukefi.metsi.sim.core_types import Step, SimConfiguration
 from tests.test_utils import inc
 
 

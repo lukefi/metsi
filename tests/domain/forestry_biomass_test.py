@@ -2,9 +2,9 @@ import unittest
 
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
-import domain.data_collection.biomass_repola as biomass
+import lukefi.metsi.domain.data_collection.biomass_repola as biomass
 
-import domain.collected_types
+import lukefi.metsi.domain.collected_types
 
 
 class ForestryOperationsTest(unittest.TestCase):
@@ -98,7 +98,7 @@ class ForestryOperationsTest(unittest.TestCase):
         wastevolumes = [10.0, 1.0]
 
         result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 1)
-        self.assertEqual(domain.collected_types.BiomassData(
+        self.assertEqual(lukefi.metsi.domain.collected_types.BiomassData(
             stem_wood=2.901904782670537,
             stem_bark=0.2621029279780194,
             stem_waste=0.0,
@@ -128,7 +128,7 @@ class ForestryOperationsTest(unittest.TestCase):
         wastevolumes = [10.0, 1.0]
 
         result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 2)
-        self.assertEqual(domain.collected_types.BiomassData(
+        self.assertEqual(lukefi.metsi.domain.collected_types.BiomassData(
             stem_wood=2.6943581559391907,
             stem_bark=0.26525277171872336,
             stem_waste=0.0,

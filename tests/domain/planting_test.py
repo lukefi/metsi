@@ -2,9 +2,9 @@
 import unittest
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.enums.internal import TreeSpecies
-from sim.core_types import CollectedData
-import domain.forestry_operations.planting as plnt
-from domain.utils.enums import SoilPreparationKey
+from lukefi.metsi.sim.core_types import CollectedData
+import lukefi.metsi.domain.forestry_operations.planting as plnt
+from lukefi.metsi.domain.utils.enums import SoilPreparationKey
 
 class PlantingTest(unittest.TestCase):
     def test_plant(self):
