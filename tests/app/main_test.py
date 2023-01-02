@@ -8,13 +8,13 @@ import os
 import sys
 import shutil
 import unittest
-from lukefi.metsi.app import mela2
+from lukefi.metsi.app import metsi
 
 
 class MainTest(unittest.TestCase):
-    def test_mela2(self):
+    def test_metsi(self):
         sys.argv = [
-            'mela2',
+            'metsi',
             '--state-format',
             'forest_centre',
             '--preprocessing-output-container',
@@ -24,7 +24,7 @@ class MainTest(unittest.TestCase):
             'tests/resources/file_io_test/forest_centre.xml',
             'test_outdir'
         ]
-        mela2.main()
+        metsi.main()
         self.assertTrue(os.path.exists('test_outdir/preprocessing_result.csv'))
         self.assertTrue(os.path.exists('test_outdir/data.cda'))
         self.assertTrue(os.path.exists('test_outdir/data.xda'))
