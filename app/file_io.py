@@ -9,7 +9,7 @@ from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, 
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, stands_to_rsd_content
 from app.app_io import Mela2Configuration
 from app.app_types import SimResults, ForestOpPayload
-from forestry.forestry_types import StandList
+from domain.forestry_types import StandList
 from sim.core_types import CollectedData
 
 
