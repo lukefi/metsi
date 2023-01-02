@@ -1,10 +1,14 @@
 import unittest
-import rpy2
-import rpy2.robjects as robjects
-from rpy2.robjects.packages import importr
-import rpy2.robjects.packages as rpackages
+
+unrunnable = False
+try:
+    import rpy2
+    import rpy2.robjects as robjects
+except ImportError:
+    unrunnable = True
 
 
+@unittest.skipIf(unrunnable, "rpy2 not installed")
 class RTest(unittest.TestCase):
     def test_init(self):
         print(rpy2.__version__)
