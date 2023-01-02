@@ -1,16 +1,16 @@
 [
   {
-    "py/object": "forestdatamodel.model.ForestStand",
+    "py/object": "lukefi.metsi.data.model.ForestStand",
     "reference_trees": [],
     "tree_strata": [
       {
-        "py/object": "forestdatamodel.model.TreeStratum",
+        "py/object": "lukefi.metsi.data.model.TreeStratum",
         "stand": null,
         "identifier": "100-331-stratum",
         "species": {
           "py/reduce": [
             {
-              "py/type": "forestdatamodel.enums.internal.TreeSpecies"
+              "py/type": "lukefi.metsi.data.enums.internal.TreeSpecies"
             },
             {
               "py/tuple": [
@@ -43,7 +43,7 @@
         "sapling_stratum": false
       },
       {
-        "py/object": "forestdatamodel.model.TreeStratum",
+        "py/object": "lukefi.metsi.data.model.TreeStratum",
         "stand": null,
         "identifier": "100-332-stratum",
         "species": {
@@ -73,13 +73,13 @@
         "sapling_stratum": false
       },
       {
-        "py/object": "forestdatamodel.model.TreeStratum",
+        "py/object": "lukefi.metsi.data.model.TreeStratum",
         "stand": null,
         "identifier": "100-333-stratum",
         "species": {
           "py/reduce": [
             {
-              "py/type": "forestdatamodel.enums.internal.TreeSpecies"
+              "py/type": "lukefi.metsi.data.enums.internal.TreeSpecies"
             },
             {
               "py/tuple": [
@@ -130,7 +130,7 @@
     "owner_category": {
       "py/reduce": [
         {
-          "py/type": "forestdatamodel.enums.internal.OwnerCategory"
+          "py/type": "lukefi.metsi.data.enums.internal.OwnerCategory"
         },
         {
           "py/tuple": [
@@ -142,7 +142,7 @@
     "land_use_category": {
       "py/reduce": [
         {
-          "py/type": "forestdatamodel.enums.internal.LandUseCategory"
+          "py/type": "lukefi.metsi.data.enums.internal.LandUseCategory"
         },
         {
           "py/tuple": [
@@ -154,7 +154,7 @@
     "soil_peatland_category": {
       "py/reduce": [
         {
-          "py/type": "forestdatamodel.enums.internal.SoilPeatlandCategory"
+          "py/type": "lukefi.metsi.data.enums.internal.SoilPeatlandCategory"
         },
         {
           "py/tuple": [
@@ -166,7 +166,7 @@
     "site_type_category": {
       "py/reduce": [
         {
-          "py/type": "forestdatamodel.enums.internal.SiteType"
+          "py/type": "lukefi.metsi.data.enums.internal.SiteType"
         },
         {
           "py/tuple": [
@@ -180,7 +180,7 @@
     "drainage_category": {
       "py/reduce": [
         {
-          "py/type": "forestdatamodel.enums.internal.DrainageCategory"
+          "py/type": "lukefi.metsi.data.enums.internal.DrainageCategory"
         },
         {
           "py/tuple": [
@@ -219,7 +219,7 @@
     "lake_effect": null
   },
   {
-    "py/object": "forestdatamodel.model.ForestStand",
+    "py/object": "lukefi.metsi.data.model.ForestStand",
     "reference_trees": [],
     "tree_strata": [],
     "identifier": "101",
@@ -249,7 +249,7 @@
     "site_type_category": {
       "py/reduce": [
         {
-          "py/type": "forestdatamodel.enums.internal.SiteType"
+          "py/type": "lukefi.metsi.data.enums.internal.SiteType"
         },
         {
           "py/tuple": [

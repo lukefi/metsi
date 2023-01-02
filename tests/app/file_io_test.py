@@ -2,10 +2,10 @@ import unittest
 import os
 import shutil
 from pathlib import Path
-from forestdatamodel.enums.internal import *
+from lukefi.metsi.data.enums.internal import *
 import app.file_io
 from dataclasses import dataclass
-from forestdatamodel.model import ForestStand, ReferenceTree, TreeStratum
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
 from app.app_io import Mela2Configuration
 

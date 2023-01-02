@@ -1,11 +1,11 @@
 import numpy as np
 from forestry.collected_types import CrossCutResult, CrossCuttableTree
 from sim.core_types import OpTuple
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 from forestry.utils.file_io import get_timber_price_table
-from forestryfunctions.cross_cutting.cross_cutting import cross_cut
-from forestryfunctions.cross_cutting.cross_cutting_fhk import cross_cut_func
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.forestry.cross_cutting.cross_cutting import cross_cut
+from lukefi.metsi.forestry.cross_cutting.cross_cutting_fhk import cross_cut_func
+from lukefi.metsi.data.enums.internal import TreeSpecies
 
 
 def cross_cuttable_trees_from_stand(stand: ForestStand, time_point: int) -> list[CrossCuttableTree]:

@@ -7,8 +7,8 @@ from typing import Any, Optional, Callable
 import numpy as np
 
 import yaml
-from forestdatamodel.enums.internal import TreeSpecies
-from forestdatamodel.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from forestry.pre_ops import compute_location_metadata
 from sim.core_types import OpTuple, OperationPayload
 

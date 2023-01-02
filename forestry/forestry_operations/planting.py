@@ -1,7 +1,7 @@
 from functools import cache
 from sim.core_types import CollectedData, OpTuple
-from forestdatamodel.model import ForestStand, ReferenceTree
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.enums.internal import TreeSpecies
 from forestry.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
 from forestry.utils.conversion import site_type_to_key
 from forestry.collected_types import PriceableOperationInfo

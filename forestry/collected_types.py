@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.data.enums.internal import TreeSpecies
 
 
 @dataclass

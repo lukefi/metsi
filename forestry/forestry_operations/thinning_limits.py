@@ -8,9 +8,9 @@ from functools import cache, lru_cache
 from enum import Enum
 from collections.abc import KeysView
 from bisect import bisect
-from forestdatamodel.model import ForestStand
-from forestdatamodel.enums.internal import TreeSpecies
-from forestryfunctions import forestry_utils as futil
+from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.forestry import forestry_utils as futil
 from forestry.utils.enums import SiteTypeKey
 from forestry.utils.conversion import site_type_to_key
 

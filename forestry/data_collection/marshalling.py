@@ -1,4 +1,4 @@
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 
 from forestry.utils.collectives import property_collector, autocollective, _collector_wrapper
 from sim.core_types import OpTuple

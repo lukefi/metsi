@@ -1,9 +1,9 @@
 import unittest
-from forestdatamodel.model import ReferenceTree,ForestStand
+from lukefi.metsi.data.model import ReferenceTree,ForestStand
 import forestry.forestry_operations.clearcutting_limits as clearcutting_lim
 import forestry.forestry_operations.clearcut as clearcut
-from forestryfunctions import forestry_utils as futil
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.forestry import forestry_utils as futil
+from lukefi.metsi.data.enums.internal import TreeSpecies
 from forestry.forestry_operations.thinning_limits import SpeciesKey
 from sim.core_types import CollectedData
 import forestry.forestry_operations.planting as plnt

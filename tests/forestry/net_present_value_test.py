@@ -1,9 +1,9 @@
 import unittest
 import forestry.data_collection.net_present_value as npv
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 from sim.core_types import CollectedData
 from forestry.collected_types import CrossCutResult, PriceableOperationInfo
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.data.enums.internal import TreeSpecies
 from forestry.utils.file_io import get_land_values_as_dict, get_renewal_costs_as_dict
 
 class NPVTest(unittest.TestCase):

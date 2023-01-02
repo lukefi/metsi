@@ -1,6 +1,6 @@
 from forestry.collected_types import PriceableOperationInfo
 from sim.core_types import OpTuple
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 
 
 def _store_renewal_collection(payload: OpTuple[ForestStand], op_tag: str):

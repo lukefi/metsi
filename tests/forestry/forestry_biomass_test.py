@@ -1,7 +1,7 @@
 import unittest
 
-from forestdatamodel.enums.internal import TreeSpecies
-from forestdatamodel.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
 import forestry.data_collection.biomass_repola as biomass
 
 import forestry.collected_types

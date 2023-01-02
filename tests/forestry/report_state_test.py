@@ -2,8 +2,8 @@ import unittest
 from forestry.collected_types import CrossCutResult
 from sim.core_types import CollectedData
 from forestry.data_collection.marshalling import report_period, report_state
-from forestdatamodel.model import ForestStand, ReferenceTree
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.enums.internal import TreeSpecies
 from types import SimpleNamespace
 
 class ReportStateTest(unittest.TestCase):

@@ -1,4 +1,4 @@
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 
 def update_stand_growth(
     stand: ForestStand, 

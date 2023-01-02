@@ -2,8 +2,8 @@ import unittest
 from forestry.data_collection.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
 from forestry.collected_types import CrossCutResult, CrossCuttableTree
 from sim.core_types import CollectedData, OperationPayload, Step
-from forestdatamodel.model import ForestStand, ReferenceTree
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.enums.internal import TreeSpecies
 from sim.generators import alternatives
 from sim.operations import processor, do_nothing
 from sim.runners import run_chains_iteratively

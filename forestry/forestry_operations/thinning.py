@@ -1,9 +1,9 @@
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 from typing import Callable
 from forestry.collected_types import CrossCuttableTree
 from forestry.forestry_operations.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
-from forestryfunctions.harvest import thinning
-from forestryfunctions import forestry_utils as futil
+from lukefi.metsi.forestry.harvest import thinning
+from lukefi.metsi.forestry import forestry_utils as futil
 from sim.core_types import CollectedData, OpTuple
 
 def evaluate_thinning_conditions(predicates):

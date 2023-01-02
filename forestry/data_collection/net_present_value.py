@@ -1,5 +1,5 @@
 from sim.core_types import CollectedData, OpTuple
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 from forestry.collected_types import CrossCutResult, NPVResult, PriceableOperationInfo
 from forestry.utils.file_io import get_renewal_costs_as_dict, get_land_values_as_dict
 

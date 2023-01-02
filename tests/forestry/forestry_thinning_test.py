@@ -1,6 +1,6 @@
 from forestry.collected_types import CrossCuttableTree
 from tests.test_utils import ConverterTestSuite
-from forestdatamodel.model import ReferenceTree
+from lukefi.metsi.data.model import ReferenceTree
 from forestry.forestry_operations.thinning_limits import *
 from sim.core_types import CollectedData
 import forestry.forestry_operations.thinning as thin

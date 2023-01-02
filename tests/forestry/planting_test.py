@@ -1,7 +1,7 @@
 
 import unittest
-from forestdatamodel.model import ForestStand
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.enums.internal import TreeSpecies
 from sim.core_types import CollectedData
 import forestry.forestry_operations.planting as plnt
 from forestry.utils.enums import SoilPreparationKey

@@ -1,6 +1,6 @@
-from forestdatamodel.conversion import internal2mela
-from forestdatamodel.enums.internal import TreeSpecies
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.conversion import internal2mela
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand
 from forestry.natural_processes.util import update_stand_growth
 from functools import cached_property
 import pymotti

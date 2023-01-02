@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import importlib
 import json
 import fhk
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 from forestry.natural_processes.grow_motti import spe2motti
 from forestry.natural_processes.util import update_stand_growth
 from functools import cache

@@ -1,4 +1,4 @@
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 
 from app.app_types import ForestOperation
 from sim.core_types import OpTuple

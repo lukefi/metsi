@@ -1,7 +1,7 @@
 import math
 from itertools import repeat
-from forestdatamodel.enums.internal import TreeSpecies
-from forestdatamodel.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from forestry.collected_types import BiomassData
 from sim.core_types import OpTuple
 

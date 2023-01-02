@@ -11,9 +11,9 @@ Norway Spruce, Silver Birch, Downy Birch) and rows by site type
 (OMT, MT, VT, CT). 
 """
 from typing import List, Tuple
-from forestdatamodel.model import ForestStand
-from forestdatamodel.enums.internal import TreeSpecies
-from forestryfunctions import forestry_utils as futil
+from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.forestry import forestry_utils as futil
 from forestry.forestry_operations.thinning_limits import SiteTypeKey, SpeciesKey, site_type_to_key
 
 RENEWAL_DIAMETERS = {

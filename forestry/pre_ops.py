@@ -1,7 +1,7 @@
-from forestdatamodel.model import ForestStand
-from forestryfunctions.preprocessing import tree_generation, pre_util
-from forestryfunctions.preprocessing.age_supplementing import supplement_age_for_reference_trees
-from forestryfunctions.preprocessing.naslund import naslund_height
+from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
+from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age_for_reference_trees
+from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 from forestry.utils.filter import applyfilter
 
 

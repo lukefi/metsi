@@ -1,5 +1,5 @@
-from forestryfunctions.naturalprocess.grow_acta import grow_diameter_and_height
-from forestdatamodel.model import ForestStand, ReferenceTree
+from lukefi.metsi.forestry.naturalprocess.grow_acta import grow_diameter_and_height
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
 
 from forestry.natural_processes.util import update_stand_growth
 

@@ -1,6 +1,6 @@
 import unittest
 from forestry.utils.filter import applyfilter
-from forestdatamodel.model import ForestStand, ReferenceTree, TreeSpecies, TreeStratum
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeSpecies, TreeStratum
 
 from forestry.pre_ops import preproc_filter
 

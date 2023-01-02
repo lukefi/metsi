@@ -1,6 +1,6 @@
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 from forestry.forestry_operations.clearcutting_limits import *
-from forestryfunctions import forestry_utils as futil
+from lukefi.metsi.forestry import forestry_utils as futil
 import enum
 from forestry.collected_types import CrossCuttableTree
 from sim.core_types import CollectedData, OpTuple

@@ -1,5 +1,5 @@
 from typing import Any, Literal
-from forestdatamodel.model import ForestStand
+from lukefi.metsi.data.model import ForestStand
 from forestry.utils.collectives import GetVarFn, compile, getvarfn
 
 Verb = Literal["select", "remove"]

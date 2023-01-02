@@ -1,8 +1,8 @@
 
 import unittest
 import forestry.pre_ops as preprocessing
-from forestdatamodel.model import ForestStand, ReferenceTree, TreeStratum
-from forestdatamodel.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
+from lukefi.metsi.data.enums.internal import TreeSpecies
 
 def generate_stand_with_saplings(sapling_tree_count, reference_tree_count):
     """generates a ForestStand with a given number of ReferenceTrees of which a given number is sapling trees"""
