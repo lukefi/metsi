@@ -4,7 +4,6 @@ from lukefi.metsi.sim.core_types import OpTuple
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.utils.file_io import get_timber_price_table
 from lukefi.metsi.forestry.cross_cutting.cross_cutting import cross_cut
-from lukefi.metsi.forestry.cross_cutting.cross_cutting_fhk import cross_cut_func
 from lukefi.metsi.data.enums.internal import TreeSpecies
 
 
@@ -65,7 +64,12 @@ def cross_cut_tree(
     :returns: A list of CrossCutResult objects, whose length is given by the number of unique timber grades in the `timber_price_table`. In other words, the returned list contains the resulting quantities of each unique timber grade.
     """
     if mode == "lua":
-        cross_cut_fn = lambda: cross_cut_func(timber_price_table)(tree.species, tree.breast_height_diameter, tree.height)
+        try:
+            from lukefi.metsi.forestry.cross_cutting.cross_cutting_fhk import cross_cut_func
+            cross_cut_fn = lambda: cross_cut_func(timber_price_table)(tree.species, tree.breast_height_diameter, tree.height)
+        except ImportError:
+            raise Exception("Unable to use cross-cut lua implementation without FHK library. Refer to documentation "
+                            "for help.")
     else:
         cross_cut_fn = lambda: cross_cut(tree.species, tree.breast_height_diameter, tree.height, timber_price_table)
 
