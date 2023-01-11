@@ -76,6 +76,31 @@ class Step:
                     result.append([self.operation] + chain)
             return result
 
+    def evaluate(self, payload) -> list:
+        """
+        Recursive pre-order walkthrough of this Step tree to evaluate its operations with the given payload,
+        copying it for branching.
+
+        :param payload: the simulation data payload (we don't care what it is here)
+        :return: list of result payloads from this Step or as concatenated from its branches
+        """
+        current = self.operation(payload)
+        if len(self.branches) == 0:
+            return [current]
+        elif len(self.branches) == 1:
+            return self.branches[0].evaluate(current)
+        elif len(self.branches) > 1:
+            results = []
+            for branch in self.branches:
+                try:
+                    results.extend(branch.evaluate(deepcopy(current)))
+                except UserWarning:
+                    ...
+            if len(results) == 0:
+                raise UserWarning(f"Branch aborted with all children failing")
+            else:
+                return results
+
     def add_branch(self, step: 'Step'):
         step.previous = self
         self.branches.append(step)

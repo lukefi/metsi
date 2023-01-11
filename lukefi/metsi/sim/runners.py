@@ -44,6 +44,10 @@ def chain_evaluator(payload: OperationPayload, root_step: Step) -> list[Operatio
     return run_chains_iteratively(payload, chains)
 
 
+def depth_first_evaluator(payload: OperationPayload, root_step: Step) -> list[OperationPayload]:
+    return root_step.evaluate(payload)
+
+
 def run_full_tree_strategy(payload: OperationPayload[CUType], config: SimConfiguration, evaluator=chain_evaluator) -> list[OperationPayload[CUType]]:
     """Process the given operation payload using a simulation state tree created from the declaration. Full simulation
     tree and operation chains are pre-generated for the run. This tree strategy creates the full theoretical branching

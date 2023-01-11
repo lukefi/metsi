@@ -4,7 +4,7 @@ import unittest
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.sim.core_types import OperationPayload, SimConfiguration, CollectedData
 from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
-from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, chain_evaluator
+from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, chain_evaluator, depth_first_evaluator
 
 optime = 0
 counter = 0
@@ -54,10 +54,12 @@ strategies = [
 
 
 evaluators = [
-    chain_evaluator
+    chain_evaluator,
+    depth_first_evaluator
 ]
 
 
+@unittest.skip
 class PerformanceTest(unittest.TestCase):
     def test_constant_work_performance(self):
         """This is a manual test case created for observing the choice of run strategies related to the shape of the
