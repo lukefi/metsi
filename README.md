@@ -198,7 +198,7 @@ python -m lukefi.metsi.app.metsi --help
 
 Input path, output path and optionally the control file path must be supplied as CLI positional arguments. All other
 parameters in commands below can also be set in the `control.yaml` file `app_configuration` block. Control file settings
-override program defaults (see app/app_io.py Mela2Configuration class). CLI arguments override the settings in the
+override program defaults (see app/app_io.py MetsiConfiguration class). CLI arguments override the settings in the
 control file.
 
 **At the time of writing this, there are no post-processing operations ready to be used. Post-processing

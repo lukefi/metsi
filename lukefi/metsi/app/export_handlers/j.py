@@ -4,7 +4,7 @@ from functools import cache
 from pathlib import Path
 from typing import TypeVar, Generic, Any, Union, Iterator, IO
 
-from lukefi.metsi.app.app_io import Mela2Configuration
+from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.utils.collectives import CollectFn, GetVarFn, compile, getvarfn, autocollective
 from lukefi.metsi.sim.core_types import OperationPayload
@@ -124,7 +124,7 @@ def j_out(data: SimResults,
         j_xda(f, data, xvariables)
 
 
-def parse_j_config(config: Mela2Configuration, decl: dict) -> dict:
+def parse_j_config(config: MetsiConfiguration, decl: dict) -> dict:
     return {
         'cda_filepath': Path(config.target_directory, decl.get("cda_filename", "data.cda")),
         'xda_filepath': Path(config.target_directory, decl.get("xda_filename", "data.xda")),

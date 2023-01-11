@@ -3,7 +3,7 @@ import queue
 import multiprocessing
 import lukefi.metsi.domain.sim_ops
 import lukefi.metsi.sim.generators
-from lukefi.metsi.app.app_io import Mela2Configuration
+from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import ForestOpPayload
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
@@ -83,7 +83,7 @@ def resolve_strategy_runner(source: str) -> StrategyRunner[ForestOpPayload]:
         raise Exception("Unable to resolve alternatives tree formation strategy '{}'".format(source))
 
 
-def simulate_alternatives(config: Mela2Configuration, control, stands: StandList):
+def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList):
     simconfig = SimConfiguration(
         operation_lookup=lukefi.metsi.domain.sim_ops.operation_lookup,
         generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,

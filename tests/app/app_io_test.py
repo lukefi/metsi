@@ -61,10 +61,10 @@ class TestAppIO(unittest.TestCase):
         ]
 
         for case in successes:
-            result = lukefi.metsi.app.app_io.Mela2Configuration(run_modes=case[0]).run_modes
+            result = lukefi.metsi.app.app_io.MetsiConfiguration(run_modes=case[0]).run_modes
             self.assertEqual(case[1], result)
         for case in failures:
-            self.assertRaises(Exception, lukefi.metsi.app.app_io.Mela2Configuration, **{'run_modes': case})
+            self.assertRaises(Exception, lukefi.metsi.app.app_io.MetsiConfiguration, **{'run_modes': case})
 
     def test_mela2_configuration(self):
         args = ['cli_input', 'cli_output', 'cli_control.yaml', '-s', 'full', '--state-format', 'vmi12', '--state-output-container', 'json']

@@ -11,7 +11,7 @@ class RunMode(Enum):
     EXPORT = "export"
 
 
-class Mela2Configuration(SimpleNamespace):
+class MetsiConfiguration(SimpleNamespace):
     input_path = None
     target_directory = None
     control_file = "control.yaml"
@@ -72,11 +72,11 @@ def remove_nones(source: dict) -> dict:
     return filtered
 
 
-def generate_program_configuration(cli_args: argparse.Namespace, control_source: dict={}) -> Mela2Configuration:
+def generate_program_configuration(cli_args: argparse.Namespace, control_source: dict={}) -> MetsiConfiguration:
     """Generate a Mela2Configuration, overriding values with control file source, then with CLI arguments"""
     cli_source = remove_nones(cli_args.__dict__)
     merged = {**control_source, **cli_source}
-    result = Mela2Configuration(**merged)
+    result = MetsiConfiguration(**merged)
     return result
 
 

@@ -7,7 +7,7 @@ from typing import Any, Callable, Iterator, Optional
 import yaml
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, stands_to_rsd_content
-from lukefi.metsi.app.app_io import Mela2Configuration
+from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.core_types import CollectedData
@@ -102,7 +102,7 @@ def external_reader(state_format: str, **builder_flags) -> StandReader:
         return lambda path: ForestCentreBuilder(builder_flags, xml_file_reader(path)).build()
 
 
-def read_stands_from_file(app_config: Mela2Configuration) -> StandList:
+def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
     """
     Read a list of ForestStands from given file with given configuration. Directly reads FDM format data. Utilizes
     FDM ForestBuilder utilities to transform VMI12, VMI13 or Forest Centre data into FDM ForestStand format.
@@ -204,7 +204,7 @@ def write_derived_data_to_file(result: CollectedData, filepath: Path, derived_da
     writer(filepath, result)
 
 
-def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mela2Configuration):
+def write_full_simulation_result_dirtree(result: SimResults, app_arguments: MetsiConfiguration):
     """
     Unwraps the given simulation result structure into computational units and further into produced schedules.
     Writes these as a matching directory structure, splitting OperationPayloads into unit_state and derived_data files.
