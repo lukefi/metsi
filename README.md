@@ -80,14 +80,6 @@ To be able to use forestry operations depending on R modules
 pip install .[rpy2]
 ```
 
-### Lua with FHK (optional)
-
-To be able to use the Lua models provided by metsi-forestry library, install `fhk`:
-
-```
-pip install -r fhk-requirements.txt
-```
-
 ### Motti (optional)
 
 Access to this module is restricted to Natural Resources Institute Finland by special admission. Installing this will
@@ -98,7 +90,7 @@ implementation, and the [fhk](https://github.com/menu-hanke/fhk)-based Lua imple
 results for big tree natural processes. The difference is that the fhk implementation is much faster but also less
 complete for now.
 
-To use the Python models, install `pymotti`:
+To use the Python or FHK version of Motti, install `pymotti`:
 
 ```
 pip install -r requirements-motti.txt
@@ -106,13 +98,7 @@ pip install -r requirements-motti.txt
 
 The corresponding growth operation is `grow_motti`.
 
-To use the Lua models, install `fhk`:
-
-```
-pip install -r fhk-requirements.txt
-```
-
-You can then use the `grow_fhk` operation with `package: pymotti_graph`.
+You can also use the `grow_fhk` operation with `package: pymotti_graph`.
 
 **NOTE**: For either model, the input data must contain precomputed weather data (temperature sums, sea/lake indices).
 In practice this means that you must enable the `compute_location_metadata` preprocessing operation **even if you're
@@ -607,9 +593,10 @@ year when this operation is called.
 
 #### **parameters**
 
-| parameter name     | type       | location in control.yaml | notes                                   |
-|--------------------|------------|--------------------------|-----------------------------------------|
-| timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers |
+| parameter name     | type       | location in control.yaml | notes                                                  |
+|--------------------|------------|--------------------------|--------------------------------------------------------|
+| timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers                |
+| implementation     | str        | operation_params         | py, fhk (lua) and lupa (lua) implementations available |
 
 #### **output**
 
@@ -635,9 +622,10 @@ trees if they were cross cut. Therefore, this operation is different from [clear
 
 #### **parameters**
 
-| parameter name     | type       | location in control.yaml | notes                                   |
-|--------------------|------------|--------------------------|-----------------------------------------|
-| timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers |
+| parameter name     | type       | location in control.yaml | notes                                                  |
+|--------------------|------------|--------------------------|--------------------------------------------------------|
+| timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers                |
+| implementation     | str        | operation_params         | py, fhk (lua) and lupa (lua) implementations available |
 
 #### **output**
 
