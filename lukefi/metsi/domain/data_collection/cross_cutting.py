@@ -1,3 +1,5 @@
+from functools import cache
+
 import numpy as np
 from lukefi.metsi.domain.collected_types import CrossCutResult, CrossCuttableTree
 from lukefi.metsi.sim.core_types import OpTuple
@@ -50,27 +52,34 @@ def _create_cross_cut_results(
     return results
 
 
+@cache
+def prepare_fhk_cross_cut_fn(timber_price_table_path: str):
+    try:
+        from lukefi.metsi.forestry.cross_cutting.cross_cutting_fhk import cross_cut_func
+        timber_price_table = get_timber_price_table(timber_price_table_path)
+        return cross_cut_func(timber_price_table)
+    except ImportError:
+        raise Exception("Unable to use cross-cut lua implementation without FHK library. Refer to documentation "
+                        "for help.")
+
+
 def cross_cut_tree(
     tree: CrossCuttableTree,
     stand_area: float,
-    timber_price_table: np.ndarray,
+    timber_price_table_path: str,
     mode: str = "py"
     ) -> list[CrossCutResult]:
     """
     :param tree: The tree to cross cut
     :param stand_area: Stand area
-    :param timber_price_table: Timber price table
+    :param timber_price_table_path: Timber price table path
     :param mode: implementation to use (py, lua)
     :returns: A list of CrossCutResult objects, whose length is given by the number of unique timber grades in the `timber_price_table`. In other words, the returned list contains the resulting quantities of each unique timber grade.
     """
     if mode == "lua":
-        try:
-            from lukefi.metsi.forestry.cross_cutting.cross_cutting_fhk import cross_cut_func
-            cross_cut_fn = lambda: cross_cut_func(timber_price_table)(tree.species, tree.breast_height_diameter, tree.height)
-        except ImportError:
-            raise Exception("Unable to use cross-cut lua implementation without FHK library. Refer to documentation "
-                            "for help.")
+            cross_cut_fn = lambda: prepare_fhk_cross_cut_fn(timber_price_table_path)(tree.species, tree.breast_height_diameter, tree.height)
     else:
+        timber_price_table = get_timber_price_table(timber_price_table_path)
         cross_cut_fn = lambda: cross_cut(tree.species, tree.breast_height_diameter, tree.height, timber_price_table)
 
     unique_timber_grades, volumes, values = cross_cut_fn()
@@ -95,7 +104,7 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
     :returns: the same payload as was given as input, but with cross cutting results stored in the collected_data.
     """
     stand, collected_data = payload
-    timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
+    timber_price_table_path = operation_parameters['timber_price_table']
     impl = operation_parameters.get('implementation', 'py')
 
     results = []
@@ -105,7 +114,7 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
     felled_trees_not_cut = filter(lambda x: not x.cross_cut_done, felled_trees)
 
     for tree in felled_trees_not_cut:
-        res = cross_cut_tree(tree, stand.area, timber_price_table, impl)
+        res = cross_cut_tree(tree, stand.area, timber_price_table_path, impl)
         results.extend(res)
         tree.cross_cut_done = True
 
@@ -119,13 +128,13 @@ def cross_cut_standing_trees(payload: OpTuple[ForestStand], **operation_paramete
     The results are stored in collected_data.
     """
     stand, collected_data = payload
-    timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
+    timber_price_table_path = operation_parameters['timber_price_table']
     cross_cuttable_trees = cross_cuttable_trees_from_stand(stand, collected_data.current_time_point)
     impl = operation_parameters.get('implementation', 'py')
 
     results = []
     for tree in cross_cuttable_trees:
-        res = cross_cut_tree(tree, stand.area, timber_price_table, impl)
+        res = cross_cut_tree(tree, stand.area, timber_price_table_path, impl)
         results.extend(res)
 
     collected_data.extend_list_result("cross_cutting", results)

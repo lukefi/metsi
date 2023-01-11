@@ -212,7 +212,7 @@ class CrossCuttingTest(unittest.TestCase):
 
         results = []
         for tree in thinned_trees:
-            results.extend(cross_cut_tree(tree, stand_area, DEFAULT_TIMBER_PRICE_TABLE))
+            results.extend(cross_cut_tree(tree, stand_area, 'tests/resources/timber_price_table.csv'))
 
         self.assertEqual(len(results), 6)
         self.assertAlmostEqual(sum([r.value_per_ha for r in results]), 0.05577748139, places=6)
@@ -252,7 +252,7 @@ class CrossCuttingTest(unittest.TestCase):
 
         results = []
         for tree in thinning_output:
-            results.extend(cross_cut_tree(tree, stand_area, TIMBER_PRICE_TABLE_THREE_GRADES))
+            results.extend(cross_cut_tree(tree, stand_area, 'tests/resources/timber_price_table_three_grades.csv'))
 
         grades = [r.timber_grade for r in results]
         unique_grades = set(grades)
