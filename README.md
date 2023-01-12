@@ -28,8 +28,8 @@ pip install .
 This installs the project into the site-packages of your Python deployment, using the project's `pyproject.toml` file.
 The program is then usable from command line by simply invoking `metsi`.
 
-`For developer usage, application entry point is the file `lukefi/metsi/app/metsi.py` or the namespace package
-`lukefi.metsi.app.metsi`
+For developer usage, application entry point is the file `lukefi/metsi/app/metsi.py` or the namespace package
+`lukefi.metsi.app.metsi`.
 
 To obtain the latest changes use the command `git pull`.
 
