@@ -6,8 +6,7 @@ simulator program developed since the 1980s.
 
 The simulator is a stepwise branching state simulator operating upon forest state data. The state data is manipulated by
 **simulator operations**, which in turn rely upon **operation chains**. The branching model for simulator operations is
-declared in a human-readable YAML format or directly by functional declaration. This declaration is used to generate a *
-*step tree** describing the full branching possibilities for the simulation. Prepared **operation chains** are generated
+declared in a human-readable YAML format or directly by functional declaration. This declaration is used to generate a **step tree** describing the full branching possibilities for the simulation. Prepared **operation chains** are generated
 from the step tree and are run with the simulator engine.
 
 ## Getting started
@@ -29,7 +28,8 @@ pip install .
 This installs the project into the site-packages of your Python deployment, using the project's `pyproject.toml` file.
 The program is then usable from command line by simply invoking `metsi`.
 
-For developer usage, the application entry point is `lukefi.metsi.app.metsi.py`.
+`For developer usage, application entry point is the file `lukefi/metsi/app/metsi.py` or the namespace package
+`lukefi.metsi.app.metsi`
 
 To obtain the latest changes use the command `git pull`.
 
