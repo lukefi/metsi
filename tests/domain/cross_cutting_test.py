@@ -1,7 +1,7 @@
 import unittest
 from lukefi.metsi.domain.data_collection.cross_cutting import cross_cut_standing_trees, cross_cut_felled_trees, cross_cut_tree, cross_cuttable_trees_from_stand
 from lukefi.metsi.domain.collected_types import CrossCutResult, CrossCuttableTree
-from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, Step
+from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, EventTree
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.sim.generators import alternatives
@@ -333,7 +333,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
         generator = lambda x: alternatives(x, *[cross_cut_processor, do_nothing_processor])
 
         generators = [generator]
-        root = Step()
+        root = EventTree()
         previous = [root]
         for generator in generators:
             current = generator(previous)

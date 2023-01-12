@@ -9,22 +9,22 @@ from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, depth_first_evaluator, \
     chain_evaluator
-from lukefi.metsi.sim.core_types import CollectedData, StrategyRunner, SimConfiguration, Evaluator
+from lukefi.metsi.sim.core_types import CollectedData, Runner, SimConfiguration, Evaluator
 
 
-def run_strategy_multiprocessing_wrapper(payload: ForestOpPayload, config: SimConfiguration, runner: StrategyRunner, evaluator: Evaluator, queue: queue.Queue) -> None:
-    """Wrapper function for running a simulation strategy in a multiprocessing context. The result is placed in the given queue"""
+def runner_multiprocessing_wrapper(payload: ForestOpPayload, config: SimConfiguration, runner: Runner, evaluator: Evaluator, queue: queue.Queue) -> None:
+    """Wrapper function for running a simulation in a multiprocessing context. The result is placed in the given queue"""
     result = runner(payload, config, evaluator)
     queue.put((payload.computational_unit.identifier, result))
 
 
 def run_stands(
         stands: StandList, config: SimConfiguration,
-        runner: StrategyRunner[ForestOpPayload],
+        runner: Runner[ForestOpPayload],
         evaluator: Evaluator[ForestOpPayload],
         using_multiprocessing: bool
 ) -> dict[str, list[ForestOpPayload]]:
-    """Run the simulation for all given stands, from the given declaration, using the given run strategy. Return the
+    """Run the simulation for all given stands, from the given declaration, using the given runner. Return the
     results organized into a dict keyed with stand identifiers."""
 
     retval = {}
@@ -54,7 +54,7 @@ def run_stands(
 
         processes = os.cpu_count()
         with multiprocessing.Pool(processes=processes) as pool:
-            pool.starmap(run_strategy_multiprocessing_wrapper, mp_args)
+            pool.starmap(runner_multiprocessing_wrapper, mp_args)
 
         #collect results from the queue into which the simulation results are put into.
         while not queue.empty():
@@ -74,16 +74,16 @@ def run_stands(
         return retval
 
 
-def resolve_step_strategy(source: str) -> StrategyRunner[ForestOpPayload]:
-    step_strategy_map = {
+def resolve_formation_strategy(source: str) -> Runner[ForestOpPayload]:
+    formation_strategy_map = {
         'full': run_full_tree_strategy,
         'partial': run_partial_tree_strategy
     }
 
     try:
-        return step_strategy_map[source]
+        return formation_strategy_map[source]
     except Exception:
-        raise Exception("Unable to resolve step tree formation strategy '{}'".format(source))
+        raise Exception("Unable to resolve event tree formation strategy '{}'".format(source))
 
 
 def resolve_evaluation_strategy(source: str) -> Evaluator[ForestOpPayload]:
@@ -95,7 +95,7 @@ def resolve_evaluation_strategy(source: str) -> Evaluator[ForestOpPayload]:
     try:
         return evaluation_strategy_map[source]
     except Exception:
-        raise Exception("Unable to resolve step tree evaluation strategy '{}'".format(source))
+        raise Exception("Unable to resolve event tree evaluation strategy '{}'".format(source))
 
 
 
@@ -104,7 +104,7 @@ def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList
         operation_lookup=lukefi.metsi.domain.sim_ops.operation_lookup,
         generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
         **control)
-    step_strategy = resolve_step_strategy(config.formation_strategy)
+    formation_strategy = resolve_formation_strategy(config.formation_strategy)
     evaluation_strategy = resolve_evaluation_strategy(config.evaluation_strategy)
-    result = run_stands(stands, simconfig, step_strategy, evaluation_strategy, config.multiprocessing)
+    result = run_stands(stands, simconfig, formation_strategy, evaluation_strategy, config.multiprocessing)
     return result

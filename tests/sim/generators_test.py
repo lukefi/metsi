@@ -1,15 +1,15 @@
 import unittest
 import lukefi.metsi.sim.generators
 import yaml
-from lukefi.metsi.sim.core_types import CollectedData, Step, OperationPayload, SimConfiguration
+from lukefi.metsi.sim.core_types import CollectedData, EventTree, OperationPayload, SimConfiguration
 from lukefi.metsi.sim.generators import sequence, compose_nested, alternatives
 from lukefi.metsi.sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from tests.test_utils import inc, collecting_increment, parametrized_operation
 
 
 class TestGenerators(unittest.TestCase):
-    def test_step_sequence_generating(self):
-        root = Step()
+    def test_event_sequence_generating(self):
+        root = EventTree()
         result = sequence(
             [root],
             inc,
@@ -23,8 +23,8 @@ class TestGenerators(unittest.TestCase):
         self.assertEqual(4, len(chain))
 
     def test_branch_generating(self):
-        parent1 = Step()
-        parent2 = Step()
+        parent1 = EventTree()
+        parent2 = EventTree()
         result = alternatives(
             [parent1, parent2],
             *[inc, inc, inc]

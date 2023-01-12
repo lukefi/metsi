@@ -1,6 +1,6 @@
 from typing import Optional, Callable
 from copy import deepcopy
-from lukefi.metsi.sim.core_types import OperationPayload, CUType, SimConfiguration, Step
+from lukefi.metsi.sim.core_types import OperationPayload, CUType, SimConfiguration, EventTree
 from lukefi.metsi.sim.generators import full_tree_generators, compose_nested, partial_tree_generators_by_time_point
 
 
@@ -39,13 +39,13 @@ def run_chains_iteratively(payload, chains: list[list[Callable]]) -> list:
     return results
 
 
-def chain_evaluator(payload: OperationPayload, root_step: Step) -> list[OperationPayload]:
-    chains = root_step.operation_chains()
+def chain_evaluator(payload: OperationPayload, root_node: EventTree) -> list[OperationPayload]:
+    chains = root_node.operation_chains()
     return run_chains_iteratively(payload, chains)
 
 
-def depth_first_evaluator(payload: OperationPayload, root_step: Step) -> list[OperationPayload]:
-    return root_step.evaluate(payload)
+def depth_first_evaluator(payload: OperationPayload, root_node: EventTree) -> list[OperationPayload]:
+    return root_node.evaluate(payload)
 
 
 def run_full_tree_strategy(payload: OperationPayload[CUType], config: SimConfiguration, evaluator=chain_evaluator) -> list[OperationPayload[CUType]]:
@@ -55,12 +55,13 @@ def run_full_tree_strategy(payload: OperationPayload[CUType], config: SimConfigu
 
     :param payload: a simulation state payload
     :param config: a prepared SimConfiguration object
+    :param evaluator: a function for performing computation from given EventTree and for given OperationPayload
     :return: a list of resulting simulation state payloads
     """
 
     nestable_generator = full_tree_generators(config)
-    root_step = compose_nested(nestable_generator)
-    result = evaluator(payload, root_step)
+    root_node = compose_nested(nestable_generator)
+    result = evaluator(payload, root_node)
     return result
 
 
@@ -71,22 +72,22 @@ def run_partial_tree_strategy(payload: OperationPayload[CUType], config: SimConf
 
     :param payload: a simulation state payload
     :param config: a prepared SimConfiguration object
-    :param evaluator: a function for performing computation from given Step and for given OperationPayload
+    :param evaluator: a function for performing computation from given EventTree and for given OperationPayload
     :return: a list of resulting simulation state payloads
     """
     generators_by_time_point = partial_tree_generators_by_time_point(config)
-    root_steps = {}
+    root_nodes = {}
     results = [payload]
 
     #build chains_by_time_point, which is a dict of chains
     for time_point, nestable_generator in generators_by_time_point.items():
-        root_steps[time_point] = compose_nested(nestable_generator)
+        root_nodes[time_point] = compose_nested(nestable_generator)
 
     for time_point in config.time_points:
-        root_step = root_steps[time_point]
+        root_node = root_nodes[time_point]
         time_point_results: list[OperationPayload] = []
         for payload in results:
-            payload_results = evaluator(payload, root_step)
+            payload_results = evaluator(payload, root_node)
             time_point_results.extend(payload_results)
         results = time_point_results
     return results

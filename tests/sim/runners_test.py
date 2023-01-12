@@ -26,7 +26,7 @@ class RunnersTest(unittest.TestCase):
         )
         self.assertRaises(Exception, prepared_function)
 
-    def test_step_tree_strategies_by_comparison(self):
+    def test_event_tree_formation_strategies_by_comparison(self):
         declaration = load_yaml('runners_test/branching.yaml')
         config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
@@ -41,7 +41,7 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(8, len(results_partial))
         self.assertEqual(results_partial, results_full)
 
-    def test_full_tree_evaluators_by_comparison(self):
+    def test_full_formation_evaluation_strategies_by_comparison(self):
         declaration = load_yaml('runners_test/branching.yaml')
         config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
@@ -62,7 +62,7 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(8, len(results_depth))
         self.assertEqual(results_chains, results_depth)
 
-    def test_partial_tree_evaluators_by_comparison(self):
+    def test_partial_formation_evaluation_strategies_by_comparison(self):
         declaration = load_yaml('runners_test/branching.yaml')
         config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
