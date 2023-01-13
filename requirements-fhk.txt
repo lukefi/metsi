@@ -1,2 +1,0 @@
-fhk
--f https://github.com/menu-hanke/fhk/releases/expanded_assets/v4.0.0

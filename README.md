@@ -4,10 +4,11 @@ Metsi forestry simulator is a Python based forest growth and maintenance operati
 Resources Institute Finland. It is a part of a software collection to eventually replace the older Fortran based MELA
 simulator program developed since the 1980s.
 
-The simulator is a branching state simulator operating upon forest state data. The state data is manipulated by
-**simulator operations**, which in turn rely upon **operation chains**. The branching model for simulator operations is
-declared in a human-readable YAML format or directly by functional declaration. This declaration is used to generate a **simulation event tree** describing the full branching possibilities for the simulation. Prepared **operation chains** are generated
-from the event tree and are run with the simulator engine.
+The simulator is a alternative state simulator operating upon forest state data. The state data is manipulated by
+**simulator operations** over a progression of time steps. The event and branching structure for simulator operations
+is declared in a human-readable YAML format or directly by functional declaration. This declaration is used to generate
+a **simulation event tree** holding the full branching possibilities for the simulation. The event tree is evaluated
+with the simulator engine to produce alternative end results.
 
 ## Getting started
 
@@ -28,7 +29,8 @@ pip install .
 This installs the project into the site-packages of your Python deployment, using the project's `pyproject.toml` file.
 The program is then usable from command line by simply invoking `metsi`.
 
-For developer usage, the application entry point is `lukefi.metsi.app.metsi.py`.
+For developer usage, application entry point is the file `lukefi/metsi/app/metsi.py` or the namespace package
+`lukefi.metsi.app.metsi`.
 
 To obtain the latest changes use the command `git pull`.
 
@@ -79,14 +81,6 @@ To be able to use forestry operations depending on R modules
 pip install .[rpy2]
 ```
 
-### Lua with FHK (optional)
-
-To be able to use the Lua models provided by metsi-forestry library, install `fhk`:
-
-```
-pip install -r fhk-requirements.txt
-```
-
 ### Motti (optional)
 
 Access to this module is restricted to Natural Resources Institute Finland by special admission. Installing this will
@@ -97,7 +91,7 @@ implementation, and the [fhk](https://github.com/menu-hanke/fhk)-based Lua imple
 results for big tree natural processes. The difference is that the fhk implementation is much faster but also less
 complete for now.
 
-To use the Python models, install `pymotti`:
+To use the Python or FHK version of Motti, install `pymotti`:
 
 ```
 pip install -r requirements-motti.txt
@@ -105,13 +99,7 @@ pip install -r requirements-motti.txt
 
 The corresponding growth operation is `grow_motti`.
 
-To use the Lua models, install `fhk`:
-
-```
-pip install -r fhk-requirements.txt
-```
-
-You can then use the `grow_fhk` operation with `package: pymotti_graph`.
+You can also use the `grow_fhk` operation with `package: pymotti_graph`.
 
 **NOTE**: For either model, the input data must contain precomputed weather data (temperature sums, sea/lake indices).
 In practice this means that you must enable the `compute_location_metadata` preprocessing operation **even if you're
@@ -606,9 +594,10 @@ year when this operation is called.
 
 #### **parameters**
 
-| parameter name     | type       | location in control.yaml | notes                                   |
-|--------------------|------------|--------------------------|-----------------------------------------|
-| timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers |
+| parameter name     | type       | location in control.yaml | notes                                                  |
+|--------------------|------------|--------------------------|--------------------------------------------------------|
+| timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers                |
+| implementation     | str        | operation_params         | py, fhk (lua) and lupa (lua) implementations available |
 
 #### **output**
 
@@ -634,9 +623,10 @@ trees if they were cross cut. Therefore, this operation is different from [clear
 
 #### **parameters**
 
-| parameter name     | type       | location in control.yaml | notes                                   |
-|--------------------|------------|--------------------------|-----------------------------------------|
-| timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers |
+| parameter name     | type       | location in control.yaml | notes                                                  |
+|--------------------|------------|--------------------------|--------------------------------------------------------|
+| timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers                |
+| implementation     | str        | operation_params         | py, fhk (lua) and lupa (lua) implementations available |
 
 #### **output**
 

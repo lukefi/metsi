@@ -21,7 +21,7 @@ def _get_bare_land_value(land_values: dict, soil_peatland_category: int, site_ty
         4: "sub_dry_sites",
         5: "dry_sites",
         6: "barren_sites",
-        7: "rocky_or_sandy",
+        7: "rocky_or_sandy_sites",
         8: "open_mountains"
     }
 
