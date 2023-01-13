@@ -1,4 +1,4 @@
-from lukefi.metsi.app.app_io import Mela2Configuration
+from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.post_ops import operation_lookup
 from lukefi.metsi.sim.core_types import OperationPayload
@@ -6,7 +6,7 @@ from lukefi.metsi.sim.generators import simple_processable_chain
 from lukefi.metsi.sim.runners import evaluate_sequence
 
 
-def post_process_alternatives(config: Mela2Configuration, control: dict, input_data: SimResults):
+def post_process_alternatives(config: MetsiConfiguration, control: dict, input_data: SimResults):
     chain = simple_processable_chain(
         control.get('post_processing', []),
         control.get('operation_params', {}),

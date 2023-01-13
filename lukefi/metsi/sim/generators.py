@@ -1,5 +1,5 @@
 from typing import Any, Callable, Optional
-from lukefi.metsi.sim.core_types import Step, SimConfiguration, SimulationEvent, OperationPayload, GeneratorFn
+from lukefi.metsi.sim.core_types import EventTree, SimConfiguration, DeclaredEvents, OperationPayload, GeneratorFn
 from lukefi.metsi.sim.operations import prepared_processor, prepared_operation, resolve_operation
 from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_params
 
@@ -7,7 +7,7 @@ from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_par
 class NestableGenerator:
     """
     NestableGenerator represents a tree for nested event generators in the simulation tree. Construction of this class
-    creates a tree structure where leaf nodes represent actual GeneratorFn instances to populate a Step tree. The
+    creates a tree structure where leaf nodes represent actual GeneratorFn instances to populate an Event tree. The
     tree organization represents the nested sequences and alternatives structure in simulation events declaration.
     """
     prepared_generator: Optional[GeneratorFn] = None
@@ -75,25 +75,25 @@ class NestableGenerator:
             self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
             self.free_operations = []
 
-    def unwrap(self, previous: list[Step]) -> list[Step]:
+    def unwrap(self, previous: list[EventTree]) -> list[EventTree]:
         """
-        Recursive depth-first walkthrough of NestableGenerator tree starting from self to generate a list of Steps.
-        These steps denote the leaves of the given Step trees as expanded by self.
+        Recursive depth-first walkthrough of NestableGenerator tree starting from self to generate a list of EventTrees.
+        These denote the leaves of the given EventTrees as expanded by self.
 
-        Sequence type NestableGenerators generate their tree of children Steps to follow up each of the given previous
-        Steps in order. Idea is like "previous + next1,next2 => [previous, next1, next2]".
+        Sequence type NestableGenerators generate their tree of children EventTrees to follow up each of the given
+        previous nodes in order. Idea is like "previous + next1,next2 => [previous, next1, next2]".
 
-        Alternatives type NestableGenerators generate their tree of children Steps attaching a copy to each given
-        previous Step. Idea is like "previous + next1,next2 => [previous, next1], [previous, next2]".
+        Alternatives type NestableGenerators generate their tree of children EventTrees attaching a copy to each given
+        previous node. Idea is like "previous + next1,next2 => [previous, next1], [previous, next2]".
 
         Recursion end condition 1 is that self is a leaf that has a GeneratorFn that ultimately extends upon
-        the previous Steps and returns the resulting list of Steps.
+        the previous EventTrees and returns the resulting list of EventTrees.
 
         Recursion end condition 2 is that a leaf that has no GeneratorFn or child NestableGenerators. Returns the
-        previous Steps unaltered.
+        previous EventTrees unaltered.
 
-        :param previous: list of Steps denoting the Step tree at parent NestableGenerator or another Step root
-        :return: list of Steps resulting from attempting to attach self's tree of Steps into previous Steps
+        :param previous: list of EventTree nodes denoting the node at parent NestableGenerator or another EventTree root
+        :return: list of EventTree nodes resulting from attempting to attach self's EventTree into previous nodes
         """
         if self.prepared_generator is not None:
             return self.prepared_generator(previous)
@@ -111,41 +111,41 @@ class NestableGenerator:
             return previous
 
 
-def sequence(parents: Optional[list[Step]] = None, *operations: Callable) -> list[Step]:
+def sequence(parents: Optional[list[EventTree]] = None, *operations: Callable) -> list[EventTree]:
     """
-    Generate a linear sequence of steps, optionally extending each Step in the given list of Steps with it.
+    Generate a linear sequence of EventTree nodes, optionally extending each node in the given list of nodes with it.
     :param parents: optional
     :param operations:
     :return:
     """
     result = []
     if parents is None or len(parents) == 0:
-        parents = [Step()]
-    for root_step in parents:
-        previous_step = root_step
+        parents = [EventTree()]
+    for root_event in parents:
+        parent_node = root_event
         for operation in operations:
-            current_step = Step(operation, previous_step)
-            previous_step.add_branch(current_step)
-            previous_step = current_step
-        result.append(previous_step)
+            branch = EventTree(operation, parent_node)
+            parent_node.add_branch(branch)
+            parent_node = branch
+        result.append(parent_node)
     return result
 
 
-def alternatives(parents: Optional[list[Step]] = None, *operations: Callable) -> list[Step]:
+def alternatives(parents: Optional[list[EventTree]] = None, *operations: Callable) -> list[EventTree]:
     """
-    Generate branches for an optional list of steps, out of an *args list of given operations
+    Generate branches for an optional list of EventTree nodes, out of an *args list of given operations
     :param parents:
     :param operations:
-    :return: a list of leaf steps now under the given parent steps
+    :return: a list of leaf nodes now under the given parent node
     """
     result = []
     if parents is None or len(parents) == 0:
-        parents = [Step()]
-    for step in parents:
+        parents = [EventTree()]
+    for parent_node in parents:
         for operation in operations:
-            branching_step = Step(operation, step)
-            step.add_branch(branching_step)
-            result.append(branching_step)
+            branch = EventTree(operation, parent_node)
+            parent_node.add_branch(branch)
+            result.append(branch)
     return result
 
 
@@ -155,14 +155,14 @@ GENERATOR_LOOKUP = {
     }
 
 
-def compose_nested(nestable_generator: NestableGenerator) -> Step:
+def compose_nested(nestable_generator: NestableGenerator) -> EventTree:
     """
-    Generate a simulation Step tree using the given NestableGenerator.
+    Generate a simulation EventTree using the given NestableGenerator.
 
-    :param nestable_generator: NestableGenerator tree for generating a Step tree.
-    :return: The root node of the generated Step tree
+    :param nestable_generator: NestableGenerator tree for generating a EventTree.
+    :return: The root node of the generated EventTree
     """
-    root = Step()
+    root = EventTree()
     nestable_generator.unwrap([root])
     return root
 
@@ -181,12 +181,11 @@ def simple_processable_chain(operation_tags: list[str], operation_params: dict, 
     return result
 
 
-def generator_declarations_for_time_point(events: list[SimulationEvent], time: int) -> list[dict]:
+def generator_declarations_for_time_point(events: list[DeclaredEvents], time: int) -> list[dict]:
     """
-    From simulation_steps, find the step generators declared for the given time point. Upon no match,
-    a sequence of a single do_nothing operation is supplanted.
+    From events declarations, find the EventTree generators declared for the given time point.
 
-    :param events: list of SimulationEvent object for generator declarations and time points
+    :param events: list of DeclaredEvents objects for generator declarations and time points
     :param time: point of simulation time for selecting matching generators
     :return: list of generator declarations for the desired point of time
     """
@@ -197,10 +196,10 @@ def generator_declarations_for_time_point(events: list[SimulationEvent], time: i
     return generator_declarations
 
 
-def generator_function(key, generator_lookup: dict, *processors: Callable) -> GeneratorFn:
+def generator_function(key, generator_lookup: dict, *fns: Callable) -> GeneratorFn:
     """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
-    argument list of processors with the generator."""
-    return lambda parent_steps: generator_lookup[key](parent_steps, *processors)
+    argument list of functions with the generator."""
+    return lambda parent_nodes: generator_lookup[key](parent_nodes, *fns)
 
 
 def prepare_parametrized_operations(config: SimConfiguration,
@@ -223,7 +222,7 @@ def prepare_parametrized_operations(config: SimConfiguration,
 
 def full_tree_generators(config: SimConfiguration) -> NestableGenerator:
     """
-    Creat a NestableGenerator describing a single simulator run.
+    Create a NestableGenerator describing a single simulator run.
 
     :param config: a prepared SimConfiguration object
     :return: a list of prepared generator functions
@@ -238,8 +237,8 @@ def full_tree_generators(config: SimConfiguration) -> NestableGenerator:
 
 def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int, NestableGenerator]:
     """
-    Create a dict of NestableGenerators describing keyed by their time_point in the simulation. Used for generating
-    partial step trees of the simulation.
+    Create a dict of NestableGenerators keyed by their time_point in the simulation. Used for generating
+    partial EventTrees of the simulation.
 
     :param config: a prepared SimConfiguration object
     :return: a list of prepared generator functions

@@ -5,7 +5,8 @@ app_configuration:
   #preprocessing_output_container: csv #options: pickle, json, csv, null, rsd (special case not usable as input container)
   #state_output_container: csv #options: pickle, json, csv, null
   #derived_data_output_container: pickle #options: pickle, json, null
-  strategy: partial
+  formation_strategy: partial
+  evaluation_strategy: depth
   run_modes: preprocess,simulate,postprocess,export
 
 run_constraints:

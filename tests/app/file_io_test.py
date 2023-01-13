@@ -7,7 +7,7 @@ import lukefi.metsi.app.file_io
 from dataclasses import dataclass
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
-from lukefi.metsi.app.app_io import Mela2Configuration
+from lukefi.metsi.app.app_io import MetsiConfiguration
 
 
 @dataclass
@@ -107,7 +107,7 @@ class TestFileReading(unittest.TestCase):
         shutil.rmtree('outdir')
 
     def test_read_stands_from_pickle_file(self):
-        config = Mela2Configuration(
+        config = MetsiConfiguration(
             input_path="tests/resources/file_io_test/forest_centre.pickle",
             state_format="fdm",
             state_input_container="pickle"
@@ -118,7 +118,7 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(type(unpickled_stands[0].tree_strata[0]), TreeStratum)
 
     def test_read_stands_from_json_file(self):
-        config = Mela2Configuration(
+        config = MetsiConfiguration(
             input_path="tests/resources/file_io_test/forest_centre.json",
             state_format="fdm",
             state_input_container="json"
@@ -129,7 +129,7 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(type(stands_from_json[0].tree_strata[0]), TreeStratum)
 
     def test_read_stands_from_csv_file(self):
-        config = Mela2Configuration(
+        config = MetsiConfiguration(
             input_path="tests/resources/file_io_test/forest_centre.csv",
             state_format="fdm",
             state_input_container="csv"
@@ -140,7 +140,7 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(type(stands_from_csv[0].tree_strata[0]), TreeStratum)
 
     def test_read_stands_from_vmi12_file(self):
-        config = Mela2Configuration(
+        config = MetsiConfiguration(
             input_path="tests/resources/file_io_test/vmi12.dat",
             state_format="vmi12",
             state_input_container=""
@@ -149,7 +149,7 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(len(stands), 4)
 
     def test_read_stands_from_vmi13_file(self):
-        config = Mela2Configuration(
+        config = MetsiConfiguration(
             input_path="tests/resources/file_io_test/vmi13.dat",
             state_format="vmi13",
             state_input_container=""
@@ -158,7 +158,7 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(len(stands), 3)
 
     def test_read_stands_from_xml_file(self):
-        config = Mela2Configuration(
+        config = MetsiConfiguration(
             input_path="tests/resources/file_io_test/forest_centre.xml",
             state_format="forest_centre",
             state_input_container=""
@@ -181,7 +181,7 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(2, len(result["3"][0].collected_data.get_list_result("calculate_biomass")))
 
     def test_read_stands_from_nonexisting_file(self):
-        config = Mela2Configuration(
+        config = MetsiConfiguration(
             input_path="nonexisting_file.pickle",
             state_format="fdm",
             state_input_container="pickle"

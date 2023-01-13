@@ -8,7 +8,7 @@ def identity(x):
     return x
 
 
-class SimulationEvent(SimpleNamespace):
+class DeclaredEvents(SimpleNamespace):
     time_points: list[int] = []
     generators: list[dict] = {}
 
@@ -17,7 +17,7 @@ class SimConfiguration(SimpleNamespace):
     operation_lookup: dict[str, Callable] = {}
     operation_params: dict[str, list[dict[str, Any]]] = {}
     operation_file_params: dict[str, dict[str, str]] = {}
-    events: list[SimulationEvent] = []
+    events: list[DeclaredEvents] = []
     run_constraints: dict[str, dict] = {}
     time_points = []
 
@@ -30,7 +30,7 @@ class SimConfiguration(SimpleNamespace):
         self.events = list()
         for event_set in events:
             source_time_points = event_set.get('time_points', [])
-            new_event = SimulationEvent(
+            new_event = DeclaredEvents(
                 time_points=source_time_points,
                 generators=event_set.get('generators', [])
             )
@@ -39,30 +39,30 @@ class SimConfiguration(SimpleNamespace):
         self.time_points = sorted(time_points)
 
 
-class Step:
+class EventTree:
     """
-    Step represents a computational operation in a tree of alternative computation paths.
+    Event represents a computational operation in a tree of following event paths.
     """
     operation: Callable = identity  # default to the identity function, essentially no-op
-    branches: list['Step'] = []
-    previous: 'Step' or None = None
+    branches: list['EventTree'] = []
+    previous: 'EventTree' or None = None
 
     def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None,
-                 previous: 'Step' or None = None):
+                 previous: 'EventTree' or None = None):
         self.operation = operation if operation is not None else identity
         self.previous = previous
         self.branches = []
 
-    def find_root(self: 'Step'):
+    def find_root(self: 'EventTree'):
         return self if self.previous is None else self.previous.find_root()
 
-    def attach(self, previous: 'Step'):
+    def attach(self, previous: 'EventTree'):
         self.previous = previous
         previous.add_branch(self)
 
     def operation_chains(self):
         """
-        Recursively produce a list of lists of possible operation chains represented by this tree in post-order
+        Recursively produce a list of lists of possible operation chains represented by this event tree in post-order
         traversal.
         """
         if len(self.branches) == 0:
@@ -76,12 +76,37 @@ class Step:
                     result.append([self.operation] + chain)
             return result
 
-    def add_branch(self, step: 'Step'):
-        step.previous = self
-        self.branches.append(step)
+    def evaluate(self, payload) -> list:
+        """
+        Recursive pre-order walkthrough of this event tree to evaluate its operations with the given payload,
+        copying it for branching.
+
+        :param payload: the simulation data payload (we don't care what it is here)
+        :return: list of result payloads from this EventTree or as concatenated from its branches
+        """
+        current = self.operation(payload)
+        if len(self.branches) == 0:
+            return [current]
+        elif len(self.branches) == 1:
+            return self.branches[0].evaluate(current)
+        elif len(self.branches) > 1:
+            results = []
+            for branch in self.branches:
+                try:
+                    results.extend(branch.evaluate(deepcopy(current)))
+                except UserWarning:
+                    ...
+            if len(results) == 0:
+                raise UserWarning(f"Branch aborted with all children failing")
+            else:
+                return results
+
+    def add_branch(self, et: 'EventTree'):
+        et.previous = self
+        self.branches.append(et)
 
     def add_branch_from_operation(self, operation: Callable):
-        self.add_branch(Step(operation, self))
+        self.add_branch(EventTree(operation, self))
 
 
 class CollectedData:
@@ -181,5 +206,6 @@ class OperationPayload(SimpleNamespace, Generic[CUType]):
 
 OpTuple = tuple[CUType, CollectedData]
 SourceData = list[CUType]
-StrategyRunner = Callable[[OperationPayload[CUType], dict, dict], list[OperationPayload[CUType]]]
-GeneratorFn = Callable[[Optional[list[Step]]], list[Step]]
+Evaluator = Callable[[OperationPayload[CUType]], list[OperationPayload[CUType]]]
+Runner = Callable[[OperationPayload[CUType], dict, dict, Evaluator[CUType]], list[OperationPayload[CUType]]]
+GeneratorFn = Callable[[Optional[list[EventTree]]], list[EventTree]]

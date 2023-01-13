@@ -2,28 +2,28 @@ import unittest
 
 from lukefi.metsi.sim.generators import sequence, alternatives
 from lukefi.metsi.sim.runners import evaluate_sequence
-from lukefi.metsi.sim.core_types import Step, SimConfiguration
+from lukefi.metsi.sim.core_types import EventTree, SimConfiguration
 from tests.test_utils import inc
 
 
 class ComputationModelTest(unittest.TestCase):
-    root = Step(inc)
+    root = EventTree(inc)
     root.branches = [
-        Step(inc),
-        Step(inc)
+        EventTree(inc),
+        EventTree(inc)
     ]
 
     root.branches[0].branches = [
-        Step(inc),
-        Step(inc)
+        EventTree(inc),
+        EventTree(inc)
     ]
 
     root.branches[1].branches = [
-        Step(inc),
-        Step(inc)
+        EventTree(inc),
+        EventTree(inc)
     ]
 
-    def test_step_generating(self):
+    def test_event_generating(self):
         chains = self.root.operation_chains()
         self.assertEqual(4, len(chains))
         self.assertEqual(3, len(chains[0]))
@@ -34,6 +34,10 @@ class ComputationModelTest(unittest.TestCase):
         for chain in chains:
             result = evaluate_sequence(0, *chain)
             self.assertEqual(3, result)
+
+    def test_evaluator(self):
+        results = self.root.evaluate(0)
+        self.assertListEqual([3, 3, 3, 3], results)
 
     def test_sim_configuration(self):
         fn1 = lambda x: x

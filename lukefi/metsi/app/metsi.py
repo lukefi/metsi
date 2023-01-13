@@ -6,7 +6,7 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import lukefi.metsi.app.preprocessor
-from lukefi.metsi.app.app_io import parse_cli_arguments, Mela2Configuration, generate_program_configuration, RunMode
+from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_program_configuration, RunMode
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.app.export import export_files
@@ -17,7 +17,7 @@ from lukefi.metsi.app.simulator import simulate_alternatives
 from lukefi.metsi.app.console_logging import print_logline
 
 
-def preprocess(config: Mela2Configuration, control: dict, stands: StandList) -> StandList:
+def preprocess(config: MetsiConfiguration, control: dict, stands: StandList) -> StandList:
     print_logline("Preprocessing...")
     result = lukefi.metsi.app.preprocessor.preprocess_stands(stands, control)
     if config.preprocessing_output_container is not None:
@@ -27,7 +27,7 @@ def preprocess(config: Mela2Configuration, control: dict, stands: StandList) -> 
     return result
 
 
-def simulate(config: Mela2Configuration, control: dict, stands: StandList) -> SimResults:
+def simulate(config: MetsiConfiguration, control: dict, stands: StandList) -> SimResults:
     print_logline("Simulating alternatives...")
     result = simulate_alternatives(config, control, stands)
     if config.state_output_container is not None or config.derived_data_output_container is not None:
@@ -36,7 +36,7 @@ def simulate(config: Mela2Configuration, control: dict, stands: StandList) -> Si
     return result
 
 
-def post_process(config: Mela2Configuration, control: dict, data: SimResults) -> SimResults:
+def post_process(config: MetsiConfiguration, control: dict, data: SimResults) -> SimResults:
     print_logline("Post-processing alternatives...")
     result = post_process_alternatives(config, control['post_processing'], data)
     if config.state_output_container is not None or config.derived_data_output_container is not None:
@@ -45,7 +45,7 @@ def post_process(config: Mela2Configuration, control: dict, data: SimResults) ->
     return result
 
 
-def export(config: Mela2Configuration, control: dict, data: SimResults) -> None:
+def export(config: MetsiConfiguration, control: dict, data: SimResults) -> None:
     print_logline("Exporting data...")
     export_files(config, control['export'], data)
 
@@ -60,7 +60,7 @@ mode_runners = {
 
 def main() -> int:
     cli_arguments = parse_cli_arguments(sys.argv[1:])
-    control_file = Mela2Configuration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
+    control_file = MetsiConfiguration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
     try:
         control_structure = simulation_declaration_from_yaml_file(control_file)
     except IOError:

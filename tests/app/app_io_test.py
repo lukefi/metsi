@@ -19,13 +19,14 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual('fdm', result.state_format)
 
     def test_sim_cli_arguments(self):
-        args = ['input.pickle', 'output2', 'control.yaml', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
+        args = ['input.pickle', 'output2', 'control.yaml', '-f', 'partial', '-e', 'depth', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
         result = aio.parse_cli_arguments(args)
-        self.assertEqual(13, len(result.__dict__.keys()))
+        self.assertEqual(15, len(result.__dict__.keys()))
         self.assertEqual('input.pickle', result.input_path)
         self.assertEqual('control.yaml', result.control_file)
         self.assertEqual('output2', result.target_directory)
-        self.assertEqual('partial', result.strategy)
+        self.assertEqual('partial', result.formation_strategy)
+        self.assertEqual('depth', result.evaluation_strategy)
         self.assertEqual('fdm', result.state_format)
         self.assertEqual(None, result.state_input_container)
         self.assertEqual(None, result.state_output_container)
@@ -61,10 +62,10 @@ class TestAppIO(unittest.TestCase):
         ]
 
         for case in successes:
-            result = lukefi.metsi.app.app_io.Mela2Configuration(run_modes=case[0]).run_modes
+            result = lukefi.metsi.app.app_io.MetsiConfiguration(run_modes=case[0]).run_modes
             self.assertEqual(case[1], result)
         for case in failures:
-            self.assertRaises(Exception, lukefi.metsi.app.app_io.Mela2Configuration, **{'run_modes': case})
+            self.assertRaises(Exception, lukefi.metsi.app.app_io.MetsiConfiguration, **{'run_modes': case})
 
     def test_mela2_configuration(self):
         args = ['cli_input', 'cli_output', 'cli_control.yaml', '-s', 'full', '--state-format', 'vmi12', '--state-output-container', 'json']
@@ -74,7 +75,7 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual('cli_input', result.input_path)
         self.assertEqual('cli_control.yaml', result.control_file)
         self.assertEqual('cli_output', result.target_directory)
-        self.assertEqual('full', result.strategy)
+        self.assertEqual('full', result.formation_strategy)
         self.assertEqual('vmi12', result.state_format)
         self.assertEqual('json', result.state_output_container)  # CLI overrides control source
         self.assertEqual('json', result.preprocessing_output_container)  # control source overrides Mela2Configuration

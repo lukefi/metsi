@@ -1,11 +1,12 @@
 import unittest
 from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
 from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, SimConfiguration
-from lukefi.metsi.sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy
+from lukefi.metsi.sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy, \
+    chain_evaluator, depth_first_evaluator
 from tests.test_utils import raises, identity, none, collect_results, load_yaml, collecting_increment
 
 
-class TestOperations(unittest.TestCase):
+class RunnersTest(unittest.TestCase):
     def test_sequence_success(self):
         payload = OperationPayload(computational_unit=1)
         result = evaluate_sequence(
@@ -25,7 +26,7 @@ class TestOperations(unittest.TestCase):
         )
         self.assertRaises(Exception, prepared_function)
 
-    def test_strategies_by_comparison(self):
+    def test_event_tree_formation_strategies_by_comparison(self):
         declaration = load_yaml('runners_test/branching.yaml')
         config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
         print(config)
@@ -39,6 +40,48 @@ class TestOperations(unittest.TestCase):
         self.assertEqual(8, len(results_full))
         self.assertEqual(8, len(results_partial))
         self.assertEqual(results_partial, results_full)
+
+    def test_full_formation_evaluation_strategies_by_comparison(self):
+        declaration = load_yaml('runners_test/branching.yaml')
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        print(config)
+        chains_payload = OperationPayload(
+            computational_unit=1,
+            collected_data=CollectedData(),
+            operation_history=[]
+        )
+        results_chains = collect_results(run_full_tree_strategy(chains_payload, config, chain_evaluator))
+
+        depth_payload = OperationPayload(
+            computational_unit=1,
+            collected_data=CollectedData(),
+            operation_history=[]
+        )
+        results_depth = collect_results(run_full_tree_strategy(depth_payload, config, depth_first_evaluator))
+        self.assertEqual(8, len(results_chains))
+        self.assertEqual(8, len(results_depth))
+        self.assertEqual(results_chains, results_depth)
+
+    def test_partial_formation_evaluation_strategies_by_comparison(self):
+        declaration = load_yaml('runners_test/branching.yaml')
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        print(config)
+        chains_payload = OperationPayload(
+            computational_unit=1,
+            collected_data=CollectedData(),
+            operation_history=[]
+        )
+        results_chains = collect_results(run_partial_tree_strategy(chains_payload, config, chain_evaluator))
+
+        depth_payload = OperationPayload(
+            computational_unit=1,
+            collected_data=CollectedData(),
+            operation_history=[]
+        )
+        results_depth = collect_results(run_partial_tree_strategy(depth_payload, config, depth_first_evaluator))
+        self.assertEqual(8, len(results_chains))
+        self.assertEqual(8, len(results_depth))
+        self.assertEqual(results_chains, results_depth)
 
     def test_no_parameters_propagation(self):
         declaration = load_yaml('runners_test/no_parameters.yaml')

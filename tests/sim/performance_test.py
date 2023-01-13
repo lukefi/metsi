@@ -4,8 +4,7 @@ import unittest
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.sim.core_types import OperationPayload, SimConfiguration, CollectedData
 from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
-from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy
-
+from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, chain_evaluator, depth_first_evaluator
 
 optime = 0
 counter = 0
@@ -42,6 +41,7 @@ def create_sim_configs(workload_time):
             {'time_points': list(range(3)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]}
         ]}),
         SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
+            {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(3)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount', 'nodecount', 'nodecount']}]}
         ]})
     ]
@@ -51,6 +51,13 @@ strategies = [
     run_full_tree_strategy,
     run_partial_tree_strategy
 ]
+
+
+evaluators = [
+    chain_evaluator,
+    depth_first_evaluator
+]
+
 
 @unittest.skip
 class PerformanceTest(unittest.TestCase):
@@ -78,17 +85,20 @@ class PerformanceTest(unittest.TestCase):
         counter = 0
 
         for si_n, sim in enumerate(sims):
+            print(f"sim {si_n}")
             for strategy in strategies:
-                payload = OperationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=sim.time_points[0]), operation_history=[])
-                start = time.time_ns()
-                result = strategy(payload, sim)
-                end = time.time_ns()
-                diff = round((end - start) / 1000000000, 3)
-                optime = round(optime, 3)
-                enginetime = round(diff - optime, 3)
-                print(f"strategy {strategy}, sim {si_n}")
-                print(f"   variants {len(result)}, operation calls {counter} ")
-                print(f"   total time {diff} s, operation time {optime} s, engine time {enginetime} s ({round(enginetime / diff * 100, 1)} % of total)")
-                optime = 0
-                counter = 0
+                print(f"  strategy {strategy.__name__}")
+                for evaluator in evaluators:
+                    print(f"    evaluator {evaluator.__name__}")
+                    payload = OperationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=sim.time_points[0]), operation_history=[])
+                    start = time.time_ns()
+                    result = strategy(payload, sim, evaluator)
+                    end = time.time_ns()
+                    diff = round((end - start) / 1000000000, 3)
+                    optime = round(optime, 3)
+                    enginetime = round(diff - optime, 3)
+                    print(f"      variants {len(result)}, operation calls {counter} ")
+                    print(f"      total time {diff} s, operation time {optime} s, engine time {enginetime} s ({round(enginetime / diff * 100, 1)} % of total)")
+                    optime = 0
+                    counter = 0
             print("\n")

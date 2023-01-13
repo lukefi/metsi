@@ -4,10 +4,11 @@ Metsi forestry simulator is a Python based forest growth and maintenance operati
 Resources Institute Finland. It is a part of a software collection to eventually replace the older Fortran based MELA
 simulator program developed since the 1980s.
 
-The simulator is a stepwise branching state simulator operating upon forest state data. The state data is manipulated by
-**simulator operations**, which in turn rely upon **operation chains**. The branching model for simulator operations is
-declared in a human-readable YAML format or directly by functional declaration. This declaration is used to generate a **step tree** describing the full branching possibilities for the simulation. Prepared **operation chains** are generated
-from the step tree and are run with the simulator engine.
+The simulator is a alternative state simulator operating upon forest state data. The state data is manipulated by
+**simulator operations** over a progression of time steps. The event and branching structure for simulator operations
+is declared in a human-readable YAML format or directly by functional declaration. This declaration is used to generate
+a **simulation event tree** holding the full branching possibilities for the simulation. The event tree is evaluated
+with the simulator engine to produce alternative end results.
 
 ## Getting started
 
@@ -184,7 +185,7 @@ python -m lukefi.metsi.app.metsi --help
 
 Input path, output path and optionally the control file path must be supplied as CLI positional arguments. All other
 parameters in commands below can also be set in the `control.yaml` file `app_configuration` block. Control file settings
-override program defaults (see app/app_io.py Mela2Configuration class). CLI arguments override the settings in the
+override program defaults (see app/app_io.py MetsiConfiguration class). CLI arguments override the settings in the
 control file.
 
 **At the time of writing this, there are no post-processing operations ready to be used. Post-processing
@@ -742,7 +743,7 @@ A run is declared in the YAML file `control.yaml`.
 4. List of `simulation_events`, where each object represents a single set of operations and a set of time points for
    those operations to be run.
     1. `time_points` is a list of integers which assign this set of operations to simulation time points
-    2. `generators` is a list of chained generator functions (see section on step generators)
+    2. `generators` is a list of chained generator functions (see section on simulation event generators)
         1. `sequence` a list of operations to be executed as a chain
         2. `alternatives` a list of operations which represent alternative branches
 5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional)
@@ -763,7 +764,7 @@ A run is declared in the YAML file `control.yaml`.
 8. Export is controlled in the `export` section of the file (TODO: structure is in works)
 
 The following example declares a simulation, which runs four event cycles at time points 0, 5, 10 and 15.
-Images below describe the simulation as a step tree, and further as the computation chains that are generated from the
+Images below describe the simulation as an event tree, and further as the computation chains that are generated from the
 tree.
 
 * At time point 0, `reporting` of the simulation state is done.
@@ -809,11 +810,12 @@ simulation_events:
           - reporting
 ```
 
-Step tree from declaration above
+Event tree from declaration above
 
-![Step tree](doc/drawio/20220221_sim-tree.drawio.png)
+![Event tree](doc/drawio/20220221_sim-tree.drawio.png)
 
-Operation chains from step tree above, as produced by the __full tree strategy__ (see below for partial tree strategy)
+Operation chains from event tree above, as produced by the **full** tree formation strategy. See below for the partial
+tree strategy.
 
 ![Operation chains](doc/drawio/20220221_sim-chains.drawio.png)
 
@@ -866,7 +868,8 @@ preprocessing_params:
 
 ## Simulator
 
-The three important concepts in the `sim` package are **operations**, **processor**, **step tree** and **generators**.
+The three important concepts in the `sim` package are **operations**, **processor**, **event tree** and
+**event generators**.
 
 ### Operation
 
@@ -892,28 +895,30 @@ follows:
 
 Processor functions are produced as lambda functions based on the `control.yaml` declaration.
 
-### The step tree
+### The event tree
 
-The step tree is a tree data structure where each individual node represents a prepared simulation processor. It is
-generated based on the `control.yaml` declaration. Unique operation chains are generated based on the step tree.
+The event tree is a tree data structure where each individual node represents a prepared simulation operation. It is
+generated based on the `control.yaml` declaration. Unique operation chains are generated based on the event tree for
+individual chain runs, or the event tree can be evaluated by depth-first walkthrough. This is controlled by the
+evaluation strategy.
 
-### Generators
+### Event generators
 
-`sequence` and `alternatives` are functions which produce `Step` instances for given input functions and as successors
-of previous `Step` instances. For the simulation purposes, these input functions are the prepared processors (see
-above), but the simulator implementation literally does not care what these functions are. Sequences are linear chains
-of steps. Alternatives are branching steps. Step instances are generated and bound to earlier steps (parents) as
-successors (children).
+`sequence` and `alternatives` are functions which produce `EventTree` instances for given input functions and as
+successors of previous `EventTree` instances. For the simulation purposes, these input functions are the prepared
+processors (see above), but the simulator implementation literally does not care what these functions are. Sequences are
+linear chains of event. Alternatives are branching events. EventTree instances are generated and bound to earlier
+EventTree leaf nodes as branches.
 
-The generators are chainable and nestable such that they can expand the step tree in formation based on the results of a
-previous generator's results. The `NestableGenerator` represents a tree structure for nested generator declarations. It
-is constructed from the `simulation_events` structure given from a configuration source. A `SimConfiguration` structure,
-likewise populated from a configuration source is used as a template for binding the created generator functions with
-prepared domain operation functions. The control source is an application's `control.yaml` file's dict structure or
-another compatible source.
+The generators are chainable and nestable such that they can expand the event tree in formation based on the results of
+a previous generator's results. The `NestableGenerator` represents a tree structure for nested generator declarations.
+It is constructed from the `simulation_events` structure given from a configuration source. A `SimConfiguration`
+structure, likewise populated from a configuration source is used as a template for binding the created generator
+functions with prepared domain operation functions. The control source is an application's `control.yaml` file's dict
+structure or another compatible source.
 
 `compose_nested` function executes the given `NestableGenerator` which in turn utilizes its prepared `sequence`
-and `alternatives` calls to build a complete simulation step tree.
+and `alternatives` calls to build a complete simulation event tree.
 
 ## The domain
 
@@ -940,9 +945,9 @@ not mutate the operation parameter `dict`
 
 `sim.runners` module has two functions of interest:
 
-* `evaluate_sequence` executes a prepared chain of functions (from the step tree), returning the final simulated stated
+* `evaluate_sequence` executes a prepared chain of functions (from the event tree), returning the final simulated stated
   or raising an execption upon any failure.
-* `run_chains_iteratively` is a simple iterator for given chain of prepared operations (from the step tree)
+* `run_chains_iteratively` is a simple iterator for given chain of prepared operations (from the event tree)
 
 Note that this package is a simple run-testing implementation. In the future we wish to expand upon this to allow for
 distributed run scenarios using Dask.
@@ -1070,10 +1075,10 @@ on the thinning operation. At time point 5, The partial tree strategy would then
 for `output 1`, i.e. the two chains on the left in the above diagram. This logic reduces the unnecessary computation the
 simulator has to make, compared to the full strategy, and this is true especially for large simulation trees.
 
-"Partial" in the strategy name refers to the fact that the strategy creates trees from only the nodes (`Step`s) in one
-time point at a time (i.e. partial trees/subtrees) and traverses those partial trees (with the same post-order traversal
-algorithm) to create partial (or sub-) chains of operations. __Therefore, the strategy can be thought to operate
-depth-first within time points, but breadth-first across time points.__
+"Partial" in the strategy name refers to the fact that the strategy creates trees from only the nodes (`EventTree`s) in
+one time point at a time (i.e. partial trees/subtrees) and traverses those partial trees (with the same post-order
+traversal algorithm) to create partial (or sub-) chains of operations. __Therefore, the strategy can be thought to
+operate depth-first within time points, but breadth-first across time points.__
 
 ## Notes for simulation creators
 

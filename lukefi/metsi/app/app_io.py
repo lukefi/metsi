@@ -11,7 +11,7 @@ class RunMode(Enum):
     EXPORT = "export"
 
 
-class Mela2Configuration(SimpleNamespace):
+class MetsiConfiguration(SimpleNamespace):
     input_path = None
     target_directory = None
     control_file = "control.yaml"
@@ -21,7 +21,8 @@ class Mela2Configuration(SimpleNamespace):
     state_output_container = None
     preprocessing_output_container = None
     derived_data_output_container = None
-    strategy = "partial"
+    formation_strategy = "partial"
+    evaluation_strategy = "depth"
     multiprocessing = False
     reference_trees = False  # ForestBuilder parameter
     strata_origin = "1"  # ForestBuilder parameter
@@ -72,11 +73,20 @@ def remove_nones(source: dict) -> dict:
     return filtered
 
 
-def generate_program_configuration(cli_args: argparse.Namespace, control_source: dict={}) -> Mela2Configuration:
+def generate_program_configuration(cli_args: argparse.Namespace, control_source: dict={}) -> MetsiConfiguration:
     """Generate a Mela2Configuration, overriding values with control file source, then with CLI arguments"""
     cli_source = remove_nones(cli_args.__dict__)
+
+    # DEPRECATED: Backwards compatiblity until next version
+    if control_source.get('strategy') is not None:
+        control_source['formation_strategy'] = control_source.get('strategy')
+        control_source.__delitem__('strategy')
+    if cli_source.get('strategy') is not None:
+        cli_source['formation_strategy'] = cli_source.get('strategy')
+        cli_source.__delitem__('strategy')
+
     merged = {**control_source, **cli_source}
-    result = Mela2Configuration(**merged)
+    result = MetsiConfiguration(**merged)
     return result
 
 
@@ -104,7 +114,13 @@ def parse_cli_arguments(args: list[str]):
                         type=str)
     parser.add_argument('-s', '--strategy',
                         type=str,
-                        help='Simulation event tree formation strategy: \'full\' (default), \'partial\', \'skip\'')
+                        help='Simulation event tree formation strategy: \'full\', \'partial\' (default). DEPRECATION WARNING: migrate to using --formation-strategy')
+    parser.add_argument('-f', '--formation-strategy',
+                        type=str,
+                        help='Simulation event tree formation strategy: \'full\', \'partial\' (default)')
+    parser.add_argument('-e', '--evaluation-strategy',
+                        type=str,
+                        help='Simulation event tree evaluation strategy: \'depth\' (default), \'chains\'')
     parser.add_argument('--state-format',
                         choices=['fdm', 'vmi12', 'vmi13', 'forest_centre'],
                         type=str,
