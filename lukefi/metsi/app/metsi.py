@@ -90,6 +90,7 @@ def main() -> int:
     if len(dirs) == 0 and len(files) == 0:
         os.rmdir(app_config.target_directory)
 
+    print_logline("Exiting successfully")
     return 0
 
 
