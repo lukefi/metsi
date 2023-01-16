@@ -1,7 +1,8 @@
+import copy
 import time
 import unittest
 
-from lukefi.metsi.data.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.sim.core_types import OperationPayload, SimConfiguration, CollectedData
 from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, chain_evaluator, depth_first_evaluator
@@ -29,19 +30,19 @@ def create_sim_configs(workload_time):
             {'time_points': list(range(400)), 'generators': [{'sequence': ['nodecount']}]}
         ]}),
         SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
-            {'time_points': [0], 'generators': [{'sequence': ['nodecount']}]},
+            {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(6)), 'generators': [{'alternatives': ['nodecount', 'nodecount']}]}
         ]}),
         SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
-            {'time_points': [0], 'generators': [{'sequence': ['nodecount']}]},
+            {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(4)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount']}]}
         ]}),
         SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
-            {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount']}]},
+            {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(3)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]}
         ]}),
         SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
-            {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount']}]},
+            {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(3)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount', 'nodecount', 'nodecount']}]}
         ]})
     ]
@@ -59,7 +60,6 @@ evaluators = [
 ]
 
 
-@unittest.skip
 class PerformanceTest(unittest.TestCase):
     def test_constant_work_performance(self):
         """This is a manual test case created for observing the choice of run strategies related to the shape of the
@@ -76,7 +76,7 @@ class PerformanceTest(unittest.TestCase):
         ]
         global optime
         global counter
-        workload_time = 0.001
+        workload_time = 0.002
         sims = create_sim_configs(workload_time)
 
         # run once to eliminate cold start effect
@@ -102,3 +102,56 @@ class PerformanceTest(unittest.TestCase):
                     optime = 0
                     counter = 0
             print("\n")
+
+    def test_raw_copying_performance(self):
+        """This is a manual test case for comparing the copying performance of the OperationPayload."""
+        fixture = ForestStand()
+        fixture.reference_trees = [
+            ReferenceTree(),
+            ReferenceTree(),
+            ReferenceTree(),
+            ReferenceTree(),
+            ReferenceTree(),
+            ReferenceTree(),
+            ReferenceTree(),
+            ReferenceTree(),
+            ReferenceTree(),
+            ReferenceTree()
+        ]
+        fixture.tree_strata = [
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum(),
+            TreeStratum()
+        ]
+        payload = OperationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=0), operation_history=[])
+
+        steps = 50000
+        worktime = 0.00001
+        operation = lambda x: nodecount(x, worktime)
+
+        start = time.time_ns()
+        result = payload
+        for i in range(steps):
+            result = operation(result)
+        end = time.time_ns()
+        no_copy_time = round((end - start) / 1000000000, 3)
+
+        start = time.time_ns()
+        for i in range(steps):
+            result = copy.deepcopy(operation(result))
+        end = time.time_ns()
+        deepcopy_time = round((end - start) / 1000000000, 3)
+
+        print("")
+        print(f"No copy;  total {no_copy_time} seconds with {steps} steps")
+        print(f"Deepcopy; total {deepcopy_time} seconds with {steps} steps")
+
+
