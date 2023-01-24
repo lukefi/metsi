@@ -141,6 +141,7 @@ simulation_events:
     generators:
       - sequence:
         - grow_acta
+        #- grow_continuous
         #- grow_motti
         # requires fhk dependencies from fhk-requirements.txt
         #- grow_fhk

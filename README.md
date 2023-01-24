@@ -998,42 +998,29 @@ ensure that your function returns what is expected and behaves like it's intende
 
 ### Using R functions
 
-TODO: this section is no longer current and will need to be rewritten when a new implementation for R wrapping is made.
-report_volume no longer exists and the R codes are in metsi-forestry.
-
 To run operations using the R functions you need R available in the local environment.
 You must additionally install the Python `rpy2` package for the necessary API.
-For convenience, this can be installed via the `optional-requirements.txt`.
 
 ```
-pip install --user -r optional-requirements.txt
+pip install .[rpy2]
 ```
 
-The r_utils.py module contains functions and examples of how to bind into R functions.
+or directly as a single dependency without installing the project
+
+```
+pip install rpy2
+```
+
 The `r` directory houses related R script and data files.
 
-An example implementation `lmfor_volume` exists for forest stand volume calculation.
-Currently, this can be taken into use with the `report_volume` operation function in the control.yaml, following the
-example below
+A single implementation `grow_continuous` exists for forest growth, implementing the Pukkala growth models as provided
+by L. Mehtätalo.
 
-```
-operation_params:
-  report_volume:
-    lmfor_volume: true
-```
+The R scripts should provide functions as pure interfaces and not depend on global script level initialization or
+variables. Installing R dependencies should be handled in the imported R scripts, see growthfuncs.R for example.
 
-The project contains a `DESCRIPTION` file which must be used to declare R library dependencies for R scripts. This is
-not necessary for running the R scripts locally, but is required for dependency resolution in the GitHub Actions test
-runs pipeline. Local dependencies are handled by the script files as exemplified by the beginning of
-the `lmfor_volume.R`. It will install its dependencies on run if they are not found from the local environment R
-libraries.
-
-```
-library_requirements <- c("lmfor")
-if(!all(library_requirements %in% installed.packages()[, "Package"]))
-  install.packages(repos="https://cran.r-project.org", dependencies=TRUE, library_requirements)
-library(lmfor)
-```
+See `lukefi.metsi.domain.natural_processes.grow_continuous` for a template for how to introduce R scripts as operations,
+or plain functions.
 
 ### A Thought exercise on the partial tree strategy
 
