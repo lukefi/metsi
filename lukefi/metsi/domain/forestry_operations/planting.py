@@ -105,7 +105,8 @@ def plant(
             breast_height_age=0,
             biological_age=1,
             height=0.3,
-            sapling=True)
+            sapling=True,
+            tree_number=i)
         for i in range(rt_count)
     ]
 
