@@ -120,9 +120,21 @@ class CollectedData:
         self.current_time_point: int = current_time_point or initial_time_point or 0
         self.initial_time_point: int = initial_time_point or 0
 
-    def __deepcopy__(self, memo: dict) -> "CollectedData":
+    def _copy_op_results(self, value: Any) -> dict or list:
+        """
+        optimises the deepcopy of self by shallow copying dict and list type operation_results.
+        This relies on the assumption that an operation result is not modified after it's stored.
+        """
+        if isinstance(value, dict):
+            return OrderedDict(value.items())
+        elif isinstance(value, list):
+            return list(value)
+        else:
+            return deepcopy(value)
+
+    def __copy__(self) -> "CollectedData":
         return CollectedData(
-            operation_results=deepcopy(self.operation_results, memo),
+            operation_results={k: self._copy_op_results(v) for k,v in self.operation_results.items()},
             current_time_point=self.current_time_point,
             initial_time_point=self.initial_time_point
         )
@@ -205,7 +217,7 @@ class OperationPayload(SimpleNamespace, Generic[CUType]):
 
         return OperationPayload(
             computational_unit = copy_like,
-            collected_data = deepcopy(self.collected_data),
+            collected_data = copy(self.collected_data),
             operation_history = list(self.operation_history)
         )
 
