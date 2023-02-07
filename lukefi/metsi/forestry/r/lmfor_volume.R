@@ -3,8 +3,6 @@ if(!all(library_requirements %in% installed.packages()[, "Package"]))
   install.packages(repos="https://cran.r-project.org", dependencies=TRUE, library_requirements)
 library(lmfor)
 
-volmods <- readRDS("r/vol_mods_final_LM.rds")
-
 # test <- data.frame(
 #   height = c(10.3, 14.7),
 #   breast_height_diameter = c(25.3, 32.3),
@@ -30,7 +28,7 @@ computable_dataframe <- function(tree_data) {
   )
 }
 
-volumes_for_species <- function(prepared_data, species) {
+volumes_for_species <- function(prepared_data, species, volmods) {
   # Need to do explicit check for existence of specific species
   # predvff raises an Error with empty data.
   # Maybe handle with tryCatch instead?
@@ -42,7 +40,8 @@ volumes_for_species <- function(prepared_data, species) {
   }
 }
 
-compute_tree_volumes <- function(tree_data, model_type) {
+compute_tree_volumes <- function(tree_data, volmods_file) {
+  volmods <- readRDS(volmods_file)
   # we assume data is a dataframe with members h, dbh, temp_sum and species
   # where species is an array of enumerations: "pine", "spruce", "birch"
   # and h, dbh and temp_sum are float arrays
@@ -51,9 +50,9 @@ compute_tree_volumes <- function(tree_data, model_type) {
   prepared_data <- computable_dataframe(tree_data)
   volpred <- vector("numeric", length(tree_data$species))
 
-  volpred[prepared_data$species == "pine"] <- volumes_for_species(prepared_data, "pine")
-  volpred[prepared_data$species == "spruce"] <- volumes_for_species(prepared_data, "spruce")
-  volpred[prepared_data$species == "birch"] <- volumes_for_species(prepared_data, "birch")
+  volpred[prepared_data$species == "pine"] <- volumes_for_species(prepared_data, "pine", volmods)
+  volpred[prepared_data$species == "spruce"] <- volumes_for_species(prepared_data, "spruce", volmods)
+  volpred[prepared_data$species == "birch"] <- volumes_for_species(prepared_data, "birch", volmods)
   volpred
 }
 

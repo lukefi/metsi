@@ -40,6 +40,7 @@ lmfor_species_map = {
 def lmfor_volume(stand: ForestStand) -> float:
     
     r = get_r_with_sourced_scripts()
+    volmods_path = Path(__file__).parent.resolve() / "r" / "vol_mods_final_LM.rds"
 
     source_data = {
         'height': robjects.FloatVector([tree.height for tree in stand.reference_trees]),
@@ -49,7 +50,7 @@ def lmfor_volume(stand: ForestStand) -> float:
         'model_type': robjects.StrVector(['scanned' for _ in range(len(stand.reference_trees))])
     }
     df = robjects.DataFrame(source_data)
-    volumes = list(r['compute_tree_volumes'](df))
+    volumes = list(r['compute_tree_volumes'](df, str(volmods_path)))
     total_volume = sum(volumes)
     return total_volume
 
