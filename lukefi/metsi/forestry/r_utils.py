@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from typing import Any, Dict
 
 from lukefi.metsi.data.enums.internal import TreeSpecies
@@ -9,27 +9,15 @@ import rpy2.robjects as robjects
 initialised = False
 
 
-def _set_working_dir_here() -> None:
-    """Sets the working directory to forestryfunctions. Currently relies on the current file being directly under forestryfunctions."""
-    dirname = os.path.dirname(os.path.realpath(__file__))
-    os.chdir(dirname)
-
-
 def get_r_with_sourced_scripts() -> robjects.R:
     """Returns the R instance that has sourced all required R-scripts. During sourcing, the working directory is set to .../forestryfunctions, after which it's set back to the initial directory."""
     global initialised
     r = robjects.r
 
     if not initialised:
-        original_wd = os.getcwd()
-        
-        #change wd temporarily
-        _set_working_dir_here()
-        r.source('./r/lmfor_volume.R')
+        dir = Path(__file__).parent.resolve() / "r" / "lmfor_volume.R"
+        r.source(str(dir))
         initialised = True
-
-        #set wd back to the initial
-        os.chdir(original_wd)
 
     return r
 
