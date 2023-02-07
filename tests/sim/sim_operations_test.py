@@ -4,7 +4,7 @@ import tests.test_utils
 from lukefi.metsi.sim.operations import prepared_operation, _get_operation_last_run
 
 
-class OperationsTest(unittest.TestCase):
+class SimOperationsTest(unittest.TestCase):
     def test_prepared_operation(self):
         assertions = [
             ([10, {}], 10),
