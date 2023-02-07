@@ -41,3 +41,7 @@ metsi = "lukefi.metsi.app.metsi:main"
 [tool.setuptools.package-dir]
 lukefi = "lukefi"
 
+[tool.setuptools.package-data]
+"lukefi.metsi.forestry.lua" = ["*"]
+"lukefi.metsi.forestry.r" = ["*"]
+
