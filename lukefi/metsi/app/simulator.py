@@ -1,6 +1,10 @@
 import os
 import queue
 import multiprocessing
+
+from lukefi.metsi.data.layered_model import LayeredObject
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
+
 import lukefi.metsi.domain.sim_ops
 import lukefi.metsi.sim.generators
 from lukefi.metsi.app.app_io import MetsiConfiguration
@@ -22,8 +26,11 @@ def run_stands(
 
     retval = {}
     for stand in stands:
+        overlaid_stand = LayeredObject[ForestStand](stand)
+        overlaid_stand.reference_trees = [LayeredObject[ReferenceTree](tree) for tree in overlaid_stand.reference_trees]
+        overlaid_stand.tree_strata = [LayeredObject[TreeStratum](stratum) for stratum in overlaid_stand.tree_strata]
         payload = ForestOpPayload(
-            computational_unit=stand,
+            computational_unit=overlaid_stand,
             collected_data=CollectedData(initial_time_point=config.time_points[0]),
             operation_history=[],
         )

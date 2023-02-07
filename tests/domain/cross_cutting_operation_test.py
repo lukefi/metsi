@@ -308,7 +308,7 @@ class CrossCuttableTreesTest(unittest.TestCase):
                     ]
                 }
             ),
-            operation_history={}
+            operation_history=[]
         )
 
         operation_parameters={"timber_price_table": "tests/resources/timber_price_table.csv"}
