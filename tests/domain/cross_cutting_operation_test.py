@@ -9,7 +9,7 @@ from lukefi.metsi.sim.operations import processor, do_nothing
 from lukefi.metsi.sim.runners import run_chains_iteratively
 from tests.test_utils import DEFAULT_TIMBER_PRICE_TABLE, TIMBER_PRICE_TABLE_THREE_GRADES
 
-class CrossCuttingTest(unittest.TestCase):
+class CrossCuttingOperationTest(unittest.TestCase):
 
     def test_cross_cut_thinning_output_cross_cuts_only_uncut_trees(self):
         """

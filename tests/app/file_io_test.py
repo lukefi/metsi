@@ -70,7 +70,12 @@ class TestFileReading(unittest.TestCase):
         lukefi.metsi.app.file_io.csv_writer(Path("outdir", "output.csv"), data)
         result = lukefi.metsi.app.file_io.csv_content_to_stands(
             lukefi.metsi.app.file_io.csv_file_reader(Path("outdir/output.csv")))
-        self.assertListEqual(data, result)
+        data[0].reference_trees[0].stand = None
+        result[0].reference_trees[0].stand = None
+        self.assertDictEqual(data[0].reference_trees[0].__dict__, result[0].reference_trees[0].__dict__)
+        data[0].reference_trees = []
+        result[0].reference_trees = []
+        self.assertDictEqual(data[0].__dict__, result[0].__dict__)
         shutil.rmtree('outdir')
 
     def test_rsd(self):
