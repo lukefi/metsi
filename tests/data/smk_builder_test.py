@@ -114,9 +114,8 @@ class TestForestCentreBuilder(unittest.TestCase):
         # TODO implement parse logic for cutting year
         self.assertEqual(None, self.smk_stands[0].cutting_year)
         self.assertEqual(None, self.smk_stands[1].cutting_year)
-        # TODO implement parse logic for forest centre id
-        self.assertEqual(None, self.smk_stands[0].forestry_centre_id)
-        self.assertEqual(None, self.smk_stands[1].forestry_centre_id)
+        self.assertEqual(-1, self.smk_stands[0].forestry_centre_id)
+        self.assertEqual(-1, self.smk_stands[1].forestry_centre_id)
         # st:CuttingRestriction '0' -> 1
         self.assertEqual(1, self.smk_stands[0].forest_management_category)
         # st:CuttingRestriction '0' -> 1
@@ -124,9 +123,8 @@ class TestForestCentreBuilder(unittest.TestCase):
         # TODO implement parse logic for last cutting method
         self.assertEqual(None, self.smk_stands[0].method_of_last_cutting)
         self.assertEqual(None, self.smk_stands[1].method_of_last_cutting)
-        # TODO implement parse logic for municipality id
-        self.assertEqual(None, self.smk_stands[0].municipality_id)
-        self.assertEqual(None, self.smk_stands[1].municipality_id)
+        self.assertEqual(-1, self.smk_stands[0].municipality_id)
+        self.assertEqual(-1, self.smk_stands[1].municipality_id)
 
 
     def test_smk_builder_strata(self):

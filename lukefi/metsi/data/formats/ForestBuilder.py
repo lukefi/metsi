@@ -478,9 +478,9 @@ class ForestCentreBuilder(XMLBuilder):
         stand = self.set_stand_operations(stand, operations) # RSD records 19, 20, 21, 23, 25, 26, 27, 28 and 31
         stand.natural_regeneration_feasibility = False # RSD record 22
         stand.development_class = 0 # RSD record 24
-        stand.forestry_centre_id = None # RSD record 29
-        stand.forest_management_category = smk_util.parse_forest_management_category(stand_basic_data.CuttingRestriction) # 30
-        stand.municipality_id = None # RSD record 32
+        stand.forestry_centre_id = -1 # RSD record 29
+        stand.forest_management_category = smk_util.parse_forest_management_category(stand_basic_data.CuttingRestriction) or 1  # 30
+        stand.municipality_id = None or -1 # RSD record 32
         # RSD record 33 and 34 unused
         return stand
 
