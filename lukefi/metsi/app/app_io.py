@@ -23,7 +23,6 @@ class MetsiConfiguration(SimpleNamespace):
     derived_data_output_container = None
     formation_strategy = "partial"
     evaluation_strategy = "depth"
-    multiprocessing = False
     reference_trees = False  # ForestBuilder parameter
     strata_origin = "1"  # ForestBuilder parameter
 
@@ -150,6 +149,5 @@ def parse_cli_arguments(args: list[str]):
                         help='Stratum origin type selector for Forest Centre data. Default \'1\'.')
     parser.add_argument('-m', '--multiprocessing', 
                         action=argparse.BooleanOptionalAction,
-                        help="Enable parallel simulation of computational units over the amount of CPU cores available.")
-
+                        help="Enable parallel simulation of computational units over the amount of CPU cores available. DEPRECATED: ignored")
     return parser.parse_args(args)

@@ -104,7 +104,6 @@ class CrossCuttableTree:
     source: str
     operation: str
     time_point: int
-    cross_cut_done: bool = False
 
 
 @dataclass

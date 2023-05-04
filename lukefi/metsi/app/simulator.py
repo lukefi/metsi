@@ -1,6 +1,10 @@
 import os
 import queue
 import multiprocessing
+
+from lukefi.metsi.data.layered_model import LayeredObject
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
+
 import lukefi.metsi.domain.sim_ops
 import lukefi.metsi.sim.generators
 from lukefi.metsi.app.app_io import MetsiConfiguration
@@ -12,66 +16,29 @@ from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_st
 from lukefi.metsi.sim.core_types import CollectedData, Runner, SimConfiguration, Evaluator
 
 
-def runner_multiprocessing_wrapper(payload: ForestOpPayload, config: SimConfiguration, runner: Runner, evaluator: Evaluator, queue: queue.Queue) -> None:
-    """Wrapper function for running a simulation in a multiprocessing context. The result is placed in the given queue"""
-    result = runner(payload, config, evaluator)
-    queue.put((payload.computational_unit.identifier, result))
-
-
 def run_stands(
         stands: StandList, config: SimConfiguration,
         runner: Runner[ForestOpPayload],
-        evaluator: Evaluator[ForestOpPayload],
-        using_multiprocessing: bool
+        evaluator: Evaluator[ForestOpPayload]
 ) -> dict[str, list[ForestOpPayload]]:
     """Run the simulation for all given stands, from the given declaration, using the given runner. Return the
     results organized into a dict keyed with stand identifiers."""
 
     retval = {}
-    args = [
-     (
-        ForestOpPayload(
-            computational_unit=stand,
+    for stand in stands:
+        overlaid_stand = LayeredObject[ForestStand](stand)
+        overlaid_stand.reference_trees = [LayeredObject[ReferenceTree](tree) for tree in overlaid_stand.reference_trees]
+        overlaid_stand.tree_strata = [LayeredObject[TreeStratum](stratum) for stratum in overlaid_stand.tree_strata]
+        payload = ForestOpPayload(
+            computational_unit=overlaid_stand,
             collected_data=CollectedData(initial_time_point=config.time_points[0]),
             operation_history=[],
-        ),
-        config,
-        evaluator
-     )
-        for stand in stands
-    ]
-
-    # Each stand can be simulated independently from each other, therefore they can be run in parallel in separate processes.
-    # pool.starmap() will allocate simulation work to available processes.
-    if using_multiprocessing:
-        #manager is used to create a shared Queue into which each process can put their result.
-        manager = multiprocessing.Manager()
-        queue = manager.Queue()
-
-        mp_args = []
-        for arg in args:
-            mp_args.append(arg + (runner, evaluator, queue,))
-
-        processes = os.cpu_count()
-        with multiprocessing.Pool(processes=processes) as pool:
-            pool.starmap(runner_multiprocessing_wrapper, mp_args)
-
-        #collect results from the queue into which the simulation results are put into.
-        while not queue.empty():
-            result = queue.get()
-            id = result[0]
-            schedule_payloads = result[1]
-            print_logline(f"Alternatives for stand {id}: {len(schedule_payloads)}")
-            retval[id] = schedule_payloads
-        return retval
-
-    else:
-        for arg in args:
-            schedule_payloads = runner(*arg)
-            id = arg[0].computational_unit.identifier
-            print_logline(f"Alternatives for stand {id}: {len(schedule_payloads)}")
-            retval[id] = schedule_payloads
-        return retval
+        )
+        schedule_payloads = runner(payload, config, evaluator)
+        identifier = stand.identifier
+        print_logline(f"Alternatives for stand {identifier}: {len(schedule_payloads)}")
+        retval[identifier] = schedule_payloads
+    return retval
 
 
 def resolve_formation_strategy(source: str) -> Runner[ForestOpPayload]:
@@ -106,5 +73,5 @@ def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList
         **control)
     formation_strategy = resolve_formation_strategy(config.formation_strategy)
     evaluation_strategy = resolve_evaluation_strategy(config.evaluation_strategy)
-    result = run_stands(stands, simconfig, formation_strategy, evaluation_strategy, config.multiprocessing)
+    result = run_stands(stands, simconfig, formation_strategy, evaluation_strategy)
     return result

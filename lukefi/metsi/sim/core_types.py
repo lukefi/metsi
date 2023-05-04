@@ -1,8 +1,7 @@
-from collections import OrderedDict, defaultdict
-from copy import deepcopy
+from collections import OrderedDict
+from copy import deepcopy, copy
 from types import SimpleNamespace
 from typing import Callable, Optional, Any, TypeVar, Generic
-
 
 def identity(x):
     return x
@@ -93,7 +92,7 @@ class EventTree:
             results = []
             for branch in self.branches:
                 try:
-                    results.extend(branch.evaluate(deepcopy(current)))
+                    results.extend(branch.evaluate(copy(current)))
                 except UserWarning:
                     ...
             if len(results) == 0:
@@ -121,9 +120,21 @@ class CollectedData:
         self.current_time_point: int = current_time_point or initial_time_point or 0
         self.initial_time_point: int = initial_time_point or 0
 
-    def __deepcopy__(self, memo: dict) -> "CollectedData":
+    def _copy_op_results(self, value: Any) -> dict or list:
+        """
+        optimises the deepcopy of self by shallow copying dict and list type operation_results.
+        This relies on the assumption that an operation result is not modified after it's stored.
+        """
+        if isinstance(value, dict):
+            return OrderedDict(value.items())
+        elif isinstance(value, list):
+            return list(value)
+        else:
+            return deepcopy(value)
+
+    def __copy__(self) -> "CollectedData":
         return CollectedData(
-            operation_results=deepcopy(self.operation_results, memo),
+            operation_results={k: self._copy_op_results(v) for k,v in self.operation_results.items()},
             current_time_point=self.current_time_point,
             initial_time_point=self.initial_time_point
         )
@@ -196,10 +207,17 @@ class OperationPayload(SimpleNamespace, Generic[CUType]):
     collected_data: CollectedData
     operation_history: list[tuple[int, str, dict[str, dict]]]
 
-    def __deepcopy__(self, memo: dict) -> "OperationPayload":
+    def __copy__(self) -> "OperationPayload":
+        try:
+            copy_like = self.computational_unit.new_layer()
+            copy_like.reference_trees = [tree.new_layer() for tree in copy_like.reference_trees]
+            copy_like.tree_strata = [stratum.new_layer() for stratum in copy_like.tree_strata]
+        except:
+            copy_like = deepcopy(self.computational_unit)
+
         return OperationPayload(
-            computational_unit = deepcopy(self.computational_unit, memo),
-            collected_data = deepcopy(self.collected_data, memo),
+            computational_unit = copy_like,
+            collected_data = copy(self.collected_data),
             operation_history = list(self.operation_history)
         )
 

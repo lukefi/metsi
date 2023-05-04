@@ -1,6 +1,6 @@
 from functools import cache
 from lukefi.metsi.sim.core_types import CollectedData, OpTuple
-from lukefi.metsi.data.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, create_layered_tree
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.domain.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
 from lukefi.metsi.domain.utils.conversion import site_type_to_key
@@ -97,7 +97,7 @@ def plant(
     }
 
     stand.reference_trees = [
-        ReferenceTree(
+        create_layered_tree(
             identifier=stand.identifier + f"-{i}-tree",
             stems_per_ha=rt_stems/rt_count,
             species=regen_species,

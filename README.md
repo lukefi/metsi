@@ -116,14 +116,7 @@ This code project is divided into following python packages in the lukefi.metsi 
 | l.m.domain | Operations for the forest development simulation.       |
 | l.m.tests  | Unit test suites for above packages.                    |
 
-The `domain` package depends on external libraries maintained by this project. These are
-
-| package                                  | description                                                               |
-|------------------------------------------|---------------------------------------------------------------------------|
-| https://github.com/lukefi/metsi-data     | Main data classes and related utilities for forestry domain operations    |
-| https://github.com/lukefi/metsi-forestry | Implementations of forest data state manipulation and related computation |
-
-Other dependencies for this project are listed in `pyproject.toml`.
+Dependency libraries for this project are listed in `pyproject.toml`.
 
 ## Application
 

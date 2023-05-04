@@ -9,53 +9,7 @@ from lukefi.metsi.sim.operations import processor, do_nothing
 from lukefi.metsi.sim.runners import run_chains_iteratively
 from tests.test_utils import DEFAULT_TIMBER_PRICE_TABLE, TIMBER_PRICE_TABLE_THREE_GRADES
 
-class CrossCuttingTest(unittest.TestCase):
-
-    def test_cross_cut_thinning_output_cross_cuts_only_uncut_trees(self):
-        """
-        First CrossCuttableTrees object has already been cross cut, but the second one has not been cross cut yet.
-        The operation should only cross cut the second one.
-        """
-        payload = (
-            ForestStand(area=2.0),
-            CollectedData(
-                operation_results={
-                    "felled_trees": [
-                        CrossCuttableTree(
-                                stems_per_ha= 0.006261167484111818,
-                                species = TreeSpecies.UNKNOWN_CONIFEROUS,
-                                breast_height_diameter = 15.57254199723247,
-                                height = 18.293846547993535,
-                                source = "harvested",
-                                operation = "thinning_from_below",
-                                time_point=10,
-                                cross_cut_done=True
-                        ),
-                        CrossCuttableTree(
-                                stems_per_ha= 0.006261167484111818,
-                                species = TreeSpecies.UNKNOWN_CONIFEROUS,
-                                breast_height_diameter = 15.57254199723247,
-                                height = 18.293846547993535,
-                                source = "harvested",
-                                operation = "thinning_from_below",
-                                time_point=20,
-                                cross_cut_done=False
-                        )
-                    ]
-                }
-            )
-        )
-
-        operation_parameters = {'timber_price_table': "tests/resources/timber_price_table.csv"}
-
-        _, collected_data = cross_cut_felled_trees(payload, **operation_parameters)
-        res = collected_data.get_list_result("cross_cutting")
-        self.assertEqual(res[0].time_point, 20)
-        self.assertEqual(len(res), 2)
-        self.assertEqual(res[0].operation, "thinning_from_below")
-        self.assertEqual(collected_data.get_list_result('felled_trees')[1].cross_cut_done, True)
-
-
+class CrossCuttingOperationTest(unittest.TestCase):
     def test_cross_cut_thinning_output_called_twice(self):
         """
         This test simulates the case when first some thinning results are produced, and cross cutting is done on them.
@@ -76,8 +30,7 @@ class CrossCuttingTest(unittest.TestCase):
                                     height = 18.293846547993535,
                                     source="harvested",
                                     operation="thinning_from_below",
-                                    time_point=20,
-                                    cross_cut_done=False
+                                    time_point=20
                     )]
                 },
             ),
@@ -96,8 +49,7 @@ class CrossCuttingTest(unittest.TestCase):
                 height = 18.293846547993535,
                 source="harvested",
                 operation="thinning_from_below",
-                time_point=30,
-                cross_cut_done=False
+                time_point=30
             ),
         )
 
@@ -279,72 +231,6 @@ class CrossCuttableTreesTest(unittest.TestCase):
         self.assertEqual(res[0].height, 28.43)
         self.assertAlmostEqual(res[0].stems_per_ha, 22.3, places=6)
 
-
-    def test_modifying_cross_cut_done_attribute_does_not_modify_other_branch_results(self):
-        """
-        cross_cut_felled_trees modifies the operation_results' `CrossCuttableTrees.cross_cut_done` attribute.
-        This test ensures that the modification does not affect other branches' CrossCuttableTrees.
-        In other words, this ensures that deepcopying operation_results copies the `CrossCuttableTree`s values, not the references.
-        """
-
-        payload = OperationPayload(
-            computational_unit=ForestStand(
-                area=1
-            ),
-            collected_data=CollectedData(
-                {
-                    "felled_trees": [
-                        CrossCuttableTree(
-                            stems_per_ha= 0.008092431491823593,
-                            species = TreeSpecies.SPRUCE,
-                            breast_height_diameter = 17.721245087039236,
-                            height = 16.353742669109522,
-                            source="harvested",
-                            operation="thin1",
-                            time_point=0,
-                            cross_cut_done=False
-
-                        )
-                    ]
-                }
-            ),
-            operation_history={}
-        )
-
-        operation_parameters={"timber_price_table": "tests/resources/timber_price_table.csv"}
-
-        cross_cut_processor = lambda state: processor(
-            payload=state,
-            operation=lambda state2: cross_cut_felled_trees(state2, **operation_parameters),
-            operation_tag ="cross_cut_felled_trees",
-            time_point=1,
-            operation_run_constraints=None,
-            operation_parameters=operation_parameters
-        )
-        do_nothing_processor = lambda state: processor(
-            payload=state,
-            operation=lambda state2: do_nothing(state2, **operation_parameters),
-            operation_tag ="do_nothing",
-            time_point=1,
-            operation_run_constraints=None,
-            operation_parameters=operation_parameters
-        )
-        # the two processors are alternatives, meaning the first branch will run cross_cut_felled_trees and the second branch will run do_nothing.
-        generator = lambda x: alternatives(x, *[cross_cut_processor, do_nothing_processor])
-
-        generators = [generator]
-        root = EventTree()
-        previous = [root]
-        for generator in generators:
-            current = generator(previous)
-            previous = current
-
-        chains = root.operation_chains()
-
-        results = run_chains_iteratively(payload, chains)
-        # running the two branches (chains) should result in one branch having the felled trees cross_cut==True, but not in the other one.
-        self.assertTrue(results[0].collected_data.operation_results["felled_trees"][0].cross_cut_done)
-        self.assertFalse(results[1].collected_data.operation_results["felled_trees"][0].cross_cut_done)
 
 class CrossCutResultTest(unittest.TestCase):
     fixture = CrossCutResult(

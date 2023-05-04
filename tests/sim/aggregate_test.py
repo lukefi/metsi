@@ -40,20 +40,3 @@ class AggregateUtilsTest(unittest.TestCase):
         result = deepcopy(self.collected_data)
         result.store('oper3', new_collected_data)
         self.assertEqual(fixture.operation_results, result.operation_results)
-
-    def test_modify_deepcopied_list_item_does_not_modify_original(self):
-        @dataclass
-        class Dummy:
-            value: str
-
-        original = CollectedData(
-            operation_results = {
-                'oper1': [Dummy(1), Dummy(2)],
-            },
-            current_time_point = 1
-        )
-
-        #modifying an attribute of copy does not modify original
-        copied = deepcopy(original)
-        copied.operation_results["oper1"][0].value = 4
-        self.assertEqual(original.operation_results["oper1"][0].value, 1)
