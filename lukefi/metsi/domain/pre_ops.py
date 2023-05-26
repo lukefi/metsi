@@ -3,6 +3,8 @@ from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
 from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 from lukefi.metsi.domain.utils.filter import applyfilter
+from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
+    debug_output_row_from_comparison_set, debug_output_header_row
 
 
 def preproc_filter(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
@@ -56,19 +58,34 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
 
 def generate_reference_trees(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Operation function that generates (N * stratum) reference trees for each stand """
+    debug = operation_params.get('debug', False)
+    debug_output_rows = []
+    debug_filename = operation_params.get('debug_filename', 'debug_weibull_reference_trees.csv')
+
     n_trees = pre_util.get_or_default(operation_params['n_trees'])
     for stand in stands:
-        generated_trees = []
+        stand_trees = []
         for stratum in stand.tree_strata:
             if pre_util.stratum_needs_diameter(stratum):
                 stratum = pre_util.supplement_mean_diameter(stratum)
-            trees = tree_generation.reference_trees_from_tree_stratum(stratum, n_trees)
-            generated_tree_count = len(generated_trees)
-            for i, tree in enumerate(trees):
-                tree.identifier = "{}-{}-tree".format(stand.identifier, generated_tree_count + i + 1)
-                generated_trees.append(tree)
-        generated_trees = pre_util.scale_stems_per_ha(generated_trees, stand.stems_per_ha_scaling_factors)
-        stand.reference_trees = generated_trees
+            stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, n_trees)
+
+            stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
+            stand_tree_count = len(stand_trees)
+            for i, tree in enumerate(stratum_trees):
+                tree.identifier = "{}-{}-tree".format(stand.identifier, stand_tree_count + i + 1)
+                stand_trees.append(tree)
+            validation_set = create_stratum_tree_comparison_set(stratum, stratum_trees)
+
+            if debug:
+                debug_output_rows.append(debug_output_row_from_comparison_set(stratum, validation_set))
+        stand.reference_trees = stand_trees
+    if debug:
+        import csv
+        with open(debug_filename, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=';')
+            writer.writerow(debug_output_header_row())
+            writer.writerows(debug_output_rows)
     return stands
 
 
