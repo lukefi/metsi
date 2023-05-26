@@ -31,8 +31,8 @@ class PreprocessingTest(unittest.TestCase):
         """ In this suite there are two stratum fixture cases.
         A stratum that has all necessary attributes inflated and one that needs mean diameter to be supplemented
         """
-        normal_case = TreeStratum(mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None)
-        supplement_diameter_case = TreeStratum(mean_diameter=None, mean_height=25.0, basal_area=250.0, stems_per_ha=300.0)
+        normal_case = TreeStratum(mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None, biological_age=10.0)
+        supplement_diameter_case = TreeStratum(mean_diameter=None, mean_height=25.0, basal_area=250.0, stems_per_ha=300.0, biological_age=15.0)
         fixtures = [normal_case, supplement_diameter_case]
         stand = ForestStand()
         stand.identifier = 'xxx'
