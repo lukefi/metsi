@@ -92,60 +92,6 @@ class TestConversion(test_util.ConverterTestSuite):
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_pruning_year)
 
-    def test_determine_land_category(self):
-        assertions = [
-            (['0'], 0),
-            (['1'], 1),
-            (['2'], 2),
-            (['3'], 3),
-            (['4'], 4),
-            (['kissa123'], None),
-            (['A'], 9),
-            (['a'], 9),
-            (['B'], 9),
-            (['b'], 9),
-            (['.'], None)
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.determine_land_category)
-
-    def test_determine_site_type(self):
-        assertions = [
-            (['T'], 8),
-            (['t'], 8),
-            (['A'], 8),
-            (['a'], 8),
-            (['1'], 1),
-            (['2323'], 2323),
-            ([' '], None),
-            (['.'], None),
-            (['kissa123'], None)
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.determine_site_type)
-
-    def test_determine_soil_type(self):
-        assertions = [
-            (['1', 1], 1),
-            (['2', 1], 2),
-            (['3', 1], 3),
-            (['4', 1], 4),
-            (['4', 10], 5),
-            (['1.0', 3], None),
-            ([' ', 2], None)
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.determine_soil_type)
-
-    def test_determine_drainage_class(self):
-        assertions = [
-            (['0', 1.0], 0.0),
-            (['0', 232333.0], 2.0),
-            (['1', 0.0], 1.0),
-            (['2', 0.0], 3.0),
-            (['3', 0.0], 4.0),
-            (['4', 0.0], 5.0),
-            (['kissa123', 666.0], 0.0),
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.determine_drainage_class)
-
     def test_drainage_year(self):
         assertions = [
             (['10', 2020], 2010),

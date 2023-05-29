@@ -76,51 +76,6 @@ def determine_pruning_year(other_method: str, year_adjustment_class: str, year: 
     return None
 
 
-def determine_land_category(land_category: str) -> int or None:
-    if land_category in ('A', 'B', 'a', 'b'):
-        return 9
-    else:
-        try:
-            return int(land_category)
-        except:
-            return None
-
-
-def determine_site_type(kasvupaikkatunnus: str) -> Optional[int]:
-    if kasvupaikkatunnus in ('T', 'A', 't', 'a'):
-        return 8
-    else:
-        return parse_int(kasvupaikkatunnus)
-
-
-def determine_soil_type(main_type: str, site_type: int) -> Optional[int]:
-    _main_type = parse_int(main_type)
-    if _main_type == 4 and site_type >= 4:
-        return 5
-    elif _main_type in (1, 2, 3, 4):
-        return _main_type
-    else:
-        return None
-
-
-def determine_drainage_class(ojitus_tilanne: str, soil_type: float) -> float:
-    if ojitus_tilanne == '0':
-        if soil_type == 1:
-            return 0.0
-        else:
-            return 2.0
-    elif ojitus_tilanne == '1':
-        return 1.0
-    elif ojitus_tilanne == '2':
-        return 3.0
-    elif ojitus_tilanne == '3':
-        return 4.0
-    elif ojitus_tilanne == '4':
-        return 5.0
-    else:
-        return 0.0
-
-
 def determine_drainage_year(sourcevalue: str, year: int) -> Optional[int]:
     try:
         value = int(sourcevalue)
