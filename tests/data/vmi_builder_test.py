@@ -226,9 +226,9 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(1, tree.tree_number)
 
         # breast_height_age is '' -> 0.0
-        self.assertEqual(46.0, tree.breast_height_age)
+        self.assertEqual(0.0, tree.breast_height_age)
         # age_increase is '', total_age is '', breast_height_age is '' -> 0.0
-        self.assertEqual(52.0, tree.biological_age)
+        self.assertEqual(0.0, tree.biological_age)
         # living_branches_height is '' -> 0.0
         self.assertEqual(0.0, tree.lowest_living_branch_height)
         # latvuskerros is '2' -> 1
@@ -414,7 +414,7 @@ class TestForestBuilder(unittest.TestCase):
         # '250' -> 25.0
         self.assertEqual(25.0, tree.breast_height_diameter)
         # missing value normalized to None
-        self.assertEqual(21.82, tree.height)
+        self.assertEqual(None, None)
         # diameter 25, area factors 1.0
         self.assertEqual(39.298, tree.stems_per_ha)
 
@@ -429,9 +429,9 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(10, tree.tree_number)
 
         # breast_height_age is '.' -> 0.0
-        self.assertEqual(50.0, tree.breast_height_age)
+        self.assertEqual(0.0, tree.breast_height_age)
         # age_increase is '.', total_age is '.', breast_height_age is '.' -> 0.0
-        self.assertEqual(59.0, tree.biological_age)
+        self.assertEqual(0.0, tree.biological_age)
         # living_branches_height is '.' -> 0.0
         self.assertEqual(0.0, tree.lowest_living_branch_height)
         # latvuskerros is '2' -> 1

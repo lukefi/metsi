@@ -8,7 +8,6 @@ from lukefi.metsi.data.formats import smk_util, util, vmi_util
 from abc import ABC, abstractmethod
 from lukefi.metsi.data.formats.vmi_const import VMI12StandIndices, VMI12TreeIndices, VMI12StratumIndices, \
     VMI13StandIndices, VMI13TreeIndices, VMI13StratumIndices
-from lukefi.metsi.data.formats.vmi_supplementing import naslund_height, supplement_age_for_reference_trees
 
 class ForestBuilder(ABC):
     """Abstract base class of forest builders"""
@@ -215,8 +214,6 @@ class VMI12Builder(VMIBuilder):
                 tree.stems_per_ha = vmi_util.determine_stems_per_ha(
                     tree.breast_height_diameter,
                     True)
-                if (tree.height or 0) <= 0:
-                    tree.height = naslund_height(tree.breast_height_diameter, tree.species)
 
             for stratum in stand.tree_strata:
                 if stratum.sapling_stratum:
@@ -225,8 +222,6 @@ class VMI12Builder(VMIBuilder):
                     tree_number = len(stand.reference_trees) + 1
                     sapling.identifier = vmi_util.convert_stratum_id_to_tree_id(stratum.identifier, tree_number)
                     stand.reference_trees.append(sapling)
-
-            supplement_age_for_reference_trees(stand.reference_trees, stand.tree_strata)
 
         return stands
 
@@ -324,8 +319,6 @@ class VMI13Builder(VMIBuilder):
                 tree.stems_per_ha = vmi_util.determine_stems_per_ha(
                     tree.breast_height_diameter,
                     False)
-                if (tree.height or 0) <= 0:
-                    tree.height = naslund_height(tree.breast_height_diameter, tree.species)
 
             for stratum in stand.tree_strata:
                 if stratum.sapling_stratum:
@@ -334,8 +327,6 @@ class VMI13Builder(VMIBuilder):
                     tree_number = len(stand.reference_trees) + 1
                     sapling.identifier = vmi_util.convert_stratum_id_to_tree_id(stratum.identifier, tree_number)
                     stand.reference_trees.append(sapling)
-
-            supplement_age_for_reference_trees(stand.reference_trees, stand.tree_strata)
 
         return stands
 
