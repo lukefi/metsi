@@ -199,10 +199,10 @@ class TestAgeSupplementing(unittest.TestCase):
 
     def test_supplement_age_for_reference_trees(self):
         tree_values = [
-            Input('002-002-02-1-01-tree', 1, 10.0, 0.0, 2, 1.3), # sapling, not to be included in results
-            Input('002-002-02-2-02-tree', 1, 10.0, 0.0, 5, 3.5),
-            Input('002-002-02-3-03-tree', 2, 10.0, 0.0, 12, 8.0),
-            Input('002-002-02-4-04-tree', 2, 10.0, 0.0, 15, 12.0),
+            Input('002-002-02-1-01-tree', 1, 10.0, None, 2, 1.3), # sapling, not to be included in results
+            Input('002-002-02-2-02-tree', 1, 10.0, None, 5, 3.5),
+            Input('002-002-02-3-03-tree', 2, 10.0, None, 12, 8.0),
+            Input('002-002-02-4-04-tree', 2, 10.0, None, 15, 12.0),
             # do not need age supplementing
             Input('002-002-02-5-05-tree', 1, 10.0, 5, 8, 9),
             Input('002-002-02-6-06-tree', 2, 10.0, 5, 8, 9)

@@ -225,10 +225,10 @@ class TestForestBuilder(unittest.TestCase):
         #tree id source value 1
         self.assertEqual(1, tree.tree_number)
 
-        # breast_height_age is '' -> 0.0
-        self.assertEqual(0.0, tree.breast_height_age)
+        # breast_height_age is '' -> None
+        self.assertEqual(None, tree.breast_height_age)
         # age_increase is '', total_age is '', breast_height_age is '' -> 0.0
-        self.assertEqual(0.0, tree.biological_age)
+        self.assertEqual(None, tree.biological_age)
         # living_branches_height is '' -> 0.0
         self.assertEqual(0.0, tree.lowest_living_branch_height)
         # latvuskerros is '2' -> 1
@@ -428,10 +428,10 @@ class TestForestBuilder(unittest.TestCase):
         #tree id source value 10
         self.assertEqual(10, tree.tree_number)
 
-        # breast_height_age is '.' -> 0.0
-        self.assertEqual(0.0, tree.breast_height_age)
-        # age_increase is '.', total_age is '.', breast_height_age is '.' -> 0.0
-        self.assertEqual(0.0, tree.biological_age)
+        # breast_height_age is '.' -> None
+        self.assertEqual(None, tree.breast_height_age)
+        # age_increase is '.', total_age is '.', breast_height_age is '.' -> None
+        self.assertEqual(None, tree.biological_age)
         # living_branches_height is '.' -> 0.0
         self.assertEqual(0.0, tree.lowest_living_branch_height)
         # latvuskerros is '2' -> 1

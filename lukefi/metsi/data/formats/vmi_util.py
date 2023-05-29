@@ -548,20 +548,20 @@ def determine_tree_age_values(
         chest_height_age_source: str,
         age_increase_source: str,
         total_age_source: str) -> Tuple[int, int]:
-    chest_height_age = get_or_default(parse_int(chest_height_age_source), 0)
-    age_increase = get_or_default(parse_int(age_increase_source), 0)
-    total_age = get_or_default(parse_int(total_age_source), 0)
+    chest_height_age = parse_int(chest_height_age_source)
+    age_increase = parse_int(age_increase_source)
+    total_age = parse_int(total_age_source)
 
-    if total_age > 0:
+    if total_age:
         computed_age = total_age
-    elif age_increase > 0:
+    elif age_increase and chest_height_age:
         computed_age = chest_height_age + age_increase
-    elif chest_height_age > 0:
+    elif chest_height_age:
         computed_age = chest_height_age + 9
     else:
-        computed_age = 0
+        computed_age = None
 
-    return chest_height_age, computed_age
+    return None if chest_height_age == 0 else chest_height_age, computed_age
 
 
 def determine_tree_management_category(sourcevalue: str) -> int:

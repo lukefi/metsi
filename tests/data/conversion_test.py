@@ -477,16 +477,16 @@ class TestConversion(test_util.ConverterTestSuite):
 
     def test_determine_tree_age_values(self):
         assertions = [
-            (['0', '0', '0'], (0, 0)),
+            (['0', '0', '0'], (None, None)),
             (['10', '0', '0'], (10, 19)),
             (['10', '2', '0'], (10, 12)),
             (['10', '2', '23'], (10, 23)),
             (['10', '2', '3'], (10, 3)),
             (['10', '2', ''], (10, 12)),
             (['10', '', ''], (10, 19)),
-            (['', '', ''], (0, 0)),
-            (['', '', '34'], (0, 34)),
-            (['', '23', ''], (0, 23)),
+            (['', '', ''], (None, None)),
+            (['', '', '34'], (None, 34)),
+            (['', '23', ''], (None, None)),
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_tree_age_values)
 
