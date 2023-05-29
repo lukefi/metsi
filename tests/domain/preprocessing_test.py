@@ -53,14 +53,14 @@ class PreprocessingTest(unittest.TestCase):
         stand = ForestStand()
         stand.reference_trees.append(ReferenceTree(breast_height_diameter=20.0, species=TreeSpecies.SPRUCE))
         stand.reference_trees.append(ReferenceTree(breast_height_diameter=0.0, species=TreeSpecies.OAK))
-        result, = preprocessing.determine_tree_height([stand])
+        result, = preprocessing.supplement_missing_tree_heights([stand])
         self.assertEqual(result.reference_trees[0].height, 17.1)
         self.assertEqual(result.reference_trees[1].height, None)
 
     def test_determine_tree_age(self):
         stand = ForestStand()
         stand.reference_trees.append(ReferenceTree(height=25.0, breast_height_age=50.0, biological_age=59.0, species=TreeSpecies.PINE))
-        stand.reference_trees.append(ReferenceTree(height=25.0, breast_height_age=0, biological_age=0, species=TreeSpecies.PINE))
-        result, = preprocessing.determine_tree_age([stand])
+        stand.reference_trees.append(ReferenceTree(height=25.0, breast_height_age=None, biological_age=None, species=TreeSpecies.PINE))
+        result, = preprocessing.supplement_missing_tree_ages([stand])
         self.assertEqual(result.reference_trees[1].breast_height_age, 50.0)
         self.assertEqual(result.reference_trees[1].biological_age, 59.0)

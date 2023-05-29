@@ -79,6 +79,8 @@ preprocessing_params:
 
 preprocessing_operations:
   - generate_reference_trees # reference trees from strata, replaces existing reference trees
+  #- supplement_missing_tree_heights
+  #- supplement_missing_tree_ages
   #- compute_location_metadata # required for using grow_motti, grow_fhk
 
 operation_file_params:

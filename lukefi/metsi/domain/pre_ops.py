@@ -89,7 +89,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     return stands
 
 
-def determine_tree_height(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def supplement_missing_tree_heights(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Fill in missing (None or nonpositive) tree heights from Näslund height curve """
     for stand in stands:
         for tree in stand.reference_trees:
@@ -98,8 +98,8 @@ def determine_tree_height(stands: list[ForestStand], **operation_params) -> list
     return stands
 
 
-def determine_tree_age(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
-    """ Supplement missing age for reference trees """
+def supplement_missing_tree_ages(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+    """ Attempt to fill in missing (None or nonpositive) tree ages using strata ages or other reference tree ages"""
     for stand in stands:
         supplement_age_for_reference_trees(stand.reference_trees, stand.tree_strata)
     return stands
@@ -109,6 +109,6 @@ operation_lookup = {
     'filter': preproc_filter,
     'compute_location_metadata': compute_location_metadata,
     'generate_reference_trees': generate_reference_trees,
-    'determine_tree_height': determine_tree_height,
-    'determine_tree_age': determine_tree_age
+    'supplement_missing_tree_heights': supplement_missing_tree_heights,
+    'supplement_missing_tree_ages': supplement_missing_tree_ages
 }
