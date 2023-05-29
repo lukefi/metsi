@@ -172,7 +172,7 @@ def simple_processable_chain(operation_tags: list[str], operation_params: dict, 
     """Prepare a list of partially applied (parametrized) operation functions based on given declaration of operation
     tags and operation parameters"""
     result = []
-    for tag in operation_tags:
+    for tag in operation_tags if operation_tags is not None else []:
         params = operation_params.get(tag, [{}])
         if len(params) > 1:
             raise Exception("Trying to apply multiple parameter set for preprocessing operation \'{}\'. "
