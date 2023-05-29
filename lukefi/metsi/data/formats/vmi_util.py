@@ -163,28 +163,6 @@ def determine_vmi13_area_ha(lohkomuoto: int) -> float:
     return vmi13_county_areas[lohkomuoto]
 
 
-def convert_stratum_id_to_tree_id(stratum_identifier: str, tree_number: int):
-    tree_number_prefix_lookup = {
-        1: '00',
-        2: '0',
-        3: ''
-    }
-
-    if isinstance(tree_number, int):
-        if tree_number > 0:
-            tree_number = str(tree_number)
-        else:
-            raise ValueError('tree number should be a positive int')
-    else:
-        raise TypeError('tree number should be type int not type {0}'.format(type(tree_number)))
-
-    prefix = tree_number_prefix_lookup[len(tree_number)]
-    id_parts = stratum_identifier.split('-')[0:5]
-    id_parts.append(prefix + tree_number)
-    id_parts.append('tree')
-    return ('-').join(map(str, id_parts))
-
-
 def is_empty_sivukoeala(sivukoeala: int, tree_count: int, strata_count: int):
     """
     Need to ignore stands which have no trees or strata and are side stands (sivukuvio)

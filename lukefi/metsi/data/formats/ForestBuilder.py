@@ -147,10 +147,6 @@ class VMIBuilder(ForestBuilder):
     def build(self) -> typing.List[ForestStand]:
         ...
 
-    @abstractmethod
-    def supplemenent_missing_values(self, stands: list[ForestStand]):
-        ...
-
 
 class VMI12Builder(VMIBuilder):
     """VMI12 specific builder implementation"""
@@ -201,29 +197,13 @@ class VMI12Builder(VMIBuilder):
     def convert_tree_entry(self, indices: VMI12TreeIndices, data_row: typing.Sequence):
         result = super().convert_tree_entry(indices, data_row)
         result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=100.0)
+        result.stems_per_ha = vmi_util.determine_stems_per_ha(result.breast_height_diameter, True)
         return result
 
     def find_row_type(self, row: str):
         """Return VMI12 data type of the row"""
         return int(row[13])
 
-    def supplemenent_missing_values(self, stands: typing.List[ForestStand]):
-        """Supplement missing heights and ages in VMI12 stands. Note that the order matters: heights must be supplemented before ages."""
-        for stand in stands:
-            for tree in stand.reference_trees:
-                tree.stems_per_ha = vmi_util.determine_stems_per_ha(
-                    tree.breast_height_diameter,
-                    True)
-
-            for stratum in stand.tree_strata:
-                if stratum.sapling_stratum:
-                    sapling = stratum.to_sapling_reference_tree()
-                    sapling.stand = stand
-                    tree_number = len(stand.reference_trees) + 1
-                    sapling.identifier = vmi_util.convert_stratum_id_to_tree_id(stratum.identifier, tree_number)
-                    stand.reference_trees.append(sapling)
-
-        return stands
 
     def build(self) -> typing.List[ForestStand]:
         """Populate a list of ForestStand with associated ReferenceTree and TreeStratum entries.
@@ -251,8 +231,6 @@ class VMI12Builder(VMIBuilder):
                 stand = result[stand_id]
                 tree.stand = stand
                 stand.reference_trees.append(tree)
-
-            self.supplemenent_missing_values(list(result.values()))
         
         return list(result.values())
 
@@ -310,25 +288,8 @@ class VMI13Builder(VMIBuilder):
     def convert_tree_entry(self, indices: VMI13TreeIndices, data_row: typing):
         result = super().convert_tree_entry(indices, data_row)
         result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=10.0)
+        result.stems_per_ha = vmi_util.determine_stems_per_ha(result.breast_height_diameter, False)
         return result
-
-    def supplemenent_missing_values(self, stands: typing.List[ForestStand]):
-        """Supplement missing heights and ages in VMI13 stands. Note that the order matters here: height must be supplemented before age."""
-        for stand in stands:
-            for tree in stand.reference_trees:
-                tree.stems_per_ha = vmi_util.determine_stems_per_ha(
-                    tree.breast_height_diameter,
-                    False)
-
-            for stratum in stand.tree_strata:
-                if stratum.sapling_stratum:
-                    sapling = stratum.to_sapling_reference_tree()
-                    sapling.stand = stand
-                    tree_number = len(stand.reference_trees) + 1
-                    sapling.identifier = vmi_util.convert_stratum_id_to_tree_id(stratum.identifier, tree_number)
-                    stand.reference_trees.append(sapling)
-
-        return stands
 
     def build(self) -> typing.List[ForestStand]:
         """Populate a list of ForestStand with associated ReferenceTree and TreeStratum entries.
@@ -357,8 +318,6 @@ class VMI13Builder(VMIBuilder):
                 stand = result[stand_id]
                 tree.stand = stand
                 stand.reference_trees.append(tree)
-
-            self.supplemenent_missing_values(list(result.values()))
 
         return list(result.values())
 

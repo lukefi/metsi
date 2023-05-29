@@ -24,13 +24,13 @@ class IoUtilsTest(ConverterTestSuite):
     def test_rsd_rows(self):
         vmi13_stands = vmi13_builder.build()
         result = stands_to_rsd_content(vmi13_stands)
-        self.assertEqual(5, len(result))
+        self.assertEqual(4, len(result))
 
     def test_stands_to_csv(self):
         delimiter = ";"
         vmi13_stands = vmi13_builder.build()
         result = stands_to_csv_content(vmi13_stands, delimiter)
-        self.assertEqual(6, len(result))
+        self.assertEqual(5, len(result))
         
         #make sure that each type of a row has the same number of columns, since csv-->stand conversion relies on it
         stand_row_lengths = [len(row.split(delimiter)) for row in result if row[0:5] == "stand"]

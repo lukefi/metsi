@@ -64,3 +64,12 @@ class PreprocessingTest(unittest.TestCase):
         result, = preprocessing.supplement_missing_tree_ages([stand])
         self.assertEqual(result.reference_trees[1].breast_height_age, 50.0)
         self.assertEqual(result.reference_trees[1].biological_age, 59.0)
+
+    def test_generate_sapling_trees_from_sapling_strata(self):
+        stand = ForestStand()
+        stand.tree_strata.append(TreeStratum(mean_diameter=2, mean_height=0.9, biological_age=5.0, sapling_stratum=True))
+        result, = preprocessing.generate_sapling_trees_from_sapling_strata([stand])
+        self.assertEqual(len(result.reference_trees), 1)
+        self.assertEqual(result.reference_trees[0].sapling, True)
+        self.assertEqual(result.reference_trees[0].breast_height_diameter, 2)
+        self.assertEqual(result.reference_trees[0].height, 0.9)

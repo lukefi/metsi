@@ -194,13 +194,11 @@ class TestForestBuilder(unittest.TestCase):
     def test_vmi12_trees(self):
         self.assertEqual(0, len(self.vmi12_stands[0].reference_trees))
         self.assertEqual(1, len(self.vmi12_stands[1].reference_trees))
-        self.assertEqual(1, len(self.vmi12_stands[2].reference_trees))
+        self.assertEqual(0, len(self.vmi12_stands[2].reference_trees))
 
         # Trees with back reference to stand
         self.assertEqual(self.vmi12_stands[1], self.vmi12_stands[1].reference_trees[0].stand)
-        self.assertEqual(self.vmi12_stands[2], self.vmi12_stands[2].reference_trees[0].stand)
         self.assertEqual('0-999-999-98-1-001-tree', self.vmi12_stands[1].reference_trees[0].identifier)
-        self.assertEqual('0-999-999-97-1-001-tree', self.vmi12_stands[2].reference_trees[0].identifier)
 
     def test_vmi12_tree_variables(self):
         tree = self.vmi12_stands[1].reference_trees[0]
@@ -397,13 +395,11 @@ class TestForestBuilder(unittest.TestCase):
 
     def test_vmi13_trees(self):
         self.assertEqual(2, len(self.vmi13_stands[0].reference_trees))
-        self.assertEqual(1, len(self.vmi13_stands[1].reference_trees))
+        self.assertEqual(0, len(self.vmi13_stands[1].reference_trees))
 
         # Trees with back reference to stand
         self.assertEqual(self.vmi13_stands[0], self.vmi13_stands[0].reference_trees[0].stand)
-        self.assertEqual(self.vmi13_stands[1], self.vmi13_stands[1].reference_trees[0].stand)
         self.assertEqual('1-99-99-99-1-10-tree', self.vmi13_stands[0].reference_trees[0].identifier)
-        self.assertEqual('1-99-99-98-1-001-tree', self.vmi13_stands[1].reference_trees[0].identifier)
 
     def test_vmi13_tree_variables(self):
         tree = self.vmi13_stands[0].reference_trees[0]

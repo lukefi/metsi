@@ -201,17 +201,6 @@ class TestConversion(test_util.ConverterTestSuite):
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_vmi13_area_ha)
 
-    def test_convert_stratum_id_to_tree_id(self):
-        assertions = [
-            (["0-023-002-02-1-001-stratum", 1], "0-023-002-02-1-001-tree"),
-            (["0-023-002-02-1-001-stratum", 99], "0-023-002-02-1-099-tree")
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.convert_stratum_id_to_tree_id)
-        self.assertRaises(ValueError, vmi_util.convert_stratum_id_to_tree_id, *["0-023-002-02-1-001-stratum", 0])
-        self.assertRaises(KeyError, vmi_util.convert_stratum_id_to_tree_id, *["0-023-002-02-1-001-stratum", 1234])
-        self.assertRaises(TypeError, vmi_util.convert_stratum_id_to_tree_id, *["0-023-002-02-1-001-stratum", 55.0])
-        self.assertRaises(TypeError, vmi_util.convert_stratum_id_to_tree_id, *["0-023-002-02-1-001-stratum", 'asd'])
-
     def test_is_empty_sivukoeala(self):
         assertions = [
             ([1, 0, 0], False),

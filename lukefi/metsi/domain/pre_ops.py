@@ -105,10 +105,24 @@ def supplement_missing_tree_ages(stands: list[ForestStand], **operation_params) 
     return stands
 
 
+def generate_sapling_trees_from_sapling_strata(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+    """ Create sapling reference trees from sapling strata """
+    for stand in stands:
+        for stratum in stand.tree_strata:
+            if stratum.sapling_stratum:
+                sapling = stratum.to_sapling_reference_tree()
+                stand.reference_trees.append(sapling)
+                sapling.stand = stand
+                tree_number = len(stand.reference_trees) + 1
+                sapling.identifier = "{}-{}-tree".format(stand.identifier, tree_number)
+    return stands
+
+
 operation_lookup = {
     'filter': preproc_filter,
     'compute_location_metadata': compute_location_metadata,
     'generate_reference_trees': generate_reference_trees,
     'supplement_missing_tree_heights': supplement_missing_tree_heights,
-    'supplement_missing_tree_ages': supplement_missing_tree_ages
+    'supplement_missing_tree_ages': supplement_missing_tree_ages,
+    'generate_sapling_trees_from_sapling_strata': generate_sapling_trees_from_sapling_strata
 }
