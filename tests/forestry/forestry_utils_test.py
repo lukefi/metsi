@@ -161,7 +161,7 @@ class ForestryUtilsTest(unittest.TestCase):
             result = lukefi.metsi.forestry.forestry_utils.override_from_diameter(initial_stratum, current_stratum, reference_tree)
             self.assertEqual(i[1], result)
 
-    def test_find_stratum_for_tree(self):
+    def test_find_matching_species_stratum_for_tree(self):
         reference_tree = ReferenceTree()
         reference_tree.species = 2
         reference_tree.breast_height_diameter = 13.0
@@ -181,6 +181,6 @@ class ForestryUtilsTest(unittest.TestCase):
             ts.species = spe_dia[0]
             ts.mean_diameter = spe_dia[1]
             stratums.append(ts)
-        result = lukefi.metsi.forestry.forestry_utils.find_stratum_for_tree(reference_tree, stratums)
+        result = lukefi.metsi.forestry.forestry_utils.find_matching_species_stratum_for_tree(reference_tree, stratums)
         self.assertEqual(stratums[2], result)
  

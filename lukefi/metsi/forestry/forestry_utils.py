@@ -128,7 +128,7 @@ def override_from_diameter(initial_stratum: TreeStratum, current_stratum: TreeSt
     return initial_stratum
 
 
-def find_stratum_for_tree(reference_tree: ReferenceTree, age_stratums: typing.List[TreeStratum]) -> TreeStratum:
+def find_matching_species_stratum_for_tree(reference_tree: ReferenceTree, age_stratums: typing.List[TreeStratum]) -> TreeStratum:
     """ Solves from which stratum the supplementing of reference tree should happen.
 
     First we initialize a supplement stratum as the first stratum that has the same tree species as reference tree.

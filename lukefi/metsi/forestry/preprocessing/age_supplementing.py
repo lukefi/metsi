@@ -1,6 +1,6 @@
 import typing
 from lukefi.metsi.data.model import ReferenceTree, TreeStratum
-from lukefi.metsi.forestry.forestry_utils import find_stratum_for_tree
+from lukefi.metsi.forestry.forestry_utils import find_matching_species_stratum_for_tree
 
 STRATUM_SUPPLEMENT = 1
 INITIAL_TREE_SUPPLEMENT = 2
@@ -21,7 +21,7 @@ def perform_supplementing(tree_and_strategy: typing.List[typing.Tuple[ReferenceT
                           age_stratums: typing.List[TreeStratum]) -> typing.List[ReferenceTree]:
     for (rt, s) in tree_and_strategy:
         if s.strategy is STRATUM_SUPPLEMENT:
-            stratum = find_stratum_for_tree(rt, age_stratums)
+            stratum = find_matching_species_stratum_for_tree(rt, age_stratums)
             rt.breast_height_age = stratum.breast_height_age
             rt.biological_age = stratum.biological_age
         elif s.strategy is INITIAL_TREE_SUPPLEMENT:
