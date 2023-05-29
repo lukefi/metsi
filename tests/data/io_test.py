@@ -30,7 +30,7 @@ class IoUtilsTest(ConverterTestSuite):
         delimiter = ";"
         vmi13_stands = vmi13_builder.build()
         result = stands_to_csv_content(vmi13_stands, delimiter)
-        self.assertEqual(5, len(result))
+        self.assertEqual(6, len(result))
         
         #make sure that each type of a row has the same number of columns, since csv-->stand conversion relies on it
         stand_row_lengths = [len(row.split(delimiter)) for row in result if row[0:5] == "stand"]

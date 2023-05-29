@@ -115,6 +115,7 @@ def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
     elif app_config.state_format in ("vmi13", "vmi12", "forest_centre"):
         return external_reader(
             app_config.state_format,
+            strata=app_config.strata,
             reference_trees=app_config.reference_trees,
             strata_origin=app_config.strata_origin)(app_config.input_path)
     else:

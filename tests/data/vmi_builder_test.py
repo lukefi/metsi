@@ -7,7 +7,7 @@ from lukefi.metsi.data.enums.internal import *
 
 class TestForestBuilder(unittest.TestCase):
 
-    default_builder_flags = {"reference_trees": True}
+    default_builder_flags = {"reference_trees": True, "strata": True}
 
     @classmethod
     def vmi12_builder(cls, vmi_builder_flags: dict = default_builder_flags) -> VMI12Builder:
@@ -56,8 +56,8 @@ class TestForestBuilder(unittest.TestCase):
         cls.vmi12_stands = cls.vmi12_built()
         cls.vmi13_stands = cls.vmi13_built()
 
-        cls.vmi12_stands_ref_trees_false = cls.vmi12_built({'reference_trees': False})
-        cls.vmi13_stands_ref_trees_false = cls.vmi13_built({'reference_trees': False})
+        cls.vmi12_stands_ref_trees_false = cls.vmi12_built({'reference_trees': False, 'strata': True})
+        cls.vmi13_stands_ref_trees_false = cls.vmi13_built({'reference_trees': False, 'strata': True})
 
 
     def test_vmi12_init(self):

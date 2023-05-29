@@ -23,8 +23,9 @@ class MetsiConfiguration(SimpleNamespace):
     derived_data_output_container = None
     formation_strategy = "partial"
     evaluation_strategy = "depth"
-    reference_trees = False  # ForestBuilder parameter
-    strata_origin = "1"  # ForestBuilder parameter
+    reference_trees = False
+    strata = True
+    strata_origin = "1"
 
     def __init__(self, **kwargs):
         if kwargs.get('run_modes') is not None:
@@ -143,6 +144,9 @@ def parse_cli_arguments(args: list[str]):
     parser.add_argument('--reference-trees',
                         action=argparse.BooleanOptionalAction,
                         help="Include reference trees from VMI data source.")
+    parser.add_argument('--strata',
+                        action=argparse.BooleanOptionalAction,
+                        help="Include strata from VMI data source.")
     parser.add_argument('--strata-origin',
                         choices=['1', '2', '3'],
                         type=str,

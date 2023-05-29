@@ -241,13 +241,13 @@ class VMI12Builder(VMIBuilder):
         for i, row in enumerate(self.forest_stands):
             stand = self.convert_stand_entry(VMI12StandIndices, row, i + 1)
             result[stand.identifier] = stand
-
-        for i, row in enumerate(self.tree_strata):
-            stratum = self.convert_stratum_entry(VMI12StratumIndices, row)
-            stand_id = vmi_util.generate_stand_identifier(row, VMI12StandIndices)
-            stand = result[stand_id]
-            stratum.stand = stand
-            stand.tree_strata.append(stratum)
+        if self.builder_flags['strata']:
+            for i, row in enumerate(self.tree_strata):
+                stratum = self.convert_stratum_entry(VMI12StratumIndices, row)
+                stand_id = vmi_util.generate_stand_identifier(row, VMI12StandIndices)
+                stand = result[stand_id]
+                stratum.stand = stand
+                stand.tree_strata.append(stratum)
 
         if self.builder_flags['reference_trees']:
             for i, row in enumerate(self.reference_trees):
@@ -258,7 +258,6 @@ class VMI12Builder(VMIBuilder):
                 stand.reference_trees.append(tree)
 
             self.supplemenent_missing_values(list(result.values()))
-            self.remove_strata(list(result.values()))
         
         return list(result.values())
 
@@ -352,12 +351,13 @@ class VMI13Builder(VMIBuilder):
             stand = self.convert_stand_entry(VMI13StandIndices, row, i + 1)
             result[stand.identifier] = stand
 
-        for i, row in enumerate(self.tree_strata):
-            stratum = self.convert_stratum_entry(VMI13StratumIndices, row)
-            stand_id = vmi_util.generate_stand_identifier(row, VMI13StandIndices)
-            stand = result[stand_id]
-            stratum.stand = stand
-            stand.tree_strata.append(stratum)
+        if self.builder_flags['strata']:
+            for i, row in enumerate(self.tree_strata):
+                stratum = self.convert_stratum_entry(VMI13StratumIndices, row)
+                stand_id = vmi_util.generate_stand_identifier(row, VMI13StandIndices)
+                stand = result[stand_id]
+                stratum.stand = stand
+                stand.tree_strata.append(stratum)
 
         if self.builder_flags['reference_trees']:
             for i, row in enumerate(self.reference_trees):
@@ -368,7 +368,6 @@ class VMI13Builder(VMIBuilder):
                 stand.reference_trees.append(tree)
 
             self.supplemenent_missing_values(list(result.values()))
-            self.remove_strata(list(result.values()))
 
         return list(result.values())
 
@@ -513,4 +512,3 @@ class ForestCentreBuilder(XMLBuilder):
             stand.tree_strata = strata
             stands.append(stand)
         return stands
-        
