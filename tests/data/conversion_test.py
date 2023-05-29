@@ -201,18 +201,6 @@ class TestConversion(test_util.ConverterTestSuite):
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_vmi13_area_ha)
 
-    def test_is_empty_sivukoeala(self):
-        assertions = [
-            ([1, 0, 0], False),
-            ([1, 1, 0], False),
-            ([1, 0, 1], False),
-            ([1, 1, 1], False),
-            ([2, 0, 0], True),
-            ([2, 1, 0], False),
-            ([2, 0, 1], False),
-            ([2, 1, 1], False),
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.is_empty_sivukoeala)
 
     def test_determine_owner_group(self):
         assertions = [

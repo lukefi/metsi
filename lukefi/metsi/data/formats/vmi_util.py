@@ -163,13 +163,6 @@ def determine_vmi13_area_ha(lohkomuoto: int) -> float:
     return vmi13_county_areas[lohkomuoto]
 
 
-def is_empty_sivukoeala(sivukoeala: int, tree_count: int, strata_count: int):
-    """
-    Need to ignore stands which have no trees or strata and are side stands (sivukuvio)
-    """
-    return sivukoeala == 2 and tree_count == 0 and strata_count == 0
-
-
 def determine_soil_surface_preparation_year(sourcevalue: str, year: int) -> Optional[int]:
     """Determine the year of soil surface preparation from given VMI source classes and the year of data set."""
     if sourcevalue == '0':
