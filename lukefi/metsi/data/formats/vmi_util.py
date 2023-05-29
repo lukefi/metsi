@@ -170,23 +170,6 @@ def is_empty_sivukoeala(sivukoeala: int, tree_count: int, strata_count: int):
     return sivukoeala == 2 and tree_count == 0 and strata_count == 0
 
 
-def is_forest_land(land_category: int) -> bool:
-    return land_category in (1, 2, 3, 4)
-
-
-def is_other_excluded_forest(land_category: int, fra_class: str, land_category_detail: str) -> bool:
-    """
-    Plot is excluded from VMI forest stand data if its’ land use category is other forest land than forest,
-    scrub or waste land and FRA class is other land than forest with no tree cover and land use category
-    adjustment is building ground or forest road or other land than forest locating on mineral soil or
-    organic soil.
-    """
-    if land_category == 4 and fra_class == '3' and land_category_detail in ('1', '2', '6', '7'):
-        return True
-    else:
-        return False
-
-
 def determine_soil_surface_preparation_year(sourcevalue: str, year: int) -> Optional[int]:
     """Determine the year of soil surface preparation from given VMI source classes and the year of data set."""
     if sourcevalue == '0':
