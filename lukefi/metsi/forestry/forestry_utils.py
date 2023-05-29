@@ -1,7 +1,8 @@
 import math
 import statistics
+import typing
 from enum import Enum
-from lukefi.metsi.data.model import ReferenceTree, ForestStand
+from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
 from typing import List, Callable, Optional
 
 
@@ -97,3 +98,57 @@ def mean_age_stand(stand: ForestStand) -> float:
         mean_age = 0
     return mean_age
 
+
+def generate_diameter_threshold(d1: float, d2: float) -> float:
+    """ Threshold value for diameter based comparison of two stratums.
+    The threshold is generated based on d[0].
+
+    Threshold will have a value based on relative distance of at most 50% of the distance between d[0] and d[1].
+    """
+    d = sorted((d1, d2), reverse=True)
+    return d[0] + (d[1] - d[0]) * (d[0] / (d[1] + d[0]))
+
+
+def override_from_diameter(initial_stratum: TreeStratum, current_stratum: TreeStratum,
+                           reference_tree: ReferenceTree) -> TreeStratum:
+    """ Solves if current startum should be used in supplementing of the tree age.
+    This happens by calculating a threshold value based on which of the stratum diameters
+    is greater and comparing the threshold to reference tree diameter.
+
+    param: initial_stratum: Stratum with the same tree species as reference tree
+    param: current_stratum: Stratum i
+    param: reference_tree: The tree for which the supplementing will be done
+
+    return: Stratum from which the supplementing will happen
+    """
+    threshold = generate_diameter_threshold(initial_stratum.mean_diameter,
+                                            current_stratum.mean_diameter)
+    if threshold > reference_tree.breast_height_diameter:
+        return current_stratum
+    return initial_stratum
+
+
+def find_stratum_for_tree(reference_tree: ReferenceTree, age_stratums: typing.List[TreeStratum]) -> TreeStratum:
+    """ Solves from which stratum the supplementing of reference tree should happen.
+
+    First we initialize a supplement stratum as the first stratum that has the same tree species as reference tree.
+    Secondly we try to override the initial supplement stratum by checking if other stratums have a diameter
+    such that would represent the reference tree better.
+
+    param: reference_tree: The tree that needs age to be supplemented
+    param: age_stratums: List of stratums that contains the best possible
+        stratum for used in supplementing
+
+    return: Stratum from which the stratum supplementing will be done
+    """
+    associated_stratum = None
+    for stratum in age_stratums:
+        if associated_stratum is None:
+            if stratum.compare_species(reference_tree):
+                associated_stratum = stratum  # Initial stratum
+        else:
+            if stratum.has_diameter() and stratum.compare_species(reference_tree):
+                associated_stratum = override_from_diameter(associated_stratum,
+                                                            stratum,
+                                                            reference_tree)
+    return associated_stratum

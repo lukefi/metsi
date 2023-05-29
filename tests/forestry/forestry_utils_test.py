@@ -1,7 +1,8 @@
 import unittest
 from lukefi.metsi.forestry import forestry_utils as futil
-from lukefi.metsi.data.model import ReferenceTree, ForestStand
+from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
 from lukefi.metsi.data.enums.internal import TreeSpecies
+import lukefi.metsi.forestry.forestry_utils
 
 
 class ForestryUtilsTest(unittest.TestCase):
@@ -132,4 +133,54 @@ class ForestryUtilsTest(unittest.TestCase):
             reference_tree.stems_per_ha = 50.0 + i
             stand.reference_trees.append(reference_tree)
         self.assertEqual(43.92307692307692,futil.mean_age_stand(stand))
+
+    def test_generate_diameter_threshold(self):
+        assertions = [
+            ((10.0, 20.0), 13.33333),
+            ((5.0, 10.0), 6.66667),
+            ((0.0, 10.0), 0.0),
+            ((5.0, 0.0), 0.0)
+        ]
+
+        for i in assertions:
+            result = round(lukefi.metsi.forestry.forestry_utils.generate_diameter_threshold(i[0][0], i[0][1]), 5)
+            self.assertEqual(result, i[1])
+
+    def test_override_from_diameter(self):
+        initial_stratum = TreeStratum()
+        initial_stratum.mean_diameter = 10.0
+        current_stratum = TreeStratum()
+        current_stratum.mean_diameter = 20.0
+        assertions = [
+            (13.0, current_stratum),
+            (15.0, initial_stratum),
+        ]
+        for i in assertions:
+            reference_tree = ReferenceTree()
+            reference_tree.breast_height_diameter = i[0]
+            result = lukefi.metsi.forestry.forestry_utils.override_from_diameter(initial_stratum, current_stratum, reference_tree)
+            self.assertEqual(i[1], result)
+
+    def test_find_stratum_for_tree(self):
+        reference_tree = ReferenceTree()
+        reference_tree.species = 2
+        reference_tree.breast_height_diameter = 13.0
+        species_diameter = [
+            (1, 3.0),
+            (1, 12.0),
+            (2, 10.0),
+            (2, 5.0),
+            (3, 7.0),
+            (3, 10.0),
+            (3, 5.80)
+        ]
+
+        stratums = []
+        for spe_dia in species_diameter:
+            ts = TreeStratum()
+            ts.species = spe_dia[0]
+            ts.mean_diameter = spe_dia[1]
+            stratums.append(ts)
+        result = lukefi.metsi.forestry.forestry_utils.find_stratum_for_tree(reference_tree, stratums)
+        self.assertEqual(stratums[2], result)
  
