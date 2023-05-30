@@ -7,8 +7,8 @@ class TreeSpecies(IntEnum):
     but can be assigned to in case the source data species is unexpected."""
     PINE = 1
     SPRUCE = 2
-    SILVER_BIRCH = 3
-    DOWNY_BIRCH = 4
+    SILVER_BIRCH = 3  # rauduskoivu
+    DOWNY_BIRCH = 4  # hieskoivu
     ASPEN = 5
     GREY_ALDER = 6
     COMMON_ALDER = 7
@@ -43,6 +43,58 @@ class TreeSpecies(IntEnum):
     POPLAR = 36
     HAZEL = 37
     UNKNOWN = 38
+
+    def is_deciduous(self):
+        return self in DECIDUOUS_SPECIES
+
+    def is_coniferous(self):
+        return self in CONIFEROUS_SPECIES
+
+
+DECIDUOUS_SPECIES = [
+    TreeSpecies.SILVER_BIRCH,
+    TreeSpecies.DOWNY_BIRCH,
+    TreeSpecies.ASPEN,
+    TreeSpecies.GREY_ALDER,
+    TreeSpecies.COMMON_ALDER,
+    TreeSpecies.OTHER_DECIDUOUS,
+    TreeSpecies.EUROPEAN_WHITE_ELM,
+    TreeSpecies.LARCH,
+    TreeSpecies.SMALL_LEAVED_LIME,
+    TreeSpecies.WILLOW,
+    TreeSpecies.MOUNTAIN_ASH,
+    TreeSpecies.GOAT_WILLOW,
+    TreeSpecies.COMMON_ASH,
+    TreeSpecies.OAK,
+    TreeSpecies.BIRD_CHERRY,
+    TreeSpecies.MAPLE,
+    TreeSpecies.CURLY_BIRCH,
+    TreeSpecies.WYCH_ELM,
+    TreeSpecies.UNKNOWN_DECIDUOUS,
+    TreeSpecies.BAY_WILLOW,
+    TreeSpecies.POPLAR,
+    TreeSpecies.HAZEL,
+    TreeSpecies.UNKNOWN
+]
+
+CONIFEROUS_SPECIES = [
+    TreeSpecies.PINE,
+    TreeSpecies.SPRUCE,
+    TreeSpecies.OTHER_CONIFEROUS,
+    TreeSpecies.DOUGLAS_FIR,
+    TreeSpecies.JUNIPER,
+    TreeSpecies.SHORE_PINE,
+    TreeSpecies.LARCH,
+    TreeSpecies.BLACK_SPRUCE,
+    TreeSpecies.ABIES,
+    TreeSpecies.KEDAR,
+    TreeSpecies.SERBIAN_SPRUCE,
+    TreeSpecies.UNKNOWN_CONIFEROUS,
+    TreeSpecies.OTHER_PINE,
+    TreeSpecies.OTHER_SPRUCE,
+    TreeSpecies.THUJA,
+    TreeSpecies.YEW
+]
 
 
 class LandUseCategory(IntEnum):
