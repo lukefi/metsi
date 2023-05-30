@@ -4,16 +4,16 @@ from lukefi.metsi.data.enums.forest_centre import (
     ForestCentreSoilPeatlandCategory,
     ForestCentreSpecies,
     ForestCentreLandUseCategory,
-    ForestCentreDrainageCategory
-    )
+    ForestCentreDrainageCategory, ForestCentreStratumStorey
+)
 from lukefi.metsi.data.enums.internal import (
     SiteType,
     OwnerCategory,
     SoilPeatlandCategory,
     TreeSpecies,
     LandUseCategory,
-    DrainageCategory
-    )
+    DrainageCategory, Storey
+)
 
 _species_map = {
     ForestCentreSpecies.PINE: TreeSpecies.PINE,
@@ -101,6 +101,15 @@ _drainage_category_map = {
 }
 
 
+_storey_map = {
+    ForestCentreStratumStorey.DOMINANT: Storey.DOMINANT,
+    ForestCentreStratumStorey.UNDER: Storey.UNDER,
+    ForestCentreStratumStorey.OVER: Storey.OVER,
+    ForestCentreStratumStorey.SPARE: Storey.SPARE,
+    ForestCentreStratumStorey.REMOTE: Storey.REMOTE,
+    ForestCentreStratumStorey.REMOVAL: Storey.REMOVAL
+}
+
 def convert_drainage_category(code: str):
     value = ForestCentreDrainageCategory(code)
     return _drainage_category_map.get(value)
@@ -130,3 +139,8 @@ def convert_species(species_code: str) -> TreeSpecies:
 def convert_owner(owner_code: str) -> OwnerCategory:
     fc_owner = ForestCentreOwnerCategory(owner_code)
     return _owner_map.get(fc_owner)
+
+
+def convert_storey(storey_code: str) -> Storey:
+    fc_storey = ForestCentreStratumStorey(storey_code)
+    return _storey_map.get(fc_storey)

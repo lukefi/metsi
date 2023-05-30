@@ -78,6 +78,7 @@ class VMI12StratumIndices:
     test_area_number = slice(9, 11)
     stand_number = 12
     stratum_number = slice(15, 17)
+    stratum_rank = 19
     species = slice(20, 22)
     origin = 22
     sapling_stems_per_ha = slice(24, 28)
@@ -162,6 +163,7 @@ class VMI13StratumIndices:
     test_area_number = 5
     stand_number = 6
     stratum_number = 7
+    stratum_rank = 11
     species = 12
     origin = 13
     sapling_stems_per_ha = 14

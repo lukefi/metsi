@@ -99,5 +99,24 @@ class VmiDrainageCategory(Enum):
     TURVEKANGAS = '4'
 
 
+class VmiStratumRank(Enum):
+    UNGROWABLE_SAPLINGS = '0'
+    DOMINANT = '1'
+    OVER_1 = '2'
+    OVER_2 = '3'
+    OVER_3 = '4'
+    UNDER_1 = '5'
+    UNDER_2 = '6'
+    UNDER_3 = '7'
+    UNDER_4 = '9'
+    REMOVAL = '8'
 
+
+class VmiTreeStorey(Enum):
+    DOMINANT_MAIN = '2'
+    DOMINANT_MIDDLE = '3'
+    DOMINANT_LOWER = '4'
+    UNDER = '5'
+    OVER_MAIN = '6'
+    OVER_OTHER = '7'
 

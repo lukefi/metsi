@@ -76,3 +76,12 @@ class ForestCentreDrainageCategory(Enum):
     OJIKKO = "7"
     MUUTTUMA = "8"
     TURVEKANGAS = "9"
+
+
+class ForestCentreStratumStorey(Enum):
+    DOMINANT = '1'
+    UNDER = '2'
+    OVER = '3'
+    SPARE = '4'
+    REMOTE = '5'
+    REMOVAL = '6'

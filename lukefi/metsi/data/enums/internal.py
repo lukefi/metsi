@@ -156,3 +156,12 @@ class DrainageCategory(IntEnum):
     DITCHED_MIRE = 6
     TRANSFORMING_MIRE = 7
     TRANSFORMED_MIRE = 8
+
+class Storey(IntEnum):
+    INDETERMINATE = 0
+    DOMINANT = 1
+    UNDER = 2
+    OVER = 3
+    SPARE = 4
+    REMOTE = 5
+    REMOVAL = 6

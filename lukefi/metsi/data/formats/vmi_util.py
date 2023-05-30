@@ -1,6 +1,7 @@
 from typing import Optional, Tuple, Sequence
 from datetime import datetime as dt
 
+from lukefi.metsi.data.enums.internal import Storey
 from lukefi.metsi.data.formats.util import get_or_default, parse_float, parse_int
 from lukefi.metsi.data.formats.vmi_const import vmi12_county_areas, vmi13_county_areas, VMI12StandIndices, VMI13StandIndices
 from shapely.geometry import Point
@@ -589,3 +590,31 @@ def determine_stratum_age_values(biological_age_source: str,
         computational_age = 0.0
 
     return (computational_age, breast_height_age)
+
+
+def determine_storey_for_stratum(source: str) -> Optional[Storey]:
+    """Determinates storey for stratum based on vmi source value 'ositteen asema'."""
+    parsed = parse_int(source)
+    if parsed in [0, 1]:
+        return Storey.DOMINANT
+    elif parsed in [2, 3, 4]:
+        return Storey.OVER
+    elif parsed in [5, 6, 7, 9]:
+        return Storey.UNDER
+    elif parsed in [8]:
+        return Storey.INDETERMINATE
+    else:
+        return None
+
+
+def determine_storey_for_tree(source: str) -> Optional[Storey]:
+    """Determinates storey for vmi tree based on vmi source value 'latvuskerros'."""
+    parsed = parse_int(source)
+    if parsed in [2, 3, 4]:
+        return Storey.DOMINANT
+    elif parsed in [5]:
+        return Storey.UNDER
+    elif parsed in [6, 7]:
+        return Storey.OVER
+    else:
+        return None

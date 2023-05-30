@@ -179,3 +179,5 @@ class TestForestCentreBuilder(unittest.TestCase):
         self.assertEqual(None, self.smk_stands[0].tree_strata[1].lowest_living_branch_height)
         self.assertEqual(None, self.smk_stands[0].tree_strata[0].management_category)
         self.assertEqual(None, self.smk_stands[0].tree_strata[1].management_category)
+        self.assertEqual(Storey.REMOTE, self.smk_stands[0].tree_strata[0].storey)
+        self.assertEqual(Storey.REMOTE, self.smk_stands[0].tree_strata[1].storey)

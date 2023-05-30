@@ -3,7 +3,8 @@ from enum import Enum
 from typing import Optional
 from dataclasses import dataclass
 from lukefi.metsi.data.conversion.internal2mela import mela_stand, mela_tree
-from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, TreeSpecies, DrainageCategory
+from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, \
+    TreeSpecies, DrainageCategory, Storey
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
 from lukefi.metsi.data.formats.util import convert_str_to_type
 from lukefi.metsi.data.layered_model import LayeredObject
@@ -51,6 +52,7 @@ class TreeStratum():
     # sapling stem count within a hectare
     sapling_stems_per_ha: Optional[float] = None
     sapling_stratum: bool = False  # this reference tree represents saplings
+    storey: Optional[Storey] = None
 
     def __hash__(self):
         return id(self)
@@ -184,6 +186,7 @@ class TreeStratum():
             self.management_category,
             self.sapling_stems_per_ha,
             self.sapling_stratum,
+            self.storey
         ]
 
     @classmethod
@@ -210,6 +213,7 @@ class TreeStratum():
         result.management_category = conv(row[18], "management_category")
         result.sapling_stems_per_ha = conv(row[19], "sapling_stems_per_ha")
         result.sapling_stratum = conv(row[20], "sapling_stratum")
+        result.storey = Storey[row[21].split(".")[1]] if row[21] != "None" else None
         return result
 
 @dataclass
@@ -251,6 +255,7 @@ class ReferenceTree():
     # VMI tree_category for living/dead/otherwise unusable tree
     tree_category: Optional[str] = None
     sapling: bool = False
+    storey: Optional[Storey] = None
 
     def __eq__(self, other: "ReferenceTree"):
         return id(self) == id(other)
@@ -322,7 +327,8 @@ class ReferenceTree():
             self.lowest_living_branch_height,
             self.management_category,
             self.tree_category,
-            self.sapling
+            self.sapling,
+            self.storey
         ]
 
     @classmethod
@@ -351,6 +357,7 @@ class ReferenceTree():
         result.management_category = conv(row[17], "management_category")
         result.tree_category = conv(row[18], "tree_category")
         result.sapling = conv(row[19], "sapling")
+        result.storey = Storey[row[20].split(".")[1]] if row[20] != 'None' else None
         return result
 
 

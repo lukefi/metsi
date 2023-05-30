@@ -99,6 +99,7 @@ class VMIBuilder(ForestBuilder):
             util.parse_float(data_row[indices.living_branches_height]),
             0.0) / 10.0
         result.management_category = vmi_util.determine_tree_management_category(data_row[indices.latvuskerros])
+        result.storey = vmi_util.determine_storey_for_tree(data_row[indices.latvuskerros])
         return result
 
     def convert_stratum_entry(self, indices: VMI12StratumIndices or VMI13StratumIndices,
@@ -133,6 +134,7 @@ class VMIBuilder(ForestBuilder):
         result.stand_origin_relative_position = (0.0, 0.0, 0.0)
         result.lowest_living_branch_height = 0.0
         result.management_category = 1
+        result.storey = vmi_util.determine_storey_for_stratum(data_row[indices.stratum_rank])
         return result
 
     def remove_strata(self, stands: list[ForestStand]):
@@ -445,6 +447,7 @@ class ForestCentreBuilder(XMLBuilder):
         stratum.biological_age = util.parse_float(stratum_data.Age)
         stratum.basal_area = util.parse_float(stratum_data.BasalArea)
         stratum.tree_number = util.parse_int(stratum_data.StratumNumber)
+        stratum.storey = fc2internal.convert_storey(stratum_data.Storey)
         return stratum
 
 

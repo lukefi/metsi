@@ -231,6 +231,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(0.0, tree.lowest_living_branch_height)
         # latvuskerros is '2' -> 1
         self.assertEqual(1, tree.management_category)
+        self.assertEqual(Storey.DOMINANT, tree.storey)
 
     def test_vmi12_strata(self):
         self.assertEqual(0, len(self.vmi12_stands_ref_trees_false[0].tree_strata))
@@ -258,6 +259,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(52.0, stratum.biological_age)
         # basal area is '17' -> 17.0
         self.assertEqual(17.0, stratum.basal_area)
+        self.assertEqual(Storey.DOMINANT, stratum.storey)
 
     def test_vmi13_init(self):
         vmi13_builder = self.vmi13_builder()
@@ -432,6 +434,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(0.0, tree.lowest_living_branch_height)
         # latvuskerros is '2' -> 1
         self.assertEqual(1, tree.management_category)
+        self.assertEqual(Storey.DOMINANT, tree.storey)
 
     def test_vmi13_strata(self):
         self.assertEqual(0, len(self.vmi13_stands_ref_trees_false[0].tree_strata))
@@ -459,6 +462,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(15.0, stratum.biological_age)
         # basal area is '2' -> 2.0
         self.assertEqual(2.0, stratum.basal_area)
+        self.assertEqual(Storey.DOMINANT, stratum.storey)
 
 
     def test_remove_strata(self):
