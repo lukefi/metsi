@@ -106,52 +106,48 @@ def generate_diameter_threshold(d1: float, d2: float) -> float:
 
     Threshold will have a value based on relative distance of at most 50% of the distance between d[0] and d[1].
     """
-    d = sorted((d1, d2), reverse=True)
-    return d[0] + (d[1] - d[0]) * (d[0] / (d[1] + d[0]))
+    greater = max((d1, d2))
+    lesser = min((d1, d2))
+    return greater + (lesser - greater) * (greater / (lesser + greater))
 
 
-def override_from_diameter(initial_stratum: TreeStratum, current_stratum: TreeStratum,
+def override_from_diameter(initial_stratum: TreeStratum, candidate_stratum: TreeStratum,
                            reference_tree: ReferenceTree) -> TreeStratum:
-    """ Solves if current startum should be used in supplementing of the tree age.
+    """ Out of given strata, return the stratum for which the mean diameter better matches the reference tree diameter.
     This happens by calculating a threshold value based on which of the stratum diameters
     is greater and comparing the threshold to reference tree diameter.
 
-    param: initial_stratum: Stratum with the same tree species as reference tree
-    param: current_stratum: Stratum i
-    param: reference_tree: The tree for which the supplementing will be done
+    :param initial_stratum: Stratum which is assumed as the current match for the reference tree
+    :param candidate_stratum: Stratum which is tested for better compatiblity than the initial stratum
+    :param reference_tree: The tree for which the supplementing will be done
 
-    return: Stratum from which the supplementing will happen
+    :returns: the better matching stratum
     """
-    threshold = generate_diameter_threshold(initial_stratum.mean_diameter,
-                                            current_stratum.mean_diameter)
+    threshold = generate_diameter_threshold(initial_stratum.mean_diameter, candidate_stratum.mean_diameter)
     if threshold > reference_tree.breast_height_diameter:
-        return current_stratum
+        return candidate_stratum
     return initial_stratum
 
 
-def find_matching_species_stratum_for_tree(reference_tree: ReferenceTree, age_stratums: typing.List[TreeStratum]) -> TreeStratum:
+def find_matching_stratum_by_diameter(reference_tree: ReferenceTree, strata: typing.List[TreeStratum]) -> Optional[TreeStratum]:
     """ Solves from which stratum the supplementing of reference tree should happen.
 
-    First we initialize a supplement stratum as the first stratum that has the same tree species as reference tree.
-    Secondly we try to override the initial supplement stratum by checking if other stratums have a diameter
-    such that would represent the reference tree better.
+    Return a stratum that has the closest diameter to the reference tree diameter.
 
-    param: reference_tree: The tree that needs age to be supplemented
-    param: age_stratums: List of stratums that contains the best possible
-        stratum for used in supplementing
-
-    return: Stratum from which the stratum supplementing will be done
+    :param reference_tree: A reference tree for which a matching stratum needs to be found
+    :param strata: List of stratums from which a diameter match is searched
+    :returns: a matching stratum or None if not match is possible
     """
-    associated_stratum = None
-    for stratum in age_stratums:
-        if associated_stratum is None:
-            if stratum.compare_species(reference_tree):
-                associated_stratum = stratum  # Initial stratum
-        else:
-            if stratum.has_diameter() and stratum.compare_species(reference_tree):
-                associated_stratum = override_from_diameter(associated_stratum,
-                                                            stratum,
-                                                            reference_tree)
+    if len(strata) == 0:
+        return None
+    associated_stratum = strata[0]
+    for stratum in strata[1:]:
+        if stratum.has_diameter():
+            # TODO: this method is definitely not stable with strata lists of different orderings
+            # i.e. it will return different result depending on which order the strata are given
+            # this is not safe to use in other contexts than the current one being refactored
+            # and requires a more robust solution
+            associated_stratum = override_from_diameter(associated_stratum, stratum, reference_tree)
     return associated_stratum
 
 
@@ -178,10 +174,11 @@ def find_matching_storey_stratum_for_tree(tree: ReferenceTree, strata: list[Tree
     same_species_strata, other_species_strata = split_list_by_predicate(
         same_storey_strata,
         lambda stratum: stratum.species == tree.species)
-    if len(same_species_strata) == 1:
+    if len(same_species_strata) > 0:
         return same_species_strata[0]
-    elif len(same_species_strata) > 1:
-        return find_matching_species_stratum_for_tree(tree, same_species_strata)
+    # TODO: species selection by diameter is not stable for this purpose
+    #elif len(same_species_strata) > 1:
+    #    return find_matching_stratum_by_diameter(tree, same_species_strata)
     #TODO: scan other species strata by species precedence list
     #elif len(other_species_strata) > 0:
     #    return find_matching_species_stratum_for_tree(tree, other_species_strata)
