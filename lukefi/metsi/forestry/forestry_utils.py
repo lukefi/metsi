@@ -2,6 +2,7 @@ import math
 import statistics
 import typing
 from enum import Enum
+from lukefi.metsi.data.enums.internal import TreeSpecies, DECIDUOUS_SPECIES, CONIFEROUS_SPECIES
 from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
 from typing import List, Callable, Optional
 
@@ -152,3 +153,37 @@ def find_matching_species_stratum_for_tree(reference_tree: ReferenceTree, age_st
                                                             stratum,
                                                             reference_tree)
     return associated_stratum
+
+
+def split_list_by_predicate(items: list, predicate: Callable) -> tuple[list, list]:
+    """ Splits a list into two lists based on a predicate.
+
+    :param items: List to be split
+    :param predicate: Predicate used to split the list
+    :return: Tuple of lists, where the first list contains the items that match the predicate and the second list
+        contains the items that do not match the predicate.
+    """
+    matching_items = []
+    non_matching_items = []
+    for item in items:
+        if predicate(item):
+            matching_items.append(item)
+        else:
+            non_matching_items.append(item)
+    return matching_items, non_matching_items
+
+
+def find_matching_storey_stratum_for_tree(tree: ReferenceTree, strata: list[TreeStratum]) -> Optional[TreeStratum]:
+    same_storey_strata = [stratum for stratum in strata if stratum.storey == tree.storey]
+    same_species_strata, other_species_strata = split_list_by_predicate(
+        same_storey_strata,
+        lambda stratum: stratum.species == tree.species)
+    if len(same_species_strata) == 1:
+        return same_species_strata[0]
+    elif len(same_species_strata) > 1:
+        return find_matching_species_stratum_for_tree(tree, same_species_strata)
+    #TODO: scan other species strata by species precedence list
+    #elif len(other_species_strata) > 0:
+    #    return find_matching_species_stratum_for_tree(tree, other_species_strata)
+    return None
+

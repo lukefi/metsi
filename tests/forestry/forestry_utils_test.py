@@ -1,7 +1,7 @@
 import unittest
 from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
-from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.enums.internal import TreeSpecies, Storey
 import lukefi.metsi.forestry.forestry_utils
 
 
@@ -184,3 +184,30 @@ class ForestryUtilsTest(unittest.TestCase):
         result = lukefi.metsi.forestry.forestry_utils.find_matching_species_stratum_for_tree(reference_tree, stratums)
         self.assertEqual(stratums[2], result)
  
+
+    def test_find_matching_storey_stratum_for_tree(self):
+        reference_tree = ReferenceTree()
+        reference_tree.breast_height_diameter = 13.0
+        reference_tree.storey = Storey.DOMINANT
+        reference_tree.species = TreeSpecies.SPRUCE
+
+        storey_diameter = [
+            (Storey.UNDER, 3.0, TreeSpecies.DOWNY_BIRCH),
+            (Storey.UNDER, 12.0, TreeSpecies.DOWNY_BIRCH),
+            (Storey.DOMINANT, 10.0, TreeSpecies.SPRUCE),
+            (Storey.DOMINANT, 5.0, TreeSpecies.SPRUCE),
+            (Storey.DOMINANT, 7.0, TreeSpecies.PINE),
+            (Storey.DOMINANT, 10.0, TreeSpecies.PINE),
+            (Storey.DOMINANT, 5.80, TreeSpecies.PINE)
+        ]
+
+        stratums = []
+        for spe_dia in storey_diameter:
+            ts = TreeStratum()
+            ts.storey = spe_dia[0]
+            ts.mean_diameter = spe_dia[1]
+            ts.species = spe_dia[2]
+            stratums.append(ts)
+
+        result = lukefi.metsi.forestry.forestry_utils.find_matching_storey_stratum_for_tree(reference_tree, stratums)
+        self.assertEqual(stratums[2], result)
