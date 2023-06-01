@@ -65,6 +65,7 @@ class VMI12TreeIndices:
     latvuskerros = 26
     height = slice(36, 40)
     living_branches_height = slice(58, 61)
+    measured_height = slice(61, 64)
     d13_age = slice(91, 94)
     age_increase = slice(95, 97)
     total_age = slice(97, 100)
@@ -148,8 +149,9 @@ class VMI13TreeIndices:
     diameter = 14
     tree_category = 15
     latvuskerros = 16
+    height = 18
     living_branches_height = 26
-    height = 27
+    measured_height = 27
     d13_age = 46
     age_increase = 48
     total_age = 49

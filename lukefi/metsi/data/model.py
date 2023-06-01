@@ -231,7 +231,8 @@ class ReferenceTree():
     species: Optional[Enum] = None  # RSD record 2, 1-8
     # RSD record 3, diameter at 1.3 m height
     breast_height_diameter: Optional[float] = None
-    height: Optional[float] = None  # RSD record 4, height in meters
+    height: Optional[float] = None  # RSD record 4, model height in meters
+    measured_height: Optional[float] = None  # measurement tree height
     # RSD record 5, age in years when reached 1.3 m height
     breast_height_age: Optional[float] = None
     biological_age: Optional[float] = None  # RSD record 6, age in years

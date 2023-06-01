@@ -210,6 +210,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(20.7, tree.breast_height_diameter)
         # '1741' -> 17.41
         self.assertEqual(17.41, tree.height)
+        self.assertEqual(None, tree.measured_height)
         # diameter 20.7, area factors 1.0
         self.assertEqual(39.298, tree.stems_per_ha)
 
@@ -411,6 +412,8 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(TreeSpecies.PINE, tree.species)
         # '250' -> 25.0
         self.assertEqual(25.0, tree.breast_height_diameter)
+        self.assertEqual(None, tree.height)
+        self.assertEqual(None, tree.measured_height)
         # missing value normalized to None
         self.assertEqual(None, None)
         # diameter 25, area factors 1.0

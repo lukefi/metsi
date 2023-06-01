@@ -199,6 +199,7 @@ class VMI12Builder(VMIBuilder):
     def convert_tree_entry(self, indices: VMI12TreeIndices, data_row: Sequence):
         result = super().convert_tree_entry(indices, data_row)
         result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=100.0)
+        result.measured_height = vmi_util.determine_tree_height(data_row[indices.measured_height], conversion_factor=10.0)
         result.stems_per_ha = vmi_util.determine_stems_per_ha(result.breast_height_diameter, True)
         return result
 
@@ -289,7 +290,8 @@ class VMI13Builder(VMIBuilder):
 
     def convert_tree_entry(self, indices: VMI13TreeIndices, data_row: Sequence):
         result = super().convert_tree_entry(indices, data_row)
-        result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=10.0)
+        result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=100.0)
+        result.measured_height = vmi_util.determine_tree_height(data_row[indices.measured_height], conversion_factor=10.0)
         result.stems_per_ha = vmi_util.determine_stems_per_ha(result.breast_height_diameter, False)
         return result
 
