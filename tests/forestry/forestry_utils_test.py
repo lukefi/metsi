@@ -4,6 +4,17 @@ from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
 from lukefi.metsi.data.enums.internal import TreeSpecies, Storey
 import lukefi.metsi.forestry.forestry_utils
 
+def strata_fixture() -> list[TreeStratum]:
+    values = [
+        {'species': TreeSpecies.SPRUCE, 'storey': Storey.DOMINANT, 'mean_diameter': 10.0},
+        {'species': TreeSpecies.SPRUCE, 'storey': Storey.UNDER, 'mean_diameter': 5.0},
+        {'species': TreeSpecies.PINE, 'storey': Storey.DOMINANT, 'mean_diameter': 18.0},
+        {'species': TreeSpecies.DOWNY_BIRCH, 'storey': Storey.UNDER, 'mean_diameter': 5.0},
+        {'species': TreeSpecies.SPRUCE, 'storey': Storey.DOMINANT, 'mean_diameter': 5.0},
+        {'species': TreeSpecies.COMMON_ALDER, 'storey': Storey.UNDER, 'mean_diameter': 6.2},
+        {'species': TreeSpecies.COMMON_ASH, 'storey': Storey.UNDER, 'mean_diameter': 6.5},
+    ]
+    return [TreeStratum(**v) for v in values]
 
 class ForestryUtilsTest(unittest.TestCase):
 
@@ -165,39 +176,16 @@ class ForestryUtilsTest(unittest.TestCase):
         reference_tree = ReferenceTree()
         reference_tree.species = TreeSpecies.SPRUCE
         reference_tree.breast_height_diameter = 13.0
-        diameters = [
-            10.0,
-            5.0
-        ]
 
-        strata = [TreeStratum(mean_diameter=d) for d in diameters]
+        strata = [stratum for stratum in strata_fixture() if stratum.species == TreeSpecies.SPRUCE]
         result = lukefi.metsi.forestry.forestry_utils.find_matching_stratum_by_diameter(reference_tree, strata)
         self.assertEqual(strata[0], result)
- 
 
     def test_find_matching_storey_stratum_for_tree(self):
         reference_tree = ReferenceTree()
-        reference_tree.breast_height_diameter = 13.0
         reference_tree.storey = Storey.DOMINANT
         reference_tree.species = TreeSpecies.SPRUCE
 
-        storey_diameter = [
-            (Storey.UNDER, 3.0, TreeSpecies.DOWNY_BIRCH),
-            (Storey.UNDER, 12.0, TreeSpecies.DOWNY_BIRCH),
-            (Storey.DOMINANT, 10.0, TreeSpecies.SPRUCE),
-            (Storey.DOMINANT, 5.0, TreeSpecies.SPRUCE),
-            (Storey.DOMINANT, 7.0, TreeSpecies.PINE),
-            (Storey.DOMINANT, 10.0, TreeSpecies.PINE),
-            (Storey.DOMINANT, 5.80, TreeSpecies.PINE)
-        ]
-
-        stratums = []
-        for spe_dia in storey_diameter:
-            ts = TreeStratum()
-            ts.storey = spe_dia[0]
-            ts.mean_diameter = spe_dia[1]
-            ts.species = spe_dia[2]
-            stratums.append(ts)
-
-        result = lukefi.metsi.forestry.forestry_utils.find_matching_storey_stratum_for_tree(reference_tree, stratums)
-        self.assertEqual(stratums[2], result)
+        strata = strata_fixture()
+        result = lukefi.metsi.forestry.forestry_utils.find_matching_storey_stratum_for_tree(reference_tree, strata)
+        self.assertEqual(strata[0], result)
