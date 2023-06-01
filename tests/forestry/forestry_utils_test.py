@@ -181,6 +181,26 @@ class ForestryUtilsTest(unittest.TestCase):
         result = lukefi.metsi.forestry.forestry_utils.find_matching_stratum_by_diameter(reference_tree, strata)
         self.assertEqual(strata[0], result)
 
+    def test_find_strata_for_black_spruce(self):
+        strata = strata_fixture()
+        result = lukefi.metsi.forestry.forestry_utils.find_strata_by_similar_species(TreeSpecies.BLACK_SPRUCE, strata)
+        self.assertEqual(4, len(result))
+        for stratum in result:
+            self.assertTrue(stratum.species.is_coniferous())
+
+    def test_find_strata_for_silver_birch(self):
+        strata = strata_fixture()
+        result = lukefi.metsi.forestry.forestry_utils.find_strata_by_similar_species(TreeSpecies.SILVER_BIRCH, strata)
+        self.assertEqual(1, len(result))
+        self.assertEqual(TreeSpecies.DOWNY_BIRCH, result[0].species)
+
+    def test_find_strata_for_bay_willow(self):
+        strata = strata_fixture()
+        result = lukefi.metsi.forestry.forestry_utils.find_strata_by_similar_species(TreeSpecies.BAY_WILLOW, strata)
+        self.assertEqual(3, len(result))
+        for stratum in result:
+            self.assertTrue(stratum.species.is_deciduous())
+
     def test_find_matching_storey_stratum_for_tree(self):
         reference_tree = ReferenceTree()
         reference_tree.storey = Storey.DOMINANT

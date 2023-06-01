@@ -102,7 +102,6 @@ def mean_age_stand(stand: ForestStand) -> float:
 
 def generate_diameter_threshold(d1: float, d2: float) -> float:
     """ Threshold value for diameter based comparison of two stratums.
-    The threshold is generated based on d[0].
 
     Threshold will have a value based on relative distance of at most 50% of the distance between d[0] and d[1].
     """
@@ -169,18 +168,40 @@ def split_list_by_predicate(items: list, predicate: Callable) -> tuple[list, lis
     return matching_items, non_matching_items
 
 
+def find_strata_by_similar_species(species: TreeSpecies, strata: list[TreeStratum]) -> list[TreeStratum]:
+    """
+    Find a list of strata which have a similar species to the given species. Out of deciduous trees,
+    silver birch is considered most similar to downy birch and vice versa.
+    :param species:
+    :param strata:
+    :return:
+    """
+    candidates = []
+
+    if species.is_deciduous():
+        if species == TreeSpecies.DOWNY_BIRCH:
+            candidates.extend(filter(lambda s: s.species == TreeSpecies.SILVER_BIRCH, strata))
+        elif species == TreeSpecies.SILVER_BIRCH:
+            candidates.extend(filter(lambda s: s.species == TreeSpecies.DOWNY_BIRCH, strata))
+        else:
+            candidates.extend(filter(lambda s: s.species.is_deciduous(), strata))
+    elif species.is_coniferous():
+        candidates.extend(filter(lambda s: s.species.is_coniferous(), strata))
+
+    return candidates
+
+
 def find_matching_storey_stratum_for_tree(tree: ReferenceTree, strata: list[TreeStratum]) -> Optional[TreeStratum]:
     same_storey_strata = [stratum for stratum in strata if stratum.storey == tree.storey]
     same_species_strata, other_species_strata = split_list_by_predicate(
         same_storey_strata,
         lambda stratum: stratum.species == tree.species)
+    candidate_strata = []
     if len(same_species_strata) > 0:
-        return same_species_strata[0]
+        candidate_strata = same_species_strata
+    elif len(other_species_strata) > 0:
+        candidate_strata = find_strata_by_similar_species(tree.species, other_species_strata)
     # TODO: species selection by diameter is not stable for this purpose
-    #elif len(same_species_strata) > 1:
-    #    return find_matching_stratum_by_diameter(tree, same_species_strata)
-    #TODO: scan other species strata by species precedence list
-    #elif len(other_species_strata) > 0:
-    #    return find_matching_species_stratum_for_tree(tree, other_species_strata)
-    return None
-
+    #selected_stratum = find_matching_stratum_by_diameter(tree, candidate_strata)
+    selected_stratum = candidate_strata[0] if len(candidate_strata) > 0 else None
+    return selected_stratum
