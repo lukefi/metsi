@@ -1,10 +1,10 @@
 import math
 import statistics
-import typing
 from enum import Enum
 from lukefi.metsi.data.enums.internal import TreeSpecies, DECIDUOUS_SPECIES, CONIFEROUS_SPECIES
 from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
-from typing import List, Callable, Optional
+from typing import Optional
+from collections.abc import Callable
 
 
 def compounded_growth_factor(growth_percent: float, years: int) -> float:
@@ -68,17 +68,17 @@ def calculate_basal_area(tree: ReferenceTree) -> float:
     return single_basal_area * tree.stems_per_ha
 
 
-def solve_dominant_height(reference_trees: List[ReferenceTree]) -> float:
+def solve_dominant_height(reference_trees: list[ReferenceTree]) -> float:
     heights = list(map(lambda tree: tree.height, reference_trees))
     dominant_height = statistics.median(heights)
     return dominant_height
 
 
-def calculate_attribute_sum(reference_trees: List[ReferenceTree], f: Callable) -> float:
+def calculate_attribute_sum(reference_trees: list[ReferenceTree], f: Callable) -> float:
     return sum(map(f, reference_trees))
 
 
-def calculate_basal_area_weighted_attribute_sum(reference_trees: List[ReferenceTree],
+def calculate_basal_area_weighted_attribute_sum(reference_trees: list[ReferenceTree],
                                                       f: Callable[[ReferenceTree], float]) -> float:
     """ Calcualtes basal area weighted sum for reference trees attribute predefined in function f
 
@@ -128,13 +128,13 @@ def override_from_diameter(initial_stratum: TreeStratum, candidate_stratum: Tree
     return initial_stratum
 
 
-def find_matching_stratum_by_diameter(reference_tree: ReferenceTree, strata: typing.List[TreeStratum]) -> Optional[TreeStratum]:
+def find_matching_stratum_by_diameter(reference_tree: ReferenceTree, strata: list[TreeStratum]) -> Optional[TreeStratum]:
     """ Solves from which stratum the supplementing of reference tree should happen.
 
     Return a stratum that has the closest diameter to the reference tree diameter.
 
     :param reference_tree: A reference tree for which a matching stratum needs to be found
-    :param strata: List of stratums from which a diameter match is searched
+    :param strata: list of stratums from which a diameter match is searched
     :returns: a matching stratum or None if not match is possible
     """
     if len(strata) == 0:
@@ -153,7 +153,7 @@ def find_matching_stratum_by_diameter(reference_tree: ReferenceTree, strata: typ
 def split_list_by_predicate(items: list, predicate: Callable) -> tuple[list, list]:
     """ Splits a list into two lists based on a predicate.
 
-    :param items: List to be split
+    :param items: list to be split
     :param predicate: Predicate used to split the list
     :return: Tuple of lists, where the first list contains the items that match the predicate and the second list
         contains the items that do not match the predicate.

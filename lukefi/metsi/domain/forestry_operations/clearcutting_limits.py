@@ -10,7 +10,6 @@ regional tables have columns by dominant species (Scots Pine,
 Norway Spruce, Silver Birch, Downy Birch) and rows by site type 
 (OMT, MT, VT, CT). 
 """
-from typing import List, Tuple
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.forestry import forestry_utils as futil
@@ -72,7 +71,7 @@ RENEWAL_AGES = {
 
 
 
-def create_clearcutting_limits_table(file_path: str) -> List:
+def create_clearcutting_limits_table(file_path: str) -> list:
     contents = None
     with open(file_path, "r") as f:
         contents = f.read()
@@ -157,7 +156,7 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
 
 
 
-def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None, file_path_diameters: str = None) -> Tuple[int, float]:
+def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None, file_path_diameters: str = None) -> tuple[int, float]:
     """ Finds minimum age and and minimum mean diameter for clearcutting
     a stand from parameter files defined in control. yaml. It is user's responsibility to provide it in correct format. 
     Parsing failure will raise an exception. 

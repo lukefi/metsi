@@ -2,7 +2,6 @@ import geopandas
 import datetime
 
 from shapely.geometry import Polygon, Point
-from typing import Tuple, List, Dict
 from xml.etree.ElementTree import Element
 from types import SimpleNamespace
 from lukefi.metsi.data.formats import util
@@ -75,7 +74,7 @@ def parse_date(value: str) -> datetime.date:
     return datetime.date(*date)
 
 
-def parse_past_operations(eoperations: List[Element]) -> Dict[int, Tuple[int, int]]:
+def parse_past_operations(eoperations: list[Element]) -> dict[int, tuple[int, int]]:
     operations = {}
     for eoper in eoperations:
         oper_id = util.parse_int(eoper.attrib['id'])
@@ -86,7 +85,7 @@ def parse_past_operations(eoperations: List[Element]) -> Dict[int, Tuple[int, in
     return operations
 
 
-def parse_future_operations(eoperations: List[Element]) -> Dict[int, Tuple[int, int]]:
+def parse_future_operations(eoperations: list[Element]) -> dict[int, tuple[int, int]]:
     operations = {}
     for eoper in eoperations:
         oper_id = util.parse_int(eoper.attrib['id'])
@@ -96,7 +95,7 @@ def parse_future_operations(eoperations: List[Element]) -> Dict[int, Tuple[int, 
     return operations
 
 
-def parse_stand_operations(estand: Element, target_operations=None) -> List[Dict[int, Tuple[int, int]]]:
+def parse_stand_operations(estand: Element, target_operations=None) -> list[dict[int, tuple[int, int]]]:
     eoperations = estand.findall('./op:Operations/op:Operation', NS)
     past_eoperatios = list(filter(lambda eoper: False if eoper.find('./op:CompletionData', NS) is None else True, eoperations))
     future_eoperations = list(filter(lambda eoper: False if eoper.find('./op:ProposalData', NS) is None else True, eoperations))
@@ -162,7 +161,7 @@ def parse_forest_management_category(source: str) -> int or float or None:
         return None
 
 
-def point_series(value: str) -> List[Tuple[float, float]]:
+def point_series(value: str) -> list[tuple[float, float]]:
     """ Converts a gml string presentation to a list of (x, y) points"""
     series = []
     for xy_point in value.split(' '):
@@ -171,7 +170,7 @@ def point_series(value: str) -> List[Tuple[float, float]]:
     return series
 
 
-def parse_centroid(sns: SimpleNamespace) -> Tuple[float, float, str]:
+def parse_centroid(sns: SimpleNamespace) -> tuple[float, float, str]:
     """
     GeoSeries instance of Geopandas library is used as container for stand gml data.
     The centroid of geoseries contain the latitude and longitude of the stand geometry.
@@ -190,7 +189,7 @@ def parse_centroid(sns: SimpleNamespace) -> Tuple[float, float, str]:
     return (gs.centroid.x[0], gs.centroid.y[0], gs.crs.srs)
 
 
-def parse_coordinates(estand: Element) -> Tuple[float, float, str]:
+def parse_coordinates(estand: Element) -> tuple[float, float, str]:
     """
     Extracting stand latitude and longitude coordinates from gml point or polygon smk xml element.
     Also the coordiante reference system (crs) is extracted and returned.

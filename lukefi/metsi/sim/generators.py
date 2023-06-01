@@ -1,4 +1,5 @@
-from typing import Any, Callable, Optional
+from typing import Any, Optional
+from collections.abc import Callable
 from lukefi.metsi.sim.core_types import EventTree, SimConfiguration, DeclaredEvents, OperationPayload, GeneratorFn
 from lukefi.metsi.sim.operations import prepared_processor, prepared_operation, resolve_operation
 from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_params

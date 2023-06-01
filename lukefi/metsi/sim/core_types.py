@@ -1,7 +1,8 @@
 from collections import OrderedDict
 from copy import deepcopy, copy
 from types import SimpleNamespace
-from typing import Callable, Optional, Any, TypeVar, Generic
+from typing import Optional, Any, TypeVar, Generic
+from collections.abc import Callable
 
 def identity(x):
     return x

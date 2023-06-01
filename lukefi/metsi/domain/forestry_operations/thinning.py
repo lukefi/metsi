@@ -1,5 +1,5 @@
 from lukefi.metsi.data.model import ForestStand
-from typing import Callable
+from collections.abc import Callable
 from lukefi.metsi.domain.collected_types import CrossCuttableTree
 from lukefi.metsi.domain.forestry_operations.thinning_limits import resolve_thinning_bounds, resolve_first_thinning_residue
 from lukefi.metsi.forestry.harvest import thinning

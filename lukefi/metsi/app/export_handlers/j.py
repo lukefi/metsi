@@ -1,8 +1,8 @@
 import bisect
-import typing
 from functools import cache
 from pathlib import Path
-from typing import TypeVar, Generic, Any, Union, Iterator, IO
+from typing import TypeVar, Generic, Any, Union, IO
+from collections.abc import Iterator, Iterable
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults
@@ -58,10 +58,10 @@ def j_row(out: IO, fns: list[CollectFn], getvar: GetVarFn):
     buf = []
     for f in fns:
         v = f(getvar)
-        if isinstance(v, str) or not isinstance(v, typing.Iterable):
+        if isinstance(v, str) or not isinstance(v, Iterable):
             n = 1
             buf.append(v)
-        elif isinstance(v, typing.Iterable):
+        elif isinstance(v, Iterable):
             it = iter(v)
             l = len(buf)
             buf.extend(it)

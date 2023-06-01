@@ -1,4 +1,3 @@
-from typing import Dict
 import unittest
 import numpy as np
 from lukefi.metsi.data.enums.internal import TreeSpecies
@@ -24,7 +23,7 @@ class CrossCuttingTest(TestCaseExtension):
         height: float,
         timber_price_table,
         div = 10
-        ) -> tuple[Dict, Dict]:
+        ) -> tuple[dict, dict]:
         """This function is used only to to test the python-ported version of the cross-cutting scripts against the original R version."""
 
         species_string = _cross_cut_species_mapper.get(species, "birch") #birch is used as the default species in cross §cutting

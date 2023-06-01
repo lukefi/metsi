@@ -1,16 +1,16 @@
-import typing
+from collections.abc import Callable
 import unittest
 
 from lukefi.metsi.data.formats.ForestBuilder import VMIBuilder, VMI13Builder
 
 
 class ConverterTestSuite(unittest.TestCase):
-    def run_with_test_assertions(self, assertions: typing.List[typing.Tuple], fn: typing.Callable):
+    def run_with_test_assertions(self, assertions: list[tuple], fn: Callable):
         for case in assertions:
             result = fn(*case[0])
             self.assertEqual(case[1], result)
 
-    def assertions_should_raise_TypeError(self, assertions: typing.List[typing.Tuple], fn: typing.Callable):
+    def assertions_should_raise_TypeError(self, assertions: list[tuple], fn: Callable):
         for case in assertions:
             self.assertRaises(TypeError, fn, *case[0])
 

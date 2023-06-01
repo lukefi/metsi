@@ -1,4 +1,4 @@
-import typing
+from collections.abc import Sequence, Iterable
 import xml.etree.ElementTree as ET
 
 from lukefi.metsi.data.enums.internal import OwnerCategory
@@ -13,14 +13,14 @@ class ForestBuilder(ABC):
     """Abstract base class of forest builders"""
 
     @abstractmethod
-    def build(self) -> typing.List[ForestStand]:
+    def build(self) -> list[ForestStand]:
         ...
 
 
 class VMIBuilder(ForestBuilder):
     """Shared functionality of VMI* builders"""
 
-    def __init__(self, builder_flags: dict, data_rows: typing.Iterable):
+    def __init__(self, builder_flags: dict, data_rows: iter):
         """
         Initialize instance variable lists for forest stands, reference trees and tree strata.
         Given source data is pre-parsed for data types 1, 2 and 3.
@@ -28,9 +28,9 @@ class VMIBuilder(ForestBuilder):
         :param builder_flags: building process spesific flags
         :param data_rows: Iterable raw data rows from a VMI source file
         """
-        self.forest_stands: typing.List[str] = []
-        self.reference_trees: typing.List[str] = []
-        self.tree_strata: typing.List[str] = []
+        self.forest_stands: list[str] = []
+        self.reference_trees: list[str] = []
+        self.tree_strata: list[str] = []
         self.builder_flags = builder_flags
 
         for row in data_rows:
@@ -48,7 +48,7 @@ class VMIBuilder(ForestBuilder):
                 print('    ' + str(row))
 
     def convert_stand_entry(self, indices: VMI12StandIndices or VMI13StandIndices,
-                            data_row: typing.Sequence, stand_id: int or None = None) -> ForestStand:
+                            data_row: Sequence, stand_id: int or None = None) -> ForestStand:
         """Create a ForestStand out of given VMI type 1 data row using given data indices and order number"""
         result = ForestStand()
         result.identifier = vmi_util.generate_stand_identifier(data_row, indices)
@@ -80,7 +80,7 @@ class VMIBuilder(ForestBuilder):
         return result
 
     def convert_tree_entry(self, indices: VMI12TreeIndices or VMI13TreeIndices,
-                           data_row: typing.Sequence) -> ReferenceTree:
+                           data_row: Sequence) -> ReferenceTree:
         result = ReferenceTree()
         result.tree_category = data_row[indices.tree_category]
         result.identifier = vmi_util.generate_tree_identifier(data_row, indices)
@@ -103,7 +103,7 @@ class VMIBuilder(ForestBuilder):
         return result
 
     def convert_stratum_entry(self, indices: VMI12StratumIndices or VMI13StratumIndices,
-                              data_row: typing.Sequence) -> TreeStratum:
+                              data_row: Sequence) -> TreeStratum:
         result = TreeStratum()
         result.identifier = vmi_util.generate_stratum_identifier(data_row, indices)
         result.species = vmi2internal.convert_species(data_row[indices.species])
@@ -142,22 +142,22 @@ class VMIBuilder(ForestBuilder):
         return [stand.tree_strata.clear() for stand in stands]
 
     @abstractmethod
-    def find_row_type(self, row: typing.Iterable):
+    def find_row_type(self, row: Iterable):
         ...
 
     @abstractmethod
-    def build(self) -> typing.List[ForestStand]:
+    def build(self) -> list[ForestStand]:
         ...
 
 
 class VMI12Builder(VMIBuilder):
     """VMI12 specific builder implementation"""
 
-    def __init__(self, builder_flags: dict, data_rows: typing.List[str] = []):
+    def __init__(self, builder_flags: dict, data_rows: list[str] = []):
         # TODO: data_rows sanity check for VMI12
         super().__init__(builder_flags, data_rows)
 
-    def convert_stand_entry(self, indices: VMI12StandIndices, data_row: typing.Sequence,
+    def convert_stand_entry(self, indices: VMI12StandIndices, data_row: Sequence,
                             stand_id: int or None = None) -> ForestStand:
         """Create a ForestStand out of given VMI12 type 1 data row using given data indices and order number"""
         result = super().convert_stand_entry(indices, data_row, stand_id)
@@ -196,7 +196,7 @@ class VMI12Builder(VMIBuilder):
         )
         return result
 
-    def convert_tree_entry(self, indices: VMI12TreeIndices, data_row: typing.Sequence):
+    def convert_tree_entry(self, indices: VMI12TreeIndices, data_row: Sequence):
         result = super().convert_tree_entry(indices, data_row)
         result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=100.0)
         result.stems_per_ha = vmi_util.determine_stems_per_ha(result.breast_height_diameter, True)
@@ -207,14 +207,14 @@ class VMI12Builder(VMIBuilder):
         return int(row[13])
 
 
-    def build(self) -> typing.List[ForestStand]:
+    def build(self) -> list[ForestStand]:
         """Populate a list of ForestStand with associated ReferenceTree and TreeStratum entries.
         Using constructor initialized instance variables as source.
 
         Returns:
-        typing.List[ForestStand]:populated and parsed VMI12 forest stands with reference trees and tree strata
+        list[ForestStand]:populated and parsed VMI12 forest stands with reference trees and tree strata
         """
-        result: typing.Dict[str, ForestStand] = {}
+        result: dict[str, ForestStand] = {}
         for i, row in enumerate(self.forest_stands):
             stand = self.convert_stand_entry(VMI12StandIndices, row, i + 1)
             result[stand.identifier] = stand
@@ -239,17 +239,17 @@ class VMI12Builder(VMIBuilder):
 class VMI13Builder(VMIBuilder):
     """VMI13 specific builder implementation"""
 
-    def __init__(self,  builder_flags: dict, data_rows: typing.List[str] = []):
+    def __init__(self,  builder_flags: dict, data_rows: list[str] = []):
         pre_parsed_rows = map(lambda raw: raw.split(), data_rows)
         # TODO: data_rows sanity check for VMI13
         super().__init__(builder_flags, pre_parsed_rows)
 
-    def find_row_type(self, row: typing.Sequence):
+    def find_row_type(self, row: Sequence):
         """Return VMI13 data type of the row"""
         return int(row[0])
 
     def convert_stand_entry(self, indices: VMI13StandIndices,
-                            data_row: typing.Sequence,
+                            data_row: Sequence,
                             stand_id: int or None = None) -> ForestStand:
         """Create a ForestStand out of given VMI13 type 1 data row using given data indices and order number"""
         result = super().convert_stand_entry(indices, data_row, stand_id)
@@ -287,20 +287,20 @@ class VMI13Builder(VMIBuilder):
         )
         return result
 
-    def convert_tree_entry(self, indices: VMI13TreeIndices, data_row: typing):
+    def convert_tree_entry(self, indices: VMI13TreeIndices, data_row: Sequence):
         result = super().convert_tree_entry(indices, data_row)
         result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=10.0)
         result.stems_per_ha = vmi_util.determine_stems_per_ha(result.breast_height_diameter, False)
         return result
 
-    def build(self) -> typing.List[ForestStand]:
+    def build(self) -> list[ForestStand]:
         """Populate a list of ForestStand with associated ReferenceTree and TreeStratum entries.
         Using constructor initialized instance variables as source.
 
         Returns:
         list[ForestStand]:populated and parsed VMI13 forest stands with reference trees and tree strata
         """
-        result: typing.Dict[str, ForestStand] = {}
+        result: dict[str, ForestStand] = {}
         for i, row in enumerate(self.forest_stands):
             stand = self.convert_stand_entry(VMI13StandIndices, row, i + 1)
             result[stand.identifier] = stand
@@ -331,7 +331,7 @@ class XMLBuilder(ForestBuilder):
 
 
     @abstractmethod
-    def build(self) -> typing.List[ForestStand]:
+    def build(self) -> list[ForestStand]:
         ...
 
 
@@ -355,7 +355,7 @@ class ForestCentreBuilder(XMLBuilder):
         self.xpath_strata = self.xpath_strata.format(builder_flags['strata_origin'])
 
 
-    def set_stand_operations(self, stand: ForestStand, operations: typing.List[typing.Dict[int, typing.Tuple[int, int]]]) -> ForestStand:
+    def set_stand_operations(self, stand: ForestStand, operations: list[dict[int, tuple[int, int]]]) -> ForestStand:
         for oper in operations.values():
             (oper_type, oper_year) = oper
             if oper_type in (1,):
@@ -451,7 +451,7 @@ class ForestCentreBuilder(XMLBuilder):
         return stratum
 
 
-    def build(self) -> typing.List[ForestStand]:
+    def build(self) -> list[ForestStand]:
         stands = []
         estands = self.root.findall(self.xpath_stand, smk_util.NS)
         for estand in estands:

@@ -1,6 +1,6 @@
 import io
 from types import SimpleNamespace
-from typing import OrderedDict
+from collections import OrderedDict
 import unittest
 from lukefi.metsi.app.export_handlers.j import j_xda, j_cda
 from lukefi.metsi.sim.core_types import CollectedData, OperationPayload

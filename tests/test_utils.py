@@ -3,7 +3,8 @@ This module contains a collection of util functions and dummy payload functions 
 """
 import os
 import unittest
-from typing import Any, Optional, Callable
+from typing import Any, Optional
+from collections.abc import Callable
 import numpy as np
 
 import yaml

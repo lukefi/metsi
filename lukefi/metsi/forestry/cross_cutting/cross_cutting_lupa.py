@@ -1,5 +1,5 @@
 from functools import cache
-from typing import Callable, Sequence
+from collections.abc import Callable, Sequence
 
 import lupa
 from lukefi.metsi.data.enums.internal import TreeSpecies

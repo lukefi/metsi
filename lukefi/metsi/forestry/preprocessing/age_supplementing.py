@@ -1,4 +1,3 @@
-import typing
 from lukefi.metsi.data.model import ReferenceTree, TreeStratum
 from lukefi.metsi.forestry.forestry_utils import find_matching_stratum_by_diameter
 
@@ -16,9 +15,9 @@ class SupplementStrategy:
         self.tree_identifier: str = None
 
 
-def perform_supplementing(tree_and_strategy: typing.List[typing.Tuple[ReferenceTree, SupplementStrategy]],
-                          age_trees: typing.List[ReferenceTree],
-                          age_stratums: typing.List[TreeStratum]) -> typing.List[ReferenceTree]:
+def perform_supplementing(tree_and_strategy: list[tuple[ReferenceTree, SupplementStrategy]],
+                          age_trees: list[ReferenceTree],
+                          age_stratums: list[TreeStratum]) -> list[ReferenceTree]:
     for (rt, s) in tree_and_strategy:
         if s.strategy is STRATUM_SUPPLEMENT:
             same_species_strata = [
@@ -61,7 +60,7 @@ def final_tree_strategy(reference_tree):
     return strategy
 
 
-def tree_strategy(reference_tree: ReferenceTree, age_trees: typing.List[ReferenceTree]):
+def tree_strategy(reference_tree: ReferenceTree, age_trees: list[ReferenceTree]):
     """ Secondary startegy for trees that have no age
 
     param: reference_tree: Tree with no age
@@ -77,7 +76,7 @@ def tree_strategy(reference_tree: ReferenceTree, age_trees: typing.List[Referenc
     return strategy
 
 
-def stratum_strategy(reference_tree: ReferenceTree, stratums: typing.List[TreeStratum]):
+def stratum_strategy(reference_tree: ReferenceTree, stratums: list[TreeStratum]):
     """ Default strategy for trees that do not have age
 
     param: reference_tree: Tree which does not yet have a age
@@ -92,9 +91,9 @@ def stratum_strategy(reference_tree: ReferenceTree, stratums: typing.List[TreeSt
     return strategy
 
 
-def solve_supplement_strategy(no_age_trees: typing.List[ReferenceTree],
-                              age_trees: typing.List[ReferenceTree],
-                              age_stratums: typing.List[TreeStratum]) -> typing.List[SupplementStrategy]:
+def solve_supplement_strategy(no_age_trees: list[ReferenceTree],
+                              age_trees: list[ReferenceTree],
+                              age_stratums: list[TreeStratum]) -> list[SupplementStrategy]:
     """ Solveing a supplement strategy happens in a priority order in which stratum strategy
     is with highest priority and using same same tree to supplement the lowest."""
     supplement_strategies = []
@@ -111,8 +110,8 @@ def solve_supplement_strategy(no_age_trees: typing.List[ReferenceTree],
     return supplement_strategies
 
 
-def supplement_age_for_reference_trees(reference_trees: typing.List[ReferenceTree],
-                                       stratums: typing.List[TreeStratum]) -> typing.List[ReferenceTree]:
+def supplement_age_for_reference_trees(reference_trees: list[ReferenceTree],
+                                       stratums: list[TreeStratum]) -> list[ReferenceTree]:
     """ Supplementing of reference trees that have no d13 age.
     Supplementing happens from subsets of stratums and trees that have d13 age.
     Based on a priority a strategy to supplement is selected and supplementing is performed.

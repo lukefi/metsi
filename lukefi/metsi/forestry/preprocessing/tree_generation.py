@@ -1,5 +1,5 @@
 """ Module contains tree generation logic that uses distribution based tree generation models (see. distributions module) """
-from typing import Optional, List
+from typing import Optional
 from lukefi.metsi.data.model import ReferenceTree, TreeStratum
 from enum import Enum
 from lukefi.metsi.forestry.preprocessing import distributions
@@ -11,7 +11,7 @@ class TreeStrategy(Enum):
     SKIP = 'skip_tree_generation'
 
 
-def finalize_trees(reference_trees: List[ReferenceTree], stratum: TreeStratum) -> List[ReferenceTree]:
+def finalize_trees(reference_trees: list[ReferenceTree], stratum: TreeStratum) -> list[ReferenceTree]:
     """ For all given trees inflates the common variables from stratum. """
     n_trees = len(reference_trees)
     for i, reference_tree in enumerate(reference_trees):
@@ -31,7 +31,7 @@ def finalize_trees(reference_trees: List[ReferenceTree], stratum: TreeStratum) -
     return reference_trees
 
 
-def trees_from_weibull(stratum: TreeStratum, n_trees: int) -> List[ReferenceTree]:
+def trees_from_weibull(stratum: TreeStratum, n_trees: int) -> list[ReferenceTree]:
     """ Generate N trees from weibull distribution.
 
     For a single tree, stem count and diameter are obtained
@@ -53,7 +53,7 @@ def trees_from_weibull(stratum: TreeStratum, n_trees: int) -> List[ReferenceTree
     return result
 
 
-def trees_from_sapling_height_distribution(stratum: TreeStratum, n_trees: Optional[int] = None) -> List[ReferenceTree]:
+def trees_from_sapling_height_distribution(stratum: TreeStratum, n_trees: Optional[int] = None) -> list[ReferenceTree]:
     """  Generate N trees from height distribution """
     return distributions.sapling_height_distribution(
         stratum,
@@ -79,7 +79,7 @@ def solve_tree_generation_strategy(stratum: TreeStratum) -> str:
             return TreeStrategy.SKIP
 
 
-def reference_trees_from_tree_stratum(stratum: TreeStratum, n_trees: Optional[int] = 10) -> List[ReferenceTree]:
+def reference_trees_from_tree_stratum(stratum: TreeStratum, n_trees: Optional[int] = 10) -> list[ReferenceTree]:
     """ Composes N number of reference trees based on values of the stratum.
 
     The tree generation strategies: weibull distribution and height distribution.
@@ -92,7 +92,7 @@ def reference_trees_from_tree_stratum(stratum: TreeStratum, n_trees: Optional[in
 
     :param stratum: Single stratum instance.
     :param (optional) n_trees: Number of reference trees to be generated (10 by default).
-    :return: List of reference trees derived from given stratum.
+    :return: list of reference trees derived from given stratum.
     """
     strategy = solve_tree_generation_strategy(stratum)
     result = []

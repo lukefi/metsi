@@ -1,5 +1,5 @@
 import unittest
-from typing import Callable, List, Tuple
+from collections.abc import Callable
 
 import numpy as np
 
@@ -21,13 +21,13 @@ TIMBER_PRICE_TABLE_THREE_GRADES = np.array(
                         ])
 
 class ConverterTestSuite(unittest.TestCase):
-    def run_with_test_assertions(self, assertions: List[Tuple], fn: Callable):
+    def run_with_test_assertions(self, assertions: list[tuple], fn: Callable):
         for case in assertions:
             result = fn(*case[0])
             self.assertEqual(case[1], result)
 
 class TestCaseExtension(unittest.TestCase):
-    def assertListsAlmostEqual(self, first: List, second: List, places: int):
+    def assertlistsAlmostEqual(self, first: list, second: list, places: int):
         self.assertEqual(len(first), len(second))
         for i in range(len(first)):
             self.assertAlmostEqual(first[i], second[i], places=places)

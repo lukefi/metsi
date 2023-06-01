@@ -3,7 +3,8 @@ import os
 import pickle
 from pathlib import Path
 import jsonpickle
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Optional
+from collections.abc import Iterator, Callable
 import yaml
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, stands_to_rsd_content

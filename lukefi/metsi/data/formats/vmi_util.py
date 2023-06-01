@@ -1,4 +1,5 @@
-from typing import Optional, Tuple, Sequence
+from typing import Optional
+from collections.abc import Sequence
 from datetime import datetime as dt
 
 from lukefi.metsi.data.enums.internal import Storey
@@ -8,7 +9,7 @@ from shapely.geometry import Point
 from geopandas import GeoSeries
 
 
-def determine_area_factors(small_tree_sourcevalue: str, big_tree_sourcevalue: str) -> Tuple[float, float]:
+def determine_area_factors(small_tree_sourcevalue: str, big_tree_sourcevalue: str) -> tuple[float, float]:
     """Compute forest stand specific scaling factors for area and reference tree stem count scaling."""
     default_rsd_value = 1.0
     small = get_or_default(parse_float(small_tree_sourcevalue), 0.0)
@@ -189,7 +190,7 @@ def determine_forest_maintenance_method(sourcevalue: str, cutting_year: Optional
     return 0
 
 
-def convert_vmi12_geolocation(lat_source: str, lon_source: str) -> Tuple[float, float]:
+def convert_vmi12_geolocation(lat_source: str, lon_source: str) -> tuple[float, float]:
     """
     Convert VMI12 coordinates in EPSG:2393 to EPSG:3067. Source values are in meter precision, return values are
     likewise rounded to meter precision.
@@ -202,7 +203,7 @@ def convert_vmi12_geolocation(lat_source: str, lon_source: str) -> Tuple[float, 
     return round(point.centroid.y[0]), round(point.centroid.x[0])
 
 
-def convert_vmi12_approximate_geolocation(lat_source: str, lon_source: str) -> Tuple[float, float]:
+def convert_vmi12_approximate_geolocation(lat_source: str, lon_source: str) -> tuple[float, float]:
     """
     Convert VMI12 coordinates in EPSG:2393 to YKJ/KKJ3 with band 3 prefix removed.
 
@@ -457,7 +458,7 @@ def vmi_codevalue(source: str) -> Optional[str]:
 def determine_tree_age_values(
         chest_height_age_source: str,
         age_increase_source: str,
-        total_age_source: str) -> Tuple[int, int]:
+        total_age_source: str) -> tuple[int, int]:
     chest_height_age = parse_int(chest_height_age_source)
     age_increase = parse_int(age_increase_source)
     total_age = parse_int(total_age_source)
@@ -555,7 +556,7 @@ def determine_stratum_origin(source_origin: str) -> int:
 
 def determine_stratum_age_values(biological_age_source: str,
                                  breast_height_age_source: str,
-                                 height: float) -> Optional[Tuple[float,float]]:
+                                 height: float) -> Optional[tuple[float,float]]:
     """ Determinates biological age and breast height age for vmi source data.
 
         param: biological_age_source: Stratum biological age or age increase value as vmi source value.
