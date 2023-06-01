@@ -1,8 +1,10 @@
-from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.model import ForestStand, TreeStratum
+from lukefi.metsi.forestry.forestry_utils import find_matching_storey_stratum_for_tree
 from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
 from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 from lukefi.metsi.domain.utils.filter import applyfilter
+from lukefi.metsi.forestry.preprocessing.tree_generation_lm import generate_trees
 from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
     debug_output_row_from_comparison_set, debug_output_header_row
 
@@ -56,21 +58,45 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
     return stands
 
 
+
+
 def generate_reference_trees(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Operation function that generates (N * stratum) reference trees for each stand """
     debug = operation_params.get('debug', False)
     debug_output_rows = []
-    debug_filename = operation_params.get('debug_filename', 'debug_weibull_reference_trees.csv')
+    debug_strata_rows = []
+    debug_tree_rows = []
+    method = operation_params.get('method', 'weibull')
 
     n_trees = pre_util.get_or_default(operation_params['n_trees'])
     for stand in stands:
-        stand_trees = []
+        stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
+        for tree in stand_trees:
+            stratum = find_matching_storey_stratum_for_tree(tree, stand.tree_strata)
+            if stratum is None:
+                continue
+            if stratum.__dict__.get('_trees') is not None:
+                stratum._trees.append(tree)
+            else:
+                stratum._trees = [tree]
+            if debug:
+                debug_tree_rows.append([
+                    stratum.identifier,
+                    tree.breast_height_diameter or 'NA',
+                    tree.height or 'NA',
+                    tree.biological_age or 'NA',
+                    tree.measured_height or 'NA'
+                ])
+        stand.tree_strata.sort(key=lambda stratum: stratum.identifier)
         for stratum in stand.tree_strata:
-            if pre_util.stratum_needs_diameter(stratum):
-                stratum = pre_util.supplement_mean_diameter(stratum)
-            stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, n_trees)
+            if method == 'weibull':
+                if pre_util.stratum_needs_diameter(stratum):
+                    stratum = pre_util.supplement_mean_diameter(stratum)
+                stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, n_trees)
 
-            stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
+                stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
+            elif method == 'lm':
+                stratum_trees = generate_trees(stratum, stand.degree_days)
             stand_tree_count = len(stand_trees)
             for i, tree in enumerate(stratum_trees):
                 tree.identifier = "{}-{}-tree".format(stand.identifier, stand_tree_count + i + 1)
@@ -78,14 +104,33 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
             validation_set = create_stratum_tree_comparison_set(stratum, stratum_trees)
 
             if debug:
+                debug_strata_rows.append([
+                    stratum.identifier,
+                    stratum.mean_diameter,
+                    stratum.mean_height,
+                    stratum.basal_area,
+                    stratum.stems_per_ha,
+                    stratum.species.value,
+                    stand.degree_days
+                ])
                 debug_output_rows.append(debug_output_row_from_comparison_set(stratum, validation_set))
         stand.reference_trees = stand_trees
     if debug:
         import csv
-        with open(debug_filename, 'w', newline='') as csvfile:
+        with open('debug_generated_tree_results.csv', 'w', newline='\n') as csvfile:
             writer = csv.writer(csvfile, delimiter=';')
             writer.writerow(debug_output_header_row())
             writer.writerows(debug_output_rows)
+        if len(debug_strata_rows) > 1:
+            with open('r_strata.dat', 'w', newline='\n') as stratum_file:
+                writer = csv.writer(stratum_file, delimiter=' ')
+                writer.writerow(["stratum", "D", "H", "G", "F", "age", "spe", "ddy"])
+                writer.writerows(debug_strata_rows)
+        if len(debug_tree_rows) > 1:
+            with open('r_trees.dat', 'w', newline='\n') as tree_file:
+                writer = csv.writer(tree_file, delimiter=' ')
+                writer.writerow(["stratum", "d", "h", "age_measured", "h_measured"])
+                writer.writerows(debug_tree_rows)
     return stands
 
 

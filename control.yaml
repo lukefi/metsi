@@ -75,6 +75,7 @@ operation_params:
 preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
+      method: weibull
       debug: false
   #filter:
   #  - remove trees: sapling or stems_per_ha == 0
