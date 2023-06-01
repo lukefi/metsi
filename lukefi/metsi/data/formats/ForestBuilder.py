@@ -404,7 +404,7 @@ class ForestCentreBuilder(XMLBuilder):
         self.xpath_strata = self.xpath_strata.format(builder_flags['strata_origin'])
 
 
-    def set_stand_operations(self, stand: ForestStand, operations: typing.List[typing.Dict[int, typing.Tuple[int, int]]]) -> ForestStand:
+    def set_stand_operations(self, stand: ForestStand, operations: typing.Dict[int, typing.Tuple[int, int]]) -> ForestStand:
         for oper in operations.values():
             (oper_type, oper_year) = oper
             if oper_type in (1,):
@@ -418,7 +418,7 @@ class ForestCentreBuilder(XMLBuilder):
                 stand.method_of_last_cutting = 1 # RSD record 31
             elif oper_type in (4, 15, 100):
                 stand.cutting_year = oper_year # RSD record 28
-                stand.method_of_last_cutting = 6 if stand.soil_and_peatland_category in (1,2,3) else 5
+                stand.method_of_last_cutting = 6 if stand.soil_peatland_category in (1,2,3) else 5
             elif oper_type in (6, 7, 102, 116, 123, 124):
                 stand.cutting_year = oper_year # RSD record 28
                 stand.method_of_last_cutting = 6 # RSD record 31
@@ -513,4 +513,3 @@ class ForestCentreBuilder(XMLBuilder):
             stand.tree_strata = strata
             stands.append(stand)
         return stands
-        

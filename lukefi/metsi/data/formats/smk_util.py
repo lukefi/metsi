@@ -96,7 +96,7 @@ def parse_future_operations(eoperations: List[Element]) -> Dict[int, Tuple[int, 
     return operations
 
 
-def parse_stand_operations(estand: Element, target_operations=None) -> List[Dict[int, Tuple[int, int]]]:
+def parse_stand_operations(estand: Element, target_operations=None) -> Dict[int, Tuple[int, int]]:
     eoperations = estand.findall('./op:Operations/op:Operation', NS)
     past_eoperatios = list(filter(lambda eoper: False if eoper.find('./op:CompletionData', NS) is None else True, eoperations))
     future_eoperations = list(filter(lambda eoper: False if eoper.find('./op:ProposalData', NS) is None else True, eoperations))
