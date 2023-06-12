@@ -16,7 +16,7 @@ class TestConversion(test_util.ConverterTestSuite):
     def test_convert_FC_species_to_internal_species(self):
         assertions = [
             (["1"], TreeSpecies.PINE),
-            (["30"], TreeSpecies.UNKNOWN_DECIDUOUS),
+            (["29"], TreeSpecies.UNKNOWN_DECIDUOUS),
         ]
         self.run_with_test_assertions(
             assertions, fc2internal.convert_species)

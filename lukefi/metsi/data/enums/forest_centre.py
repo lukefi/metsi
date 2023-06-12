@@ -30,8 +30,8 @@ class ForestCentreSpecies(Enum):
     MAPLE = '26'
     CURLY_BIRCH = '27'
     WYCH_ELM = '28'
-    UNKNOWN_CONIFEROUS = '29'
-    UNKNOWN_DECIDUOUS = '30'
+    UNKNOWN_DECIDUOUS = '29'
+    UNKNOWN_CONIFEROUS = '30'
 
 
 class ForestCentreOwnerCategory(Enum):
