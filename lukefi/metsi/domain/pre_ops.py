@@ -4,7 +4,7 @@ from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
 from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 from lukefi.metsi.domain.utils.filter import applyfilter
-from lukefi.metsi.forestry.preprocessing.tree_generation_lm import generate_trees
+from lukefi.metsi.forestry.preprocessing.tree_generation_lm import tree_generation_lm
 from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
     debug_output_row_from_comparison_set, debug_output_header_row
 
@@ -67,9 +67,10 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     debug_strata_rows = []
     debug_tree_rows = []
     method = operation_params.get('method', 'weibull')
-
-    n_trees = pre_util.get_or_default(operation_params['n_trees'])
-    for stand in stands:
+    n_trees = operation_params.get('n_trees', 10)
+    lm_mode = operation_params.get('lm_mode', 'dcons')
+    for i, stand in enumerate(stands):
+        print(f"\rGenerating trees for stand {i}/{len(stands)}", end="")
         stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
         for tree in stand_trees:
             stratum = find_matching_storey_stratum_for_tree(tree, stand.tree_strata)
@@ -96,7 +97,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
 
                 stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
             elif method == 'lm':
-                stratum_trees = generate_trees(stratum, stand.degree_days)
+                stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode)
             stand_tree_count = len(stand_trees)
             for i, tree in enumerate(stratum_trees):
                 tree.identifier = "{}-{}-tree".format(stand.identifier, stand_tree_count + i + 1)
@@ -115,6 +116,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                 ])
                 debug_output_rows.append(debug_output_row_from_comparison_set(stratum, validation_set))
         stand.reference_trees = stand_trees
+    print()
     if debug:
         import csv
         with open('debug_generated_tree_results.csv', 'w', newline='\n') as csvfile:
