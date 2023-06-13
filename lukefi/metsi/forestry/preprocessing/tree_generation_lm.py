@@ -38,8 +38,6 @@ def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_are
     }
 
     source_trees = stratum.__dict__.get('_trees', [])
-    if stratum.mean_diameter == 0.0:
-        return []
 
     tree_data = {
         'lpm': robjects.FloatVector([tree.breast_height_diameter or robjects.NA_Real for tree in source_trees]),
