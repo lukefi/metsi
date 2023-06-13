@@ -190,6 +190,8 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual((1.0, 1.0), self.vmi12_stands[1].stems_per_ha_scaling_factors)
         self.assertEqual(False, self.vmi12_stands[0].auxiliary_stand)
         self.assertEqual(False, self.vmi12_stands[1].auxiliary_stand)
+        self.assertEqual(None, self.vmi12_stands[0].basal_area)
+        self.assertEqual(19.0, self.vmi12_stands[1].basal_area)
 
     def test_vmi12_trees(self):
         self.assertEqual(0, len(self.vmi12_stands[0].reference_trees))
@@ -395,6 +397,8 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual((1.0, 1.0), self.vmi13_stands[1].stems_per_ha_scaling_factors)
         self.assertEqual(False, self.vmi13_stands[0].auxiliary_stand)
         self.assertEqual(False, self.vmi13_stands[1].auxiliary_stand)
+        self.assertEqual(26, self.vmi13_stands[0].basal_area)
+        self.assertEqual(5, self.vmi13_stands[1].basal_area)
 
     def test_vmi13_trees(self):
         self.assertEqual(2, len(self.vmi13_stands[0].reference_trees))

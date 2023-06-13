@@ -125,6 +125,8 @@ class TestForestCentreBuilder(unittest.TestCase):
         self.assertEqual(None, self.smk_stands[1].method_of_last_cutting)
         self.assertEqual(-1, self.smk_stands[0].municipality_id)
         self.assertEqual(-1, self.smk_stands[1].municipality_id)
+        self.assertEqual(9.5, self.smk_stands[0].basal_area)
+        self.assertEqual(0.0, self.smk_stands[1].basal_area)
 
 
     def test_smk_builder_strata(self):

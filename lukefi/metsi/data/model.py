@@ -457,6 +457,8 @@ class ForestStand():
     sea_effect: Optional[float] = None
     lake_effect: Optional[float] = None
 
+    basal_area: Optional[float] = None
+
     def __eq__(self, other: "ForestStand"):
         return id(self) == id(other)
 
@@ -560,6 +562,7 @@ class ForestStand():
             self.stems_per_ha_scaling_factors[0],
             self.stems_per_ha_scaling_factors[1],
             self.stand_id,
+            self.basal_area
         ]
 
     def from_row(self, row):
@@ -605,6 +608,7 @@ class ForestStand():
         self.auxiliary_stand = conv(row[33], "auxiliary_stand")
         self.stems_per_ha_scaling_factors = conv((row[34], row[35]), "stems_per_ha_scaling_factors")
         self.stand_id = conv(row[36], "stand_id")
+        self.basal_area = conv(row[37], "basal_area")
 
 
     @classmethod

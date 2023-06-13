@@ -49,6 +49,7 @@ class VMI12StandIndices:
     hakkuuehdotus = 278
     koealan_kasittelyluokka = slice(314, 317)
     kehitysluokka = 203
+    pohjapintaala = slice(228, 230)
 
 
 class VMI12TreeIndices:
@@ -135,6 +136,7 @@ class VMI13StandIndices:
     ahvenanmaan_markkinahakkuualue = 132
     koealan_kasittelyluokka = 133
     kehitysluokka = 76
+    pohjapintaala = 88
 
 
 class VMI13TreeIndices:

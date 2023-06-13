@@ -2,6 +2,7 @@ from collections.abc import Sequence, Iterable
 import xml.etree.ElementTree as ET
 
 from lukefi.metsi.data.enums.internal import OwnerCategory
+from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.conversion import vmi2internal, fc2internal
 from lukefi.metsi.data.formats import smk_util, util, vmi_util
@@ -77,6 +78,7 @@ class VMIBuilder(ForestBuilder):
             data_row[indices.kitukunta])
         result.natural_regeneration_feasibility = vmi_util.determine_natural_renewal(data_row[indices.hakkuuehdotus])
         result.auxiliary_stand = data_row[indices.stand_number] != '1'
+        result.basal_area = parse_float(data_row[indices.pohjapintaala])
         return result
 
     def convert_tree_entry(self, indices: VMI12TreeIndices or VMI13TreeIndices,
@@ -465,5 +467,6 @@ class ForestCentreBuilder(XMLBuilder):
                 stratum.identifier = f"{stand.identifier}.{stratum.tree_number or stratum.identifier}-stratum"
                 strata.append(stratum)
             stand.tree_strata = strata
+            stand.basal_area = sum([stratum.basal_area or 0.0 for stratum in strata])
             stands.append(stand)
         return stands
