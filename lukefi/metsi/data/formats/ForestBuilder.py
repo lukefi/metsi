@@ -102,6 +102,7 @@ class VMIBuilder(ForestBuilder):
             0.0) / 10.0
         result.management_category = vmi_util.determine_tree_management_category(data_row[indices.latvuskerros])
         result.storey = vmi_util.determine_storey_for_tree(data_row[indices.latvuskerros])
+        result.tree_type = vmi_util.determine_tree_type(data_row[indices.tree_type])
         return result
 
     def convert_stratum_entry(self, indices: VMI12StratumIndices or VMI13StratumIndices,

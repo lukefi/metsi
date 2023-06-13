@@ -619,3 +619,10 @@ def determine_storey_for_tree(source: str) -> Optional[Storey]:
         return Storey.OVER
     else:
         return None
+
+
+def determine_tree_type(source: str) -> Optional[str]:
+    if source in (' ', '.', ''):
+        return None
+    else:
+        return source

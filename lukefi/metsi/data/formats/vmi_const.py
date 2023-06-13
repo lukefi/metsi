@@ -57,6 +57,7 @@ class VMI12TreeIndices:
     section_y = slice(2, 5)
     section_x = slice(5, 8)
     test_area_number = slice(9, 11)
+    tree_type = 11
     stand_number = 12
     tree_number = slice(14, 17)
     species = slice(17, 19)
@@ -146,6 +147,7 @@ class VMI13TreeIndices:
     test_area_number = 5
     stand_number = 6
     tree_number = 7
+    tree_type = 12
     species = 13
     diameter = 14
     tree_category = 15

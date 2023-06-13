@@ -235,6 +235,7 @@ class TestForestBuilder(unittest.TestCase):
         # latvuskerros is '2' -> 1
         self.assertEqual(1, tree.management_category)
         self.assertEqual(Storey.DOMINANT, tree.storey)
+        self.assertEqual(None, tree.tree_type)
 
     def test_vmi12_strata(self):
         self.assertEqual(0, len(self.vmi12_stands_ref_trees_false[0].tree_strata))
@@ -442,6 +443,7 @@ class TestForestBuilder(unittest.TestCase):
         # latvuskerros is '2' -> 1
         self.assertEqual(1, tree.management_category)
         self.assertEqual(Storey.DOMINANT, tree.storey)
+        self.assertEqual('V', tree.tree_type)
 
     def test_vmi13_strata(self):
         self.assertEqual(0, len(self.vmi13_stands_ref_trees_false[0].tree_strata))

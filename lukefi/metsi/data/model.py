@@ -257,6 +257,7 @@ class ReferenceTree():
     tree_category: Optional[str] = None
     sapling: bool = False
     storey: Optional[Storey] = None
+    tree_type: Optional[str] = None
 
     def __eq__(self, other: "ReferenceTree"):
         return id(self) == id(other)
@@ -329,7 +330,8 @@ class ReferenceTree():
             self.management_category,
             self.tree_category,
             self.sapling,
-            self.storey
+            self.storey,
+            self.tree_type
         ]
 
     @classmethod
@@ -359,6 +361,7 @@ class ReferenceTree():
         result.tree_category = conv(row[18], "tree_category")
         result.sapling = conv(row[19], "sapling")
         result.storey = Storey[row[20].split(".")[1]] if row[20] != 'None' else None
+        result.tree_type = conv(row[21], "tree_type")
         return result
 
 

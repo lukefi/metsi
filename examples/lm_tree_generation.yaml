@@ -7,9 +7,13 @@ app_configuration:
   run_modes: preprocess
 
 preprocessing_operations:
+  - filter
   - generate_reference_trees
 
 preprocessing_params:
+  filter:
+    - remove trees: "tree_type not in (None, 'V', 'U', 'S', 'T', 'N')"
+
   generate_reference_trees:
     - n_trees: 10
       method: lm # lm, weibull
