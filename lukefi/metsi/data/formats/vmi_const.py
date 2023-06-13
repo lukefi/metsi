@@ -48,7 +48,6 @@ class VMI12StandIndices:
     muu_toimenpide_aika = 275
     hakkuuehdotus = 278
     koealan_kasittelyluokka = slice(314, 317)
-    kehitysluokka = 203
     pohjapintaala = slice(228, 230)
 
 
@@ -135,7 +134,7 @@ class VMI13StandIndices:
     naturaaluekoodi = 131
     ahvenanmaan_markkinahakkuualue = 132
     koealan_kasittelyluokka = 133
-    kehitysluokka = 76
+    kehitysluokka = 72
     pohjapintaala = 88
 
 

@@ -150,8 +150,8 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(None, self.vmi12_stands[1].regeneration_area_cleaning_year)
         # kehitysluokka is ' ' -> 0
         self.assertEqual(0, self.vmi12_stands[0].development_class)
-        # kehitysluokka is '1' -> 1
-        self.assertEqual(1, self.vmi12_stands[1].development_class)
+        # kehitysluokka is '5' -> 5
+        self.assertEqual(5, self.vmi12_stands[1].development_class)
         # viljely is ' '
         # viljely_aika is ' '
         # date is 020618 and year is 2018 when date string is parsed
@@ -355,10 +355,10 @@ class TestForestBuilder(unittest.TestCase):
         # muu_toimenpide_aika is '0'
         # date is 20200503
         self.assertEqual(None, self.vmi13_stands[1].regeneration_area_cleaning_year)
-        # development class '.' for 0
-        self.assertEqual(0, self.vmi13_stands[0].development_class)
-        # development class '.' for 0
-        self.assertEqual(0, self.vmi13_stands[1].development_class)
+        # development class '5' for 5
+        self.assertEqual(5, self.vmi13_stands[0].development_class)
+        # development class '3' for 3
+        self.assertEqual(3, self.vmi13_stands[1].development_class)
         # viljely is '0'
         # viljely_aika is '.'
         # date is 20200522
