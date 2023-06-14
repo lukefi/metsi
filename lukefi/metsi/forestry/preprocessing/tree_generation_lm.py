@@ -8,12 +8,8 @@ lm_tree_generation_loaded = False
 
 
 def determine_hmalli_value(species: TreeSpecies):
-    if species == TreeSpecies.PINE:
+    if species in (TreeSpecies.PINE, TreeSpecies.OTHER_PINE, TreeSpecies.OTHER_SPRUCE):
         return 1
-    elif species == TreeSpecies.SPRUCE:
-        return 2
-    elif species in (TreeSpecies.DOWNY_BIRCH, TreeSpecies.SILVER_BIRCH):
-        return 3
     elif species.is_coniferous():
         return 2
     else:
