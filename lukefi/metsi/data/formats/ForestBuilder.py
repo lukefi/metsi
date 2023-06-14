@@ -116,9 +116,7 @@ class VMIBuilder(ForestBuilder):
         result.sapling_stems_per_ha = util.get_or_default(
             util.parse_float(data_row[indices.sapling_stems_per_ha]), 0.0)
         result.sapling_stratum = result.has_sapling_stems_per_ha()
-        result.mean_diameter = util.get_or_default(
-            util.parse_float(data_row[indices.avg_diameter]),
-            0.0)
+        result.mean_diameter = util.parse_float(data_row[indices.avg_diameter])
         result.mean_height = vmi_util.determine_stratum_tree_height(
             data_row[indices.avg_height],
             result.mean_diameter)
@@ -128,9 +126,7 @@ class VMIBuilder(ForestBuilder):
             result.mean_height)
         result.breast_height_age = breast_height_age
         result.biological_age = biological_age
-        result.basal_area = util.get_or_default(
-            util.parse_float(data_row[indices.basal_area]),
-            0.0)
+        result.basal_area = util.parse_float(data_row[indices.basal_area])
         result.cutting_year = 0
         result.age_when_10cm_diameter_at_breast_height = 0
         result.tree_number = 0
