@@ -97,7 +97,15 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
 
                 stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
             elif method == 'lm':
-                stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode)
+                try:
+                    stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode)
+                except Exception as e:
+                    if debug:
+                        print()
+                        print(f"\nError generating trees for stratum {stratum.identifier} in stand {stand.identifier}")
+                        print(e)
+                    else:
+                        raise e
             stand_tree_count = len(stand_trees)
             for i, tree in enumerate(stratum_trees):
                 tree.identifier = "{}-{}-tree".format(stand.identifier, stand_tree_count + i + 1)
