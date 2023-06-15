@@ -150,6 +150,27 @@ def find_matching_stratum_by_diameter(reference_tree: ReferenceTree, strata: lis
     return associated_stratum
 
 
+def find_matching_stratum_by_diameter_lm(reference_tree: ReferenceTree, strata: list[TreeStratum], threshold=3) -> Optional[TreeStratum]:
+    """
+    Find the stratum that has the closest diameter to the reference tree diameter by factor of difference, where the
+    factor is below the given threshold.
+
+    :param reference_tree: candidate reference tree
+    :param strata: candidate strata
+    :param threshold: maximum allowed relative diameter
+    :return: matching stratum or None if no match is found
+    """
+    candidate = min(
+        strata,
+        key=lambda stratum: abs(1 - reference_tree.breast_height_diameter / stratum.mean_diameter),
+        default=None
+    )
+    if candidate and abs(1 - reference_tree.breast_height_diameter / candidate.mean_diameter) < threshold:
+        return candidate
+    else:
+        return None
+
+
 def split_list_by_predicate(items: list, predicate: Callable) -> tuple[list, list]:
     """ Splits a list into two lists based on a predicate.
 
@@ -201,7 +222,7 @@ def find_matching_storey_stratum_for_tree(tree: ReferenceTree, strata: list[Tree
         candidate_strata = same_species_strata
     elif len(other_species_strata) > 0:
         candidate_strata = find_strata_by_similar_species(tree.species, other_species_strata)
-    # TODO: species selection by diameter is not stable for this purpose
-    #selected_stratum = find_matching_stratum_by_diameter(tree, candidate_strata)
-    selected_stratum = candidate_strata[0] if len(candidate_strata) > 0 else None
+    else:
+        candidate_strata = same_storey_strata
+    selected_stratum = find_matching_stratum_by_diameter_lm(tree, candidate_strata)
     return selected_stratum

@@ -1,4 +1,5 @@
 import unittest
+from parameterized import parameterized
 from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
 from lukefi.metsi.data.enums.internal import TreeSpecies, Storey
@@ -201,11 +202,38 @@ class ForestryUtilsTest(unittest.TestCase):
         for stratum in result:
             self.assertTrue(stratum.species.is_deciduous())
 
-    def test_find_matching_storey_stratum_for_tree(self):
+    @parameterized.expand([
+        [6, 4],
+        [7, 0],
+        [13, 0],
+        [17, 0]
+    ])
+    def test_find_matching_storey_stratum_for_spruce(self, diameter, expected_stratum_index):
         reference_tree = ReferenceTree()
         reference_tree.storey = Storey.DOMINANT
         reference_tree.species = TreeSpecies.SPRUCE
+        reference_tree.breast_height_diameter = diameter
 
         strata = strata_fixture()
         result = lukefi.metsi.forestry.forestry_utils.find_matching_storey_stratum_for_tree(reference_tree, strata)
-        self.assertEqual(strata[0], result)
+        self.assertEqual(strata[expected_stratum_index], result)
+
+    @parameterized.expand([
+        [1, 2],
+        [5, 2],
+        [10, 2],
+        [15, 2],
+        [100, None]  # beyond threshold
+    ])
+    def test_find_matching_storey_stratum_for_pine(self, diameter, expected_stratum_index):
+        reference_tree = ReferenceTree()
+        reference_tree.storey = Storey.DOMINANT
+        reference_tree.species = TreeSpecies.PINE
+        reference_tree.breast_height_diameter = diameter
+
+        strata = strata_fixture()
+        result = lukefi.metsi.forestry.forestry_utils.find_matching_storey_stratum_for_tree(reference_tree, strata)
+        if expected_stratum_index is not None:
+            self.assertEqual(strata[expected_stratum_index], result)
+        else:
+            self.assertEqual(None, result)
