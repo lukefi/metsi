@@ -536,10 +536,16 @@ def generate_stratum_identifier(row: Sequence, indices: VMI12StandIndices or VMI
            row[indices.stratum_number] + "-" + \
            "stratum"
 
-def determine_stratum_tree_height(source_height: str, diameter: float) -> Optional[float]:
-    primary = round(get_or_default(parse_float(source_height), 0.0) / 10, 2)
-    alternative = diameter * 0.9 if diameter > 0 else 0.0
-    return primary if primary > 0.0 else alternative
+
+def determine_stratum_tree_height(source_height: str, diameter: Optional[float]) -> Optional[float]:
+    maybe_height = parse_float(source_height)
+    if maybe_height is None:
+        if diameter is None:
+            return None
+        else:
+            return round(diameter * 0.9, 2)
+    else:
+        return round(maybe_height / 10, 2)
 
 
 def determine_stratum_origin(source_origin: str) -> int:
@@ -556,7 +562,7 @@ def determine_stratum_origin(source_origin: str) -> int:
 
 def determine_stratum_age_values(biological_age_source: str,
                                  breast_height_age_source: str,
-                                 height: float) -> Optional[tuple[float,float]]:
+                                 height: Optional[float]) -> Optional[tuple[float,float]]:
     """ Determinates biological age and breast height age for vmi source data.
 
         param: biological_age_source: Stratum biological age or age increase value as vmi source value.
@@ -567,6 +573,8 @@ def determine_stratum_age_values(biological_age_source: str,
     """
     computational_age = get_or_default(parse_float(biological_age_source), 0.0)
     breast_height_age = get_or_default(parse_float(breast_height_age_source), 0.0)
+    if height is None:
+        height = 0.0
 
     if computational_age == 0 and breast_height_age > 0:
         computational_age = breast_height_age + 9

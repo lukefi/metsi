@@ -441,6 +441,7 @@ class TestConversion(test_util.ConverterTestSuite):
             (['10', 5.0], 1.0),
             (['.', 5.0], 4.5),
             (['.', 0.0], 0.0),
+            (['.', None], None),
             ([None, 5.0], 4.5),
             (['kissa123', 5.0], 4.5),
         ]

@@ -13,7 +13,7 @@ preprocessing_operations:
 preprocessing_params:
   filter:
     - remove trees: "tree_type not in (None, 'V', 'U', 'S', 'T', 'N')"
-      remove strata: mean_diameter == 0
+      remove strata: mean_diameter is None
 
   generate_reference_trees:
     - n_trees: 10
