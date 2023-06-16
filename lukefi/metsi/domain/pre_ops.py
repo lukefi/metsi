@@ -8,6 +8,7 @@ from lukefi.metsi.forestry.preprocessing.tree_generation import trees_from_sapli
 from lukefi.metsi.forestry.preprocessing.tree_generation_lm import tree_generation_lm
 from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
     debug_output_row_from_comparison_set, debug_output_header_row
+import traceback
 
 
 def preproc_filter(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
@@ -93,6 +94,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
         stand.tree_strata.sort(key=lambda stratum: stratum.identifier)
         new_trees = []
         for stratum in stand.tree_strata:
+            stratum_trees = []
             if method == 'weibull':
                 if pre_util.stratum_needs_diameter(stratum):
                     stratum = pre_util.supplement_mean_diameter(stratum)
@@ -105,10 +107,10 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                     else:
                         stratum_trees = trees_from_sapling_height_distribution(stratum, n_trees)
                 except Exception as e:
+                    print(f"\nError generating trees for stratum {stratum.identifier} in stand {stand.identifier}")
+                    print()
                     if debug:
-                        print()
-                        print(f"\nError generating trees for stratum {stratum.identifier} in stand {stand.identifier}")
-                        print(e)
+                        traceback.print_exc()
                     else:
                         raise e
             stand_tree_count = len(new_trees)
