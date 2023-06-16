@@ -50,7 +50,8 @@ def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_are
             stems_per_ha=result_df.rx2(9)[i],
             height=result_df.rx2(10)[i],
             species=stratum.species,
-            biological_age=stratum.biological_age
+            biological_age=stratum.biological_age,
+            sapling=result_df.rx2(10)[i] < 1.3
         ))
 
     return trees
