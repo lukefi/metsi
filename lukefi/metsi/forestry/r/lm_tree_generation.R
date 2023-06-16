@@ -72,7 +72,7 @@ fitRMLVMI2<-function(d,D,Dtype,init=NA,trace=FALSE,minshape=0.05,q=1.5,r1=5.64,r
              est1
              }
 
-fitRMLVMI<-function(d,D,Dtype,init=NA,trace=FALSE,minshape=0.01,q=1.5,r1=5.64,r2=9.00,d1=4.5,d2=9.5,shdef=1) {
+fitRMLVMI<-function(d,D,Dtype,init=NA,trace=FALSE,minshape=0.01,q=1.5,r1=5.64,r2=9.00,d1=4.5,d2=9.5,shdef=3) {
              if (is.na(init)) init<-winit(d)[1]
              linit<-log(init-minshape)
              nll<-function(lshape) nll.recml.VMI(d,lshape,D,Dtype,trace,minshape,q,r1,r2,d1,d2)   
@@ -137,14 +137,15 @@ Hpred<-function(lpuut,kpuut,malli,m) {
 #                                    "fcons" vakio luokan runkoluku
 # HDmod - Siipilehdon ja kankaan pituusmallit listana järjesteyksessä mä, ku, ko
 # hmalli - kokonaisluku, minkä puulajin pituusmallia ositteelle käytetään (1, 2 tai 3)
+# shdef - Weibull-jakauman muotoparametrin arvo (positiivinen reaaliuluku). Käytetään jos nrow(lukupuut)=0.
+#         Mitä pienempi arvo, sitä leveämpi jakauma.
 
-generoi.kuvauspuut<-function(ositerivi,lukupuut,path="",n=10,tapa="dcons",hmalli=1) {
+generoi.kuvauspuut<-function(ositerivi,lukupuut,path="",n=10,tapa="dcons",hmalli=1,shdef=5) {
    # kokojakauma
    if (!exists("HDmod")) {
       load(paste0(path,"HDmod_Siipilehto_Kangas_2015",".RData"))
    }
-
-   sol<-fitRMLVMI(lukupuut$lpm,ositerivi$DGM,Dtype="D",init=0.5,trace=FALSE,minshape=0.055)
+   sol<-fitRMLVMI(lukupuut$lpm,ositerivi$DGM,Dtype="D",init=0.5,trace=FALSE,minshape=0.055,shdef=shdef)
    theta<-attr(sol,"parms")
    Nos<-40000/pi*ositerivi$Gos/(theta[2]^2*gamma(2/theta[1]+1)) # ositteen runkoluku
    if (tapa=="dcons") {
@@ -152,8 +153,11 @@ generoi.kuvauspuut<-function(ositerivi,lukupuut,path="",n=10,tapa="dcons",hmalli
       } else if (tapa=="fcons") {
       dlim <- qweibull(seq(1e-8,1-1e-8,length=n+1),theta[1],theta[2])
       }
-   kuvauspuut<-merge(cbind(ositerivi,osite=1),data.frame(lpm=(dlim[-1]+dlim[-(n+1)])/2,                  # kuvauspuiden läpimitat
-                                lkm=Nos*diff(pweibull(dlim,theta[1],theta[2])), # kuvauspuiden edustamat runkoluvut
+   lpm<-(dlim[-1]+dlim[-(n+1)])/2
+   lkm2<-40000*ositerivi$Gos*diff(pgamma((dlim/theta[2])^theta[1],2/theta[1]+1))/(pi*lpm^2)
+   kuvauspuut<-merge(cbind(ositerivi,osite=1),data.frame(lpm=lpm,                  # kuvauspuiden läpimitat
+                                lkm0=Nos*diff(pweibull(dlim,theta[1],theta[2])),    # kuvauspuiden edustamat tarkat runkoluvut
+                                lkm=lkm2,                                          # kuvauspuiden laskennalliset runkoluvut
                                 osite=1))
    if (!all(is.na(lukupuut$height))) {
       koepuut<-merge(cbind(ositerivi,osite=1),cbind(lukupuut[!is.na(lukupuut$height),],osite=1))

@@ -69,6 +69,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     method = operation_params.get('method', 'weibull')
     n_trees = operation_params.get('n_trees', 10)
     lm_mode = operation_params.get('lm_mode', 'dcons')
+    lm_shdef = operation_params.get('lm_shdef', 'dcons')
     for i, stand in enumerate(stands):
         print(f"\rGenerating trees for stand {i}/{len(stands)}", end="")
         stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
@@ -99,7 +100,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                 stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
             elif method == 'lm':
                 try:
-                    stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode)
+                    stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode, lm_shdef)
                 except Exception as e:
                     if debug:
                         print()

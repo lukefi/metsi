@@ -19,4 +19,5 @@ preprocessing_params:
     - n_trees: 10
       method: lm # lm, weibull
       lm_mode: dcons # dcons, fcons
+      lm_shdef: 5
       debug: true # true, false

@@ -16,7 +16,7 @@ def determine_hmalli_value(species: TreeSpecies):
         return 3
 
 
-def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_area: float, n=10, mode="dcons") -> list[ReferenceTree]:
+def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_area: float, n=10, mode="dcons", shdef=5) -> list[ReferenceTree]:
     global lm_tree_generation_loaded
     dir = Path(__file__).parent.parent.resolve() / "r"
     growth_script_file = dir / "lm_tree_generation.R"
@@ -37,18 +37,19 @@ def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_are
 
     tree_data = {
         'lpm': robjects.FloatVector([tree.breast_height_diameter or robjects.NA_Real for tree in source_trees]),
-        'height': robjects.FloatVector([tree.height or robjects.NA_Real for tree in source_trees])
+        'height': robjects.FloatVector([tree.height or robjects.NA_Real for tree in source_trees]),
+        'lkm': robjects.FloatVector([tree.stems_per_ha or robjects.NA_Real for tree in source_trees])
     }
     df = robjects.DataFrame(stratum_data)
     df2 = robjects.DataFrame(tree_data)
-    result_df = robjects.r['generoi.kuvauspuut'](df, df2, path=str(dir) + '/', tapa=mode, n=n, hmalli=determine_hmalli_value(stratum.species))
+    result_df = robjects.r['generoi.kuvauspuut'](df, df2, path=str(dir) + '/', tapa=mode, n=n, hmalli=determine_hmalli_value(stratum.species), shdef=shdef)
 
     trees = []
-    for i in range(len(result_df)):
+    for i in range(n):
         trees.append(ReferenceTree(
             breast_height_diameter=result_df.rx2(8)[i],
-            stems_per_ha=result_df.rx2(9)[i],
-            height=result_df.rx2(10)[i],
+            stems_per_ha=result_df.rx2(10)[i],
+            height=result_df.rx2(11)[i],
             species=stratum.species,
             biological_age=stratum.biological_age,
             sapling=result_df.rx2(10)[i] < 1.3
