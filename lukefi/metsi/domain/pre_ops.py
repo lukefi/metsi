@@ -89,6 +89,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                     tree.measured_height or 'NA'
                 ])
         stand.tree_strata.sort(key=lambda stratum: stratum.identifier)
+        new_trees = []
         for stratum in stand.tree_strata:
             if method == 'weibull':
                 if pre_util.stratum_needs_diameter(stratum):
@@ -106,10 +107,10 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                         print(e)
                     else:
                         raise e
-            stand_tree_count = len(stand_trees)
+            stand_tree_count = len(new_trees)
             for i, tree in enumerate(stratum_trees):
                 tree.identifier = "{}-{}-tree".format(stand.identifier, stand_tree_count + i + 1)
-                stand_trees.append(tree)
+                new_trees.append(tree)
             validation_set = create_stratum_tree_comparison_set(stratum, stratum_trees)
 
             if debug:
@@ -123,7 +124,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                     stand.degree_days
                 ])
                 debug_output_rows.append(debug_output_row_from_comparison_set(stratum, validation_set))
-        stand.reference_trees = stand_trees
+        stand.reference_trees = new_trees
     print()
     if debug:
         import csv
