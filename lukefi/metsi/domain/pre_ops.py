@@ -1,3 +1,4 @@
+from lukefi.metsi.data.enums.internal import LandUseCategory
 from lukefi.metsi.data.model import ForestStand, TreeStratum
 from lukefi.metsi.forestry.forestry_utils import find_matching_storey_stratum_for_tree
 from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
@@ -167,6 +168,15 @@ def supplement_missing_tree_ages(stands: list[ForestStand], **operation_params) 
     return stands
 
 
+def supplement_missing_stratum_diameters(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+    """ Attempt to fill in missing (None) stratum mean diameters using reference tree diameters """
+    for stand in stands:
+        for stratum in stand.tree_strata:
+            if stratum.mean_diameter is None and (stratum.has_height_over_130_cm() or stand.land_use_category == LandUseCategory.SCRUB_LAND):
+                pre_util.supplement_mean_diameter(stratum)
+    return stands
+
+
 def generate_sapling_trees_from_sapling_strata(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Create sapling reference trees from sapling strata """
     for stand in stands:
@@ -186,5 +196,6 @@ operation_lookup = {
     'generate_reference_trees': generate_reference_trees,
     'supplement_missing_tree_heights': supplement_missing_tree_heights,
     'supplement_missing_tree_ages': supplement_missing_tree_ages,
+    'supplement_missing_stratum_diameters': supplement_missing_stratum_diameters,
     'generate_sapling_trees_from_sapling_strata': generate_sapling_trees_from_sapling_strata
 }
