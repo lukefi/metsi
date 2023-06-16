@@ -4,6 +4,7 @@ from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
 from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 from lukefi.metsi.domain.utils.filter import applyfilter
+from lukefi.metsi.forestry.preprocessing.tree_generation import trees_from_sapling_height_distribution
 from lukefi.metsi.forestry.preprocessing.tree_generation_lm import tree_generation_lm
 from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
     debug_output_row_from_comparison_set, debug_output_header_row
@@ -96,11 +97,13 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                 if pre_util.stratum_needs_diameter(stratum):
                     stratum = pre_util.supplement_mean_diameter(stratum)
                 stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, n_trees)
-
                 stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
             elif method == 'lm':
                 try:
-                    stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode, lm_shdef)
+                    if stratum.has_height_over_130_cm() and stratum.has_diameter():
+                        stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode, lm_shdef)
+                    else:
+                        stratum_trees = trees_from_sapling_height_distribution(stratum, n_trees)
                 except Exception as e:
                     if debug:
                         print()
