@@ -25,7 +25,7 @@ def create_stratum_tree_comparison_set(stratum: TreeStratum, reference_trees: li
         'sapling_stems_per_ha': (stratum.sapling_stems_per_ha, sum([tree.stems_per_ha for tree in reference_trees if tree.sapling])),
         'mean_diameter': (stratum.mean_diameter, weighted_mean([tree.breast_height_diameter for tree in reference_trees], [calculate_basal_area(tree) for tree in reference_trees])),
         'mean_height': (stratum.mean_height, weighted_mean([tree.height for tree in reference_trees], [calculate_basal_area(tree) for tree in reference_trees])),
-        'mean_age': (stratum.biological_age, mean([tree.biological_age for tree in reference_trees]))
+        'mean_age': (stratum.biological_age, mean([tree.biological_age or 0 for tree in reference_trees]))
     }
 
 

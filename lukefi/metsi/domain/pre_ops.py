@@ -105,10 +105,13 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                 try:
                     if stratum.has_height_over_130_cm() and stratum.has_diameter():
                         stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode, lm_shdef)
-                    else:
+                    elif stratum.mean_height and stratum.mean_height <= 1.3:
                         stratum_trees = trees_from_sapling_height_distribution(stratum, n_trees)
+                    else:
+                        print(f"\nStratum {stratum.identifier} has no height or diameter usable for generating trees")
+                        continue
                 except Exception as e:
-                    print(f"\nError generating trees for stratum {stratum.identifier} in stand {stand.identifier}")
+                    print(f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, height {stratum.mean_height}, basal_area {stratum.basal_area}")
                     print()
                     if debug:
                         traceback.print_exc()
@@ -169,11 +172,12 @@ def supplement_missing_tree_ages(stands: list[ForestStand], **operation_params) 
 
 
 def supplement_missing_stratum_diameters(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
-    """ Attempt to fill in missing (None) stratum mean diameters using reference tree diameters """
+    """ Attempt to fill in missing (None) stratum mean diameters using mean height """
     for stand in stands:
         for stratum in stand.tree_strata:
-            if stratum.mean_diameter is None and (stratum.has_height_over_130_cm() or stand.land_use_category == LandUseCategory.SCRUB_LAND):
-                pre_util.supplement_mean_diameter(stratum)
+            if stratum.mean_diameter is None:
+                if stratum.has_height_over_130_cm() and stand.land_use_category == LandUseCategory.SCRUB_LAND:
+                    pre_util.supplement_mean_diameter(stratum)
     return stands
 
 

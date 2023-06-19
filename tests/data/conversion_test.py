@@ -438,12 +438,10 @@ class TestConversion(test_util.ConverterTestSuite):
 
     def test_determine_stratum_tree_height(self):
         assertions = [
-            (['10', 5.0], 1.0),
-            (['.', 5.0], 4.5),
-            (['.', 0.0], 0.0),
-            (['.', None], None),
-            ([None, 5.0], 4.5),
-            (['kissa123', 5.0], 4.5),
+            (['10'], 1.0),
+            (['.'], None),
+            ([None], None),
+            (['kissa123'], None),
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_stratum_tree_height)
 

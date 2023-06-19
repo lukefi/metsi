@@ -537,15 +537,12 @@ def generate_stratum_identifier(row: Sequence, indices: VMI12StandIndices or VMI
            "stratum"
 
 
-def determine_stratum_tree_height(source_height: str, diameter: Optional[float]) -> Optional[float]:
+def determine_stratum_tree_height(source_height: str) -> Optional[float]:
     maybe_height = parse_float(source_height)
-    if maybe_height is None:
-        if diameter is None:
-            return None
-        else:
-            return round(diameter * 0.9, 2)
-    else:
+    if maybe_height is not None and maybe_height > 0:
         return round(maybe_height / 10, 2)
+    else:
+        return None
 
 
 def determine_stratum_origin(source_origin: str) -> int:

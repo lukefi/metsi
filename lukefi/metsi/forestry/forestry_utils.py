@@ -224,5 +224,14 @@ def find_matching_storey_stratum_for_tree(tree: ReferenceTree, strata: list[Tree
         candidate_strata = find_strata_by_similar_species(tree.species, other_species_strata)
     else:
         candidate_strata = same_storey_strata
-    selected_stratum = find_matching_stratum_by_diameter_lm(tree, candidate_strata)
+    if len(candidate_strata) > 1:
+        with_diameter = list(filter(lambda stratum: stratum.has_diameter(), candidate_strata))
+        if len(with_diameter) > 0:
+            selected_stratum = find_matching_stratum_by_diameter_lm(tree, with_diameter)
+        else:
+            selected_stratum = None
+    elif len(candidate_strata) == 1:
+        selected_stratum = candidate_strata[0]
+    else:
+        selected_stratum = None
     return selected_stratum
