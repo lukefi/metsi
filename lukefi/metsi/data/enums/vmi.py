@@ -119,4 +119,10 @@ class VmiTreeStorey(Enum):
     UNDER = '5'
     OVER_MAIN = '6'
     OVER_OTHER = '7'
+    DOMINANT_SPARE_1 = 'B'
+    DOMINANT_SPARE_2 = 'C'
+    DOMINANT_SPARE_3 = 'D'
+    UNDER_SPARE_1 = 'E'
+    OVER_SPARE_1 = 'F'
+    OVER_SPARE_2 = 'G'
 

@@ -116,7 +116,7 @@ _stratum_rank_map = {
     VmiStratumRank.UNGROWABLE_SAPLINGS: Storey.DOMINANT,
     VmiStratumRank.DOMINANT: Storey.DOMINANT,
     VmiStratumRank.OVER_1: Storey.OVER,
-    VmiStratumRank.OVER_2: Storey.OVER,
+    VmiStratumRank.OVER_2: Storey.SPARE,
     VmiStratumRank.OVER_3: Storey.OVER,
     VmiStratumRank.UNDER_1: Storey.UNDER,
     VmiStratumRank.UNDER_2: Storey.UNDER,
@@ -132,7 +132,13 @@ _tree_storey_map = {
     VmiTreeStorey.DOMINANT_LOWER: Storey.DOMINANT,
     VmiTreeStorey.UNDER: Storey.UNDER,
     VmiTreeStorey.OVER_MAIN: Storey.OVER,
-    VmiTreeStorey.OVER_OTHER: Storey.OVER
+    VmiTreeStorey.OVER_OTHER: Storey.OVER,
+    VmiTreeStorey.DOMINANT_SPARE_1: Storey.SPARE,
+    VmiTreeStorey.DOMINANT_SPARE_2: Storey.SPARE,
+    VmiTreeStorey.DOMINANT_SPARE_3: Storey.SPARE,
+    VmiTreeStorey.UNDER_SPARE_1: Storey.SPARE,
+    VmiTreeStorey.OVER_SPARE_1: Storey.SPARE,
+    VmiTreeStorey.OVER_SPARE_2: Storey.SPARE
 }
 
 def is_empty_vmi_str(candidate: str) -> bool:
