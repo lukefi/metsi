@@ -102,9 +102,9 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                 stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
             elif method == 'lm':
                 try:
-                    if stratum.has_height_over_130_cm() and stratum.has_diameter():
+                    if not stratum.sapling_stratum and stratum.has_diameter():
                         stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode, lm_shdef)
-                    elif stratum.mean_height and stratum.mean_height <= 1.3:
+                    elif stratum.sapling_stratum and stratum.mean_height:
                         stratum_trees = trees_from_sapling_height_distribution(stratum, n_trees)
                     else:
                         print(f"\nStratum {stratum.identifier} has no height or diameter usable for generating trees")
@@ -176,6 +176,8 @@ def supplement_missing_stratum_diameters(stands: list[ForestStand], **operation_
         for stratum in stand.tree_strata:
             if stratum.mean_diameter is None:
                 if stratum.has_height_over_130_cm() and stand.land_use_category == LandUseCategory.SCRUB_LAND:
+                    pre_util.supplement_mean_diameter(stratum)
+                elif stratum.sapling_stratum and stratum.mean_height:
                     pre_util.supplement_mean_diameter(stratum)
     return stands
 
