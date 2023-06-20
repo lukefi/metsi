@@ -88,9 +88,8 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                 debug_tree_rows.append([
                     stratum.identifier,
                     tree.breast_height_diameter or 'NA',
-                    tree.height or 'NA',
-                    tree.biological_age or 'NA',
-                    tree.measured_height or 'NA'
+                    tree.measured_height or 'NA',
+                    tree.stems_per_ha or 'NA'
                 ])
         stand.tree_strata.sort(key=lambda stratum: stratum.identifier)
         new_trees = []
@@ -128,8 +127,8 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                     stratum.identifier,
                     stratum.mean_diameter,
                     stratum.mean_height,
+                    stand.basal_area,
                     stratum.basal_area,
-                    stratum.stems_per_ha,
                     stratum.species.value,
                     stand.degree_days
                 ])
@@ -145,12 +144,12 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
         if len(debug_strata_rows) > 1:
             with open('r_strata.dat', 'w', newline='\n') as stratum_file:
                 writer = csv.writer(stratum_file, delimiter=' ')
-                writer.writerow(["stratum", "D", "H", "G", "F", "age", "spe", "ddy"])
+                writer.writerow(["stratum", "DGM", "HGM", "G", "Gos", "spe", "DDY"])
                 writer.writerows(debug_strata_rows)
         if len(debug_tree_rows) > 1:
             with open('r_trees.dat', 'w', newline='\n') as tree_file:
                 writer = csv.writer(tree_file, delimiter=' ')
-                writer.writerow(["stratum", "d", "h", "age_measured", "h_measured"])
+                writer.writerow(["stratum", "lpm", "height", "lkm"])
                 writer.writerows(debug_tree_rows)
     return stands
 
