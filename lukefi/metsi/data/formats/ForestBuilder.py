@@ -431,6 +431,7 @@ class ForestCentreBuilder(XMLBuilder):
         stand.forestry_centre_id = -1 # RSD record 29
         stand.forest_management_category = smk_util.parse_forest_management_category(stand_basic_data.CuttingRestriction) or 1  # 30
         stand.municipality_id = None or -1 # RSD record 32
+        stand.stems_per_ha_scaling_factors = (1.0, 1.0)
         # RSD record 33 and 34 unused
         return stand
 
@@ -460,6 +461,7 @@ class ForestCentreBuilder(XMLBuilder):
             for estratum in estrata:
                 stratum = self.convert_stratum_entry(estratum)
                 stratum.identifier = f"{stand.identifier}.{stratum.tree_number or stratum.identifier}-stratum"
+                stratum.stand = stand
                 strata.append(stratum)
             stand.tree_strata = strata
             stand.basal_area = sum([stratum.basal_area or 0.0 for stratum in strata])

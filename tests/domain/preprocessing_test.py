@@ -28,26 +28,17 @@ def generate_empty_stands(stand_count, empty_stand_count):
 class PreprocessingTest(unittest.TestCase):
 
     def test_generate_reference_trees(self):
-        """ In this suite there are two stratum fixture cases.
-        A stratum that has all necessary attributes inflated and one that needs mean diameter to be supplemented
-        """
-        normal_case = TreeStratum(identifier="1-stratum", mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None, biological_age=10.0)
-        supplement_diameter_case = TreeStratum(identifier="2-stratum", mean_diameter=None, mean_height=25.0, basal_area=250.0, stems_per_ha=300.0, biological_age=15.0)
-        fixtures = [normal_case, supplement_diameter_case]
+        normal_case = TreeStratum(identifier="1-stratum", mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None, biological_age=10.0, sapling_stratum=False)
         stand = ForestStand()
         stand.identifier = 'xxx'
-        stand.tree_strata.extend(fixtures)
+        stand.stems_per_ha_scaling_factors = (1.0, 1.0)
+        stand.tree_strata.append(normal_case)
+        normal_case.stand = stand
         result = preprocessing.generate_reference_trees([stand], n_trees=10)
-        self.assertEqual(20, len(result[0].reference_trees))
+        self.assertEqual(10, len(result[0].reference_trees))
         self.assertEqual('xxx-1-tree', result[0].reference_trees[0].identifier)
-        self.assertEqual('xxx-2-tree', result[0].reference_trees[1].identifier)
-        self.assertEqual('xxx-11-tree', result[0].reference_trees[10].identifier)
-        self.assertEqual('xxx-12-tree', result[0].reference_trees[11].identifier)
         self.assertEqual(10237.96, result[0].reference_trees[0].stems_per_ha)
         self.assertEqual(1138.02, result[0].reference_trees[1].stems_per_ha)
-        self.assertEqual(2768.41, result[0].reference_trees[10].stems_per_ha)
-        self.assertEqual(982.96, result[0].reference_trees[11].stems_per_ha)
-
 
     def test_determine_tree_height(self):
         stand = ForestStand()

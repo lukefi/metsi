@@ -23,6 +23,7 @@ class TestTreeGeneration(unittest.TestCase):
             stratum.stand = i.stand
             stratum.stems_per_ha = i.stems_per_ha
             stratum.sapling_stems_per_ha = i.sapling_stems_per_ha
+            stratum.sapling_stratum = False if i.sapling_stems_per_ha is None or i.sapling_stems_per_ha == 0 else True
             data.append(stratum)
         return data
 
@@ -34,7 +35,7 @@ class TestTreeGeneration(unittest.TestCase):
         fixture.mean_height = 22.0
         fixture.species = TreeSpecies.PINE
         n_trees = 10
-        result = tree_generation.trees_from_weibull(fixture, n_trees)
+        result = tree_generation.trees_from_weibull(fixture, n_trees=n_trees)
         self.assertEqual(10, len(result))
 
     def test_finalize_trees(self):
@@ -155,7 +156,7 @@ class TestTreeGeneration(unittest.TestCase):
         # Derive results
         results = []
         for test_stratum in test_data:
-            result = tree_generation.reference_trees_from_tree_stratum(test_stratum)
+            result = tree_generation.reference_trees_from_tree_stratum(test_stratum, n_trees=10)
             results.append(result)
         # Validate
         for (result, asse) in zip(results, expected_results):
@@ -219,7 +220,7 @@ class TestTreeGeneration(unittest.TestCase):
         n_trees = 10
         results = []
         for test_stratum in test_data:
-            result = tree_generation.reference_trees_from_tree_stratum(test_stratum, n_trees)
+            result = tree_generation.reference_trees_from_tree_stratum(test_stratum, n_trees=n_trees)
             results.append(result)
         # Validate
         for (result, asse) in zip(results, expected_results):

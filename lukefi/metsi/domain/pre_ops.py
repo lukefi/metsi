@@ -69,10 +69,6 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     debug_output_rows = []
     debug_strata_rows = []
     debug_tree_rows = []
-    method = operation_params.get('method', 'weibull')
-    n_trees = operation_params.get('n_trees', 10)
-    lm_mode = operation_params.get('lm_mode', 'dcons')
-    lm_shdef = operation_params.get('lm_shdef', 5)
     for i, stand in enumerate(stands):
         print(f"\rGenerating trees for stand {stand.identifier}    {i}/{len(stands)}", end="")
         stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
@@ -95,27 +91,16 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
         new_trees = []
         for stratum in stand.tree_strata:
             stratum_trees = []
-            if method == 'weibull':
-                if pre_util.stratum_needs_diameter(stratum):
-                    stratum = pre_util.supplement_mean_diameter(stratum)
-                stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, n_trees)
-                stratum_trees = pre_util.scale_stems_per_ha(stratum_trees, stand.stems_per_ha_scaling_factors)
-            elif method == 'lm':
-                try:
-                    if not stratum.sapling_stratum and stratum.has_diameter():
-                        stratum_trees = tree_generation_lm(stratum, stand.degree_days, stand.basal_area, n_trees, lm_mode, lm_shdef)
-                    elif stratum.sapling_stratum and stratum.mean_height:
-                        stratum_trees = trees_from_sapling_height_distribution(stratum, n_trees)
-                    else:
-                        print(f"\nStratum {stratum.identifier} has no height or diameter usable for generating trees")
-                        continue
-                except Exception as e:
-                    print(f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, height {stratum.mean_height}, basal_area {stratum.basal_area}")
-                    print()
-                    if debug:
-                        traceback.print_exc()
-                    else:
-                        raise e
+            try:
+                stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, **operation_params)
+            except Exception as e:
+                print(f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, height {stratum.mean_height}, basal_area {stratum.basal_area}")
+                print()
+                if debug:
+                    traceback.print_exc()
+                    continue
+                else:
+                    raise e
             stand_tree_count = len(new_trees)
             for i, tree in enumerate(stratum_trees):
                 tree.identifier = "{}-{}-tree".format(stand.identifier, stand_tree_count + i + 1)
