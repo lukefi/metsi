@@ -92,60 +92,6 @@ class TestConversion(test_util.ConverterTestSuite):
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_pruning_year)
 
-    def test_determine_land_category(self):
-        assertions = [
-            (['0'], 0),
-            (['1'], 1),
-            (['2'], 2),
-            (['3'], 3),
-            (['4'], 4),
-            (['kissa123'], None),
-            (['A'], 9),
-            (['a'], 9),
-            (['B'], 9),
-            (['b'], 9),
-            (['.'], None)
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.determine_land_category)
-
-    def test_determine_site_type(self):
-        assertions = [
-            (['T'], 8),
-            (['t'], 8),
-            (['A'], 8),
-            (['a'], 8),
-            (['1'], 1),
-            (['2323'], 2323),
-            ([' '], None),
-            (['.'], None),
-            (['kissa123'], None)
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.determine_site_type)
-
-    def test_determine_soil_type(self):
-        assertions = [
-            (['1', 1], 1),
-            (['2', 1], 2),
-            (['3', 1], 3),
-            (['4', 1], 4),
-            (['4', 10], 5),
-            (['1.0', 3], None),
-            ([' ', 2], None)
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.determine_soil_type)
-
-    def test_determine_drainage_class(self):
-        assertions = [
-            (['0', 1.0], 0.0),
-            (['0', 232333.0], 2.0),
-            (['1', 0.0], 1.0),
-            (['2', 0.0], 3.0),
-            (['3', 0.0], 4.0),
-            (['4', 0.0], 5.0),
-            (['kissa123', 666.0], 0.0),
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.determine_drainage_class)
-
     def test_drainage_year(self):
         assertions = [
             (['10', 2020], 2010),
@@ -201,29 +147,6 @@ class TestConversion(test_util.ConverterTestSuite):
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_vmi13_area_ha)
 
-    def test_convert_stratum_id_to_tree_id(self):
-        assertions = [
-            (["0-023-002-02-1-001-stratum", 1], "0-023-002-02-1-001-tree"),
-            (["0-023-002-02-1-001-stratum", 99], "0-023-002-02-1-099-tree")
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.convert_stratum_id_to_tree_id)
-        self.assertRaises(ValueError, vmi_util.convert_stratum_id_to_tree_id, *["0-023-002-02-1-001-stratum", 0])
-        self.assertRaises(KeyError, vmi_util.convert_stratum_id_to_tree_id, *["0-023-002-02-1-001-stratum", 1234])
-        self.assertRaises(TypeError, vmi_util.convert_stratum_id_to_tree_id, *["0-023-002-02-1-001-stratum", 55.0])
-        self.assertRaises(TypeError, vmi_util.convert_stratum_id_to_tree_id, *["0-023-002-02-1-001-stratum", 'asd'])
-
-    def test_is_empty_sivukoeala(self):
-        assertions = [
-            ([1, 0, 0], False),
-            ([1, 1, 0], False),
-            ([1, 0, 1], False),
-            ([1, 1, 1], False),
-            ([2, 0, 0], True),
-            ([2, 1, 0], False),
-            ([2, 0, 1], False),
-            ([2, 1, 1], False),
-        ]
-        self.run_with_test_assertions(assertions, vmi_util.is_empty_sivukoeala)
 
     def test_determine_owner_group(self):
         assertions = [
@@ -477,16 +400,16 @@ class TestConversion(test_util.ConverterTestSuite):
 
     def test_determine_tree_age_values(self):
         assertions = [
-            (['0', '0', '0'], (0, 0)),
+            (['0', '0', '0'], (None, None)),
             (['10', '0', '0'], (10, 19)),
             (['10', '2', '0'], (10, 12)),
             (['10', '2', '23'], (10, 23)),
             (['10', '2', '3'], (10, 3)),
             (['10', '2', ''], (10, 12)),
             (['10', '', ''], (10, 19)),
-            (['', '', ''], (0, 0)),
-            (['', '', '34'], (0, 34)),
-            (['', '23', ''], (0, 23)),
+            (['', '', ''], (None, None)),
+            (['', '', '34'], (None, 34)),
+            (['', '23', ''], (None, None)),
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_tree_age_values)
 
@@ -515,11 +438,10 @@ class TestConversion(test_util.ConverterTestSuite):
 
     def test_determine_stratum_tree_height(self):
         assertions = [
-            (['10', 5.0], 1.0),
-            (['.', 5.0], 4.5),
-            (['.', 0.0], 0.0),
-            ([None, 5.0], 4.5),
-            (['kissa123', 5.0], 4.5),
+            (['10'], 1.0),
+            (['.'], None),
+            ([None], None),
+            (['kissa123'], None),
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_stratum_tree_height)
 

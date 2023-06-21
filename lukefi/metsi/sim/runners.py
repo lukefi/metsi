@@ -1,4 +1,5 @@
-from typing import Optional, Callable
+from typing import Optional
+from collections.abc import Callable
 from copy import deepcopy
 from lukefi.metsi.sim.core_types import OperationPayload, CUType, SimConfiguration, EventTree
 from lukefi.metsi.sim.generators import full_tree_generators, compose_nested, partial_tree_generators_by_time_point

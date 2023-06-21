@@ -1,24 +1,25 @@
 from itertools import chain
-from typing import Any, List, Tuple, Callable
+from typing import Any
+from collections.abc import Callable
 
 from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.formats.rsd_const import MSBInitialDataRecordConst as msb_meta
 
 
-def recreate_stand_indices(stands: List[ForestStand]) -> List[ForestStand]:
+def recreate_stand_indices(stands: list[ForestStand]) -> list[ForestStand]:
     for idx, stand in enumerate(stands):
         stand.set_identifiers(idx + 1)
     return stands
 
 
-def recreate_tree_indices(trees: List[ReferenceTree]) -> List[ReferenceTree]:
+def recreate_tree_indices(trees: list[ReferenceTree]) -> list[ReferenceTree]:
     for idx, tree in enumerate(trees):
         tree.tree_number = idx + 1
     return trees
 
 
-def cleaned_output(stands: List[ForestStand]) -> List[ForestStand]:
+def cleaned_output(stands: list[ForestStand]) -> list[ForestStand]:
     """Recreate forest stands for output:
         1) filtering out non-living reference trees
         2) recreating indices for reference trees
@@ -43,7 +44,7 @@ def rsd_float(source: str or int or float or None) -> str:
         return f'{0:.6f}'
 
 
-def msb_metadata(stand: ForestStand) -> Tuple[List[str], List[str], List[str]]:
+def msb_metadata(stand: ForestStand) -> tuple[list[str], list[str], list[str]]:
     """
     Generate a triple with:
         MSB physical record metadata
@@ -81,7 +82,7 @@ def msb_metadata(stand: ForestStand) -> Tuple[List[str], List[str], List[str]]:
     return physical_record_metadata, logical_record_metadata, logical_subrecord_metadata
 
 
-def rsd_forest_stand_rows(stand: ForestStand) -> List[str]:
+def rsd_forest_stand_rows(stand: ForestStand) -> list[str]:
     """Generate RSD data file rows (with MSB metadata) for a single ForestStand"""
     result = []
     msb_preliminary_records = msb_metadata(stand)
@@ -102,7 +103,7 @@ def csv_value(source: Any) -> str:
     else:
         return str(source)
 
-def stand_to_csv_rows(stand: ForestStand, delimeter: str) -> List[str]:
+def stand_to_csv_rows(stand: ForestStand, delimeter: str) -> list[str]:
     """converts the :stand:, its reference trees and tree strata to csv rows."""
     result = []
     result.append(delimeter.join(map(lambda x: csv_value(x), stand.as_internal_csv_row())))
@@ -151,13 +152,13 @@ def csv_content_to_stands(csv_content: list[list[str]]) -> list[ForestStand]:
     return stands
 
 
-def outputtable_rows(stands: List[ForestStand], formatter: Callable[[List[ForestStand]], List[str]]) -> List[str]:
+def outputtable_rows(stands: list[ForestStand], formatter: Callable[[list[ForestStand]], list[str]]) -> list[str]:
     result = []
     for stand in cleaned_output(stands):
         result.extend(formatter(stand))
     return result
 
 
-def stands_to_rsd_content(stands: List[ForestStand]) -> list[str]:
+def stands_to_rsd_content(stands: list[ForestStand]) -> list[str]:
     """Generate RSD file contents for the given list of ForestStand"""
     return outputtable_rows(stands, lambda stand: rsd_forest_stand_rows(stand))

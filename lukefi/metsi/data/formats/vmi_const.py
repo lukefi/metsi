@@ -48,7 +48,7 @@ class VMI12StandIndices:
     muu_toimenpide_aika = 275
     hakkuuehdotus = 278
     koealan_kasittelyluokka = slice(314, 317)
-    kehitysluokka = 203
+    pohjapintaala = slice(228, 230)
 
 
 class VMI12TreeIndices:
@@ -57,6 +57,7 @@ class VMI12TreeIndices:
     section_y = slice(2, 5)
     section_x = slice(5, 8)
     test_area_number = slice(9, 11)
+    tree_type = 11
     stand_number = 12
     tree_number = slice(14, 17)
     species = slice(17, 19)
@@ -65,6 +66,7 @@ class VMI12TreeIndices:
     latvuskerros = 26
     height = slice(36, 40)
     living_branches_height = slice(58, 61)
+    measured_height = slice(61, 64)
     d13_age = slice(91, 94)
     age_increase = slice(95, 97)
     total_age = slice(97, 100)
@@ -78,6 +80,7 @@ class VMI12StratumIndices:
     test_area_number = slice(9, 11)
     stand_number = 12
     stratum_number = slice(15, 17)
+    stratum_rank = 19
     species = slice(20, 22)
     origin = 22
     sapling_stems_per_ha = slice(24, 28)
@@ -132,7 +135,8 @@ class VMI13StandIndices:
     naturaaluekoodi = 131
     ahvenanmaan_markkinahakkuualue = 132
     koealan_kasittelyluokka = 133
-    kehitysluokka = 76
+    kehitysluokka = 72
+    pohjapintaala = 88
 
 
 class VMI13TreeIndices:
@@ -143,12 +147,14 @@ class VMI13TreeIndices:
     test_area_number = 5
     stand_number = 6
     tree_number = 7
+    tree_type = 12
     species = 13
     diameter = 14
     tree_category = 15
     latvuskerros = 16
+    height = 18
     living_branches_height = 26
-    height = 27
+    measured_height = 27
     d13_age = 46
     age_increase = 48
     total_age = 49
@@ -162,6 +168,7 @@ class VMI13StratumIndices:
     test_area_number = 5
     stand_number = 6
     stratum_number = 7
+    stratum_rank = 11
     species = 12
     origin = 13
     sapling_stems_per_ha = 14

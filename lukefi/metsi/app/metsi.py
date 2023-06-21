@@ -3,6 +3,7 @@ import sys
 
 # TODO: find out what triggers FutureWarning behaviour in numpy
 import warnings
+import traceback
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import lukefi.metsi.app.preprocessor
@@ -77,7 +78,7 @@ def main() -> int:
         else:
             raise Exception("Can not determine input data for unknown run mode")
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         print("Aborting run...")
         return 1
 

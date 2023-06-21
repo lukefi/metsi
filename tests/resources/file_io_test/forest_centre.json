@@ -216,7 +216,8 @@
     "monthly_temperatures": null,
     "monthly_rainfall": null,
     "sea_effect": null,
-    "lake_effect": null
+    "lake_effect": null,
+    "basal_area": 9.5
   },
   {
     "py/object": "lukefi.metsi.data.model.ForestStand",
@@ -290,6 +291,7 @@
     "monthly_temperatures": null,
     "monthly_rainfall": null,
     "sea_effect": null,
-    "lake_effect": null
+    "lake_effect": null,
+    "basal_area": null
   }
 ]

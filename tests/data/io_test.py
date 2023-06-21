@@ -24,7 +24,7 @@ class IoUtilsTest(ConverterTestSuite):
     def test_rsd_rows(self):
         vmi13_stands = vmi13_builder.build()
         result = stands_to_rsd_content(vmi13_stands)
-        self.assertEqual(5, len(result))
+        self.assertEqual(4, len(result))
 
     def test_stands_to_csv(self):
         delimiter = ";"

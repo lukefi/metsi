@@ -66,7 +66,7 @@ class TestDistributions(test_util.ConverterTestSuite):
         # Derive results
         results = []
         for test_stratum in test_data:
-            result = tree_generation.trees_from_sapling_height_distribution(test_stratum, n_trees)
+            result = tree_generation.trees_from_sapling_height_distribution(test_stratum, n_trees=n_trees)
             results.append(result)
         # Validate
         for (result, asse) in zip(results, expected_results):

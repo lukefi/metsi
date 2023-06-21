@@ -7,7 +7,7 @@ from lukefi.metsi.data.enums.internal import *
 
 class TestForestBuilder(unittest.TestCase):
 
-    default_builder_flags = {"reference_trees": True}
+    default_builder_flags = {"reference_trees": True, "strata": True}
 
     @classmethod
     def vmi12_builder(cls, vmi_builder_flags: dict = default_builder_flags) -> VMI12Builder:
@@ -56,8 +56,8 @@ class TestForestBuilder(unittest.TestCase):
         cls.vmi12_stands = cls.vmi12_built()
         cls.vmi13_stands = cls.vmi13_built()
 
-        cls.vmi12_stands_ref_trees_false = cls.vmi12_built({'reference_trees': False})
-        cls.vmi13_stands_ref_trees_false = cls.vmi13_built({'reference_trees': False})
+        cls.vmi12_stands_ref_trees_false = cls.vmi12_built({'reference_trees': False, 'strata': True})
+        cls.vmi13_stands_ref_trees_false = cls.vmi13_built({'reference_trees': False, 'strata': True})
 
 
     def test_vmi12_init(self):
@@ -150,8 +150,8 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(None, self.vmi12_stands[1].regeneration_area_cleaning_year)
         # kehitysluokka is ' ' -> 0
         self.assertEqual(0, self.vmi12_stands[0].development_class)
-        # kehitysluokka is '1' -> 1
-        self.assertEqual(1, self.vmi12_stands[1].development_class)
+        # kehitysluokka is '5' -> 5
+        self.assertEqual(5, self.vmi12_stands[1].development_class)
         # viljely is ' '
         # viljely_aika is ' '
         # date is 020618 and year is 2018 when date string is parsed
@@ -190,17 +190,17 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual((1.0, 1.0), self.vmi12_stands[1].stems_per_ha_scaling_factors)
         self.assertEqual(False, self.vmi12_stands[0].auxiliary_stand)
         self.assertEqual(False, self.vmi12_stands[1].auxiliary_stand)
+        self.assertEqual(None, self.vmi12_stands[0].basal_area)
+        self.assertEqual(19.0, self.vmi12_stands[1].basal_area)
 
     def test_vmi12_trees(self):
         self.assertEqual(0, len(self.vmi12_stands[0].reference_trees))
         self.assertEqual(1, len(self.vmi12_stands[1].reference_trees))
-        self.assertEqual(1, len(self.vmi12_stands[2].reference_trees))
+        self.assertEqual(0, len(self.vmi12_stands[2].reference_trees))
 
         # Trees with back reference to stand
         self.assertEqual(self.vmi12_stands[1], self.vmi12_stands[1].reference_trees[0].stand)
-        self.assertEqual(self.vmi12_stands[2], self.vmi12_stands[2].reference_trees[0].stand)
         self.assertEqual('0-999-999-98-1-001-tree', self.vmi12_stands[1].reference_trees[0].identifier)
-        self.assertEqual('0-999-999-97-1-001-tree', self.vmi12_stands[2].reference_trees[0].identifier)
 
     def test_vmi12_tree_variables(self):
         tree = self.vmi12_stands[1].reference_trees[0]
@@ -212,6 +212,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(20.7, tree.breast_height_diameter)
         # '1741' -> 17.41
         self.assertEqual(17.41, tree.height)
+        self.assertEqual(None, tree.measured_height)
         # diameter 20.7, area factors 1.0
         self.assertEqual(39.298, tree.stems_per_ha)
 
@@ -225,14 +226,16 @@ class TestForestBuilder(unittest.TestCase):
         #tree id source value 1
         self.assertEqual(1, tree.tree_number)
 
-        # breast_height_age is '' -> 0.0
-        self.assertEqual(46.0, tree.breast_height_age)
+        # breast_height_age is '' -> None
+        self.assertEqual(None, tree.breast_height_age)
         # age_increase is '', total_age is '', breast_height_age is '' -> 0.0
-        self.assertEqual(52.0, tree.biological_age)
+        self.assertEqual(None, tree.biological_age)
         # living_branches_height is '' -> 0.0
         self.assertEqual(0.0, tree.lowest_living_branch_height)
         # latvuskerros is '2' -> 1
         self.assertEqual(1, tree.management_category)
+        self.assertEqual(Storey.DOMINANT, tree.storey)
+        self.assertEqual(None, tree.tree_type)
 
     def test_vmi12_strata(self):
         self.assertEqual(0, len(self.vmi12_stands_ref_trees_false[0].tree_strata))
@@ -260,6 +263,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(52.0, stratum.biological_age)
         # basal area is '17' -> 17.0
         self.assertEqual(17.0, stratum.basal_area)
+        self.assertEqual(Storey.DOMINANT, stratum.storey)
 
     def test_vmi13_init(self):
         vmi13_builder = self.vmi13_builder()
@@ -352,10 +356,10 @@ class TestForestBuilder(unittest.TestCase):
         # muu_toimenpide_aika is '0'
         # date is 20200503
         self.assertEqual(None, self.vmi13_stands[1].regeneration_area_cleaning_year)
-        # development class '.' for 0
-        self.assertEqual(0, self.vmi13_stands[0].development_class)
-        # development class '.' for 0
-        self.assertEqual(0, self.vmi13_stands[1].development_class)
+        # development class '5' for 5
+        self.assertEqual(5, self.vmi13_stands[0].development_class)
+        # development class '3' for 3
+        self.assertEqual(3, self.vmi13_stands[1].development_class)
         # viljely is '0'
         # viljely_aika is '.'
         # date is 20200522
@@ -394,16 +398,16 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual((1.0, 1.0), self.vmi13_stands[1].stems_per_ha_scaling_factors)
         self.assertEqual(False, self.vmi13_stands[0].auxiliary_stand)
         self.assertEqual(False, self.vmi13_stands[1].auxiliary_stand)
+        self.assertEqual(26, self.vmi13_stands[0].basal_area)
+        self.assertEqual(5, self.vmi13_stands[1].basal_area)
 
     def test_vmi13_trees(self):
         self.assertEqual(2, len(self.vmi13_stands[0].reference_trees))
-        self.assertEqual(1, len(self.vmi13_stands[1].reference_trees))
+        self.assertEqual(0, len(self.vmi13_stands[1].reference_trees))
 
         # Trees with back reference to stand
         self.assertEqual(self.vmi13_stands[0], self.vmi13_stands[0].reference_trees[0].stand)
-        self.assertEqual(self.vmi13_stands[1], self.vmi13_stands[1].reference_trees[0].stand)
         self.assertEqual('1-99-99-99-1-10-tree', self.vmi13_stands[0].reference_trees[0].identifier)
-        self.assertEqual('1-99-99-98-1-001-tree', self.vmi13_stands[1].reference_trees[0].identifier)
 
     def test_vmi13_tree_variables(self):
         tree = self.vmi13_stands[0].reference_trees[0]
@@ -413,8 +417,10 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(TreeSpecies.PINE, tree.species)
         # '250' -> 25.0
         self.assertEqual(25.0, tree.breast_height_diameter)
+        self.assertEqual(None, tree.height)
+        self.assertEqual(None, tree.measured_height)
         # missing value normalized to None
-        self.assertEqual(21.82, tree.height)
+        self.assertEqual(None, None)
         # diameter 25, area factors 1.0
         self.assertEqual(39.298, tree.stems_per_ha)
 
@@ -428,14 +434,16 @@ class TestForestBuilder(unittest.TestCase):
         #tree id source value 10
         self.assertEqual(10, tree.tree_number)
 
-        # breast_height_age is '.' -> 0.0
-        self.assertEqual(50.0, tree.breast_height_age)
-        # age_increase is '.', total_age is '.', breast_height_age is '.' -> 0.0
-        self.assertEqual(59.0, tree.biological_age)
+        # breast_height_age is '.' -> None
+        self.assertEqual(None, tree.breast_height_age)
+        # age_increase is '.', total_age is '.', breast_height_age is '.' -> None
+        self.assertEqual(None, tree.biological_age)
         # living_branches_height is '.' -> 0.0
         self.assertEqual(0.0, tree.lowest_living_branch_height)
         # latvuskerros is '2' -> 1
         self.assertEqual(1, tree.management_category)
+        self.assertEqual(Storey.DOMINANT, tree.storey)
+        self.assertEqual('V', tree.tree_type)
 
     def test_vmi13_strata(self):
         self.assertEqual(0, len(self.vmi13_stands_ref_trees_false[0].tree_strata))
@@ -463,6 +471,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(15.0, stratum.biological_age)
         # basal area is '2' -> 2.0
         self.assertEqual(2.0, stratum.basal_area)
+        self.assertEqual(Storey.DOMINANT, stratum.storey)
 
 
     def test_remove_strata(self):

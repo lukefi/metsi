@@ -1,6 +1,7 @@
 from enum import Enum
 from functools import reduce
-from typing import Optional, Sequence, TypeVar, Generic, Hashable, ClassVar
+from typing import Optional, TypeVar, Generic, Hashable, ClassVar
+from collections.abc import Sequence
 
 
 T = TypeVar("T", bound=Hashable)

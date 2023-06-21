@@ -28,39 +28,39 @@ def generate_empty_stands(stand_count, empty_stand_count):
 class PreprocessingTest(unittest.TestCase):
 
     def test_generate_reference_trees(self):
-        """ In this suite there are two stratum fixture cases.
-        A stratum that has all necessary attributes inflated and one that needs mean diameter to be supplemented
-        """
-        normal_case = TreeStratum(mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None, biological_age=10.0)
-        supplement_diameter_case = TreeStratum(mean_diameter=None, mean_height=25.0, basal_area=250.0, stems_per_ha=300.0, biological_age=15.0)
-        fixtures = [normal_case, supplement_diameter_case]
+        normal_case = TreeStratum(identifier="1-stratum", mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None, biological_age=10.0, sapling_stratum=False)
         stand = ForestStand()
         stand.identifier = 'xxx'
-        stand.tree_strata.extend(fixtures)
+        stand.stems_per_ha_scaling_factors = (1.0, 1.0)
+        stand.tree_strata.append(normal_case)
+        normal_case.stand = stand
         result = preprocessing.generate_reference_trees([stand], n_trees=10)
-        self.assertEqual(20, len(result[0].reference_trees))
+        self.assertEqual(10, len(result[0].reference_trees))
         self.assertEqual('xxx-1-tree', result[0].reference_trees[0].identifier)
-        self.assertEqual('xxx-2-tree', result[0].reference_trees[1].identifier)
-        self.assertEqual('xxx-11-tree', result[0].reference_trees[10].identifier)
-        self.assertEqual('xxx-12-tree', result[0].reference_trees[11].identifier)
         self.assertEqual(10237.96, result[0].reference_trees[0].stems_per_ha)
         self.assertEqual(1138.02, result[0].reference_trees[1].stems_per_ha)
-        self.assertEqual(2768.41, result[0].reference_trees[10].stems_per_ha)
-        self.assertEqual(982.96, result[0].reference_trees[11].stems_per_ha)
-
 
     def test_determine_tree_height(self):
         stand = ForestStand()
         stand.reference_trees.append(ReferenceTree(breast_height_diameter=20.0, species=TreeSpecies.SPRUCE))
         stand.reference_trees.append(ReferenceTree(breast_height_diameter=0.0, species=TreeSpecies.OAK))
-        result, = preprocessing.determine_tree_height([stand])
+        result, = preprocessing.supplement_missing_tree_heights([stand])
         self.assertEqual(result.reference_trees[0].height, 17.1)
         self.assertEqual(result.reference_trees[1].height, None)
 
     def test_determine_tree_age(self):
         stand = ForestStand()
         stand.reference_trees.append(ReferenceTree(height=25.0, breast_height_age=50.0, biological_age=59.0, species=TreeSpecies.PINE))
-        stand.reference_trees.append(ReferenceTree(height=25.0, breast_height_age=0, biological_age=0, species=TreeSpecies.PINE))
-        result, = preprocessing.determine_tree_age([stand])
+        stand.reference_trees.append(ReferenceTree(height=25.0, breast_height_age=None, biological_age=None, species=TreeSpecies.PINE))
+        result, = preprocessing.supplement_missing_tree_ages([stand])
         self.assertEqual(result.reference_trees[1].breast_height_age, 50.0)
         self.assertEqual(result.reference_trees[1].biological_age, 59.0)
+
+    def test_generate_sapling_trees_from_sapling_strata(self):
+        stand = ForestStand()
+        stand.tree_strata.append(TreeStratum(mean_diameter=2, mean_height=0.9, biological_age=5.0, sapling_stratum=True))
+        result, = preprocessing.generate_sapling_trees_from_sapling_strata([stand])
+        self.assertEqual(len(result.reference_trees), 1)
+        self.assertEqual(result.reference_trees[0].sapling, True)
+        self.assertEqual(result.reference_trees[0].breast_height_diameter, 2)
+        self.assertEqual(result.reference_trees[0].height, 0.9)

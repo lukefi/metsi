@@ -6,7 +6,8 @@ from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.natural_processes.grow_motti import spe2motti
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
 from functools import cache
-from typing import Any, Callable, Generator, Optional
+from typing import Any, Optional
+from collections.abc import Callable, Generator
 
 StrArg = str|list[str]
 StrArgOpt = Optional[StrArg]

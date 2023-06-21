@@ -5,14 +5,14 @@
       sapling trees
 """
 import math
-from typing import Optional, List, Tuple
+from typing import Optional
 from lukefi.metsi.data.model import ReferenceTree, TreeStratum
 from lukefi.metsi.forestry.preprocessing import pre_util
 
 
 # ---- Weibull distribution model ----
 
-def weibull_coeffs(diameter: float, basal_area: float, min_diameter: Optional[float] = None) -> Tuple:
+def weibull_coeffs(diameter: float, basal_area: float, min_diameter: Optional[float] = None) -> tuple:
     """ Weight parameter calcualtions for Weibull distribution formula.
 
     Notice that min_diameter can be used to override the formulation of weight (a).
@@ -30,7 +30,7 @@ def weibull_coeffs(diameter: float, basal_area: float, min_diameter: Optional[fl
     return w1, w2, w3
 
 
-def weibull(n_samples: int, diameter: float, basal_area: float, height: float, min_diameter: Optional[float] = None) -> List[ReferenceTree]:
+def weibull(n_samples: int, diameter: float, basal_area: float, height: float, min_diameter: Optional[float] = None) -> list[ReferenceTree]:
     """ Computes Stems per hectare and diameter for given number of refernece trees. The values are driven from the Weibull distribution.
 
     :param n_samples: Number of trees to be created
@@ -81,7 +81,7 @@ def weibull(n_samples: int, diameter: float, basal_area: float, height: float, m
 # ---- Simple height distribution model ----
 
 # NOTE: Debricated, only for test purposes
-def simple_height_distribution(stratum: TreeStratum, n_trees: int) -> List[ReferenceTree]:
+def simple_height_distribution(stratum: TreeStratum, n_trees: int) -> list[ReferenceTree]:
     """ Generate N trees from tree stratum.
 
     For a single tree, height and diameter are obtained from stratum.
@@ -134,26 +134,26 @@ def diameter_model_siipilehto(height_rt: float, height: float, diameter: float, 
     return math.exp(lndiJS + dvari / 2.0)
 
 
-def predict_sapling_diameters(reference_trees: List[ReferenceTree], height: float, diameter: float, dominant_height: float) -> List[ReferenceTree]:
+def predict_sapling_diameters(reference_trees: list[ReferenceTree], height: float, diameter: float, dominant_height: float) -> list[ReferenceTree]:
     """ Logic for predicting sapling diameters.
 
     Diameters are predicted via Valkonen's diameter height model or Siipilehto's diameter model.
     For other cases diameter is set to zero.
 
-    reference_trees: List of reference trees with height and stems_per_ha members inflated
+    reference_trees: list of reference trees with height and stems_per_ha members inflated
     height: Mean height of stratum (m)
     diameter: Mean diameter of stratum (cm)
     return: Updated list of reference trees containing diameters (cm).
     """
     for rt in reference_trees:
-        if rt.has_height_over_130_cm() and height > 1.3 and diameter > 0.0:
+        if rt.has_height_over_130_cm() and height > 1.3 and diameter:
             di = diameter_model_siipilehto(
                 rt.height,
                 height,
                 diameter,
                 dominant_height
             )
-        elif rt.height >= 1.3 and (height >= 1.3 or diameter <= 0):
+        elif rt.height >= 1.3 and (height >= 1.3 or not diameter):
             di = diameter_model_valkonen(rt.height)
         else:
             # rt.height <= 1.3 and other cases
@@ -162,7 +162,7 @@ def predict_sapling_diameters(reference_trees: List[ReferenceTree], height: floa
     return reference_trees
 
 
-def weibull_sapling(height: float, stem_count: float, dominant_height: float, n_trees: int) -> List[ReferenceTree]:
+def weibull_sapling(height: float, stem_count: float, dominant_height: float, n_trees: int) -> list[ReferenceTree]:
     """Formulates weibull height distribution of sapling stratum and the number of stems of the trees
 
     References: Siipilehto, J. 2009, Modelling stand structure in young Scots pine dominated stands.
@@ -229,7 +229,7 @@ def weibull_sapling(height: float, stem_count: float, dominant_height: float, n_
     return result
 
 
-def sapling_height_distribution(stratum: TreeStratum, dominant_height: float, n_trees: int) -> List[ReferenceTree]:
+def sapling_height_distribution(stratum: TreeStratum, dominant_height: float, n_trees: int) -> list[ReferenceTree]:
     """Formulates height distribution of sapling stratum and predicts the diameters and the number of stems of the simulation trees
     References: Siipilehto, J. 2009, Modelling stand structure in young Scots pine dominated stands.
                 Forest Ecology and management 257: 223–232. (GLM model)

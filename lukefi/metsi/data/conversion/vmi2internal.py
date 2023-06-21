@@ -2,20 +2,20 @@ from typing import Optional
 
 from lukefi.metsi.data.enums.vmi import (
     VmiSiteType,
-    VmiOwnerCategory,  
-    VmiSoilPeatlandCategory, 
-    VmiSpecies, 
+    VmiOwnerCategory,
+    VmiSoilPeatlandCategory,
+    VmiSpecies,
     VmiLandUseCategory,
-    VmiDrainageCategory,
-    )
+    VmiDrainageCategory, VmiStratumRank, VmiTreeStorey,
+)
 from lukefi.metsi.data.enums.internal import (
-    SiteType, 
-    OwnerCategory, 
-    SoilPeatlandCategory, 
-    TreeSpecies, 
+    SiteType,
+    OwnerCategory,
+    SoilPeatlandCategory,
+    TreeSpecies,
     LandUseCategory,
-    DrainageCategory,
-    )
+    DrainageCategory, Storey,
+)
 
 _species_map = {
     VmiSpecies.PINE: TreeSpecies.PINE,
@@ -112,6 +112,34 @@ _drainage_category_map = {
     VmiDrainageCategory.TURVEKANGAS: DrainageCategory.TRANSFORMED_MIRE
 }
 
+_stratum_rank_map = {
+    VmiStratumRank.UNGROWABLE_SAPLINGS: Storey.DOMINANT,
+    VmiStratumRank.DOMINANT: Storey.DOMINANT,
+    VmiStratumRank.OVER_1: Storey.OVER,
+    VmiStratumRank.OVER_2: Storey.SPARE,
+    VmiStratumRank.OVER_3: Storey.OVER,
+    VmiStratumRank.UNDER_1: Storey.UNDER,
+    VmiStratumRank.UNDER_2: Storey.UNDER,
+    VmiStratumRank.UNDER_3: Storey.UNDER,
+    VmiStratumRank.UNDER_4: Storey.UNDER,
+    VmiStratumRank.REMOVAL: Storey.REMOVAL
+}
+
+
+_tree_storey_map = {
+    VmiTreeStorey.DOMINANT_MAIN: Storey.DOMINANT,
+    VmiTreeStorey.DOMINANT_MIDDLE: Storey.DOMINANT,
+    VmiTreeStorey.DOMINANT_LOWER: Storey.DOMINANT,
+    VmiTreeStorey.UNDER: Storey.UNDER,
+    VmiTreeStorey.OVER_MAIN: Storey.OVER,
+    VmiTreeStorey.OVER_OTHER: Storey.OVER,
+    VmiTreeStorey.DOMINANT_SPARE_1: Storey.INDETERMINATE,
+    VmiTreeStorey.DOMINANT_SPARE_2: Storey.INDETERMINATE,
+    VmiTreeStorey.DOMINANT_SPARE_3: Storey.INDETERMINATE,
+    VmiTreeStorey.UNDER_SPARE_1: Storey.INDETERMINATE,
+    VmiTreeStorey.OVER_SPARE_1: Storey.SPARE,
+    VmiTreeStorey.OVER_SPARE_2: Storey.SPARE
+}
 
 def is_empty_vmi_str(candidate: str) -> bool:
     return candidate in ('', ' ', '.')
@@ -155,3 +183,17 @@ def convert_species(species_code: str) -> TreeSpecies:
 def convert_owner(owner_code: str) -> OwnerCategory:
     vmi_owner = VmiOwnerCategory(owner_code)
     return _owner_map.get(vmi_owner)
+
+
+def convert_stratum_rank(rank_code: str) -> Storey:
+    if is_empty_vmi_str(rank_code):
+        return None
+    vmi_rank = VmiStratumRank(rank_code)
+    return _stratum_rank_map.get(vmi_rank)
+
+
+def convert_tree_storey(storey_code: str) -> Storey:
+    if is_empty_vmi_str(storey_code):
+        return None
+    vmi_storey = VmiTreeStorey(storey_code)
+    return _tree_storey_map.get(vmi_storey)

@@ -3,7 +3,8 @@ from enum import Enum
 from typing import Optional
 from dataclasses import dataclass
 from lukefi.metsi.data.conversion.internal2mela import mela_stand, mela_tree
-from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, TreeSpecies, DrainageCategory
+from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, \
+    TreeSpecies, DrainageCategory, Storey
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
 from lukefi.metsi.data.formats.util import convert_str_to_type
 from lukefi.metsi.data.layered_model import LayeredObject
@@ -51,6 +52,7 @@ class TreeStratum():
     # sapling stem count within a hectare
     sapling_stems_per_ha: Optional[float] = None
     sapling_stratum: bool = False  # this reference tree represents saplings
+    storey: Optional[Storey] = None
 
     def __hash__(self):
         return id(self)
@@ -184,6 +186,7 @@ class TreeStratum():
             self.management_category,
             self.sapling_stems_per_ha,
             self.sapling_stratum,
+            self.storey
         ]
 
     @classmethod
@@ -210,6 +213,7 @@ class TreeStratum():
         result.management_category = conv(row[18], "management_category")
         result.sapling_stems_per_ha = conv(row[19], "sapling_stems_per_ha")
         result.sapling_stratum = conv(row[20], "sapling_stratum")
+        result.storey = Storey[row[21].split(".")[1]] if row[21] != "None" else None
         return result
 
 @dataclass
@@ -227,7 +231,8 @@ class ReferenceTree():
     species: Optional[Enum] = None  # RSD record 2, 1-8
     # RSD record 3, diameter at 1.3 m height
     breast_height_diameter: Optional[float] = None
-    height: Optional[float] = None  # RSD record 4, height in meters
+    height: Optional[float] = None  # RSD record 4, model height in meters
+    measured_height: Optional[float] = None  # measurement tree height
     # RSD record 5, age in years when reached 1.3 m height
     breast_height_age: Optional[float] = None
     biological_age: Optional[float] = None  # RSD record 6, age in years
@@ -251,6 +256,8 @@ class ReferenceTree():
     # VMI tree_category for living/dead/otherwise unusable tree
     tree_category: Optional[str] = None
     sapling: bool = False
+    storey: Optional[Storey] = None
+    tree_type: Optional[str] = None
 
     def __eq__(self, other: "ReferenceTree"):
         return id(self) == id(other)
@@ -322,7 +329,9 @@ class ReferenceTree():
             self.lowest_living_branch_height,
             self.management_category,
             self.tree_category,
-            self.sapling
+            self.sapling,
+            self.storey,
+            self.tree_type
         ]
 
     @classmethod
@@ -351,6 +360,8 @@ class ReferenceTree():
         result.management_category = conv(row[17], "management_category")
         result.tree_category = conv(row[18], "tree_category")
         result.sapling = conv(row[19], "sapling")
+        result.storey = Storey[row[20].split(".")[1]] if row[20] != 'None' else None
+        result.tree_type = conv(row[21], "tree_type")
         return result
 
 
@@ -448,6 +459,8 @@ class ForestStand():
     monthly_rainfall: Optional[list[float]] = None
     sea_effect: Optional[float] = None
     lake_effect: Optional[float] = None
+
+    basal_area: Optional[float] = None
 
     def __eq__(self, other: "ForestStand"):
         return id(self) == id(other)
@@ -552,6 +565,7 @@ class ForestStand():
             self.stems_per_ha_scaling_factors[0],
             self.stems_per_ha_scaling_factors[1],
             self.stand_id,
+            self.basal_area
         ]
 
     def from_row(self, row):
@@ -597,6 +611,7 @@ class ForestStand():
         self.auxiliary_stand = conv(row[33], "auxiliary_stand")
         self.stems_per_ha_scaling_factors = conv((row[34], row[35]), "stems_per_ha_scaling_factors")
         self.stand_id = conv(row[36], "stand_id")
+        self.basal_area = conv(row[37], "basal_area")
 
 
     @classmethod

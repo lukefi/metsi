@@ -2,7 +2,8 @@ from dataclasses import dataclass, field, fields, make_dataclass
 from functools import cache
 from json import dumps
 from pathlib import Path
-from typing import Callable, Iterable, Optional, Sequence
+from typing import Optional
+from collections.abc import Callable, Iterable, Sequence
 from lukefi.metsi.data.model import TreeSpecies
 import fhk
 

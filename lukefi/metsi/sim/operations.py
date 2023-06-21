@@ -1,5 +1,5 @@
-import typing
 from typing import Optional, TypeVar
+from collections.abc import Callable
 from lukefi.metsi.sim.core_types import OpTuple, OperationPayload
 from lukefi.metsi.sim.util import get_or_default
 
@@ -15,7 +15,7 @@ def do_nothing(data: T, **kwargs) -> T:
     return data
 
 
-def prepared_operation(operation_entrypoint: typing.Callable, **operation_parameters):
+def prepared_operation(operation_entrypoint: Callable, **operation_parameters):
     """prepares an opertion entrypoint function with configuration parameters"""
     return lambda state: operation_entrypoint(state, **operation_parameters)
 
@@ -27,7 +27,7 @@ def prepared_processor(operation_tag, processor_lookup, time_point: int, operati
     return lambda payload: processor(payload, operation, operation_tag, time_point, operation_run_constraints, **operation_parameters)
 
 
-def processor(payload: OperationPayload, operation: typing.Callable[[OpTuple], OpTuple], operation_tag, time_point: int,
+def processor(payload: OperationPayload, operation: Callable[[OpTuple], OpTuple], operation_tag, time_point: int,
               operation_run_constraints: Optional[dict], **operation_parameters: dict) -> OperationPayload:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     if operation_run_constraints is not None:
@@ -56,7 +56,7 @@ def check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_
                               .format(operation_tag, operation_last_run_time_point, time_point, minimum_time_interval))
 
 
-def resolve_operation(tag: str, external_operation_lookup: dict) -> typing.Callable:
+def resolve_operation(tag: str, external_operation_lookup: dict) -> Callable:
     operation = get_or_default(
         external_operation_lookup.get(tag),
         internal_operation_lookup.get(tag))

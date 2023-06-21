@@ -3,7 +3,8 @@ import os
 import pickle
 from pathlib import Path
 import jsonpickle
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Optional
+from collections.abc import Iterator, Callable
 import yaml
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, stands_to_rsd_content
@@ -115,6 +116,7 @@ def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
     elif app_config.state_format in ("vmi13", "vmi12", "forest_centre"):
         return external_reader(
             app_config.state_format,
+            strata=app_config.strata,
             reference_trees=app_config.reference_trees,
             strata_origin=app_config.strata_origin)(app_config.input_path)
     else:

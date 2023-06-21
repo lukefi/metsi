@@ -1,13 +1,15 @@
-from typing import Optional, Tuple, Sequence
+from typing import Optional
+from collections.abc import Sequence
 from datetime import datetime as dt
 
+from lukefi.metsi.data.enums.internal import Storey
 from lukefi.metsi.data.formats.util import get_or_default, parse_float, parse_int
 from lukefi.metsi.data.formats.vmi_const import vmi12_county_areas, vmi13_county_areas, VMI12StandIndices, VMI13StandIndices
 from shapely.geometry import Point
 from geopandas import GeoSeries
 
 
-def determine_area_factors(small_tree_sourcevalue: str, big_tree_sourcevalue: str) -> Tuple[float, float]:
+def determine_area_factors(small_tree_sourcevalue: str, big_tree_sourcevalue: str) -> tuple[float, float]:
     """Compute forest stand specific scaling factors for area and reference tree stem count scaling."""
     default_rsd_value = 1.0
     small = get_or_default(parse_float(small_tree_sourcevalue), 0.0)
@@ -76,51 +78,6 @@ def determine_pruning_year(other_method: str, year_adjustment_class: str, year: 
     return None
 
 
-def determine_land_category(land_category: str) -> int or None:
-    if land_category in ('A', 'B', 'a', 'b'):
-        return 9
-    else:
-        try:
-            return int(land_category)
-        except:
-            return None
-
-
-def determine_site_type(kasvupaikkatunnus: str) -> Optional[int]:
-    if kasvupaikkatunnus in ('T', 'A', 't', 'a'):
-        return 8
-    else:
-        return parse_int(kasvupaikkatunnus)
-
-
-def determine_soil_type(main_type: str, site_type: int) -> Optional[int]:
-    _main_type = parse_int(main_type)
-    if _main_type == 4 and site_type >= 4:
-        return 5
-    elif _main_type in (1, 2, 3, 4):
-        return _main_type
-    else:
-        return None
-
-
-def determine_drainage_class(ojitus_tilanne: str, soil_type: float) -> float:
-    if ojitus_tilanne == '0':
-        if soil_type == 1:
-            return 0.0
-        else:
-            return 2.0
-    elif ojitus_tilanne == '1':
-        return 1.0
-    elif ojitus_tilanne == '2':
-        return 3.0
-    elif ojitus_tilanne == '3':
-        return 4.0
-    elif ojitus_tilanne == '4':
-        return 5.0
-    else:
-        return 0.0
-
-
 def determine_drainage_year(sourcevalue: str, year: int) -> Optional[int]:
     try:
         value = int(sourcevalue)
@@ -161,52 +118,6 @@ def determine_vmi13_area_ha(lohkomuoto: int) -> float:
     if lohkomuoto < 0:
         raise IndexError
     return vmi13_county_areas[lohkomuoto]
-
-
-def convert_stratum_id_to_tree_id(stratum_identifier: str, tree_number: int):
-    tree_number_prefix_lookup = {
-        1: '00',
-        2: '0',
-        3: ''
-    }
-
-    if isinstance(tree_number, int):
-        if tree_number > 0:
-            tree_number = str(tree_number)
-        else:
-            raise ValueError('tree number should be a positive int')
-    else:
-        raise TypeError('tree number should be type int not type {0}'.format(type(tree_number)))
-
-    prefix = tree_number_prefix_lookup[len(tree_number)]
-    id_parts = stratum_identifier.split('-')[0:5]
-    id_parts.append(prefix + tree_number)
-    id_parts.append('tree')
-    return ('-').join(map(str, id_parts))
-
-
-def is_empty_sivukoeala(sivukoeala: int, tree_count: int, strata_count: int):
-    """
-    Need to ignore stands which have no trees or strata and are side stands (sivukuvio)
-    """
-    return sivukoeala == 2 and tree_count == 0 and strata_count == 0
-
-
-def is_forest_land(land_category: int) -> bool:
-    return land_category in (1, 2, 3, 4)
-
-
-def is_other_excluded_forest(land_category: int, fra_class: str, land_category_detail: str) -> bool:
-    """
-    Plot is excluded from VMI forest stand data if its’ land use category is other forest land than forest,
-    scrub or waste land and FRA class is other land than forest with no tree cover and land use category
-    adjustment is building ground or forest road or other land than forest locating on mineral soil or
-    organic soil.
-    """
-    if land_category == 4 and fra_class == '3' and land_category_detail in ('1', '2', '6', '7'):
-        return True
-    else:
-        return False
 
 
 def determine_soil_surface_preparation_year(sourcevalue: str, year: int) -> Optional[int]:
@@ -279,7 +190,7 @@ def determine_forest_maintenance_method(sourcevalue: str, cutting_year: Optional
     return 0
 
 
-def convert_vmi12_geolocation(lat_source: str, lon_source: str) -> Tuple[float, float]:
+def convert_vmi12_geolocation(lat_source: str, lon_source: str) -> tuple[float, float]:
     """
     Convert VMI12 coordinates in EPSG:2393 to EPSG:3067. Source values are in meter precision, return values are
     likewise rounded to meter precision.
@@ -292,7 +203,7 @@ def convert_vmi12_geolocation(lat_source: str, lon_source: str) -> Tuple[float, 
     return round(point.centroid.y[0]), round(point.centroid.x[0])
 
 
-def convert_vmi12_approximate_geolocation(lat_source: str, lon_source: str) -> Tuple[float, float]:
+def convert_vmi12_approximate_geolocation(lat_source: str, lon_source: str) -> tuple[float, float]:
     """
     Convert VMI12 coordinates in EPSG:2393 to YKJ/KKJ3 with band 3 prefix removed.
 
@@ -547,21 +458,21 @@ def vmi_codevalue(source: str) -> Optional[str]:
 def determine_tree_age_values(
         chest_height_age_source: str,
         age_increase_source: str,
-        total_age_source: str) -> Tuple[int, int]:
-    chest_height_age = get_or_default(parse_int(chest_height_age_source), 0)
-    age_increase = get_or_default(parse_int(age_increase_source), 0)
-    total_age = get_or_default(parse_int(total_age_source), 0)
+        total_age_source: str) -> tuple[int, int]:
+    chest_height_age = parse_int(chest_height_age_source)
+    age_increase = parse_int(age_increase_source)
+    total_age = parse_int(total_age_source)
 
-    if total_age > 0:
+    if total_age:
         computed_age = total_age
-    elif age_increase > 0:
+    elif age_increase and chest_height_age:
         computed_age = chest_height_age + age_increase
-    elif chest_height_age > 0:
+    elif chest_height_age:
         computed_age = chest_height_age + 9
     else:
-        computed_age = 0
+        computed_age = None
 
-    return chest_height_age, computed_age
+    return None if chest_height_age == 0 else chest_height_age, computed_age
 
 
 def determine_tree_management_category(sourcevalue: str) -> int:
@@ -625,10 +536,13 @@ def generate_stratum_identifier(row: Sequence, indices: VMI12StandIndices or VMI
            row[indices.stratum_number] + "-" + \
            "stratum"
 
-def determine_stratum_tree_height(source_height: str, diameter: float) -> Optional[float]:
-    primary = round(get_or_default(parse_float(source_height), 0.0) / 10, 2)
-    alternative = diameter * 0.9 if diameter > 0 else 0.0
-    return primary if primary > 0.0 else alternative
+
+def determine_stratum_tree_height(source_height: str) -> Optional[float]:
+    maybe_height = parse_float(source_height)
+    if maybe_height is not None and maybe_height > 0:
+        return round(maybe_height / 10, 2)
+    else:
+        return None
 
 
 def determine_stratum_origin(source_origin: str) -> int:
@@ -645,7 +559,7 @@ def determine_stratum_origin(source_origin: str) -> int:
 
 def determine_stratum_age_values(biological_age_source: str,
                                  breast_height_age_source: str,
-                                 height: float) -> Optional[Tuple[float,float]]:
+                                 height: Optional[float]) -> Optional[tuple[float,float]]:
     """ Determinates biological age and breast height age for vmi source data.
 
         param: biological_age_source: Stratum biological age or age increase value as vmi source value.
@@ -656,6 +570,8 @@ def determine_stratum_age_values(biological_age_source: str,
     """
     computational_age = get_or_default(parse_float(biological_age_source), 0.0)
     breast_height_age = get_or_default(parse_float(breast_height_age_source), 0.0)
+    if height is None:
+        height = 0.0
 
     if computational_age == 0 and breast_height_age > 0:
         computational_age = breast_height_age + 9
@@ -680,3 +596,38 @@ def determine_stratum_age_values(biological_age_source: str,
         computational_age = 0.0
 
     return (computational_age, breast_height_age)
+
+
+def determine_storey_for_stratum(source: str) -> Optional[Storey]:
+    """Determinates storey for stratum based on vmi source value 'ositteen asema'."""
+    parsed = parse_int(source)
+    if parsed in [0, 1]:
+        return Storey.DOMINANT
+    elif parsed in [2, 3, 4]:
+        return Storey.OVER
+    elif parsed in [5, 6, 7, 9]:
+        return Storey.UNDER
+    elif parsed in [8]:
+        return Storey.INDETERMINATE
+    else:
+        return None
+
+
+def determine_storey_for_tree(source: str) -> Optional[Storey]:
+    """Determinates storey for vmi tree based on vmi source value 'latvuskerros'."""
+    parsed = parse_int(source)
+    if parsed in [2, 3, 4]:
+        return Storey.DOMINANT
+    elif parsed in [5]:
+        return Storey.UNDER
+    elif parsed in [6, 7]:
+        return Storey.OVER
+    else:
+        return None
+
+
+def determine_tree_type(source: str) -> Optional[str]:
+    if source in (' ', '.', ''):
+        return None
+    else:
+        return source

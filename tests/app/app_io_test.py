@@ -21,7 +21,7 @@ class TestAppIO(unittest.TestCase):
     def test_sim_cli_arguments(self):
         args = ['input.pickle', 'output2', 'control.yaml', '-f', 'partial', '-e', 'depth', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
         result = aio.parse_cli_arguments(args)
-        self.assertEqual(15, len(result.__dict__.keys()))
+        self.assertEqual(16, len(result.__dict__.keys()))
         self.assertEqual('input.pickle', result.input_path)
         self.assertEqual('control.yaml', result.control_file)
         self.assertEqual('output2', result.target_directory)

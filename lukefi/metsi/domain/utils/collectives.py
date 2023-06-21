@@ -1,7 +1,8 @@
 import builtins
 from enum import Enum
 from functools import lru_cache, cache
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Optional
+from collections.abc import Iterator, Callable
 import numpy as np
 
 GetVarFn = Callable[[str], Any]

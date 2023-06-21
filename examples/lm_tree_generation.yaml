@@ -1,0 +1,23 @@
+# Example for converting source data files
+
+#Application configuration values. Can be overriden by CLI arguments. May be commented out for None or default from Mela2Configuration.
+app_configuration:
+  state_format: vmi12 #options: fdm, vmi12, vmi13, forest_centre
+  preprocessing_output_container: csv #options: pickle, json, csv, null, rsd (special case not usable as input container)
+  run_modes: preprocess
+
+preprocessing_operations:
+  - supplement_missing_stratum_diameters
+  - filter
+  - generate_reference_trees
+
+preprocessing_params:
+  filter:
+    - remove trees: "tree_type not in (None, 'V', 'U', 'S', 'T', 'N')"
+
+  generate_reference_trees:
+    - n_trees: 10
+      method: lm # lm, weibull
+      lm_mode: dcons # dcons, fcons
+      lm_shdef: 5
+      debug: true # true, false

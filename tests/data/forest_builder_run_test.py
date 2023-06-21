@@ -26,7 +26,7 @@ class TestForestBuilderRun(unittest.TestCase):
     def test_run_vmi12_forest_builder_build(self):
         assertion = (('VMI12_source_mini.dat', 'vmi12'), 4)
         reference_file = Path('tests', 'data', 'resources', assertion[0][0])
-        list_of_stands = VMI12Builder({"reference_trees": False}, vmi_file_reader(reference_file)).build()
+        list_of_stands = VMI12Builder({"reference_trees": False, "strata": True}, vmi_file_reader(reference_file)).build()
         result = len(list_of_stands)
         self.assertEqual(result, assertion[1])
 
@@ -34,6 +34,6 @@ class TestForestBuilderRun(unittest.TestCase):
     def test_run_vmi13_forest_builder_build(self):
         assertion = (('VMI13_source_mini.dat', 'vmi13'), 3)
         reference_file = Path('tests', 'data', 'resources', assertion[0][0])
-        list_of_stands = VMI13Builder({"reference_trees": False}, vmi_file_reader(reference_file)).build()
+        list_of_stands = VMI13Builder({"reference_trees": False, "strata": True}, vmi_file_reader(reference_file)).build()
         result = len(list_of_stands)
         self.assertEqual(result, assertion[1])

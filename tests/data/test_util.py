@@ -1,16 +1,16 @@
-import typing
+from collections.abc import Callable
 import unittest
 
 from lukefi.metsi.data.formats.ForestBuilder import VMIBuilder, VMI13Builder
 
 
 class ConverterTestSuite(unittest.TestCase):
-    def run_with_test_assertions(self, assertions: typing.List[typing.Tuple], fn: typing.Callable):
+    def run_with_test_assertions(self, assertions: list[tuple], fn: Callable):
         for case in assertions:
             result = fn(*case[0])
             self.assertEqual(case[1], result)
 
-    def assertions_should_raise_TypeError(self, assertions: typing.List[typing.Tuple], fn: typing.Callable):
+    def assertions_should_raise_TypeError(self, assertions: list[tuple], fn: Callable):
         for case in assertions:
             self.assertRaises(TypeError, fn, *case[0])
 
@@ -24,4 +24,4 @@ vmi13_data = [
     '6 U 1  99  99 99 8   6 0 20181102 258  7  3  0  23 V2  3  53  6  1  4  35  4  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  . .    .',
     ""
 ]
-vmi13_builder: VMIBuilder = VMI13Builder({ 'reference_trees': True}, vmi13_data)
+vmi13_builder: VMIBuilder = VMI13Builder({ 'reference_trees': True, 'strata': True}, vmi13_data)

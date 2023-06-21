@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand
@@ -54,5 +54,5 @@ def lmfor_volume(stand: ForestStand) -> float:
     total_volume = sum(volumes)
     return total_volume
 
-def convert_r_named_list_to_py_dict(named_list) -> Dict[Any, Any]:
+def convert_r_named_list_to_py_dict(named_list) -> dict[Any, Any]:
     return dict(zip(named_list.names, [list(i) for i in named_list]))
