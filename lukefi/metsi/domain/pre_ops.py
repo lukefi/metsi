@@ -72,7 +72,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     method = operation_params.get('method', 'weibull')
     n_trees = operation_params.get('n_trees', 10)
     lm_mode = operation_params.get('lm_mode', 'dcons')
-    lm_shdef = operation_params.get('lm_shdef', 'dcons')
+    lm_shdef = operation_params.get('lm_shdef', 5)
     for i, stand in enumerate(stands):
         print(f"\rGenerating trees for stand {stand.identifier}    {i}/{len(stands)}", end="")
         stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
