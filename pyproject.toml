@@ -19,6 +19,7 @@ dependencies = [
     "scipy==1.7.3",
     "geopandas == 0.12.2",
     "pandas == 1.5.2",
+    "rpy2==3.5.12",
     "fhk @ https://github.com/menu-hanke/fhk/releases/download/v4.0.0/fhk-4.0.0-cp310-cp310-win_amd64.whl ; platform_system=='Windows' and python_version=='3.10'",
     "fhk @ https://github.com/menu-hanke/fhk/releases/download/v4.0.0/fhk-4.0.0-cp311-cp311-win_amd64.whl ; platform_system=='Windows' and python_version=='3.11'",
     "fhk @ https://github.com/menu-hanke/fhk/releases/download/v4.0.0/fhk-4.0.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl ; platform_system=='Linux' and python_version=='3.10'",
@@ -30,9 +31,6 @@ dependencies = [
 tests = [
     "pytest",
     "parameterized==0.8.1"
-]
-rpy = [
-    "rpy2==3.5.2"
 ]
 
 [project.scripts]
