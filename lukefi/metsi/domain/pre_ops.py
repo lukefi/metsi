@@ -69,11 +69,12 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     debug_output_rows = []
     debug_strata_rows = []
     debug_tree_rows = []
+    stratum_association_diameter_threshold = operation_params.get('stratum_association_diameter_threshold', 2.5)
     for i, stand in enumerate(stands):
         print(f"\rGenerating trees for stand {stand.identifier}    {i}/{len(stands)}", end="")
         stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
         for tree in stand_trees:
-            stratum = find_matching_storey_stratum_for_tree(tree, stand.tree_strata)
+            stratum = find_matching_storey_stratum_for_tree(tree, stand.tree_strata, stratum_association_diameter_threshold)
             if stratum is None:
                 continue
             if stratum.__dict__.get('_trees') is not None:

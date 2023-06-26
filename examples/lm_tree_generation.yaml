@@ -18,6 +18,7 @@ preprocessing_params:
   generate_reference_trees:
     - n_trees: 10
       method: lm # lm, weibull
+      stratum_association_diameter_threshold: 2.5
       lm_mode: dcons # dcons, fcons
       lm_shdef: 5
       debug: true # true, false

@@ -4,7 +4,7 @@ from enum import Enum
 from lukefi.metsi.data.enums.internal import TreeSpecies, DECIDUOUS_SPECIES, CONIFEROUS_SPECIES
 from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
 from typing import Optional
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 
 
 def compounded_growth_factor(growth_percent: float, years: int) -> float:
@@ -150,22 +150,27 @@ def find_matching_stratum_by_diameter(reference_tree: ReferenceTree, strata: lis
     return associated_stratum
 
 
-def find_matching_stratum_by_diameter_lm(reference_tree: ReferenceTree, strata: list[TreeStratum], threshold=3) -> Optional[TreeStratum]:
+def find_matching_stratum_by_diameter_lm(reference_tree: ReferenceTree, strata: Iterable[TreeStratum], threshold=2.5) -> Optional[TreeStratum]:
     """
     Find the stratum that has the closest diameter to the reference tree diameter by factor of difference, where the
-    factor is below the given threshold.
+    reference tree diameter is between the stratum mean diameter divided by threshold and multiplied by threshold.
 
     :param reference_tree: candidate reference tree
     :param strata: candidate strata
-    :param threshold: maximum allowed relative diameter
+    :param threshold: threshold factor for diameter bounds
     :return: matching stratum or None if no match is found
     """
     candidate = min(
         strata,
-        key=lambda stratum: abs(1 - reference_tree.breast_height_diameter / stratum.mean_diameter),
+        key=lambda stratum: abs(reference_tree.breast_height_diameter / stratum.mean_diameter - 1),
         default=None
     )
-    if candidate and abs(1 - reference_tree.breast_height_diameter / candidate.mean_diameter) < threshold:
+    if candidate is None:
+        return None
+
+    lower = candidate.mean_diameter / threshold
+    upper = candidate.mean_diameter * threshold
+    if lower < reference_tree.breast_height_diameter < upper:
         return candidate
     else:
         return None
@@ -212,24 +217,23 @@ def find_strata_by_similar_species(species: TreeSpecies, strata: list[TreeStratu
     return candidates
 
 
-def find_matching_storey_stratum_for_tree(tree: ReferenceTree, strata: list[TreeStratum]) -> Optional[TreeStratum]:
+def find_matching_storey_stratum_for_tree(tree: ReferenceTree, strata: list[TreeStratum], diameter_threshold=2.5) -> Optional[TreeStratum]:
     same_storey_strata = [stratum for stratum in strata if stratum.storey == tree.storey]
     same_species_strata, other_species_strata = split_list_by_predicate(
         same_storey_strata,
         lambda stratum: stratum.species == tree.species)
-    candidate_strata = []
+
     if len(same_species_strata) > 0:
         candidate_strata = same_species_strata
     elif len(other_species_strata) > 0:
         candidate_strata = find_strata_by_similar_species(tree.species, other_species_strata)
     else:
         candidate_strata = same_storey_strata
+
     if len(candidate_strata) > 0:
-        with_diameter = list(filter(lambda stratum: stratum.has_diameter(), candidate_strata))
-        if len(with_diameter) > 0:
-            selected_stratum = find_matching_stratum_by_diameter_lm(tree, with_diameter)
-        else:
-            selected_stratum = None
+        strata_with_diameter = filter(lambda stratum: stratum.has_diameter(), candidate_strata)
+        selected_stratum = find_matching_stratum_by_diameter_lm(tree, strata_with_diameter, diameter_threshold)
     else:
         selected_stratum = None
+
     return selected_stratum

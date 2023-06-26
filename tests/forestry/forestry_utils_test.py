@@ -219,11 +219,12 @@ class ForestryUtilsTest(unittest.TestCase):
         self.assertEqual(strata[expected_stratum_index], result)
 
     @parameterized.expand([
-        [1, 2],
-        [5, 2],
+        [7.2, None],  # 7.2 is below threshold for 18 cm mean_diameter
+        [7.3, 2],
         [10, 2],
         [15, 2],
-        [100, None]  # beyond threshold
+        [44.9, 2],
+        [45, None]  # 45 is beyond threshold for 18 cm mean_diameter
     ])
     def test_find_matching_storey_stratum_for_pine(self, diameter, expected_stratum_index):
         reference_tree = ReferenceTree()
