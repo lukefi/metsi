@@ -46,6 +46,9 @@ _species_map = {
     ForestCentreSpecies.WYCH_ELM: TreeSpecies.WYCH_ELM,
     ForestCentreSpecies.UNKNOWN_CONIFEROUS: TreeSpecies.UNKNOWN_CONIFEROUS,
     ForestCentreSpecies.UNKNOWN_DECIDUOUS: TreeSpecies.UNKNOWN_DECIDUOUS,
+    ForestCentreSpecies.BIRCH: TreeSpecies.SILVER_BIRCH,
+    ForestCentreSpecies.ALDER: TreeSpecies.GREY_ALDER,
+    ForestCentreSpecies.MIXED: TreeSpecies.OTHER_DECIDUOUS
 }
 
 
