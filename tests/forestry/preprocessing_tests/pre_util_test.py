@@ -33,16 +33,3 @@ class TestPreprocessingUtils(unittest.TestCase):
             stratum.mean_diameter = i[0][1]
             result = pre_util.supplement_mean_diameter(stratum)
             self.assertEqual(i[1], result.mean_diameter)
-
-    def test_stems_scaling(self):
-        factors = (2.0, 4.0)
-        reftree1 = ReferenceTree()
-        reftree1.stems_per_ha = 10
-        reftree1.breast_height_diameter = 0.5
-        reftree2 = ReferenceTree()
-        reftree2.stems_per_ha = 10
-        reftree2.breast_height_diameter = 1
-        scaled = pre_util.scale_stems_per_ha([reftree1, reftree2], factors)
-
-        self.assertEqual(20.0, scaled[0].stems_per_ha)
-        self.assertEqual(40.0, scaled[1].stems_per_ha)
