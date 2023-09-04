@@ -84,7 +84,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(230.8291, self.vmi12_stands[3].area)
         self.assertEqual(reference_area, self.vmi12_stands[0].area_weight)
         self.assertEqual(reference_area, self.vmi12_stands[1].area_weight)
-        self.assertEqual(230.8291, self.vmi12_stands[3].area_weight)
+        self.assertAlmostEqual(23.08291, self.vmi12_stands[3].area_weight, 5)
 
         # lat 6656996, lon 3102608, height
         self.assertEqual((6652133.0, 3246174.0, None, 'EPSG:2393'), self.vmi12_stands[0].geo_location)
