@@ -231,7 +231,7 @@ def mela_stand(stand):
     """Convert a ForestStand so that enumerated category variables are converted to Mela value space"""
     result = copy(stand)
     result.geo_location = copy(stand.geo_location)
-    result.stems_per_ha_scaling_factors = copy(stand.stems_per_ha_scaling_factors)
+    result.area_weight_factors = copy(stand.area_weight_factors)
     result = apply_mappers(result, *default_mela_stand_mappers)
     result.reference_trees = list(map(mela_tree, result.reference_trees))
     for tree in result.reference_trees:

@@ -185,9 +185,9 @@ class TestForestBuilder(unittest.TestCase):
         # municipality is '417', kitukunta is '417'
         self.assertEqual(417, self.vmi12_stands[1].municipality_id)
         # osuus564 is '10', koealaosuudet is '10'
-        self.assertEqual((1.0, 1.0), self.vmi12_stands[0].stems_per_ha_scaling_factors)
+        self.assertEqual((1.0, 1.0), self.vmi12_stands[0].area_weight_factors)
         # osuus564 is '10', koealaosuudet is '10'
-        self.assertEqual((1.0, 1.0), self.vmi12_stands[1].stems_per_ha_scaling_factors)
+        self.assertEqual((1.0, 1.0), self.vmi12_stands[1].area_weight_factors)
         self.assertEqual(False, self.vmi12_stands[0].auxiliary_stand)
         self.assertEqual(False, self.vmi12_stands[1].auxiliary_stand)
         self.assertEqual(None, self.vmi12_stands[0].basal_area)
@@ -393,9 +393,9 @@ class TestForestBuilder(unittest.TestCase):
         # municipality is '11', kitukunta '402'
         self.assertEqual(11, self.vmi13_stands[1].municipality_id)
         # osuus4m is '10', osuus9m is '10'
-        self.assertEqual((1.0, 1.0), self.vmi13_stands[0].stems_per_ha_scaling_factors)
+        self.assertEqual((1.0, 1.0), self.vmi13_stands[0].area_weight_factors)
         # osuus4m is '10', osuus9m is '10'
-        self.assertEqual((1.0, 1.0), self.vmi13_stands[1].stems_per_ha_scaling_factors)
+        self.assertEqual((1.0, 1.0), self.vmi13_stands[1].area_weight_factors)
         self.assertEqual(False, self.vmi13_stands[0].auxiliary_stand)
         self.assertEqual(False, self.vmi13_stands[1].auxiliary_stand)
         self.assertEqual(26, self.vmi13_stands[0].basal_area)

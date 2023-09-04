@@ -447,7 +447,7 @@ class ForestStand():
     # RSD record 33 and 34 unused
 
     # stand specific factors for scaling estimated ReferenceTree count per hectare
-    stems_per_ha_scaling_factors: tuple[float, float] = (1.0, 1.0)
+    area_weight_factors: tuple[float, float] = (1.0, 1.0)
 
     fra_category: Optional[str] = None  # VMI fra category
     # VMI land use category detail
@@ -562,8 +562,8 @@ class ForestStand():
             self.fra_category,
             self.land_use_category_detail,
             self.auxiliary_stand,
-            self.stems_per_ha_scaling_factors[0],
-            self.stems_per_ha_scaling_factors[1],
+            self.area_weight_factors[0],
+            self.area_weight_factors[1],
             self.stand_id,
             self.basal_area
         ]
@@ -609,7 +609,7 @@ class ForestStand():
         self.fra_category = conv(row[31], "fra_category")
         self.land_use_category_detail = conv(row[32], "land_use_category_detail")
         self.auxiliary_stand = conv(row[33], "auxiliary_stand")
-        self.stems_per_ha_scaling_factors = conv((row[34], row[35]), "stems_per_ha_scaling_factors")
+        self.area_weight_factors = conv((row[34], row[35]), "area_weight_factors")
         self.stand_id = conv(row[36], "stand_id")
         self.basal_area = conv(row[37], "basal_area")
 
