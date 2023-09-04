@@ -102,10 +102,8 @@ def reference_trees_from_tree_stratum(stratum: TreeStratum, **params) -> list[Re
     result = []
     if strategy == TreeStrategy.HEIGHT_DISTRIBUTION:
         result = trees_from_sapling_height_distribution(stratum, **params)
-        result = pre_util.scale_stems_per_ha(result, stratum.stand.stems_per_ha_scaling_factors)
     elif strategy == TreeStrategy.WEIBULL_DISTRIBUTION:
         result = trees_from_weibull(stratum, **params)
-        result = pre_util.scale_stems_per_ha(result, stratum.stand.stems_per_ha_scaling_factors)
     elif strategy == TreeStrategy.LM_TREES:
         result = tree_generation_lm(stratum, stratum.stand.degree_days, stratum.stand.basal_area, **params)
     elif strategy == TreeStrategy.SKIP:

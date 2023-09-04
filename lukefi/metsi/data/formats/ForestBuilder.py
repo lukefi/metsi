@@ -162,7 +162,12 @@ class VMI12Builder(VMIBuilder):
         area_ha = vmi_util.determine_vmi12_area_ha(
             int(data_row[indices.lohkomuoto]),
             int(data_row[indices.county]))
-        result.set_area(area_ha)
+        result.area_weight_factors = vmi_util.determine_area_factors(
+            data_row[indices.osuus5m],
+            data_row[indices.osuus9m]
+        )
+        area_weight = area_ha * result.area_weight_factors[1]
+        result.set_area(area_ha, area_weight)
         lat = vmi_util.parse_float(data_row[indices.lat])
         lon = vmi_util.parse_float(data_row[indices.lon])
         height = vmi_util.transform_vmi12_height_above_sea_level(data_row[indices.height_above_sea_level])
@@ -187,10 +192,6 @@ class VMI12Builder(VMIBuilder):
         result.young_stand_tending_year = maintenance_details[0]
         result.cutting_year = maintenance_details[1]
         result.method_of_last_cutting = maintenance_details[2]
-        result.stems_per_ha_scaling_factors = vmi_util.determine_area_factors(
-            data_row[indices.osuus5m],
-            data_row[indices.osuus9m]
-        )
         return result
 
     def convert_tree_entry(self, indices: VMI12TreeIndices, data_row: Sequence):
@@ -253,7 +254,12 @@ class VMI13Builder(VMIBuilder):
         result = super().convert_stand_entry(indices, data_row, stand_id)
         result.year = vmi_util.parse_vmi13_date(data_row[indices.date]).year
         area_ha = vmi_util.determine_vmi13_area_ha(int(data_row[indices.lohkomuoto]))
-        result.set_area(area_ha)
+        result.area_weight_factors = vmi_util.determine_area_factors(
+            data_row[indices.osuus4m],
+            data_row[indices.osuus9m]
+        )
+        area_weight = area_ha * result.area_weight_factors[1]
+        result.set_area(area_ha, area_weight)
         lat = vmi_util.parse_float(data_row[indices.lat])
         lon = vmi_util.parse_float(data_row[indices.lon])
         height = vmi_util.transform_vmi13_height_above_sea_level(data_row[indices.height_above_sea_level])
@@ -279,10 +285,6 @@ class VMI13Builder(VMIBuilder):
         result.young_stand_tending_year = maintenance_details[0]
         result.cutting_year = maintenance_details[1]
         result.method_of_last_cutting = maintenance_details[2]
-        result.stems_per_ha_scaling_factors = vmi_util.determine_area_factors(
-            data_row[indices.osuus4m],
-            data_row[indices.osuus9m]
-        )
         return result
 
     def convert_tree_entry(self, indices: VMI13TreeIndices, data_row: Sequence):
@@ -431,7 +433,7 @@ class ForestCentreBuilder(XMLBuilder):
         stand.forestry_centre_id = -1 # RSD record 29
         stand.forest_management_category = smk_util.parse_forest_management_category(stand_basic_data.CuttingRestriction) or 1  # 30
         stand.municipality_id = None or -1 # RSD record 32
-        stand.stems_per_ha_scaling_factors = (1.0, 1.0)
+        stand.area_weight_factors = (1.0, 1.0)
         # RSD record 33 and 34 unused
         return stand
 

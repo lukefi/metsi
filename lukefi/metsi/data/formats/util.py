@@ -37,7 +37,7 @@ def convert_str_to_type(_class: type, value: str, property_name: str):
         return property_type.__args__[0][value.split('.')[1]]
 
     if type(value) == tuple:
-        #stand.stems_per_ha_scaling_factors
+        #stand.area_weight_factors
         if property_type == tuple[float, float]:
             return tuple(parse_float(v) for v in value)
         #stand.geo_location

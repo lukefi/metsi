@@ -204,7 +204,7 @@
     "forest_management_category": 1,
     "method_of_last_cutting": null,
     "municipality_id": null,
-    "stems_per_ha_scaling_factors": {
+    "area_weight_factors": {
       "py/tuple": [
         1.0,
         1.0
@@ -279,7 +279,7 @@
     "forest_management_category": 1,
     "method_of_last_cutting": null,
     "municipality_id": null,
-    "stems_per_ha_scaling_factors": {
+    "area_weight_factors": {
       "py/tuple": [
         1.0,
         1.0

@@ -31,7 +31,7 @@ class PreprocessingTest(unittest.TestCase):
         normal_case = TreeStratum(identifier="1-stratum", mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None, biological_age=10.0, sapling_stratum=False)
         stand = ForestStand()
         stand.identifier = 'xxx'
-        stand.stems_per_ha_scaling_factors = (1.0, 1.0)
+        stand.area_weight_factors = (1.0, 1.0)
         stand.tree_strata.append(normal_case)
         normal_case.stand = stand
         result = preprocessing.generate_reference_trees([stand], n_trees=10)
