@@ -2,7 +2,8 @@ from types import SimpleNamespace
 import unittest
 from parameterized import parameterized
 from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
-from lukefi.metsi.data.conversion.internal2mela import land_use_mapper, soil_peatland_mapper, species_mapper, owner_mapper, mela_stand
+from lukefi.metsi.data.conversion.internal2mela import land_use_mapper, soil_peatland_mapper, species_mapper, \
+    owner_mapper, mela_stand, stand_area_converter
 from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, TreeSpecies
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory, MelaOwnerCategory, MelaSoilAndPeatlandCategory, MelaTreeSpecies
 
@@ -71,3 +72,12 @@ class Internal2MelaTest(unittest.TestCase):
             )
         result = soil_peatland_mapper(fixture)
         self.assertEqual(result.soil_peatland_category, expected)
+
+    @parameterized.expand([
+        (ForestStand(area=100.0, area_weight=100.0, auxiliary_stand=True), ForestStand(area=0.0, area_weight=100.0, auxiliary_stand=True)),
+        (ForestStand(area=100.0, area_weight=100.0, auxiliary_stand=False), ForestStand(area=100.0, area_weight=100.0, auxiliary_stand=False))
+    ])
+    def test_stand_area_converter(self, stand, expected):
+        result = stand_area_converter(stand)
+        self.assertEqual(result.area, expected.area)
+        self.assertEqual(result.area_weight, expected.area_weight)
