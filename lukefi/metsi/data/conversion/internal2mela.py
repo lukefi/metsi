@@ -206,9 +206,8 @@ def stand_location_converter(target):
 
 
 def stand_area_converter(target):
-    """ in-place conversion to for variables area and area weight when stands is auxiliary """
+    """ in-place conversion to Mela value space for area related matters """
     if target.is_auxiliary():
-        target.area_weight = target.area
         target.area = 0.0
     return target
 
