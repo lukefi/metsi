@@ -143,6 +143,7 @@ of associated reference trees and tree strata. The file can be of following type
 1. a .json file or .pickle file containing Forest Data Model type source data.
 2. a .dat file containing VMI12 or VMI13 type source data
 3. a .xml file containing Forest Centre type source data
+4. a .gpkg file containing Forest Centre type source data
 
 Input for postprocess and export phases is a directory produced by the simulate phase.
 
@@ -204,10 +205,16 @@ To run full pipeline from a VMI13 data source file using direct reference trees 
 python -m lukefi.metsi.app.metsi --state-format vmi13 --reference-trees -r preprocess,simulate,postprocess,export vmi13.dat sim_outdir
 ```
 
-To run full pipeline from a Forest Centre source file, run:
+To run full pipeline from a Forest Centre .xml source file, run:
 
 ```
 python -m lukefi.metsi.app.metsi --state-format forest_centre --reference-trees -r preprocess,simulate,postprocess,export forest_centre.xml sim_outdir
+```
+
+To run full pipeline from a Forest Centre .gpkg source file, run:
+
+```
+python -m lukefi.metsi.app.metsi --state-format geopackage --reference-trees -r preprocess,simulate,postprocess,export geopackage.gpkg sim_outdir
 ```
 
 To run full pipeline from a FDM formatted data from csv (or json or pickle with replacement below), run:
@@ -715,6 +722,7 @@ A run is declared in the YAML file `control.yaml`.
         1. `fdm` is the standard Forest Data Model.
         2. `vmi12` and `vmi13` denote the VMI data format and container.
         3. `forest_centre` denotes the Forest Centre XML data format and container.
+        4. `geopackage` denotes the Forest Centre GPKG data format and container.
     2. `state_input_container` is the file type for `fdm` data format. This may be `csv`, `pickle` or `json`.
     3. `preprocessing_output_container` is the file type for outputting the `fdm` formatted state of computational units
        after preprocessing operations. This may be `csv`, `pickle` or `json` or commented out for no output.
