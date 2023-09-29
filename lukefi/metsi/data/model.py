@@ -627,6 +627,9 @@ class ForestStand():
         forestry_centre_id = (
             -1 if melaed.forestry_centre_id is None else melaed.forestry_centre_id
         )
+        municipality_id = (
+            -1 if melaed.municipality_id is None else melaed.municipality_id
+        )
         return [
             melaed.management_unit_id,
             melaed.year,
@@ -659,7 +662,7 @@ class ForestStand():
             forestry_centre_id,
             melaed.forest_management_category,
             melaed.method_of_last_cutting,
-            melaed.municipality_id,
+            municipality_id,
             None,
             None,
         ]
