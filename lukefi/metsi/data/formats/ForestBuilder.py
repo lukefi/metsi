@@ -168,8 +168,7 @@ class VMI12Builder(VMIBuilder):
             data_row[indices.osuus5m],
             data_row[indices.osuus9m]
         )
-        area_weight = area_ha * result.area_weight_factors[1]
-        result.set_area(area_ha, area_weight)
+        result.set_area(area_ha)
         lat = vmi_util.parse_float(data_row[indices.lat])
         lon = vmi_util.parse_float(data_row[indices.lon])
         height = vmi_util.transform_vmi12_height_above_sea_level(data_row[indices.height_above_sea_level])
@@ -260,8 +259,7 @@ class VMI13Builder(VMIBuilder):
             data_row[indices.osuus4m],
             data_row[indices.osuus9m]
         )
-        area_weight = area_ha * result.area_weight_factors[1]
-        result.set_area(area_ha, area_weight)
+        result.set_area(area_ha)
         lat = vmi_util.parse_float(data_row[indices.lat])
         lon = vmi_util.parse_float(data_row[indices.lon])
         height = vmi_util.transform_vmi13_height_above_sea_level(data_row[indices.height_above_sea_level])
@@ -412,8 +410,7 @@ class ForestCentreBuilder(XMLBuilder):
         stand = ForestStand()
         stand.management_unit_id = None # RSD record 1
         stand.year = smk_util.parse_year(stand_basic_data.StandBasicDataDate) # RSD record 2
-        stand.area = util.parse_float(stand_basic_data.Area) # RSD record 3
-        stand.area_weight = stand.area # RSD record 4
+        stand.set_area(util.parse_float(stand_basic_data.Area)) # RSD record 3 and 4
         (latitude, longitude, crs) = smk_util.parse_coordinates(estand)
         stand.geo_location = (latitude, longitude, None, crs) # RSD record 5,6,8
         stand.identifier = stand_basic_data.id # RSD record 7
@@ -493,7 +490,7 @@ class GeoPackageBuilder(ForestBuilder):
         stand = ForestStand()
         stand.management_unit_id = None # RSD record 1
         stand.year = smk_util.parse_year(entry.date) # RSD record 2
-        stand.area = entry.area - entry.areadecrease # RSD record 3
+        stand.set_area(entry.area - entry.areadecrease) # RSD record 3 and 4
         stand.area_weight = stand.area # RSD record 4
         # RSD records 5, 6 and 8
         (latitude, longitude) = entry.centroid.get('centroid')

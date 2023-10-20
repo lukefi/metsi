@@ -71,6 +71,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     debug_tree_rows = []
     stratum_association_diameter_threshold = operation_params.get('stratum_association_diameter_threshold', 2.5)
     for i, stand in enumerate(stands):
+        stand.area_weight = stand.area * stand.area_weight_factors[1]
         print(f"\rGenerating trees for stand {stand.identifier}    {i}/{len(stands)}", end="")
         stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
         for tree in stand_trees:
