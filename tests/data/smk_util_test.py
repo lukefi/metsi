@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 from types import SimpleNamespace
 from lukefi.metsi.data.formats import smk_util
 from tests.data import test_util
-
+from lukefi.metsi.data.model import TreeStratum
 
 def generate_test_data(stand_data_element='', point_element='', polygon_element='', tree_stand_element='', operations_element='') -> ET.Element:
     """ Generates test data for smk xml test suites
@@ -427,3 +427,11 @@ class TestSmkXMLConversion(test_util.ConverterTestSuite):
         oper = result.get(123)
         self.assertEqual(oper[0], 410)
         self.assertEqual(oper[1], 2041)
+
+    def test_calculate_stand_basal_area(self):
+        s1 = TreeStratum(basal_area=1.99)
+        s2 = TreeStratum(basal_area=2.00)
+        stratum = [s1, s2]
+        result = smk_util.calculate_stand_basal_area(stratum)
+        self.assertEqual(result, 3.99)
+        

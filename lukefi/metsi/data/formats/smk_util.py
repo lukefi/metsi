@@ -1,10 +1,12 @@
 import geopandas
 import datetime
+import math
 
 from shapely.geometry import Polygon, Point
 from xml.etree.ElementTree import Element
 from types import SimpleNamespace
 from lukefi.metsi.data.formats import util
+from lukefi.metsi.data.model import TreeStratum
 
 NS = {
         "schema_location": "http://standardit.tapio.fi/schemas/forestData ForestData.xsd",
@@ -43,6 +45,7 @@ def parse_stand_basic_data(xml_stand: Element) -> SimpleNamespace:
     sns.id = generate_stand_identifier(xml_stand)
     sns.CompleteState = xml_stand.findtext('./st:StandBasicData/st:CompleteState', None, NS)
     sns.StandBasicDataDate = xml_stand.findtext('./st:StandBasicData/st:StandBasicDataDate', None, NS)
+    # NOTE: AreaDecrese mukaan: area - areadecrese
     sns.Area = xml_stand.findtext('./st:StandBasicData/st:Area', None, NS)
     sns.SubGroup = xml_stand.findtext('./st:StandBasicData/st:SubGroup', None, NS)
     sns.FertilityClass = xml_stand.findtext('./st:StandBasicData/st:FertilityClass', None, NS)
@@ -137,25 +140,43 @@ def parse_drainage_category(source: str) -> int or None:
         return 5
     else:
         return util.parse_int(source)
+    
+def parse_development_class(source: str) -> int:
+    """ TODO: Waiting for future implementation.
+
+    At the moment (22.9.2023) development class variable is extracted
+    from .gpkg (not in .xml) format but not used by any model in simulation.
+    For that reason constant zero is returned.
+
+    :returns: zero """
+    return 0
 
 
 def parse_forest_management_category(source: str) -> int or float or None:
     try:
         if source in ('1'):
+            # No hold-over (ylispuu)
             return 2.1
         elif source in ('2', '3'):
+            # No first thinnings or other thinnings
             return 2.2
         elif source in ('4'):
+            # No intermediate felling (kasvatushakkuu)
             return 2.3
         elif source in ('6', '7'):
+            # No seeding felling or shelterwood felling (suojuspuuhakkuu)
             return 2.4
         elif source in ('5'):
+            # No clear cut
             return 2.5
         elif source in ('8'):
+            # No regeneration felling (uudistushakkuu)
             return 2.6
         elif source in ('9'):
+            # No fellings (ei hakkuita)
             return 7
         else:
+            # No restrictions
             return 1
     except:
         return None
@@ -209,3 +230,15 @@ def parse_coordinates(estand: Element) -> tuple[float, float, str]:
         return (None, None, None)
     (longitude, latitude, crs) = parse_centroid(sns)
     return (float(latitude), float(longitude), crs)
+
+
+def calculate_stand_basal_area(strata: list[TreeStratum]) -> float:
+    def f(s):
+        try:
+            return round(math.pi / 4 * math.pow(s.mean_diameter/100, 2) * s.stems_per_ha, 2)
+        except TypeError:
+            return 0.0 
+    basal_areas = [ stratum.basal_area if stratum.basal_area is not None else f(stratum) for stratum in strata ]
+    for bs, s in zip(basal_areas, strata):
+        s.basal_area = bs
+    return sum(basal_areas) 

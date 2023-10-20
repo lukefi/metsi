@@ -122,9 +122,9 @@ def parse_cli_arguments(args: list[str]):
                         type=str,
                         help='Simulation event tree evaluation strategy: \'depth\' (default), \'chains\'')
     parser.add_argument('--state-format',
-                        choices=['fdm', 'vmi12', 'vmi13', 'forest_centre'],
+                        choices=['fdm', 'vmi12', 'vmi13', 'forest_centre', 'geo_package'],
                         type=str,
-                        help='Data format of the state input file: fdm (default), vmi12, vmi13, forest_centre')
+                        help='Data format of the state input file: fdm (default), vmi12, vmi13, forest_centre, geopackage')
     parser.add_argument('--state-input-container',
                         choices=['pickle', 'json', 'csv'],
                         type=str,

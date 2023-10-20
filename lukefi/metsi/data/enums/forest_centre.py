@@ -32,6 +32,9 @@ class ForestCentreSpecies(Enum):
     WYCH_ELM = '28'
     UNKNOWN_DECIDUOUS = '29'
     UNKNOWN_CONIFEROUS = '30'
+    BIRCH = '103'
+    ALDER = '106'
+    MIXED = '201'
 
 
 class ForestCentreOwnerCategory(Enum):

@@ -1,11 +1,13 @@
 from collections.abc import Sequence, Iterable
 import xml.etree.ElementTree as ET
+from pandas import DataFrame, Series
+from geopandas import GeoDataFrame
 
 from lukefi.metsi.data.enums.internal import OwnerCategory
 from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.conversion import vmi2internal, fc2internal
-from lukefi.metsi.data.formats import smk_util, util, vmi_util
+from lukefi.metsi.data.formats import smk_util, util, vmi_util, gpkg_util
 from abc import ABC, abstractmethod
 from lukefi.metsi.data.formats.vmi_const import VMI12StandIndices, VMI12TreeIndices, VMI12StratumIndices, \
     VMI13StandIndices, VMI13TreeIndices, VMI13StratumIndices
@@ -429,11 +431,10 @@ class ForestCentreBuilder(XMLBuilder):
         operations = smk_util.parse_stand_operations(estand, target_operations='past')
         stand = self.set_stand_operations(stand, operations) # RSD records 19, 20, 21, 23, 25, 26, 27, 28 and 31
         stand.natural_regeneration_feasibility = False # RSD record 22
-        stand.development_class = 0 # RSD record 24
-        stand.forestry_centre_id = -1 # RSD record 29
+        stand.development_class = smk_util.parse_development_class(0) # RSD record 24
+        stand.forestry_centre_id = None # RSD record 29
         stand.forest_management_category = smk_util.parse_forest_management_category(stand_basic_data.CuttingRestriction) or 1  # 30
-        stand.municipality_id = None or -1 # RSD record 32
-        stand.area_weight_factors = (1.0, 1.0)
+        stand.municipality_id = None # RSD record 32
         # RSD record 33 and 34 unused
         return stand
 
@@ -466,6 +467,95 @@ class ForestCentreBuilder(XMLBuilder):
                 stratum.stand = stand
                 strata.append(stratum)
             stand.tree_strata = strata
-            stand.basal_area = sum([stratum.basal_area or 0.0 for stratum in strata])
+            stand.basal_area = smk_util.calculate_stand_basal_area(stand.tree_strata)
+            stands.append(stand)
+        return stands
+
+
+class GeoPackageBuilder(ForestBuilder):
+    """ ForestBuilder class for geopackage format spesification """
+    stands: DataFrame = None
+    strata: DataFrame = None
+    type_value = None
+
+   
+    def __init__(self, builder_flags: dict, db_path: str):
+        """ Reads Geopackage format into pandas dataframe representing stands and strata """
+        self.type_value = builder_flags['strata_origin']
+        (self.stands,
+         self.strata) = gpkg_util.read_geopackage(db_path, self.type_value)
+
+
+    def convert_stand_entry(self, entry: Series) -> ForestStand:
+        """ Converts a single pandas Series object into a ForestStand object
+        :return: ForestStand object
+        """
+        stand = ForestStand()
+        stand.management_unit_id = None # RSD record 1
+        stand.year = smk_util.parse_year(entry.date) # RSD record 2
+        stand.area = entry.area - entry.areadecrease # RSD record 3
+        stand.area_weight = stand.area # RSD record 4
+        # RSD records 5, 6 and 8
+        (latitude, longitude) = entry.centroid.get('centroid')
+        stand.geo_location = (latitude,
+                              longitude,
+                              None,
+                              entry.centroid.get('crs'))
+        stand.identifier = entry.standid # RSD record 7
+        stand.degree_days = None # RSD record 9
+        stand.owner_category = OwnerCategory.PRIVATE # RSD record 10
+        stand.land_use_category = fc2internal.convert_land_use_category(str(entry.maingroup)) # RSD record 11
+        stand.soil_peatland_category = fc2internal.convert_soil_peatland_category(str(entry.subgroup)) # RSD record 12
+        stand.site_type_category = fc2internal.convert_site_type_category(str(entry.fertilityclass)) # RSD record 13
+        # RSD record 14
+        # RSD record 15
+        stand.drainage_category = fc2internal.convert_drainage_category(str(entry.drainagestate)) # RSD record 16
+        stand.drainage_feasibility = True # RSD record 17
+        # RSD record 18 is '0' by default
+        # TODO: parse operations -> RSD records 19, 20, 21, 23, 25, 26, 27, 28 and 31
+        stand.natural_regeneration_feasibility = False # RSD record 22
+        stand.development_class = smk_util.parse_development_class(str(entry.developmentclass)) # RSD record 24
+        stand.forestry_centre_id = None # RSD record 29
+        restrictioncode = entry.restrictioncode if entry.restrictiontype == 1 else 1
+        stand.forest_management_category = smk_util.parse_forest_management_category(str(int(restrictioncode))) # 30
+        stand.municipality_id = None # RSD record 32
+        # RSD record 33 and 34 unused
+        return stand
+
+
+    def convert_stratum_entry(self, entry: Series) -> TreeStratum:
+        """ Converts a single pandas Series object into a TreeStratum object
+        :return: TreeStratum object
+        """
+        stratum = TreeStratum()
+        stratum.identifier = entry.treestratumid
+        stratum.species = fc2internal.convert_species(str(int(entry.treespecies)))
+        stratum.stems_per_ha = entry.stemcount
+        stratum.mean_diameter = entry.meandiameter
+        stratum.mean_height = entry.meanheight
+        stratum.biological_age = float(entry.age)
+        stratum.tree_number = entry.stratumnumber
+        stratum.basal_area = entry.basalarea
+        stratum.storey = entry.storey
+        return stratum
+
+
+    def build(self) -> list[ForestStand]:
+        """ Converts geopackage into list of ForestStand objects.
+        :return: List of ForestStand objects 
+        """
+        stands = []
+        for _, rowi in self.stands.iterrows():
+            # for each stand row
+            stand = self.convert_stand_entry(rowi)
+            strata = []
+            i_strata = self.strata[self.strata['standid'] == stand.identifier]
+            for _, rowj in i_strata.iterrows():
+                # for each strata row
+                stratum = self.convert_stratum_entry(rowj)
+                stratum.stand = stand
+                strata.append(stratum)
+            stand.tree_strata = strata
+            stand.basal_area = smk_util.calculate_stand_basal_area(stand.tree_strata)
             stands.append(stand)
         return stands
