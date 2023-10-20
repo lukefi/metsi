@@ -435,7 +435,6 @@ class ForestCentreBuilder(XMLBuilder):
         stand.forestry_centre_id = None # RSD record 29
         stand.forest_management_category = smk_util.parse_forest_management_category(stand_basic_data.CuttingRestriction) or 1  # 30
         stand.municipality_id = None # RSD record 32
-        stand.stems_per_ha_scaling_factors = (1.0, 1.0)
         # RSD record 33 and 34 unused
         return stand
 
