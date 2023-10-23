@@ -40,7 +40,7 @@ class PreprocessingTest(unittest.TestCase):
         self.assertEqual('xxx-1-tree', result[0].reference_trees[0].identifier)
         self.assertEqual(10237.96, result[0].reference_trees[0].stems_per_ha)
         self.assertEqual(1138.02, result[0].reference_trees[1].stems_per_ha)
-        self.assertEqual(120.0, result[0].area_weight)
+        self.assertEqual(0.0, result[0].area_weight)
 
     def test_determine_tree_height(self):
         stand = ForestStand()
@@ -66,3 +66,8 @@ class PreprocessingTest(unittest.TestCase):
         self.assertEqual(result.reference_trees[0].sapling, True)
         self.assertEqual(result.reference_trees[0].breast_height_diameter, 2)
         self.assertEqual(result.reference_trees[0].height, 0.9)
+
+    def test_scale_area_weight(self):
+        stand = ForestStand(area_weight=100.0, area_weight_factors=(0.0, 1.2))
+        result = preprocessing.scale_area_weight([stand])
+        self.assertEqual(result[0].area_weight, 120.0)

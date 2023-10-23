@@ -61,8 +61,6 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
     return stands
 
 
-
-
 def generate_reference_trees(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Operation function that generates (N * stratum) reference trees for each stand """
     debug = operation_params.get('debug', False)
@@ -71,7 +69,6 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     debug_tree_rows = []
     stratum_association_diameter_threshold = operation_params.get('stratum_association_diameter_threshold', 2.5)
     for i, stand in enumerate(stands):
-        stand.area_weight = stand.area * stand.area_weight_factors[1]
         print(f"\rGenerating trees for stand {stand.identifier}    {i}/{len(stands)}", end="")
         stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
         for tree in stand_trees:
@@ -182,6 +179,17 @@ def generate_sapling_trees_from_sapling_strata(stands: list[ForestStand], **oper
     return stands
 
 
+def scale_area_weight(stands: list[ForestStand], **operation_params):
+    """ Scales area weight of a stand.
+    
+        Especially necessary for VMI tree generation cases.
+        Should be used as precesing operation before the generation of reference trees.
+    """
+    for stand in stands:
+        stand.area_weight = stand.area_weight * stand.area_weight_factors[1]
+    return stands
+
+
 operation_lookup = {
     'filter': preproc_filter,
     'compute_location_metadata': compute_location_metadata,
@@ -189,5 +197,6 @@ operation_lookup = {
     'supplement_missing_tree_heights': supplement_missing_tree_heights,
     'supplement_missing_tree_ages': supplement_missing_tree_ages,
     'supplement_missing_stratum_diameters': supplement_missing_stratum_diameters,
-    'generate_sapling_trees_from_sapling_strata': generate_sapling_trees_from_sapling_strata
+    'generate_sapling_trees_from_sapling_strata': generate_sapling_trees_from_sapling_strata,
+    'scale_area_weight': scale_area_weight
 }
