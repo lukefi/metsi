@@ -12,6 +12,7 @@ class TestConversion(test_util.ConverterTestSuite):
             (['2', None], (0.2, 0.0)),
             ([None, '4'], (0.0, 0.4)),
             ([None, None], (0.0, 0.0)),
+            (['2', '4'], (0.2, 0.4)),
         ]
 
         self.run_with_test_assertions(assertions, vmi_util.determine_area_factors)
