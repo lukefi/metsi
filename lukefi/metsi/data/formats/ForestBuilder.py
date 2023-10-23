@@ -1,7 +1,6 @@
 from collections.abc import Sequence, Iterable
 import xml.etree.ElementTree as ET
 from pandas import DataFrame, Series
-from geopandas import GeoDataFrame
 
 from lukefi.metsi.data.enums.internal import OwnerCategory
 from lukefi.metsi.data.formats.util import parse_float
@@ -491,7 +490,6 @@ class GeoPackageBuilder(ForestBuilder):
         stand.management_unit_id = None # RSD record 1
         stand.year = smk_util.parse_year(entry.date) # RSD record 2
         stand.set_area(entry.area - entry.areadecrease) # RSD record 3 and 4
-        stand.area_weight = stand.area # RSD record 4
         # RSD records 5, 6 and 8
         (latitude, longitude) = entry.centroid.get('centroid')
         stand.geo_location = (latitude,
