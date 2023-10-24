@@ -82,6 +82,7 @@ preprocessing_params:
   #    remove stands: site_type_category == 0 #not reference_trees
 
 preprocessing_operations:
+  - scale_area_weight
   - generate_reference_trees # reference trees from strata, replaces existing reference trees
   #- supplement_missing_tree_heights
   #- supplement_missing_tree_ages

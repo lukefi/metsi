@@ -31,7 +31,8 @@ class PreprocessingTest(unittest.TestCase):
         normal_case = TreeStratum(identifier="1-stratum", mean_diameter=17.0, mean_height=15.0, basal_area=250.0, stems_per_ha=None, biological_age=10.0, sapling_stratum=False)
         stand = ForestStand()
         stand.identifier = 'xxx'
-        stand.area_weight_factors = (1.0, 1.0)
+        stand.area = 200.0
+        stand.area_weight_factors = (1.0, 0.6)
         stand.tree_strata.append(normal_case)
         normal_case.stand = stand
         result = preprocessing.generate_reference_trees([stand], n_trees=10)
@@ -39,6 +40,7 @@ class PreprocessingTest(unittest.TestCase):
         self.assertEqual('xxx-1-tree', result[0].reference_trees[0].identifier)
         self.assertEqual(10237.96, result[0].reference_trees[0].stems_per_ha)
         self.assertEqual(1138.02, result[0].reference_trees[1].stems_per_ha)
+        self.assertEqual(0.0, result[0].area_weight)
 
     def test_determine_tree_height(self):
         stand = ForestStand()
@@ -64,3 +66,8 @@ class PreprocessingTest(unittest.TestCase):
         self.assertEqual(result.reference_trees[0].sapling, True)
         self.assertEqual(result.reference_trees[0].breast_height_diameter, 2)
         self.assertEqual(result.reference_trees[0].height, 0.9)
+
+    def test_scale_area_weight(self):
+        stand = ForestStand(area_weight=100.0, area_weight_factors=(0.0, 1.2))
+        result = preprocessing.scale_area_weight([stand])
+        self.assertEqual(result[0].area_weight, 120.0)

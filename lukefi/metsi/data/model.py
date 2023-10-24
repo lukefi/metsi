@@ -485,9 +485,12 @@ class ForestStand():
             stand_id if management_unit_id is None else management_unit_id
         )
 
-    def set_area(self, area_ha: float, area_weight: Optional[float] = None):
-        self.area = area_ha
-        self.area_weight = area_ha if area_weight is None else area_weight
+    def set_area(self, area_ha: float):
+        if self.is_auxiliary():
+            self.area = 0.0
+        else:
+            self.area = area_ha
+        self.area_weight = area_ha
 
     def set_geo_location(
         self, lat: float, lon: float, height: float, system: str = "EPSG:3067"

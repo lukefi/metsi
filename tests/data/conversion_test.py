@@ -6,13 +6,13 @@ from tests.data import test_util
 class TestConversion(test_util.ConverterTestSuite):
     def test_determine_area_factors(self):
         assertions = [
-            (['0', '0'], (1.0, 1.0)),
-            (['0', '1'], (1.0, 0.1)),
-            (['1', '0'], (0.1, 1.0)),
+            (['0', '0'], (0.0, 0.0)),
+            (['0', '1'], (0.0, 0.1)),
+            (['1', '0'], (0.1, 0.0)),
+            (['2', None], (0.2, 0.0)),
+            ([None, '4'], (0.0, 0.4)),
+            ([None, None], (0.0, 0.0)),
             (['2', '4'], (0.2, 0.4)),
-            (['2', None], (0.2, 1.0)),
-            ([None, '4'], (1.0, 0.4)),
-            ([None, None], (1.0, 1.0)),
         ]
 
         self.run_with_test_assertions(assertions, vmi_util.determine_area_factors)
