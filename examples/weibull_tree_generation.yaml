@@ -9,6 +9,7 @@ app_configuration:
 preprocessing_operations:
   - supplement_missing_stratum_diameters
   - filter
+  - scale_area_weight
   - generate_reference_trees
 
 preprocessing_params:

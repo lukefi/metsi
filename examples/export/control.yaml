@@ -58,6 +58,7 @@ preprocessing_params:
     - n_trees: 10
 
 preprocessing_operations:
+  - scale_area_weight
   - generate_reference_trees # reference trees from strata, replaces existing reference trees
   #- compute_location_metadata # required for using grow_motti, grow_fhk
 
