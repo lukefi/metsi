@@ -30,14 +30,16 @@ def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_are
         'G': robjects.FloatVector([stand_basal_area]),
         'Gos': robjects.FloatVector([stratum.basal_area]),
         'spe': robjects.FloatVector([stratum.species.value]),
-        'DDY': robjects.FloatVector([degree_days])
+        'DDY': robjects.FloatVector([degree_days]),
+        'Nos': robjects.FloatVector([stratum.stems_per_ha])
     }
 
     source_trees = stratum.__dict__.get('_trees', [])
 
     tree_data = {
         'lpm': robjects.FloatVector([tree.breast_height_diameter or robjects.NA_Real for tree in source_trees]),
-        'height': robjects.FloatVector([tree.measured_height or robjects.NA_Real for tree in source_trees]),
+        'height': robjects.FloatVector([robjects.NA_Real if tree.tuhon_ilmiasu.strip() in ('2', '61', '62', '71', '72') \
+            else (tree.measured_height or robjects.NA_Real) for tree in source_trees]),
         'lkm': robjects.FloatVector([tree.stems_per_ha or robjects.NA_Real for tree in source_trees])
     }
     df = robjects.DataFrame(stratum_data)
@@ -49,17 +51,18 @@ def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_are
         tapa=params.get('lm_mode', 'dcons'),
         n=params.get('n_trees', 10),
         hmalli=determine_hmalli_value(stratum.species),
-        shdef=params.get('lm_shdef', 5))
+        shdef=params.get('lm_shdef', 5),
+        shinit=0.1)
 
     trees = []
-    for i in range(params.get('n_trees', 10)):
+    for i in range(result_df.nrow):
         trees.append(ReferenceTree(
-            breast_height_diameter=result_df.rx2(8)[i],
+            breast_height_diameter=result_df.rx2(9)[i],
             stems_per_ha=result_df.rx2(10)[i],
             height=result_df.rx2(11)[i],
             species=stratum.species,
             biological_age=stratum.biological_age,
-            sapling=result_df.rx2(10)[i] < 1.3
+            sapling=result_df.rx2(11)[i] < 1.3
         ))
-
+    
     return trees
