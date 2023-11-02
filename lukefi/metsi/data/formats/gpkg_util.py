@@ -36,7 +36,7 @@ def _extract_centroid(geometry: Polygon) -> tuple[float, float]:
     longitude = round(float(cid.x), 2)
     return dict(
         centroid=(longitude, latitude),
-        crs=cid.crs.srs)
+        crs=cid.crs.srs.upper())
 
 
 def _attach_location(df: pd.DataFrame, gdf: geopandas.GeoDataFrame) -> pd.DataFrame:
