@@ -45,3 +45,15 @@ def naslund_height(diameter: float, species: TreeSpecies) -> Optional[float]:
             return round(height, 2)
     else:
         return None
+
+
+def naslund_correction(species: TreeSpecies, diameter: float, height: float) -> float:
+    ''' Height correction coefficient by Naslund height model
+
+        :spe: tree stratum species
+        :diameter: tree stratum diameter 
+        :height: tree stratum height
+        :return: height correction coefficient
+    '''
+    h_computed = naslund_height(diameter, species)
+    return height/h_computed

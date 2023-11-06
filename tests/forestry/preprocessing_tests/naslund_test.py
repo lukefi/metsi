@@ -17,3 +17,12 @@ class TestNaslund(test_util.ConverterTestSuite):
             ([10.0, TreeSpecies.UNKNOWN], 10.38),
         ]
         self.run_with_test_assertions(assertions, naslund.naslund_height)
+
+    def test_naslund_correction(self):
+        assertions = [
+            ([2, 10.0, 12.0], 1.22),
+            ([1, 10.0, 12.0], 0.82),
+        ]
+        for a in assertions:
+            result = round(naslund.naslund_correction(*a[0]), 2)
+            self.assertEqual(a[1], result)
