@@ -3,7 +3,7 @@ from typing import Optional
 from lukefi.metsi.data.model import ReferenceTree, TreeStratum
 from enum import Enum
 from lukefi.metsi.forestry.preprocessing import distributions, pre_util
-from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
+from lukefi.metsi.forestry.preprocessing.naslund import naslund_height, naslund_correction
 from lukefi.metsi.forestry.preprocessing.tree_generation_lm import tree_generation_lm
 
 
@@ -53,6 +53,13 @@ def trees_from_weibull(stratum: TreeStratum, **params) -> list[ReferenceTree]:
             reference_tree.breast_height_diameter,
             stratum.species)
         reference_tree.height = 0.0 if height is None else height
+    # height correction
+    h_scalar = naslund_correction(stratum.species,
+                                  stratum.mean_diameter,
+                                  stratum.mean_height)
+    for reference_tree in result:
+        reference_tree.height = round(h_scalar*reference_tree.height, 2)
+
     return result
 
 
