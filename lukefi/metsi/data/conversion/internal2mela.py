@@ -205,13 +205,6 @@ def stand_location_converter(target):
     return target
 
 
-def stand_area_converter(target):
-    """ in-place conversion to Mela value space for area related matters """
-    if target.is_auxiliary():
-        target.area = 0.0
-    return target
-
-
 def mela_stratum(stratum):
     """Convert a TreeStratum so that enumerated category variables are converted to Mela value space"""
     result = copy(stratum)
@@ -244,7 +237,6 @@ def mela_stand(stand):
 default_mela_tree_mappers = [species_mapper]
 default_mela_stratum_mappers = [species_mapper]
 default_mela_stand_mappers = [stand_location_converter,
-                              stand_area_converter,
                               owner_mapper, 
                               land_use_mapper, 
                               site_type_mapper, 
