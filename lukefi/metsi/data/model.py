@@ -259,6 +259,9 @@ class ReferenceTree():
     storey: Optional[Storey] = None
     tree_type: Optional[str] = None
 
+    # VMI tuhon ilmiasu
+    tuhon_ilmiasu: Optional[str] = None
+    
     def __eq__(self, other: "ReferenceTree"):
         return id(self) == id(other)
 
@@ -331,7 +334,8 @@ class ReferenceTree():
             self.tree_category,
             self.sapling,
             self.storey,
-            self.tree_type
+            self.tree_type,
+            self.tuhon_ilmiasu
         ]
 
     @classmethod
@@ -362,6 +366,7 @@ class ReferenceTree():
         result.sapling = conv(row[19], "sapling")
         result.storey = Storey[row[20].split(".")[1]] if row[20] != 'None' else None
         result.tree_type = conv(row[21], "tree_type")
+        result.tuhon_ilmiasu = conv(row[22], "tuhon_ilmiasu")
         return result
 
 

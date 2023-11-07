@@ -66,11 +66,12 @@ def trees_from_sapling_height_distribution(stratum: TreeStratum, **params) -> li
 
 def solve_tree_generation_strategy(stratum: TreeStratum, method='weibull') -> str:
     """ Solves the strategy of tree generation for given stratum """
+
     if stratum.has_height_over_130_cm():
         # big trees
         if stratum.has_diameter() and stratum.has_height() and stratum.has_basal_area() and method == 'weibull':
             return TreeStrategy.WEIBULL_DISTRIBUTION
-        elif not stratum.sapling_stratum and stratum.has_diameter() and method == 'lm':
+        elif not stratum.sapling_stratum and stratum.has_diameter() and (stratum.has_basal_area() or stratum.has_stems_per_ha()) and method == 'lm':
             return TreeStrategy.LM_TREES
         elif stratum.has_diameter() and stratum.has_height() and stratum.has_stems_per_ha():
             return TreeStrategy.HEIGHT_DISTRIBUTION
@@ -111,5 +112,8 @@ def reference_trees_from_tree_stratum(stratum: TreeStratum, **params) -> list[Re
         return []
     else:
         raise UserWarning("Unable to generate reference trees from stratum {}".format(stratum.identifier))
+    
+    result = [ rt for rt in result if round(rt.stems_per_ha,2) > 0.0 ]
+    
     return finalize_trees(result, stratum)
 

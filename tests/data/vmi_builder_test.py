@@ -236,6 +236,7 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(1, tree.management_category)
         self.assertEqual(Storey.DOMINANT, tree.storey)
         self.assertEqual(None, tree.tree_type)
+        self.assertEqual(None, tree.tuhon_ilmiasu)
 
     def test_vmi12_strata(self):
         self.assertEqual(0, len(self.vmi12_stands_ref_trees_false[0].tree_strata))
