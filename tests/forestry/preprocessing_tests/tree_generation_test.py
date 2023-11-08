@@ -37,6 +37,9 @@ class TestTreeGeneration(unittest.TestCase):
         n_trees = 10
         result = tree_generation.trees_from_weibull(fixture, n_trees=n_trees)
         self.assertEqual(10, len(result))
+        self.assertEqual(14.67280367311326, result[0].breast_height_diameter)
+        self.assertEqual(17.4, result[0].height)
+        self.assertEqual(1.9357767362985978, result[0].stems_per_ha)
 
     def test_finalize_trees(self):
         stratum = TreeStratum()
@@ -127,13 +130,13 @@ class TestTreeGeneration(unittest.TestCase):
             # stems_per_ha=1.94;
             # breast_height_age=15;
             # biological_age=16;
-            14.67, 17.83, 1.94, 15, 16, # result[0]
+            14.67, 17.4, 1.94, 15, 16, # result[0]
             # diameter=17.14;
             # height=19.08;
             # stems_per_ha=15.42;
             # breast_height_age=15;
             # biological_age=16;
-            17.14, 19.08, 15.42, 15, 16], # result[1]
+            17.14, 18.61, 15.42, 15, 16], # result[1]
             # n_trees=10;
             # ForestStand=stand;
             # species=1;
