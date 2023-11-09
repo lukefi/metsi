@@ -325,6 +325,7 @@ class VMI13Builder(VMIBuilder):
         return list(result.values())
 
 class ForestCentreBuilder(ForestBuilder):
+    ''' Base class for building a forest data model from Forest Centre (Suomen Metsakeskus) source '''
 
     @abstractmethod
     def build(self) -> list[ForestStand]:
