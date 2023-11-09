@@ -1,5 +1,5 @@
 import unittest
-from lukefi.metsi.data.formats.ForestBuilder import VMI12Builder, VMI13Builder, ForestCentreBuilder, GeoPackageBuilder
+from lukefi.metsi.data.formats.ForestBuilder import VMI12Builder, VMI13Builder, XMLBuilder, GeoPackageBuilder
 from pathlib import Path
 
 
@@ -17,7 +17,7 @@ class TestForestBuilderRun(unittest.TestCase):
     def test_run_smk_forest_builder_build(self):
         assertion = ('SMK_source.xml', 2)
         reference_file = Path('tests', 'data', 'resources', assertion[0])
-        list_of_stands = ForestCentreBuilder({"strata_origin": "1", "reference_trees": False},
+        list_of_stands = XMLBuilder({"strata_origin": "1", "reference_trees": False},
                                              xml_file_reader(reference_file)).build()
         result = len(list_of_stands)
         self.assertEqual(result, assertion[1])

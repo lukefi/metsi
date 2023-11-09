@@ -1,6 +1,6 @@
 #Application configuration values. Can be overriden by CLI arguments. May be commented out for None or default from Mela2Configuration.
 app_configuration:
-  state_format: fdm #options: fdm, vmi12, vmi13, forest_centre
+  state_format: fdm #options: fdm, vmi12, vmi13, xml
   state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
   #preprocessing_output_container: csv #options: pickle, json, csv, null, rsd (special case not usable as input container)
   #state_output_container: csv #options: pickle, json, csv, null

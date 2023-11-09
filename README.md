@@ -208,7 +208,7 @@ python -m lukefi.metsi.app.metsi --state-format vmi13 --reference-trees -r prepr
 To run full pipeline from a Forest Centre .xml source file, run:
 
 ```
-python -m lukefi.metsi.app.metsi --state-format forest_centre --reference-trees -r preprocess,simulate,postprocess,export forest_centre.xml sim_outdir
+python -m lukefi.metsi.app.metsi --state-format xml --reference-trees -r preprocess,simulate,postprocess,export forest_centre.xml sim_outdir
 ```
 
 To run full pipeline from a Forest Centre .gpkg source file, run:
@@ -721,7 +721,7 @@ A run is declared in the YAML file `control.yaml`.
     1. `state_format` specifies the data format of the input computational units
         1. `fdm` is the standard Forest Data Model.
         2. `vmi12` and `vmi13` denote the VMI data format and container.
-        3. `forest_centre` denotes the Forest Centre XML data format and container.
+        3. `xml` denotes the Forest Centre XML data format and container.
         4. `geopackage` denotes the Forest Centre GPKG data format and container.
     2. `state_input_container` is the file type for `fdm` data format. This may be `csv`, `pickle` or `json`.
     3. `preprocessing_output_container` is the file type for outputting the `fdm` formatted state of computational units
@@ -733,7 +733,7 @@ A run is declared in the YAML file `control.yaml`.
     6. `strategy` is the simulation event tree formation strategy. Can be `partial` or `full`.
     7. `reference_trees` instructs the `vmi12` and `vmi13` data converters to choose either reference trees or tree
        strata from the source. `True` or `False`.
-    8. `strata_origin` instructs the `forest_centre` converter to choose only strata with certain origin to the
+    8. `strata_origin` instructs a forest centre converter to choose only strata with certain origin to the
        result. `1`, `2` or `3`.
     9. `multiprocessing` instructs the application to parallelizes the computation to available CPU cores in the
        system. `True` or `False`.
