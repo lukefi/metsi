@@ -6,7 +6,7 @@ import jsonpickle
 from typing import Any, Optional
 from collections.abc import Iterator, Callable
 import yaml
-from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, ForestCentreBuilder, GeoPackageBuilder
+from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, stands_to_rsd_content
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
@@ -99,8 +99,8 @@ def external_reader(state_format: str, **builder_flags) -> StandReader:
         return lambda path: VMI13Builder(builder_flags, vmi_file_reader(path)).build()
     elif state_format == "vmi12":
         return lambda path: VMI12Builder(builder_flags, vmi_file_reader(path)).build()
-    elif state_format == "forest_centre":
-        return lambda path: ForestCentreBuilder(builder_flags, xml_file_reader(path)).build()
+    elif state_format == "xml":
+        return lambda path: XMLBuilder(builder_flags, xml_file_reader(path)).build()
     elif state_format == "geo_package":
         return lambda path: GeoPackageBuilder(builder_flags, path).build()
 
@@ -115,7 +115,7 @@ def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
     """
     if app_config.state_format == "fdm":
         return fdm_reader(app_config.state_input_container)(app_config.input_path)
-    elif app_config.state_format in ("vmi13", "vmi12", "forest_centre", "geo_package"):
+    elif app_config.state_format in ("vmi13", "vmi12", "xml", "geo_package"):
         return external_reader(
             app_config.state_format,
             strata=app_config.strata,

@@ -165,7 +165,7 @@ class TestFileReading(unittest.TestCase):
     def test_read_stands_from_xml_file(self):
         config = MetsiConfiguration(
             input_path="tests/resources/file_io_test/forest_centre.xml",
-            state_format="forest_centre",
+            state_format="xml",
             state_input_container=""
         )
         stands = lukefi.metsi.app.file_io.read_stands_from_file(config)
