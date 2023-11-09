@@ -332,12 +332,12 @@ class ForestCentreBuilder(ForestBuilder):
 
 
     @abstractmethod
-    def convert_stand_entry(self):
+    def convert_stand_entry(self, entry) -> ForestStand:
         ...
 
 
     @abstractmethod
-    def convert_stratum_entry(self):
+    def convert_stratum_entry(self, entry) -> TreeStratum:
         ...
 
 class XMLBuilder(ForestCentreBuilder):
