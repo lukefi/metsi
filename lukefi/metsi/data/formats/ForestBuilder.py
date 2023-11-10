@@ -104,7 +104,7 @@ class VMIBuilder(ForestBuilder):
         result.management_category = vmi_util.determine_tree_management_category(data_row[indices.latvuskerros])
         result.storey = vmi_util.determine_storey_for_tree(data_row[indices.latvuskerros])
         result.tree_type = vmi_util.determine_tree_type(data_row[indices.tree_type])
-        result.tuhon_ilmiasu = None if data_row[indices.tuhon_ilmiasu] == "  " else data_row[indices.tuhon_ilmiasu]
+        result.tuhon_ilmiasu = None if data_row[indices.tuhon_ilmiasu] == "  " else data_row[indices.tuhon_ilmiasu].strip()
         return result
 
     def convert_stratum_entry(self, indices: VMI12StratumIndices or VMI13StratumIndices,
