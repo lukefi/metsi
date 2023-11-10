@@ -504,7 +504,9 @@ class GeoPackageBuilder(ForestBuilder):
         stand.site_type_category = fc2internal.convert_site_type_category(util.parse_type(entry.fertilityclass, str)) # RSD record 13
         # RSD record 14
         # RSD record 15
-        stand.drainage_category = fc2internal.convert_drainage_category(util.parse_type(entry.drainagestate, str)) # RSD record 16
+        stand.drainage_category = fc2internal.convert_to_internal(
+            util.parse_type(entry.drainagestate, int, str),
+            fc2internal.convert_drainage_category) # RSD record 16
         stand.drainage_feasibility = True # RSD record 17
         # RSD record 18 is '0' by default
         # TODO: parse operations -> RSD records 19, 20, 21, 23, 25, 26, 27, 28 and 31
