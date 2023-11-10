@@ -2,6 +2,18 @@ from enum import EnumMeta
 from typing import Optional, Any
 
 
+def parse_type(source, *ts: type) -> type:
+    ''' Generic version of  parse_int and parse_float utilities'''
+    ts = list(ts)
+    try:
+        t0 = ts.pop(0)
+        r = t0(source)
+        for t in ts:
+            r = t(r)
+        return r
+    except (ValueError, TypeError, IndexError):
+        return None
+
 def parse_int(source: str) -> Optional[int]:
     try:
         return int(source)

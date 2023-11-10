@@ -1,8 +1,16 @@
 from tests.data import test_util
-from lukefi.metsi.data.formats.util import parse_int, parse_float, get_or_default
+from lukefi.metsi.data.formats.util import parse_int, parse_float, get_or_default, parse_type
 
 
 class TestOptionUtil(test_util.ConverterTestSuite):
+    def test_parse_type(self):
+        assertions = [
+            ([1.0, int, str], '1'),
+            (['1.0', float, int], 1),
+            ([1, float, str], '1.0'),
+        ]
+        self.run_with_test_assertions(assertions, parse_type)
+
     def test_parse_int(self):
         assertions = [
             (['123'], 123),
