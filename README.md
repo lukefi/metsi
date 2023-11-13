@@ -214,7 +214,7 @@ python -m lukefi.metsi.app.metsi --state-format xml --reference-trees -r preproc
 To run full pipeline from a Forest Centre .gpkg source file, run:
 
 ```
-python -m lukefi.metsi.app.metsi --state-format geopackage --reference-trees -r preprocess,simulate,postprocess,export geopackage.gpkg sim_outdir
+python -m lukefi.metsi.app.metsi --state-format gpkg --reference-trees -r preprocess,simulate,postprocess,export geopackage.gpkg sim_outdir
 ```
 
 To run full pipeline from a FDM formatted data from csv (or json or pickle with replacement below), run:
@@ -722,7 +722,7 @@ A run is declared in the YAML file `control.yaml`.
         1. `fdm` is the standard Forest Data Model.
         2. `vmi12` and `vmi13` denote the VMI data format and container.
         3. `xml` denotes the Forest Centre XML data format and container.
-        4. `geopackage` denotes the Forest Centre GPKG data format and container.
+        4. `gpkg` denotes the Forest Centre GPKG data format and container.
     2. `state_input_container` is the file type for `fdm` data format. This may be `csv`, `pickle` or `json`.
     3. `preprocessing_output_container` is the file type for outputting the `fdm` formatted state of computational units
        after preprocessing operations. This may be `csv`, `pickle` or `json` or commented out for no output.

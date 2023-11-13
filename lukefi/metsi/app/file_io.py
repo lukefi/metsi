@@ -101,7 +101,7 @@ def external_reader(state_format: str, **builder_flags) -> StandReader:
         return lambda path: VMI12Builder(builder_flags, vmi_file_reader(path)).build()
     elif state_format == "xml":
         return lambda path: XMLBuilder(builder_flags, xml_file_reader(path)).build()
-    elif state_format == "geo_package":
+    elif state_format == "gpkg":
         return lambda path: GeoPackageBuilder(builder_flags, path).build()
 
 
@@ -115,7 +115,7 @@ def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
     """
     if app_config.state_format == "fdm":
         return fdm_reader(app_config.state_input_container)(app_config.input_path)
-    elif app_config.state_format in ("vmi13", "vmi12", "xml", "geo_package"):
+    elif app_config.state_format in ("vmi13", "vmi12", "xml", "gpkg"):
         return external_reader(
             app_config.state_format,
             strata=app_config.strata,

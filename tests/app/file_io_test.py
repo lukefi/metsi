@@ -171,6 +171,15 @@ class TestFileReading(unittest.TestCase):
         stands = lukefi.metsi.app.file_io.read_stands_from_file(config)
         self.assertEqual(len(stands), 2)
 
+    def test_read_stands_from_gpkg_file(self):
+        config = MetsiConfiguration(
+            input_path="tests/data/resources/SMK_source.gpkg",
+            state_format="gpkg",
+            state_input_container=""
+        )
+        stands = lukefi.metsi.app.file_io.read_stands_from_file(config)
+        self.assertEqual(len(stands), 9)
+
     def test_read_schedule_payload_from_directory(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory/3/0")
         result = lukefi.metsi.app.file_io.read_schedule_payload_from_directory(dir)
