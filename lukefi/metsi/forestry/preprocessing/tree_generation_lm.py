@@ -38,7 +38,7 @@ def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_are
 
     tree_data = {
         'lpm': robjects.FloatVector([tree.breast_height_diameter or robjects.NA_Real for tree in source_trees]),
-        'height': robjects.FloatVector([robjects.NA_Real if tree.tuhon_ilmiasu.strip() in ('2', '61', '62', '71', '72') \
+        'height': robjects.FloatVector([robjects.NA_Real if tree.tuhon_ilmiasu in ('2', '61', '62', '71', '72') \
             else (tree.measured_height or robjects.NA_Real) for tree in source_trees]),
         'lkm': robjects.FloatVector([tree.stems_per_ha or robjects.NA_Real for tree in source_trees])
     }
