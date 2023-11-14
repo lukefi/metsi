@@ -208,13 +208,13 @@ python -m lukefi.metsi.app.metsi --state-format vmi13 --measured-trees -r prepro
 To run full pipeline from a Forest Centre .xml source file, run:
 
 ```
-python -m lukefi.metsi.app.metsi --state-format forest_centre --measured-trees -r preprocess,simulate,postprocess,export forest_centre.xml sim_outdir
+python -m lukefi.metsi.app.metsi --state-format forest_centre -r preprocess,simulate,postprocess,export forest_centre.xml sim_outdir
 ```
 
 To run full pipeline from a Forest Centre .gpkg source file, run:
 
 ```
-python -m lukefi.metsi.app.metsi --state-format geopackage --measured-trees -r preprocess,simulate,postprocess,export geopackage.gpkg sim_outdir
+python -m lukefi.metsi.app.metsi --state-format geopackage -r preprocess,simulate,postprocess,export geopackage.gpkg sim_outdir
 ```
 
 To run full pipeline from a FDM formatted data from csv (or json or pickle with replacement below), run:
