@@ -3,7 +3,6 @@ import xml.etree.ElementTree as ET
 from pandas import DataFrame, Series
 
 from lukefi.metsi.data.enums.internal import OwnerCategory
-from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.conversion import vmi2internal, fc2internal
 from lukefi.metsi.data.formats import smk_util, util, vmi_util, gpkg_util
@@ -79,7 +78,7 @@ class VMIBuilder(ForestBuilder):
             data_row[indices.kitukunta])
         result.natural_regeneration_feasibility = vmi_util.determine_natural_renewal(data_row[indices.hakkuuehdotus])
         result.auxiliary_stand = data_row[indices.stand_number] != '1'
-        result.basal_area = parse_float(data_row[indices.pohjapintaala])
+        result.basal_area = util.parse_type(data_row[indices.pohjapintaala], float)
         return result
 
     def convert_tree_entry(self, indices: VMI12TreeIndices or VMI13TreeIndices,
@@ -96,15 +95,15 @@ class VMIBuilder(ForestBuilder):
         result.pruning_year = 0
         result.age_when_10cm_diameter_at_breast_height = 0
         result.origin = 0
-        result.tree_number = util.parse_int(data_row[indices.tree_number])
+        result.tree_number = util.parse_type(data_row[indices.tree_number], int)
         result.stand_origin_relative_position = (0.0, 0.0, 0.0)
         result.lowest_living_branch_height = util.get_or_default(
-            util.parse_float(data_row[indices.living_branches_height]),
+            util.parse_type(data_row[indices.living_branches_height], float),
             0.0) / 10.0
         result.management_category = vmi_util.determine_tree_management_category(data_row[indices.latvuskerros])
         result.storey = vmi_util.determine_storey_for_tree(data_row[indices.latvuskerros])
         result.tree_type = vmi_util.determine_tree_type(data_row[indices.tree_type])
-        result.tuhon_ilmiasu = None if data_row[indices.tuhon_ilmiasu] == "  " else data_row[indices.tuhon_ilmiasu]
+        result.tuhon_ilmiasu = None if data_row[indices.tuhon_ilmiasu] in ('  ',' ', '.', '') else data_row[indices.tuhon_ilmiasu].strip()
         return result
 
     def convert_stratum_entry(self, indices: VMI12StratumIndices or VMI13StratumIndices,
@@ -114,11 +113,11 @@ class VMIBuilder(ForestBuilder):
         result.species = vmi2internal.convert_species(data_row[indices.species])
         result.origin = vmi_util.determine_stratum_origin(data_row[indices.origin])
         result.stems_per_ha = util.get_or_default(
-            util.parse_float(data_row[indices.stems_per_ha]), 0.0)
+            util.parse_type(data_row[indices.stems_per_ha], float), 0.0)
         result.sapling_stems_per_ha = util.get_or_default(
-            util.parse_float(data_row[indices.sapling_stems_per_ha]), 0.0)
+            util.parse_type(data_row[indices.sapling_stems_per_ha], float), 0.0)
         result.sapling_stratum = result.has_sapling_stems_per_ha()
-        result.mean_diameter = util.parse_float(data_row[indices.avg_diameter])
+        result.mean_diameter = util.parse_type(data_row[indices.avg_diameter], float)
         result.mean_height = vmi_util.determine_stratum_tree_height(data_row[indices.avg_height])
         (biological_age, breast_height_age) = vmi_util.determine_stratum_age_values(
             data_row[indices.biological_age],
@@ -126,7 +125,7 @@ class VMIBuilder(ForestBuilder):
             result.mean_height)
         result.breast_height_age = breast_height_age
         result.biological_age = biological_age
-        result.basal_area = util.parse_float(data_row[indices.basal_area])
+        result.basal_area = util.parse_type(data_row[indices.basal_area], float)
         result.cutting_year = 0
         result.age_when_10cm_diameter_at_breast_height = 0
         result.tree_number = 0
@@ -169,8 +168,8 @@ class VMI12Builder(VMIBuilder):
             data_row[indices.osuus9m]
         )
         result.set_area(area_ha)
-        lat = vmi_util.parse_float(data_row[indices.lat])
-        lon = vmi_util.parse_float(data_row[indices.lon])
+        lat = util.parse_type(data_row[indices.lat], float)
+        lon = util.parse_type(data_row[indices.lon], float)
         height = vmi_util.transform_vmi12_height_above_sea_level(data_row[indices.height_above_sea_level])
         result.set_geo_location(lat, lon, height, "EPSG:2393")
         result.drainage_year = vmi_util.determine_drainage_year(data_row[indices.ojitus_aika], result.year)
@@ -226,7 +225,7 @@ class VMI12Builder(VMIBuilder):
                 stratum.stand = stand
                 stand.tree_strata.append(stratum)
 
-        if self.builder_flags['reference_trees']:
+        if self.builder_flags['measured_trees']:
             for i, row in enumerate(self.reference_trees):
                 tree = self.convert_tree_entry(VMI12TreeIndices, row)
                 stand_id = vmi_util.generate_stand_identifier(row, VMI12StandIndices)
@@ -260,8 +259,8 @@ class VMI13Builder(VMIBuilder):
             data_row[indices.osuus9m]
         )
         result.set_area(area_ha)
-        lat = vmi_util.parse_float(data_row[indices.lat])
-        lon = vmi_util.parse_float(data_row[indices.lon])
+        lat = util.parse_type(data_row[indices.lat], float)
+        lon = util.parse_type(data_row[indices.lon], float)
         height = vmi_util.transform_vmi13_height_above_sea_level(data_row[indices.height_above_sea_level])
         result.set_geo_location(lat, lon, height)
         result.drainage_year = vmi_util.determine_drainage_year(data_row[indices.ojitus_aika], result.year)
@@ -314,7 +313,7 @@ class VMI13Builder(VMIBuilder):
                 stratum.stand = stand
                 stand.tree_strata.append(stratum)
 
-        if self.builder_flags['reference_trees']:
+        if self.builder_flags['measured_trees']:
             for i, row in enumerate(self.reference_trees):
                 tree = self.convert_tree_entry(VMI13TreeIndices, row)
                 stand_id = vmi_util.generate_stand_identifier(row, VMI13StandIndices)
@@ -407,7 +406,7 @@ class XMLBuilder(ForestCentreBuilder):
         stand = ForestStand()
         stand.management_unit_id = None # RSD record 1
         stand.year = smk_util.parse_year(stand_basic_data.StandBasicDataDate) # RSD record 2
-        stand.set_area(util.parse_float(stand_basic_data.Area)) # RSD record 3 and 4
+        stand.set_area(util.parse_type(stand_basic_data.Area, float)) # RSD record 3 and 4
         (latitude, longitude, crs) = smk_util.parse_coordinates(estand)
         stand.geo_location = (latitude, longitude, None, crs) # RSD record 5,6,8
         stand.identifier = stand_basic_data.id # RSD record 7
@@ -436,14 +435,14 @@ class XMLBuilder(ForestCentreBuilder):
     def convert_stratum_entry(self, estratum: ET.Element) -> TreeStratum:
         stratum_data = smk_util.parse_stratum_data(estratum)
         stratum = TreeStratum()
-        stratum.identifier = stratum_data.id
+        stratum.identifier = util.parse_type(stratum_data.id, int)
         stratum.species = fc2internal.convert_species(stratum_data.TreeSpecies)
-        stratum.stems_per_ha = util.parse_int(stratum_data.StemCount)
-        stratum.mean_diameter = util.parse_float(stratum_data.MeanDiameter)
-        stratum.mean_height = util.parse_float(stratum_data.MeanHeight)
-        stratum.biological_age = util.parse_float(stratum_data.Age)
-        stratum.basal_area = util.parse_float(stratum_data.BasalArea)
-        stratum.tree_number = util.parse_int(stratum_data.StratumNumber)
+        stratum.stems_per_ha = util.parse_type(stratum_data.StemCount, int)
+        stratum.mean_diameter = util.parse_type(stratum_data.MeanDiameter, float)
+        stratum.mean_height = util.parse_type(stratum_data.MeanHeight, float)
+        stratum.biological_age = util.parse_type(stratum_data.Age, float)
+        stratum.basal_area = util.parse_type(stratum_data.BasalArea, float)
+        stratum.tree_number = util.parse_type(stratum_data.StratumNumber, int)
         stratum.storey = fc2internal.convert_storey(stratum_data.Storey)
         return stratum
 
@@ -497,20 +496,22 @@ class GeoPackageBuilder(ForestCentreBuilder):
         stand.identifier = entry.standid # RSD record 7
         stand.degree_days = None # RSD record 9
         stand.owner_category = OwnerCategory.PRIVATE # RSD record 10
-        stand.land_use_category = fc2internal.convert_land_use_category(str(entry.maingroup)) # RSD record 11
-        stand.soil_peatland_category = fc2internal.convert_soil_peatland_category(str(entry.subgroup)) # RSD record 12
-        stand.site_type_category = fc2internal.convert_site_type_category(str(entry.fertilityclass)) # RSD record 13
+        stand.land_use_category = fc2internal.convert_land_use_category(util.parse_type(entry.maingroup, str)) # RSD record 11
+        stand.soil_peatland_category = fc2internal.convert_soil_peatland_category(util.parse_type(entry.subgroup, str)) # RSD record 12
+        stand.site_type_category = fc2internal.convert_site_type_category(util.parse_type(entry.fertilityclass, str)) # RSD record 13
         # RSD record 14
         # RSD record 15
-        stand.drainage_category = fc2internal.convert_drainage_category(str(entry.drainagestate)) # RSD record 16
+        stand.drainage_category = fc2internal.convert_to_internal(
+            util.parse_type(entry.drainagestate, int, str),
+            fc2internal.convert_drainage_category) # RSD record 16
         stand.drainage_feasibility = True # RSD record 17
         # RSD record 18 is '0' by default
         # TODO: parse operations -> RSD records 19, 20, 21, 23, 25, 26, 27, 28 and 31
         stand.natural_regeneration_feasibility = False # RSD record 22
-        stand.development_class = smk_util.parse_development_class(str(entry.developmentclass)) # RSD record 24
+        stand.development_class = smk_util.parse_development_class(util.parse_type(entry.developmentclass, str)) # RSD record 24
         stand.forestry_centre_id = None # RSD record 29
         restrictioncode = entry.restrictioncode if entry.restrictiontype == 1 else 1
-        stand.forest_management_category = smk_util.parse_forest_management_category(str(int(restrictioncode))) # 30
+        stand.forest_management_category = smk_util.parse_forest_management_category(util.parse_type(restrictioncode, int, str)) # 30
         stand.municipality_id = None # RSD record 32
         # RSD record 33 and 34 unused
         return stand
@@ -522,11 +523,11 @@ class GeoPackageBuilder(ForestCentreBuilder):
         """
         stratum = TreeStratum()
         stratum.identifier = entry.treestratumid
-        stratum.species = fc2internal.convert_species(str(int(entry.treespecies)))
+        stratum.species = fc2internal.convert_species(util.parse_type(entry.treespecies, int, str))
         stratum.stems_per_ha = entry.stemcount
         stratum.mean_diameter = entry.meandiameter
         stratum.mean_height = entry.meanheight
-        stratum.biological_age = float(entry.age)
+        stratum.biological_age = util.parse_type(entry.age, float)
         stratum.tree_number = entry.stratumnumber
         stratum.basal_area = entry.basalarea
         stratum.storey = entry.storey

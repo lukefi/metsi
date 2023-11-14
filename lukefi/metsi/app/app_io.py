@@ -23,7 +23,7 @@ class MetsiConfiguration(SimpleNamespace):
     derived_data_output_container = None
     formation_strategy = "partial"
     evaluation_strategy = "depth"
-    reference_trees = False
+    measured_trees = False
     strata = True
     strata_origin = "1"
 
@@ -141,9 +141,9 @@ def parse_cli_arguments(args: list[str]):
                         choices=['pickle', 'json'],
                         type=str,
                         help='Container format of derived data result file: \'pickle\' (default), \'json\'')
-    parser.add_argument('--reference-trees',
+    parser.add_argument('--measured-trees',
                         action=argparse.BooleanOptionalAction,
-                        help="Include reference trees from VMI data source.")
+                        help="Include measured trees from VMI data source.")
     parser.add_argument('--strata',
                         action=argparse.BooleanOptionalAction,
                         help="Include strata from VMI data source.")

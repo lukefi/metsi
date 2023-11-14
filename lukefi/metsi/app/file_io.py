@@ -119,7 +119,7 @@ def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
         return external_reader(
             app_config.state_format,
             strata=app_config.strata,
-            reference_trees=app_config.reference_trees,
+            measured_trees=app_config.measured_trees,
             strata_origin=app_config.strata_origin)(app_config.input_path)
     else:
         raise Exception(f"Unsupported state format '{app_config.state_format}'")

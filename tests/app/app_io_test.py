@@ -11,7 +11,7 @@ class TestAppIO(unittest.TestCase):
             'state_format': 'vmi12',
             'state_output_container': 'pickle'
         }
-        args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
+        args = ['input.pickle', 'control.yaml', 'output2', '-s', 'partial', '--state-format', 'fdm', '--measured-trees', '--strata-origin', '2']
         result = set_default_arguments(aio.parse_cli_arguments(args), default_io_arguments)
         self.assertEqual(None, result.preprocessing_output_container)
         self.assertEqual(None, result.state_input_container)
@@ -19,7 +19,7 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual('fdm', result.state_format)
 
     def test_sim_cli_arguments(self):
-        args = ['input.pickle', 'output2', 'control.yaml', '-f', 'partial', '-e', 'depth', '--state-format', 'fdm', '--reference-trees', '--strata-origin', '2']
+        args = ['input.pickle', 'output2', 'control.yaml', '-f', 'partial', '-e', 'depth', '--state-format', 'fdm', '--measured-trees', '--strata-origin', '2']
         result = aio.parse_cli_arguments(args)
         self.assertEqual(16, len(result.__dict__.keys()))
         self.assertEqual('input.pickle', result.input_path)
@@ -30,7 +30,7 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual('fdm', result.state_format)
         self.assertEqual(None, result.state_input_container)
         self.assertEqual(None, result.state_output_container)
-        self.assertEqual(True, result.reference_trees)
+        self.assertEqual(True, result.measured_trees)
         self.assertEqual("2", result.strata_origin)
 
     def test_run_modes(self):

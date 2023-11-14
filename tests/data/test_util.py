@@ -24,4 +24,4 @@ vmi13_data = [
     '6 U 1  99  99 99 8   6 0 20181102 258  7  3  0  23 V2  3  53  6  1  4  35  4  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  .  .  .   .  . .    .',
     ""
 ]
-vmi13_builder: VMIBuilder = VMI13Builder({ 'reference_trees': True, 'strata': True}, vmi13_data)
+vmi13_builder: VMIBuilder = VMI13Builder({ 'measured_trees': True, 'strata': True}, vmi13_data)
