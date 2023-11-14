@@ -323,12 +323,8 @@ class VMI13Builder(VMIBuilder):
 
         return list(result.values())
 
-class XMLBuilder(ForestBuilder):
-
-    def __init__(self, builder_flags: dict, data: str):
-        self.root: ET.Element = ET.fromstring(data)
-        self.builder_flags = builder_flags
-
+class ForestCentreBuilder(ForestBuilder):
+    ''' Base class for building a forest data model from Forest Centre (Suomen Metsakeskus) source '''
 
     @abstractmethod
     def build(self) -> list[ForestStand]:
@@ -336,22 +332,23 @@ class XMLBuilder(ForestBuilder):
 
 
     @abstractmethod
-    def convert_stand_entry(self):
+    def convert_stand_entry(self, entry) -> ForestStand:
         ...
 
 
     @abstractmethod
-    def convert_stratum_entry(self):
+    def convert_stratum_entry(self, entry) -> TreeStratum:
         ...
 
-class ForestCentreBuilder(XMLBuilder):
+class XMLBuilder(ForestCentreBuilder):
 
     xpath_strata = './ts:TreeStandData/ts:TreeStandDataDate[@type="{}"]/tst:TreeStrata/tst:TreeStratum'
     xpath_stand = "st:Stands/st:Stand"
 
 
     def __init__(self, builder_flags: dict, data: str):
-        super().__init__(builder_flags, data)
+        self.root: ET.Element = ET.fromstring(data)
+        self.builder_flags = builder_flags
         self.xpath_strata = self.xpath_strata.format(builder_flags['strata_origin'])
 
 
@@ -468,8 +465,8 @@ class ForestCentreBuilder(XMLBuilder):
         return stands
 
 
-class GeoPackageBuilder(ForestBuilder):
-    """ ForestBuilder class for geopackage format spesification """
+class GeoPackageBuilder(ForestCentreBuilder):
+    """ ForestBuilder for geopackage format spesification """
     stands: DataFrame = None
     strata: DataFrame = None
     type_value = None

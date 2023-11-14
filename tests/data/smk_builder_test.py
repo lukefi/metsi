@@ -1,21 +1,21 @@
 import unittest
 import os
 from functools import reduce
-from lukefi.metsi.data.formats.ForestBuilder import ForestCentreBuilder, GeoPackageBuilder
+from lukefi.metsi.data.formats.ForestBuilder import XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.enums.internal import *
 
 builder_flags = {
     'strata_origin': '1'
 }
 
-class TestForestCentreBuilder(unittest.TestCase):
+class TestXMLBuilder(unittest.TestCase):
     
     xml_data = 'SMK_source.xml'
     absolute_resource_path = os.path.join(os.getcwd(), 'tests', 'data', 'resources', xml_data)
 
     with open(absolute_resource_path, 'r', encoding='utf-8') as f:
         xml_string = f.read()
-    smk_builder = ForestCentreBuilder(builder_flags, xml_string)
+    smk_builder = XMLBuilder(builder_flags, xml_string)
     smk_stands = smk_builder.build()
 
     def test_individual_smk_build_with_different_strata_origins(self):
@@ -25,7 +25,7 @@ class TestForestCentreBuilder(unittest.TestCase):
             (None, 0)
         ]
         for i in assertions:
-            smk_builder = ForestCentreBuilder(
+            smk_builder = XMLBuilder(
                 {
                     'strata_origin': i[0]
                 },
