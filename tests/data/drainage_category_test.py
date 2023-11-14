@@ -21,5 +21,11 @@ class TestConversion(unittest.TestCase):
     def test_convert_FC_drainage_category_to_internal(self, code, expected):
         result = fc2internal.convert_drainage_category(code)
         self.assertEqual(result, expected)
-
     
+    @parameterized.expand([
+        ("1", fc2internal.convert_drainage_category, DrainageCategory.UNDRAINED_MINERAL_SOIL),
+        (None, lambda a: a, None),
+    ])
+    def test_general_FC_conversion(self, code, f, expected):
+        result = fc2internal.convert_to_internal(code, f)
+        self.assertEqual(result, expected)
