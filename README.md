@@ -34,41 +34,6 @@ For developer usage, application entry point is the file `lukefi/metsi/app/metsi
 
 To obtain the latest changes use the command `git pull`.
 
-### Notes about proxy configuration for Natural Resources Institute Finland users
-
-Both git and pip use a separate configuration for WWW proxy. Proxy is manadatory for Luke internal network. Software
-Center presets this for pip, but not for git. Depending on whether you are using Luke internal network (Ethernet, Reitti
-or FortiClient VPN) or another network, you need to adjust proxy configuration manually to be able to run
-internet-facing commands with these tools.
-
-In the following subsections, `~` denotes your home directory. This is your home directory in windows format is a path
-such as `C:\Users\12345678`. You can always re-enter your home directory by running the command `cd`, or
-explicitly `cd ~`.
-
-#### pip
-
-The pip configuration file can be found in `~/AppData/Roaming/pip/pip.ini`. It may be overridden with `~/pip/pip.ini`.
-To enable the proxy usage, the file should have a proxy configuration line in the global section such as
-
-```
-[global]
-proxy = http://suoja-proxy.vyv.fi:8080
-```
-
-To disable the proxy, insert a `#` character in front of the proxy line to comment it out.
-
-#### git
-
-The git configuration file can be found in `~/.gitconfig`. By default this file does not exist. To enable the proxy
-usage, the file should have a proxy configuration line in the http section such as
-
-```
-[http]
-proxy = http://suoja-proxy.vyv.fi:8080
-```
-
-To disable the proxy, insert a `#` character in front of the proxy line to comment it out.
-
 ### R (optional)
 
 To be able to use forestry operations depending on R modules
