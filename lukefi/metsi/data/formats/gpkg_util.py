@@ -58,7 +58,7 @@ def read_geopackage(path: str, type_value: int = 1) -> tuple[pd.DataFrame, pd.Da
     """
     RESTRICTION_TYPE_CUTTINGS = 1
     stands_query = '''
-        SELECT s.standid,
+        SELECT DISTINCT s.standid,
             s.maingroup,
             s.subgroup,
             s.fertilityclass,
