@@ -32,7 +32,7 @@ class TestForestBuilderRun(unittest.TestCase):
 
 
     def test_run_vmi13_forest_builder_build(self):
-        assertion = ('VMI13_source_mini.dat', 3)
+        assertion = ('VMI13_source_mini.dat', 4)
         reference_file = Path('tests', 'data', 'resources', assertion[0])
         list_of_stands = VMI13Builder({"measured_trees": False, "strata": True}, vmi_file_reader(reference_file)).build()
         result = len(list_of_stands)

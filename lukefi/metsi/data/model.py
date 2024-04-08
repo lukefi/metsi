@@ -320,6 +320,7 @@ class ReferenceTree():
             self.stems_per_ha,
             self.breast_height_diameter,
             self.height,
+            self.measured_height,
             self.breast_height_age,
             self.biological_age,
             self.saw_log_volume_reduction_factor,
@@ -349,24 +350,25 @@ class ReferenceTree():
         result.stems_per_ha = conv(row[4], "stems_per_ha")
         result.breast_height_diameter = conv(row[5], "breast_height_diameter")
         result.height = conv(row[6], "height")
-        result.breast_height_age = conv(row[7], "breast_height_age")
-        result.biological_age = conv(row[8], "biological_age")
-        result.saw_log_volume_reduction_factor = conv(row[9], "saw_log_volume_reduction_factor")
-        result.pruning_year = conv(row[10], "pruning_year")
-        result.age_when_10cm_diameter_at_breast_height = conv(row[11], "age_when_10cm_diameter_at_breast_height")
-        result.tree_number = conv(row[12], "tree_number")
+        result.measured_height = conv(row[7], "measured_height")
+        result.breast_height_age = conv(row[8], "breast_height_age")
+        result.biological_age = conv(row[9], "biological_age")
+        result.saw_log_volume_reduction_factor = conv(row[10], "saw_log_volume_reduction_factor")
+        result.pruning_year = conv(row[11], "pruning_year")
+        result.age_when_10cm_diameter_at_breast_height = conv(row[12], "age_when_10cm_diameter_at_breast_height")
+        result.tree_number = conv(row[13], "tree_number")
         result.stand_origin_relative_position = conv((
-            row[13],
             row[14],
             row[15],
+            row[16],
         ), "stand_origin_relative_position")
-        result.lowest_living_branch_height = conv(row[16], "lowest_living_branch_height")
-        result.management_category = conv(row[17], "management_category")
-        result.tree_category = conv(row[18], "tree_category")
-        result.sapling = conv(row[19], "sapling")
-        result.storey = Storey[row[20].split(".")[1]] if row[20] != 'None' else None
-        result.tree_type = conv(row[21], "tree_type")
-        result.tuhon_ilmiasu = conv(row[22], "tuhon_ilmiasu")
+        result.lowest_living_branch_height = conv(row[17], "lowest_living_branch_height")
+        result.management_category = conv(row[18], "management_category")
+        result.tree_category = conv(row[19], "tree_category")
+        result.sapling = conv(row[20], "sapling")
+        result.storey = Storey[row[21].split(".")[1]] if row[21] != 'None' else None
+        result.tree_type = conv(row[22], "tree_type")
+        result.tuhon_ilmiasu = conv(row[23], "tuhon_ilmiasu")
         return result
 
 

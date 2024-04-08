@@ -1,8 +1,9 @@
 import csv
 from io import StringIO
 from lukefi.metsi.data.formats.io_utils import *
-from tests.data.test_util import ConverterTestSuite, vmi13_builder
+from tests.data.test_util import ConverterTestSuite, ForestBuilderTestBench
 
+vmi13_builder = ForestBuilderTestBench.vmi13_builder()
 
 class IoUtilsTest(ConverterTestSuite):
     def test_rsd_float(self):
@@ -18,19 +19,19 @@ class IoUtilsTest(ConverterTestSuite):
 
     def test_rsd_forest_stand_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = rsd_forest_stand_rows(vmi13_stands[0])
-        self.assertEqual(3, len(result))
+        result = rsd_forest_stand_rows(vmi13_stands[1])
+        self.assertEqual(4, len(result))
 
     def test_rsd_rows(self):
         vmi13_stands = vmi13_builder.build()
         result = stands_to_rsd_content(vmi13_stands)
-        self.assertEqual(4, len(result))
+        self.assertEqual(9, len(result))
 
     def test_stands_to_csv(self):
         delimiter = ";"
         vmi13_stands = vmi13_builder.build()
         result = stands_to_csv_content(vmi13_stands, delimiter)
-        self.assertEqual(5, len(result))
+        self.assertEqual(13, len(result))
         
         #make sure that each type of a row has the same number of columns, since csv-->stand conversion relies on it
         stand_row_lengths = [len(row.split(delimiter)) for row in result if row[0:5] == "stand"]
@@ -48,7 +49,7 @@ class IoUtilsTest(ConverterTestSuite):
         serialized = '\n'.join(stands_to_csv_content(vmi13_stands, delimiter))
         deserialized = list(csv.reader(StringIO(serialized), delimiter=delimiter))
         stands_from_csv = csv_content_to_stands(deserialized)
-        self.assertEqual(2, len(stands_from_csv))
+        self.assertEqual(4, len(stands_from_csv))
 
         # Test that the stands from csv and the original stands are equal.
         # Perform comparison of dicts for each relevant object, setting relations to None to avoid recursive loop

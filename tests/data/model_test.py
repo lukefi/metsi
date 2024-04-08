@@ -2,7 +2,6 @@ import unittest
 
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.enums import internal
-from tests.data.test_util import vmi13_builder
 
 
 class TestForestDataModel(unittest.TestCase):
