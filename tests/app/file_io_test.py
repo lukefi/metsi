@@ -155,12 +155,12 @@ class TestFileReading(unittest.TestCase):
 
     def test_read_stands_from_vmi13_file(self):
         config = MetsiConfiguration(
-            input_path="tests/resources/file_io_test/vmi13.dat",
+            input_path=Path("tests", "data", "resources", "VMI13_source_mini.dat"),
             state_format="vmi13",
             state_input_container=""
         )
         stands = lukefi.metsi.app.file_io.read_stands_from_file(config)
-        self.assertEqual(len(stands), 3)
+        self.assertEqual(len(stands), 4)
 
     def test_read_stands_from_xml_file(self):
         config = MetsiConfiguration(

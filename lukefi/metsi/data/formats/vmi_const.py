@@ -111,33 +111,33 @@ class VMI13StandIndices:
     lon = 27
     height_above_sea_level = 30
     degree_days = 31
-    land_category = 42
-    land_category_detail = 43
-    fra_class = 48
-    paatyyppi = 54
-    kasvupaikkatunnus = 55
-    ojitus_tilanne = 59
-    ojitus_aika = 61
-    ojitus_tarve = 62
-    tax_class = 64
-    tax_class_reduction = 65
-    hakkuu_tapa = 104
-    hakkuu_aika = 105
-    maanmuokkaus = 110
-    viljely = 112
-    viljely_aika = 113
-    muu_toimenpide = 115
-    muu_toimenpide_aika = 116
-    hakkuuehdotus = 117
-    puuntuotannon_rajoitus = 127
-    puuntuotannon_rajoitus_tarkenne = 128
-    suojametsakoodi = 129
-    muut_arvot = 130
-    naturaaluekoodi = 131
-    ahvenanmaan_markkinahakkuualue = 132
-    koealan_kasittelyluokka = 133
-    kehitysluokka = 72
-    pohjapintaala = 88
+    land_category = 40
+    land_category_detail = 41
+    fra_class = 46
+    paatyyppi = 52
+    kasvupaikkatunnus = 53
+    ojitus_tilanne = 57
+    ojitus_aika = 59
+    ojitus_tarve = 60
+    tax_class = 62
+    tax_class_reduction = 63
+    kehitysluokka = 70
+    pohjapintaala = 86
+    hakkuu_tapa = 102
+    hakkuu_aika = 103
+    maanmuokkaus = 108
+    viljely = 110
+    viljely_aika = 111
+    muu_toimenpide = 113
+    muu_toimenpide_aika = 114
+    hakkuuehdotus = 115
+    puuntuotannon_rajoitus = 125
+    puuntuotannon_rajoitus_tarkenne = 126
+    suojametsakoodi = 127
+    muut_arvot = 128
+    naturaaluekoodi = 129
+    ahvenanmaan_markkinahakkuualue = 130
+    koealan_kasittelyluokka = 131
 
 
 class VMI13TreeIndices:
@@ -151,15 +151,15 @@ class VMI13TreeIndices:
     tree_type = 12
     species = 13
     diameter = 14
-    tree_category = 15
-    latvuskerros = 16
-    height = 18
-    living_branches_height = 26
-    measured_height = 27
-    tuhon_ilmiasu = 37
-    d13_age = 46
-    age_increase = 48
-    total_age = 49
+    tree_category = 16
+    latvuskerros = 17
+    height = 19
+    living_branches_height = 27
+    measured_height = 28
+    tuhon_ilmiasu = 38
+    d13_age = 47
+    age_increase = 49
+    total_age = 50
 
 
 class VMI13StratumIndices:
@@ -179,7 +179,7 @@ class VMI13StratumIndices:
     avg_height = 17
     d13_age = 19
     biological_age = 20
-    basal_area = 22
+    basal_area = 23
 
 
 vmi12_county_areas = [

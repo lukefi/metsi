@@ -56,7 +56,7 @@ class VMIBuilder(ForestBuilder):
         result.set_identifiers(stand_id)
         result.degree_days = vmi_util.transform_vmi_degree_days(data_row[indices.degree_days])
         result.owner_category = vmi2internal.convert_owner(data_row[indices.owner_group])
-        result.fra_category = data_row[indices.fra_class]
+        result.fra_category = None if data_row[indices.fra_class] == '.' else data_row[indices.fra_class]
         result.land_use_category = vmi2internal.convert_land_use_category(data_row[indices.land_category])
         result.land_use_category_detail = data_row[indices.land_category_detail]
         result.site_type_category = vmi2internal.convert_site_type_category(data_row[indices.kasvupaikkatunnus])
