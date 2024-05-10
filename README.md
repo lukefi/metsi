@@ -686,13 +686,8 @@ A run is declared in the YAML file `control.yaml`.
     1. `state_format` specifies the data format of the input computational units
         1. `fdm` is the standard Forest Data Model.
         2. `vmi12` and `vmi13` denote the VMI data format and container.
-<<<<<<< HEAD
-        3. `xml` denotes the Forest Centre XML data format and container.
-        4. `gpkg` denotes the Forest Centre GPKG data format and container.
-=======
         3. `forest_centre` denotes the Forest Centre XML data format and container.
         4. `geo_package` denotes the Forest Centre GPKG data format and container.
->>>>>>> main
     2. `state_input_container` is the file type for `fdm` data format. This may be `csv`, `pickle` or `json`.
     3. `preprocessing_output_container` is the file type for outputting the `fdm` formatted state of computational units
        after preprocessing operations. This may be `csv`, `pickle` or `json` or commented out for no output.
@@ -701,16 +696,9 @@ A run is declared in the YAML file `control.yaml`.
     5. `derived_data_output_container` is the file type for outputting derived data during and after the simulation.
        This may be `pickle` or `json` or commented out for no output.
     6. `strategy` is the simulation event tree formation strategy. Can be `partial` or `full`.
-<<<<<<< HEAD
-    7. `reference_trees` instructs the `vmi12` and `vmi13` data converters to choose either reference trees or tree
-       strata from the source. `True` or `False`.
-    8. `strata_origin` instructs a forest centre converter to choose only strata with certain origin to the
-=======
-    7. `measured_trees` instructs the `vmi12` and `vmi13` data converters to choose reference trees from the source.
-      `True` or `False`.
+    7. `measured_trees` instructs the `vmi12` and `vmi13` data converters to choose reference trees from the source. `True` or `False`.
     8. `strata` instructs the `vmi12` and `vmi13` data converters strata from the source. `True` or `False`.
     8. `strata_origin` instructs the `forest_centre` converter to choose only strata with certain origin to the
->>>>>>> main
        result. `1`, `2` or `3`.
     9. `multiprocessing` instructs the application to parallelizes the computation to available CPU cores in the
        system. `True` or `False`.
