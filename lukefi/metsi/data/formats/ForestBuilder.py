@@ -192,6 +192,10 @@ class VMI12Builder(VMIBuilder):
         result.young_stand_tending_year = maintenance_details[0]
         result.cutting_year = maintenance_details[1]
         result.method_of_last_cutting = maintenance_details[2]
+        result.dominant_storey_age = vmi_util.determine_vmi12_dominant_storey_age(
+            data_row[indices.vallitsevanjakson_d13ika],
+            data_row[indices.vallitsevanjakson_ikalisays]
+        )
         return result
 
     def convert_tree_entry(self, indices: VMI12TreeIndices, data_row: Sequence):
@@ -284,6 +288,9 @@ class VMI13Builder(VMIBuilder):
         result.young_stand_tending_year = maintenance_details[0]
         result.cutting_year = maintenance_details[1]
         result.method_of_last_cutting = maintenance_details[2]
+        result.dominant_storey_age = vmi_util.determine_vmi13_dominant_storey_age(
+            data_row[indices.vallitsevanjaksonika]
+        )
         return result
 
     def convert_tree_entry(self, indices: VMI13TreeIndices, data_row: Sequence):

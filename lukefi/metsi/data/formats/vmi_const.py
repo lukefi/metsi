@@ -39,6 +39,8 @@ class VMI12StandIndices:
     naturaaluekoodi = 141
     ahvenanmaan_markkinahakkuualue = 149
     kehitysluokka = 201
+    vallitsevanjakson_d13ika = slice(247,250)
+    vallitsevanjakson_ikalisays = slice(250,252)
     hakkuu_tapa = 262
     hakkuu_aika = 263
     maanmuokkaus = 268
@@ -123,6 +125,7 @@ class VMI13StandIndices:
     tax_class_reduction = 63
     kehitysluokka = 70
     pohjapintaala = 86
+    vallitsevanjaksonika = 95
     hakkuu_tapa = 102
     hakkuu_aika = 103
     maanmuokkaus = 108
