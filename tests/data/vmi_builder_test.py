@@ -151,6 +151,10 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(False, self.vmi12_stands[1].auxiliary_stand)
         self.assertEqual(None, self.vmi12_stands[0].basal_area)
         self.assertEqual(19.0, self.vmi12_stands[1].basal_area)
+        # vallitsevanjakson_d13ika is '   ' vallitsevanjakson_ikalisays is '  ' -> result to 0.0
+        self.assertEqual(0.0, self.vmi12_stands[0].dominant_storey_age)
+        # vallitsevanjakson_d13ika is '045' vallitsevanjakson_ikalisays is '06' -> result to 51.0
+        self.assertEqual(51.0, self.vmi12_stands[1].dominant_storey_age)
 
     def test_vmi12_trees(self):
         self.assertEqual(0, len(self.vmi12_stands[0].reference_trees))
@@ -335,6 +339,8 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(False, self.vmi13_stands[1].auxiliary_stand)
         self.assertEqual(None, self.vmi13_stands[0].basal_area)
         self.assertEqual(19.0, self.vmi13_stands[1].basal_area)
+        self.assertEqual(0.0, self.vmi13_stands[0].dominant_storey_age)
+        self.assertEqual(51.0, self.vmi13_stands[1].dominant_storey_age)
 
     def test_vmi13_trees(self):
         self.assertEqual(0, len(self.vmi13_stands[0].reference_trees))

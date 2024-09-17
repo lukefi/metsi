@@ -296,6 +296,12 @@ class TestConversion(test_util.ConverterTestSuite):
         self.assertEqual(result.month, 2)
         self.assertEqual(result.day, 1)
 
+    def test_vmi12_dominant_storey_age(self):
+        assertions = [
+            (("10.0", "2.0"), (12.0))
+        ]
+        self.run_with_test_assertions(assertions, vmi_util.determine_vmi12_dominant_storey_age)
+
     def test_parse_forestry_centre(self):
         assertions = [
             (['20'], 20),
