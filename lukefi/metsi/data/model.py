@@ -451,7 +451,9 @@ class ForestStand():
     method_of_last_cutting: Optional[int] = None  # RSD record 31, 0-6
     # RSD record 32, code from Statistics Finland
     municipality_id: Optional[int] = None
-    # RSD record 33 and 34 unused
+    # RSD record 33 unused
+    # RSD record 34
+    dominant_storey_age: Optional[float] = None
 
     # stand specific factors for scaling estimated ReferenceTree count per hectare
     area_weight_factors: tuple[float, float] = (1.0, 1.0)
@@ -575,7 +577,8 @@ class ForestStand():
             self.area_weight_factors[0],
             self.area_weight_factors[1],
             self.stand_id,
-            self.basal_area
+            self.basal_area,
+            self.dominant_storey_age
         ]
 
     def from_row(self, row):
@@ -622,6 +625,7 @@ class ForestStand():
         self.area_weight_factors = conv((row[34], row[35]), "area_weight_factors")
         self.stand_id = conv(row[36], "stand_id")
         self.basal_area = conv(row[37], "basal_area")
+        self.dominant_storey_age = conv(row[38], "dominant_storey_age")
 
 
     @classmethod
@@ -674,7 +678,7 @@ class ForestStand():
             melaed.method_of_last_cutting,
             municipality_id,
             None,
-            None,
+            0 if melaed.dominant_storey_age is None else melaed.dominant_storey_age,
         ]
 
 

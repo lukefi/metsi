@@ -214,6 +214,18 @@ def convert_vmi12_approximate_geolocation(lat_source: str, lon_source: str) -> t
     return lat, lon
 
 
+def determine_vmi12_dominant_storey_age(ds_bh_age: str, ds_age_increase: str) -> float:
+    """ Dominant storey age is composed of dominant storey breast height age and age increase for vmi12. """
+    a = get_or_default(parse_float(ds_bh_age), 0.0)
+    b = get_or_default(parse_float(ds_age_increase), 0.0)
+    return a + b
+
+
+def determine_vmi13_dominant_storey_age(ds_age) -> float:
+    """ Dominant storey mean age for vmi13 """
+    return get_or_default(parse_float(ds_age), 0.0)
+
+
 def parse_vmi12_date(date_string: str) -> dt:
     """Generate a datetime entry out of VMI12 date source format ddmmyy"""
     return dt.strptime(date_string, '%d%m%y')
