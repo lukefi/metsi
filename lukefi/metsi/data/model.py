@@ -518,7 +518,7 @@ class ForestStand():
         return self.auxiliary_stand
 
     def is_forest_land(self):
-        return self.land_use_category.value < 5
+        return self.land_use_category.value < 4
 
     def is_other_excluded_forest(self):
         return (
