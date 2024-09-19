@@ -30,7 +30,6 @@ def cleaned_output(stands: list[ForestStand]) -> list[ForestStand]:
         stand.reference_trees = recreate_tree_indices(stand.reference_trees)
     stands = [s for s in stands if (
         s.is_forest_land()
-        and not s.is_other_excluded_forest()
         and (not s.is_auxiliary() or s.has_trees() or s.has_strata())
     )]
     stands = recreate_stand_indices(stands)
