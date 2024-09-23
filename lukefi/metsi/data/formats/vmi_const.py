@@ -194,7 +194,8 @@ vmi12_county_areas = [
 
 # Inventointialueiden koealojen pinta-alat(0=Ahve 1=V-Suomi 2=E-Suomi 3=Kai-PP 4=Lappi, 5=Y-Lappi)
 # tarkista Ahve ja Y-Lappi
-vmi13_county_areas = [343.0, 436.0, 343.0, 456.0, 784.0, 784.0]
+# TODO: muuta VMI13-painot.xlsx mukaiseksi
+vmi13_county_areas = [343.0, 436.0, 343.0, 456.0, 784.0, 784.0] 
 
 # scots pine, norway spruce, silver birch, downy birch, aspen, alder
 species_directly_mappable = ['1', '2', '3', '4', '5', '6']
