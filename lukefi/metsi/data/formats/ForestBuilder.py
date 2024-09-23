@@ -259,11 +259,11 @@ class VMI13Builder(VMIBuilder):
         result.year = vmi_util.parse_vmi13_date(data_row[indices.date]).year
         # area_ha = vmi_util.determine_vmi13_area_ha(int(data_row[indices.lohkomuoto]))
         area_ha = vmi_util.determine_vmi13_area_ha(
-            int(data_row[indices.municipality]),
+            int(data_row[indices.county]),
             int(data_row[indices.lohkomuoto]),
             util.get_or_default(
-                util.parse_int(data_row[indices.lohkotarkenne],
-                0))
+                util.parse_int(data_row[indices.lohkotarkenne]),
+                0)
         )
         result.area_weight_factors = vmi_util.determine_area_factors(
             data_row[indices.osuus4m],

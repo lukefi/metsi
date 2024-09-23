@@ -106,6 +106,7 @@ class VMI13StandIndices:
     date = 9
     osuus9m = 14
     osuus4m = 15
+    county = 17
     forestry_centre = 18
     municipality = 17
     kitukunta = 20
