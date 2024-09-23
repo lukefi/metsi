@@ -102,6 +102,7 @@ class VMI13StandIndices:
     section_x = 4
     test_area_number = 5
     stand_number = 6
+    lohkotarkenne = 7
     date = 9
     osuus9m = 14
     osuus4m = 15
@@ -195,7 +196,85 @@ vmi12_county_areas = [
 # Inventointialueiden koealojen pinta-alat(0=Ahve 1=V-Suomi 2=E-Suomi 3=Kai-PP 4=Lappi, 5=Y-Lappi)
 # tarkista Ahve ja Y-Lappi
 # TODO: muuta VMI13-painot.xlsx mukaiseksi
-vmi13_county_areas = [343.0, 436.0, 343.0, 456.0, 784.0, 784.0] 
+def vmi13_county_areas(municipality: int, lohkomuoto: int, lohkotarkenne: int) -> float:
+    if municipality == 1 and lohkomuoto == 2 and lohkotarkenne == 0:
+        return 345.73918
+    elif municipality == 2 and lohkomuoto == 2 and lohkotarkenne == 0:
+        return 338.0386443
+    elif municipality == 4 and lohkomuoto == 2 and lohkotarkenne == 0:
+        return 342.975010960105
+    elif municipality == 5 and lohkomuoto == 2 and lohkotarkenne == 0:
+        return 342.747528
+    elif municipality == 6 and lohkotarkenne == 0:
+        if lohkomuoto == 1:
+            return 413.08125
+        if lohkomuoto == 2:
+            return 347.828958275767
+    elif municipality == 7 and lohkomuoto == 2 and lohkotarkenne == 0:
+            return 342.438585979628
+    elif municipality == 8 and lohkomuoto == 2 and lohkotarkenne == 0:
+            return 349.917881811205
+    elif municipality == 9 and lohkomuoto == 2 and lohkotarkenne == 0:
+            return 350.8972332
+    elif municipality == 10 and lohkomuoto == 2 and lohkotarkenne == 0:
+            return 340.4779333
+    elif municipality == 11:
+        if lohkomuoto == 1:
+            return 436.521343
+        if lohkomuoto == 2:
+            return 330.3735632
+    elif municipality == 12 and lohkotarkenne == 0:
+        if lohkomuoto == 1:
+            return 433.4836506
+        if lohkomuoto == 2:
+            return 351.5358362
+    elif municipality == 13 and lohkomuoto == 1 and lohkotarkenne == 0:
+            return 435.9383152
+    elif municipality == 14 and lohkomuoto == 1 and lohkotarkenne == 0:
+            return 429.5909091
+    elif municipality == 15 and lohkomuoto == 1 and lohkotarkenne == 0:
+            return 434.9541716
+    elif municipality == 16 and lohkomuoto == 1 and lohkotarkenne == 0:
+            return 435.0433276
+    elif municipality == 17 and lohkotarkenne == 0:
+        if lohkomuoto == 3:
+            return 457.7258227
+        if lohkomuoto == 4: 
+            return 747.6246246
+    elif municipality == 18 and lohkomuoto == 3 and lohkotarkenne == 0:
+            return 455.8440533
+    elif municipality == 19:
+        if lohkomuoto == 4:
+            if lohkotarkenne == 0:
+                return 786.978534
+        if lohkomuoto == 5:
+            if lohkotarkenne == 0:
+                return 1357.608776
+            if lohkotarkenne == 1:
+                return 1176.023409
+            if lohkotarkenne == 2:
+                return 1355.455959
+            if lohkotarkenne == 3:
+                return 1999.800742
+            if lohkotarkenne == 4:
+                return 10756.11645
+    elif municipality == 21 and lohkomuoto == 0 and lohkotarkenne == 0:
+        return 164.2650475
+    else:
+        raise Exception("Unable to solve vmi13 country area weight for values: \
+                        county {}, lohkomuoto {} and lohkotarkenne {}"
+                        .format(municipality, lohkomuoto, lohkotarkenne))            
+
+
+
+
+
+
+
+
+
+    
+    
 
 # scots pine, norway spruce, silver birch, downy birch, aspen, alder
 species_directly_mappable = ['1', '2', '3', '4', '5', '6']

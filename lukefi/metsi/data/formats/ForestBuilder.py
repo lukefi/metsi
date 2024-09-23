@@ -257,7 +257,14 @@ class VMI13Builder(VMIBuilder):
         """Create a ForestStand out of given VMI13 type 1 data row using given data indices and order number"""
         result = super().convert_stand_entry(indices, data_row, stand_id)
         result.year = vmi_util.parse_vmi13_date(data_row[indices.date]).year
-        area_ha = vmi_util.determine_vmi13_area_ha(int(data_row[indices.lohkomuoto]))
+        # area_ha = vmi_util.determine_vmi13_area_ha(int(data_row[indices.lohkomuoto]))
+        area_ha = vmi_util.determine_vmi13_area_ha(
+            int(data_row[indices.municipality]),
+            int(data_row[indices.lohkomuoto]),
+            util.get_or_default(
+                util.parse_int(data_row[indices.lohkotarkenne],
+                0))
+        )
         result.area_weight_factors = vmi_util.determine_area_factors(
             data_row[indices.osuus4m],
             data_row[indices.osuus9m]

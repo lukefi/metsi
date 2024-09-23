@@ -111,10 +111,10 @@ def determine_vmi12_area_ha(lohkomuoto: int, county: int) -> float:
     return round(area_ha, 4)
 
 
-def determine_vmi13_area_ha(lohkomuoto: int) -> float:
-    if lohkomuoto < 0:
+def determine_vmi13_area_ha(municipality: int, lohkomuoto: int, lohkotarkenne: int) -> float:
+    if lohkomuoto < 0 or municipality < 0 or lohkotarkenne < 0:
         raise IndexError
-    return vmi13_county_areas[lohkomuoto]
+    return vmi13_county_areas(municipality, lohkomuoto, lohkotarkenne)
 
 
 def determine_soil_surface_preparation_year(sourcevalue: str, year: int) -> Optional[int]:
