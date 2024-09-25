@@ -51,20 +51,12 @@ pip install .[rpy2]
 Access to this module is restricted to Natural Resources Institute Finland by special admission. Installing this will
 not work without access to the related GitHub repositories.
 
-There's two ways to use Motti growth models: the pure Python [`pymotti`](https://github.com/menu-hanke/pymotti)
-implementation, and the [fhk](https://github.com/menu-hanke/fhk)-based Lua implementation. They *should* give the same
-results for big tree natural processes. The difference is that the fhk implementation is much faster but also less
-complete for now.
-
-To use the Python or FHK version of Motti, install `pymotti`:
-
 ```
 pip install -r requirements-motti.txt
 ```
 
 The corresponding growth operation is `grow_motti`.
 
-You can also use the `grow_fhk` operation with `package: pymotti_graph`.
 
 **NOTE**: For either model, the input data must contain precomputed weather data (temperature sums, sea/lake indices).
 In practice this means that you must enable the `compute_location_metadata` preprocessing operation **even if you're
@@ -242,7 +234,6 @@ See table below for a quick reference of forestry operations usable in control.y
 | do_nothing                                            | This operation is no-op utility operation to simulate rest                                       |                             | native         |
 | grow_acta                                             | A simple ReferenceTree diameter and height growth operation                                      | Acta Forestalia Fennica 163 | metsi-forestry |
 | grow_motti                                            | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.                | Luke Motti group            | pymotti        |
-| grow_fhk                                              | grow_motti as a Lua + FHK graph implementation. Requires `pymotti`.                              |                             | pymotti        |
 | first_thinning                                        | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest          | Reijo Mykkänen              | metsi-forestry |
 | thinning_from_below                                   | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees   | Reijo Mykkänen              | metsi-forestry |
 | thinning_from_above                                   | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees   | Reijo Mykkänen              | metsi-forestry |
@@ -562,7 +553,7 @@ year when this operation is called.
 | parameter name     | type       | location in control.yaml | notes                                                  |
 |--------------------|------------|--------------------------|--------------------------------------------------------|
 | timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers                |
-| implementation     | str        | operation_params         | py, fhk (lua) and lupa (lua) implementations available |
+| implementation     | str        | operation_params         | py and lupa (lua) implementations available |
 
 #### **output**
 
@@ -591,7 +582,7 @@ trees if they were cross cut. Therefore, this operation is different from [clear
 | parameter name     | type       | location in control.yaml | notes                                                  |
 |--------------------|------------|--------------------------|--------------------------------------------------------|
 | timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers                |
-| implementation     | str        | operation_params         | py, fhk (lua) and lupa (lua) implementations available |
+| implementation     | str        | operation_params         | py and lupa (lua) implementations available |
 
 #### **output**
 

@@ -7,14 +7,13 @@ from tests.forestry.test_util import DEFAULT_TIMBER_PRICE_TABLE, TestCaseExtensi
 
 unrunnable = False
 try:
-    from lukefi.metsi.forestry.cross_cutting.cross_cutting_fhk import cross_cut_fhk
     import rpy2.robjects as robjects
     import lukefi.metsi.forestry.r_utils as r_utils
 except ImportError:
     unrunnable = True
 
 
-@unittest.skipIf(unrunnable, "fhk or rpy2 not installed")
+@unittest.skipIf(unrunnable, "rpy2 not installed")
 class CrossCuttingTest(TestCaseExtension):
     def _cross_cut_with_r(
         self,
@@ -43,14 +42,11 @@ class CrossCuttingTest(TestCaseExtension):
     def test_implementation_equality(self, species, breast_height_diameter, height):
         P = DEFAULT_TIMBER_PRICE_TABLE
         _, vol_lupa, val_lupa = cross_cut(species, breast_height_diameter, height, P, 10, "lupa")
-        _, vol_fhk, val_fhk = cross_cut(species, breast_height_diameter, height, P, 10, "fhk")
         _, vol_py, val_py = cross_cut(species, breast_height_diameter, height, P, 10, "py")
         vol_r, val_r = self._cross_cut_with_r(species, breast_height_diameter, height, DEFAULT_TIMBER_PRICE_TABLE)
         self.assertTrue(np.allclose(vol_lupa, np.array(vol_r), atol=10e-6))
-        self.assertTrue(np.allclose(vol_fhk, np.array(vol_r), atol=10e-6))
         self.assertTrue(np.allclose(vol_py, np.array(vol_r), atol=10e-6))
         self.assertTrue(np.allclose(val_lupa, np.array(val_r), atol=10e-6))
-        self.assertTrue(np.allclose(val_fhk, np.array(val_r), atol=10e-6))
         self.assertTrue(np.allclose(val_py, np.array(val_r), atol=10e-6))
 
     def test_cross_cut_zero_dbh_tree_returns_constant_values(self):
