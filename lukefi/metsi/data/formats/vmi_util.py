@@ -4,7 +4,7 @@ from datetime import datetime as dt
 
 from lukefi.metsi.data.enums.internal import Storey
 from lukefi.metsi.data.formats.util import get_or_default, parse_float, parse_int
-from lukefi.metsi.data.formats.vmi_const import vmi12_county_areas, vmi13_county_areas, VMI12StandIndices, VMI13StandIndices
+from lukefi.metsi.data.formats.vmi_const import vmi12_county_areas, VMI12StandIndices, VMI13StandIndices
 from shapely.geometry import Point
 from geopandas import GeoSeries
 
@@ -111,10 +111,80 @@ def determine_vmi12_area_ha(lohkomuoto: int, county: int) -> float:
     return round(area_ha, 4)
 
 
-def determine_vmi13_area_ha(municipality: int, lohkomuoto: int, lohkotarkenne: int) -> float:
-    if lohkomuoto < 0 or municipality < 0 or lohkotarkenne < 0:
+def _solve_vmi13_county_areas(county: int, lohkomuoto: int, lohkotarkenne: int) -> float:
+    if county == 1 and lohkomuoto == 2 and lohkotarkenne == 0:
+        return 345.73918
+    elif county == 2 and lohkomuoto == 2 and lohkotarkenne == 0:
+        return 338.0386443
+    elif county == 4 and lohkomuoto == 2 and lohkotarkenne == 0:
+        return 342.975010960105
+    elif county == 5 and lohkomuoto == 2 and lohkotarkenne == 0:
+        return 342.747528
+    elif county == 6 and lohkotarkenne == 0:
+        if lohkomuoto == 1:
+            return 413.08125
+        if lohkomuoto == 2:
+            return 347.828958275767
+    elif county == 7 and lohkomuoto == 2 and lohkotarkenne == 0:
+            return 342.438585979628
+    elif county == 8 and lohkomuoto == 2 and lohkotarkenne == 0:
+            return 349.917881811205
+    elif county == 9 and lohkomuoto == 2 and lohkotarkenne == 0:
+            return 350.8972332
+    elif county == 10 and lohkomuoto == 2 and lohkotarkenne == 0:
+            return 340.4779333
+    elif county == 11:
+        if lohkomuoto == 1:
+            return 436.521343
+        if lohkomuoto == 2:
+            return 330.3735632
+    elif county == 12 and lohkotarkenne == 0:
+        if lohkomuoto == 1:
+            return 433.4836506
+        if lohkomuoto == 2:
+            return 351.5358362
+    elif county == 13 and lohkomuoto == 1 and lohkotarkenne == 0:
+            return 435.9383152
+    elif county == 14 and lohkomuoto == 1 and lohkotarkenne == 0:
+            return 429.5909091
+    elif county == 15 and lohkomuoto == 1 and lohkotarkenne == 0:
+            return 434.9541716
+    elif county == 16 and lohkomuoto == 1 and lohkotarkenne == 0:
+            return 435.0433276
+    elif county == 17 and lohkotarkenne == 0:
+        if lohkomuoto == 3:
+            return 457.7258227
+        if lohkomuoto == 4: 
+            return 747.6246246
+    elif county == 18 and lohkomuoto == 3 and lohkotarkenne == 0:
+            return 455.8440533
+    elif county == 19:
+        if lohkomuoto == 4:
+            if lohkotarkenne == 0:
+                return 786.978534
+        if lohkomuoto == 5:
+            if lohkotarkenne == 0:
+                return 1357.608776
+            if lohkotarkenne == 1:
+                return 1176.023409
+            if lohkotarkenne == 2:
+                return 1355.455959
+            if lohkotarkenne == 3:
+                return 1999.800742
+            if lohkotarkenne == 4:
+                return 10756.11645
+    elif county == 21 and lohkomuoto == 0 and lohkotarkenne == 0:
+        return 164.2650475
+    else:
+        raise Exception("Unable to solve vmi13 country area weight for values: \
+                        county {}, lohkomuoto {} and lohkotarkenne {}"
+                        .format(county, lohkomuoto, lohkotarkenne))
+
+
+def determine_vmi13_area_ha(county: int, lohkomuoto: int, lohkotarkenne: int) -> float:
+    if county < 0 and lohkomuoto < 0 or lohkotarkenne < 0:
         raise IndexError
-    return vmi13_county_areas(municipality, lohkomuoto, lohkotarkenne)
+    return _solve_vmi13_county_areas(county, lohkomuoto, lohkotarkenne)
 
 
 def determine_soil_surface_preparation_year(sourcevalue: str, year: int) -> Optional[int]:
