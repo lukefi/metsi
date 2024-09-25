@@ -1,7 +1,12 @@
 from enum import IntEnum
 
 
-class TreeSpecies(IntEnum):
+class MetsiEnum(IntEnum):
+
+    def __str__(self):
+        return self.__int__().__str__()
+
+class TreeSpecies(MetsiEnum):
     """This list is formed by combining VMI and Forest centre species 
     and listing all the distinct ones. UNKNOWN (38) is not part of either list, 
     but can be assigned to in case the source data species is unexpected."""
@@ -97,7 +102,7 @@ CONIFEROUS_SPECIES = [
 ]
 
 
-class LandUseCategory(IntEnum):
+class LandUseCategory(MetsiEnum):
     FOREST = 1
     SCRUB_LAND = 2
     WASTE_LAND = 3
@@ -113,7 +118,7 @@ class LandUseCategory(IntEnum):
     WATER_BODY = 13
 
 
-class OwnerCategory(IntEnum):
+class OwnerCategory(MetsiEnum):
     UNKNOWN = 0
     PRIVATE = 1
     FOREST_INDUSTRY = 2
@@ -127,14 +132,14 @@ class OwnerCategory(IntEnum):
     UNDIVIDED = 10
 
 
-class SoilPeatlandCategory(IntEnum):
+class SoilPeatlandCategory(MetsiEnum):
     MINERAL_SOIL = 1 # kangas
     SPRUCE_MIRE = 2 # korpi
     PINE_MIRE = 3 # räme
     TREELESS_MIRE = 4 # avosuo. Conversion to MELA's Neva or Letto is made with siteType
 
 
-class SiteType(IntEnum):
+class SiteType(MetsiEnum):
     VERY_RICH_SITE = 1
     RICH_SITE = 2
     DAMP_SITE = 3
@@ -147,7 +152,7 @@ class SiteType(IntEnum):
     LAKIMETSA_TAI_TUNTURIHAVUMETSA = 10
 
 
-class DrainageCategory(IntEnum):
+class DrainageCategory(MetsiEnum):
     UNDRAINED_MINERAL_SOIL_OR_MIRE = 1
     UNDRAINED_MINERAL_SOIL = 2
     MINERAL_SOIL_TURNED_MIRE = 3
@@ -157,7 +162,7 @@ class DrainageCategory(IntEnum):
     TRANSFORMING_MIRE = 7
     TRANSFORMED_MIRE = 8
 
-class Storey(IntEnum):
+class Storey(MetsiEnum):
     INDETERMINATE = 0
     DOMINANT = 1
     UNDER = 2
