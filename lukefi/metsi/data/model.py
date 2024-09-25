@@ -196,7 +196,7 @@ class TreeStratum():
 
         result = cls()
         result.identifier = conv(row[1], "identifier")
-        result.species = TreeSpecies[row[2].split(".")[1]]
+        result.species = TreeSpecies(int(row[2]))
         result.origin = conv(row[3], "origin")
         result.stems_per_ha = conv(row[4], "stems_per_ha")
         result.mean_diameter = conv(row[5], "mean_diameter")
@@ -213,7 +213,7 @@ class TreeStratum():
         result.management_category = conv(row[18], "management_category")
         result.sapling_stems_per_ha = conv(row[19], "sapling_stems_per_ha")
         result.sapling_stratum = conv(row[20], "sapling_stratum")
-        result.storey = Storey[row[21].split(".")[1]] if row[21] != "None" else None
+        result.storey = Storey(int(row[21])) if row[21] != "None" else None
         return result
 
 @dataclass
@@ -228,7 +228,7 @@ class ReferenceTree():
     identifier: Optional[str] = None
 
     stems_per_ha: Optional[float] = None  # RSD record 1
-    species: Optional[Enum] = None  # RSD record 2, 1-8
+    species: Optional[TreeSpecies] = None  # RSD record 2, 1-8
     # RSD record 3, diameter at 1.3 m height
     breast_height_diameter: Optional[float] = None
     height: Optional[float] = None  # RSD record 4, model height in meters
@@ -345,7 +345,7 @@ class ReferenceTree():
             return convert_str_to_type(cls, value, property_name)
         result = cls()
         result.identifier = conv(row[1], "identifier")
-        result.species = TreeSpecies[row[2].split(".")[1]]
+        result.species = TreeSpecies(int(row[2]))
         result.origin = conv(row[3], "origin")
         result.stems_per_ha = conv(row[4], "stems_per_ha")
         result.breast_height_diameter = conv(row[5], "breast_height_diameter")
@@ -366,7 +366,7 @@ class ReferenceTree():
         result.management_category = conv(row[18], "management_category")
         result.tree_category = conv(row[19], "tree_category")
         result.sapling = conv(row[20], "sapling")
-        result.storey = Storey[row[21].split(".")[1]] if row[21] != 'None' else None
+        result.storey = Storey(int(row[21])) if row[21] != 'None' else None
         result.tree_type = conv(row[22], "tree_type")
         result.tuhon_ilmiasu = conv(row[23], "tuhon_ilmiasu")
         return result
