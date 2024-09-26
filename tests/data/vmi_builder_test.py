@@ -243,8 +243,8 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual('0-2-23-2-1', self.vmi13_stands[1].identifier)
 
     def test_vmi13_stand_variables(self):
-        # test data coincides with lohkomuoto 0
-        reference_area = vmi_const.vmi13_county_areas[0]
+        # When county is 21, lohkomuoto is 0 and lohkotarkenne is 0 reference_area is 164.2650475 
+        reference_area = 164.2650475
         self.assertEqual(False, self.vmi13_stands[0].auxiliary_stand)
         self.assertEqual(True, self.vmi13_stands[2].auxiliary_stand)
         self.assertEqual(reference_area, self.vmi13_stands[0].area)
@@ -331,8 +331,8 @@ class TestForestBuilder(unittest.TestCase):
         # hakkuu_tapa is '0' (no operation)
         self.assertEqual(None, self.vmi13_stands[0].method_of_last_cutting)
         self.assertEqual(1, self.vmi13_stands[1].method_of_last_cutting)
-        self.assertEqual(21, self.vmi13_stands[0].municipality_id)
-        self.assertEqual(21, self.vmi13_stands[1].municipality_id)
+        self.assertEqual(417, self.vmi13_stands[0].municipality_id)
+        self.assertEqual(417, self.vmi13_stands[1].municipality_id)
         self.assertEqual((0.0, 1.0), self.vmi13_stands[0].area_weight_factors)
         self.assertEqual((0.0, 1.0), self.vmi13_stands[1].area_weight_factors)
         self.assertEqual(False, self.vmi13_stands[0].auxiliary_stand)

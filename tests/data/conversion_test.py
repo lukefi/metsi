@@ -134,16 +134,16 @@ class TestConversion(test_util.ConverterTestSuite):
         self.run_with_test_assertions(assertions, vmi_util.determine_vmi12_area_ha)
 
     def test_determine_vmi13_area_ha(self):
-        self.assertRaises(IndexError, vmi_util.determine_vmi13_area_ha, -1)
-        self.assertRaises(IndexError, vmi_util.determine_vmi13_area_ha, 6)
+        self.assertRaises(IndexError, vmi_util.determine_vmi13_area_ha, -1, -1, -1)
+        self.assertRaises(Exception, vmi_util.determine_vmi13_area_ha, 0, 0, 0)
+        self.assertRaises(Exception, vmi_util.determine_vmi13_area_ha, 3, 0, 0)
+        self.assertRaises(Exception, vmi_util.determine_vmi13_area_ha, 5, 2, 1)
+        self.assertRaises(Exception, vmi_util.determine_vmi13_area_ha, 5, 2, None)
 
         assertions = [
-            ([0], vmi13_county_areas[0]),
-            ([1], vmi13_county_areas[1]),
-            ([2], vmi13_county_areas[2]),
-            ([3], vmi13_county_areas[3]),
-            ([4], vmi13_county_areas[4]),
-            ([5], vmi13_county_areas[5])
+            ([1, 2, 0], 345.73918),
+            ([2, 2, 0], 338.0386443),
+            ([4, 2, 0], 342.975010960105),
         ]
         self.run_with_test_assertions(assertions, vmi_util.determine_vmi13_area_ha)
 
