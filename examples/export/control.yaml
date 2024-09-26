@@ -60,7 +60,7 @@ preprocessing_params:
 preprocessing_operations:
   - scale_area_weight
   - generate_reference_trees # reference trees from strata, replaces existing reference trees
-  #- compute_location_metadata # required for using grow_motti, grow_fhk
+  #- compute_location_metadata # required for using grow_motti
 
 operation_file_params:
   thinning_from_above:
