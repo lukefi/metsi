@@ -43,3 +43,7 @@ lukefi = "lukefi"
 "lukefi.metsi.forestry.lua" = ["*"]
 "lukefi.metsi.forestry.r" = ["*"]
 
+[tool.pytest.ini_options]
+filterwarnings = [ 
+    "ignore::pytest.PytestCollectionWarning:.*metsi.tests.app.file_io_test"
+]
