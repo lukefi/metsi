@@ -2,7 +2,6 @@ from collections.abc import Callable, Sequence
 import numpy as np
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.forestry.cross_cutting import stem_profile
-from lukefi.metsi.forestry.cross_cutting.cross_cutting_fhk import cross_cut_fhk
 from lukefi.metsi.forestry.cross_cutting.cross_cutting_lupa import cross_cut_lupa
 
 _cross_cut_species_mapper = {
@@ -107,8 +106,6 @@ def cross_cut(
         raise ValueError("breast_height_diameter must be a non-negative number")
     if breast_height_diameter in (None, 0):
         return ZERO_DIAMETER_DEFAULTS
-    if impl in ("fhk", "lua"):
-        cc = cross_cut_fhk(tuple(P[:, 0]), tuple(P[:, 1]), tuple(P[:, 2]), tuple(P[:, 3]), P.shape[0], div, tuple(np.unique(P[:, 0])))
     elif impl == "lupa":
         cc = cross_cut_lupa(tuple(P[:, 0]), tuple(P[:, 1]), tuple(P[:, 2]), tuple(P[:, 3]), P.shape[0], div, tuple(np.unique(P[:, 0])))
     else:
