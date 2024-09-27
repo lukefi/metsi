@@ -23,7 +23,7 @@ jobs:
         python-version: ["3.10.0", "3.11.9"]
         r-version: ["4.1.3", "4.3.3"]
         
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
     - uses: actions/checkout@v4
