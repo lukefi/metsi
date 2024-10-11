@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10.0", "3.11.9"]
+        python-version: ["3.10.0", "3.11.9", "3.12.5"]
         r-version: ["4.1.3", "4.3.3"]
         
     runs-on: ubuntu-20.04
@@ -48,38 +48,6 @@ jobs:
       with:
         cache-version: 2
 
-    # - name: Debug test.R
-    #   run: |
-    #     echo DEBUGGING R PATHS
-    #     Rscript test.R
-    #     echo DEBUGGING EVIRONMENT VARIABLES
-    #     echo R_HOME: $R_HOME
-    #     echo LD_LIBRARY_PATH: $LD_LIBRARY_PATH
-    #     echo DEBUGGING CALLING set
-    #     set
-    #     echo DEBUGGING CALLING printenv
-    #     printenv
-    # - name: Debug python
-    #   run: |
-    #     # export LD_LIBRARY_PATH=/opt/R/4.3.3/lib/R/library:$LD_LIBRARY_PATH
-    #     export R_HOME=$(R --slave -e 'cat(R.home())')
-    #     echo CALLING which R:
-    #     which R
-    #     python -m rpy2.situation
-
-    # - name: Setup upterm session
-    #   uses: lhotari/action-upterm@v1
-    #   with:
-    #     limit-access-to-actor: true
-
-    # - name: Wait 1 hour
-    #   run: sleep 7200
-
-    - name: Debug test.py
-      run: |
-        python test.py
-
-    
     - name: Test with pytest
       run: |
         python -m pytest
