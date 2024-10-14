@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "lukefi.metsi"
 description = "Metsi forestry simulator."
@@ -5,17 +9,18 @@ version = "1.0.0"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
-    { name = "Juho-Petteri Yliuntinen", email = "juho-petteri.yliuntinen@luke.fi"},
     { name = "Daniel Melander", email = "daniel.melander@luke.fi"},
+    { name = "Reetta Lempinen", email = "reetta.lempinen@luke.fi"},
+    { name = "Tapio Lempinen", email = "tapio.lempinen@luke.fi"},
     { name = "Arto Haara", email = "arto.haara@luke.fi"},
-    { name = "Laura Jaakkola", email = "laura.jaakkola@luke.fi"},
-    { name = "Tapio Lempinen"},
+    { name = "Juho-Petteri Yliuntinen"},
+    { name = "Laura Jaakkola"},
     { name = "Urho Niemelä"}
 ]
 dependencies = [
-    "pyyaml==6.0",
+    "pyyaml==6.0.2",
     "jsonpickle==3.0.1",
-    "lupa==1.14.1",
+    "lupa==2.2",
     "scipy==1.14.0",
     "geopandas == 1.0.1",
     "pandas == 2.2.2",
@@ -39,3 +44,7 @@ lukefi = "lukefi"
 "lukefi.metsi.forestry.lua" = ["*"]
 "lukefi.metsi.forestry.r" = ["*"]
 
+[tool.pytest.ini_options]
+filterwarnings = [ 
+    "ignore::pytest.PytestCollectionWarning:.*metsi.tests.app.file_io_test"
+]
