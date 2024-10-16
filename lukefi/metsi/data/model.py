@@ -678,7 +678,7 @@ class ForestStand():
             melaed.method_of_last_cutting,
             municipality_id,
             None,
-            0 if melaed.dominant_storey_age is None else melaed.dominant_storey_age,
+            melaed.dominant_storey_age,
         ]
 
 
