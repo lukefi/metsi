@@ -7,7 +7,8 @@ from typing import Any, Optional
 from collections.abc import Iterator, Callable
 import yaml
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
-from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, stands_to_rsd_content
+from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, \
+    stands_to_rsd_content, stands_to_rsds_content
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
 from lukefi.metsi.domain.forestry_types import StandList
@@ -42,13 +43,13 @@ def prepare_target_directory(path_descriptor: str) -> Path:
 def stand_writer(container_format: str) -> StandWriter:
     """Return a serialization file writer function for a ForestDataPackage"""
     if container_format == "pickle":
-        return pickle_writer
+        return (pickle_writer,)
     elif container_format == "json":
-        return json_writer
+        return (json_writer,)
     elif container_format == "csv":
-        return csv_writer
+        return (csv_writer,)
     elif container_format == "rsd":
-        return rsd_writer
+        return (rsd_writer, rsds_writer)
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
@@ -63,8 +64,9 @@ def object_writer(container_format: str) -> ObjectWriter:
         raise Exception(f"Unsupported container format '{container_format}'")
 
 
-def determine_file_path(dir: Path, filename: str) -> Path:
-    return Path(dir, filename)
+def determine_file_path(dir: Path, file_ext: str) -> list[Path]:
+    exts = [file_ext, 'rsds'] if file_ext == 'rsd' else [ file_ext ] 
+    return tuple( Path(dir, f"preprocessing_result.{ext}") for ext in exts )
 
 
 def file_contents(file_path: str) -> str:
@@ -196,10 +198,11 @@ def read_full_simulation_result_dirtree(source_path: Path) -> SimResults:
     return result
 
 
-def write_stands_to_file(result: StandList, filepath: Path, state_output_container: str):
+def write_stands_to_file(result: StandList, filepaths: list[Path], state_output_container: str):
     """Resolve a writer function for ForestStands matching the given state_output_container. Invokes write."""
-    writer = stand_writer(state_output_container)
-    writer(filepath, result)
+    writers = stand_writer(state_output_container)
+    for writer, filepath in zip(writers, filepaths):
+        writer(filepath, result)
 
 
 def write_derived_data_to_file(result: CollectedData, filepath: Path, derived_data_output_container: str):
@@ -223,11 +226,11 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mets
         for i, schedule in enumerate(schedules):
             if app_arguments.state_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
-                filepath = determine_file_path(schedule_dir, f"unit_state.{app_arguments.state_output_container}")
+                filepath = determine_file_path(schedule_dir, app_arguments.state_output_container)
                 write_stands_to_file([schedule.computational_unit], filepath, app_arguments.state_output_container)
             if app_arguments.derived_data_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
-                filepath = determine_file_path(schedule_dir, f"derived_data.{app_arguments.derived_data_output_container}")
+                filepath = determine_file_path(schedule_dir, app_arguments.derived_data_output_container)
                 write_derived_data_to_file(schedule.collected_data, filepath, app_arguments.derived_data_output_container)
 
 
@@ -258,6 +261,10 @@ def csv_writer(filepath: Path, data: StandList):
 
 def rsd_writer(filepath: Path, data: StandList):
     row_writer(filepath, stands_to_rsd_content(data))
+
+
+def rsds_writer(filepath: Path, data: StandList):
+    row_writer(filepath, stands_to_rsds_content(data))
 
 
 def row_writer(filepath: Path, rows: list[str]):
