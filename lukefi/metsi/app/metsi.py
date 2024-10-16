@@ -23,8 +23,8 @@ def preprocess(config: MetsiConfiguration, control: dict, stands: StandList) -> 
     result = lukefi.metsi.app.preprocessor.preprocess_stands(stands, control)
     if config.preprocessing_output_container is not None:
         print_logline(f"Writing preprocessed data to '{config.target_directory}/preprocessing_result.{config.preprocessing_output_container}'")
-        filepath = determine_file_path(config.target_directory, f"preprocessing_result.{config.preprocessing_output_container}")
-        write_stands_to_file(result, filepath, config.preprocessing_output_container)
+        filepaths = determine_file_path(config.target_directory, config.preprocessing_output_container)
+        write_stands_to_file(result, filepaths, config.preprocessing_output_container)
     return result
 
 

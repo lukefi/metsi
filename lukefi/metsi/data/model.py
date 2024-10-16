@@ -2,7 +2,7 @@ import dataclasses
 from enum import Enum
 from typing import Optional
 from dataclasses import dataclass
-from lukefi.metsi.data.conversion.internal2mela import mela_stand, mela_tree
+from lukefi.metsi.data.conversion.internal2mela import mela_stand, mela_tree, mela_stratum
 from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, \
     TreeSpecies, DrainageCategory, Storey
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
@@ -32,7 +32,7 @@ class TreeStratum():
     # identifier of the stratum within the container stand
     identifier: Optional[str] = None
 
-    species: Optional[Enum] = None
+    species: Optional[TreeSpecies] = None
     origin: Optional[int] = None
     stems_per_ha: Optional[float] = None  # stem count within a hectare
     mean_diameter: Optional[float] = None  # in decimeters
@@ -53,6 +53,7 @@ class TreeStratum():
     sapling_stems_per_ha: Optional[float] = None
     sapling_stratum: bool = False  # this reference tree represents saplings
     storey: Optional[Storey] = None
+    number_of_generated_trees: Optional[int] = None
 
     def __hash__(self):
         return id(self)
@@ -215,6 +216,23 @@ class TreeStratum():
         result.sapling_stratum = conv(row[20], "sapling_stratum")
         result.storey = Storey(int(row[21])) if row[21] != "None" else None
         return result
+    
+    def as_rsds_row(self):
+        melaed = mela_stratum(self)
+        return [
+            melaed.tree_number,
+            0 if melaed.species is None else melaed.species.value,
+            melaed.origin,
+            melaed.stems_per_ha,
+            melaed.mean_diameter,
+            melaed.mean_height,
+            melaed.breast_height_age,
+            melaed.biological_age,
+            melaed.basal_area,
+            melaed.sapling_stems_per_ha,
+            0 if melaed.storey is None else melaed.storey.value,
+            melaed.number_of_generated_trees
+        ]
 
 @dataclass
 class ReferenceTree():

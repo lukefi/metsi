@@ -19,6 +19,18 @@ class Test:
 
 
 class TestFileReading(unittest.TestCase):
+    def test_determine_file_path(self):
+        assertions = [
+            (('testdir', 'rsd'), (
+                Path('testdir', 'preprocessing_result.rsd'),
+                Path('testdir', 'preprocessing_result.rsds'))
+            ),
+            (('testdir', 'csv'), ( Path('testdir', 'preprocessing_result.csv'), )), # single tuple
+        ]
+        for a in assertions:
+            result = lukefi.metsi.app.file_io.determine_file_path(*a[0])
+            self.assertEqual(a[1], result) 
+
     def test_file_contents(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "test_dummy")
         result = lukefi.metsi.app.file_io.file_contents(input_file_path)
@@ -110,6 +122,48 @@ class TestFileReading(unittest.TestCase):
         self.assertTrue(exists)
         self.assertTrue(size > 0)
         shutil.rmtree('outdir')
+
+
+    def test_rsds(self):
+        data = [
+            ForestStand(
+                identifier="123-234",
+                geo_location=(600000.0, 300000.0, 30.0, "EPSG:3067"),
+                land_use_category=LandUseCategory.FOREST,
+                owner_category=OwnerCategory.PRIVATE,
+                soil_peatland_category=SoilPeatlandCategory.MINERAL_SOIL,
+                site_type_category=SiteType.RICH_SITE,
+                drainage_category=DrainageCategory.DITCHED_MINERAL_SOIL,
+                fra_category="1",
+                auxiliary_stand=False,
+                tree_strata=[
+                    TreeStratum(
+                        identifier="123-234-1",
+                        tree_number=1,
+                        species=TreeSpecies.PINE,
+                        stems_per_ha=200.0,
+                        mean_diameter=20.0,
+                        mean_height=15.0,
+                        breast_height_age=52,
+                        biological_age=55,
+                        basal_area=210.0,
+                        sapling_stems_per_ha=100.0,
+                        storey=Storey.DOMINANT
+                    )
+                ]
+            )
+        ]
+        lukefi.metsi.app.file_io.prepare_target_directory("outdir")
+        target = Path("outdir", "output.rsds")
+        lukefi.metsi.app.file_io.rsds_writer(target, data)
+
+        # There is no rsd input so check sanity just by file existence and non-emptiness
+        exists = os.path.exists(target)
+        size = os.path.getsize(target)
+        self.assertTrue(exists)
+        self.assertTrue(size > 0)
+        shutil.rmtree('outdir')
+
 
     def test_read_stands_from_pickle_file(self):
         config = MetsiConfiguration(

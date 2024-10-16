@@ -228,6 +228,7 @@ class TestForestBuilder(unittest.TestCase):
         # basal area is '17' -> 17.0
         self.assertEqual(17.0, stratum.basal_area)
         self.assertEqual(Storey.DOMINANT, stratum.storey)
+        self.assertEqual(1, stratum.tree_number)
 
     def test_vmi13_init(self):
         vmi13_builder = self.vmi13_builder()
@@ -415,6 +416,7 @@ class TestForestBuilder(unittest.TestCase):
         # basal area is '17' -> 17.0
         self.assertEqual(17.0, stratum.basal_area)
         self.assertEqual(Storey.DOMINANT, stratum.storey)
+        self.assertEqual(1, stratum.tree_number)
 
 
     def test_remove_strata(self):

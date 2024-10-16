@@ -96,6 +96,15 @@ def rsd_forest_stand_rows(stand: ForestStand) -> list[str]:
     return result
 
 
+def rsds_forest_stand_rows(stand: ForestStand) -> list[str]:
+    """Generate RSDS data file rows for a single ForestStand"""
+    result = []
+    result.append(" ".join(map(rsd_float, stand.as_rsd_row())))
+    for stratum in stand.tree_strata:
+        result.append(" ".join(map(rsd_float, stratum.as_rsds_row())))
+    return result
+
+
 def csv_value(source: Any) -> str:
     if source is None:
         return "None"
@@ -161,3 +170,8 @@ def outputtable_rows(stands: list[ForestStand], formatter: Callable[[list[Forest
 def stands_to_rsd_content(stands: list[ForestStand]) -> list[str]:
     """Generate RSD file contents for the given list of ForestStand"""
     return outputtable_rows(stands, lambda stand: rsd_forest_stand_rows(stand))
+
+
+def stands_to_rsds_content(stands: list[ForestStand]) -> list[str]:
+    """Generate RSD and RSTS file contents for the given list of ForestStand"""
+    return outputtable_rows(stands, lambda stand: rsds_forest_stand_rows(stand))
