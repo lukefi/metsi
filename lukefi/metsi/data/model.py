@@ -381,7 +381,7 @@ class ReferenceTree():
         )
         return [
             melaed.stems_per_ha,
-            melaed.species.value,
+            0 if melaed.species is None else melaed.species.value,
             melaed.breast_height_diameter,
             melaed.height,
             melaed.breast_height_age,
