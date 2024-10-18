@@ -22,10 +22,20 @@ class IoUtilsTest(ConverterTestSuite):
         result = rsd_forest_stand_rows(vmi13_stands[1])
         self.assertEqual(4, len(result))
 
+    def test_rsds_forest_stand_rows(self):
+        vmi13_stands = vmi13_builder.build()
+        result = rsds_forest_stand_rows(vmi13_stands[1])
+        self.assertEqual(3, len(result))
+
     def test_rsd_rows(self):
         vmi13_stands = vmi13_builder.build()
         result = stands_to_rsd_content(vmi13_stands)
         self.assertEqual(9, len(result))
+
+    def test_rsds_rows(self):
+        vmi13_stands = vmi13_builder.build()
+        result = stands_to_rsds_content(vmi13_stands)
+        self.assertEqual(6, len(result))
 
     def test_stands_to_csv(self):
         delimiter = ";"

@@ -128,7 +128,7 @@ class VMIBuilder(ForestBuilder):
         result.basal_area = util.parse_type(data_row[indices.basal_area], float)
         result.cutting_year = 0
         result.age_when_10cm_diameter_at_breast_height = 0
-        result.tree_number = 0
+        result.tree_number = util.parse_int(data_row[indices.stratum_number])
         result.stand_origin_relative_position = (0.0, 0.0, 0.0)
         result.lowest_living_branch_height = 0.0
         result.management_category = 1

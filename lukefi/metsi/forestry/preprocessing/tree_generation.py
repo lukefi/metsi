@@ -16,11 +16,12 @@ class TreeStrategy(Enum):
 
 def finalize_trees(reference_trees: list[ReferenceTree], stratum: TreeStratum) -> list[ReferenceTree]:
     """ For all given trees inflates the common variables from stratum. """
-    n_trees = len(reference_trees)
+    stratum.number_of_generated_trees = len(reference_trees)
     for i, reference_tree in enumerate(reference_trees):
         reference_tree.stand = stratum.stand
         reference_tree.species = stratum.species
-        reference_tree.breast_height_age = 0.0 if n_trees == 1 else stratum.get_breast_height_age()
+        reference_tree.breast_height_age = 0.0 \
+            if stratum.number_of_generated_trees == 1 else stratum.get_breast_height_age()
         reference_tree.biological_age = stratum.biological_age
         if reference_tree.breast_height_age == 0.0 and reference_tree.breast_height_diameter > 0.0:
             reference_tree.breast_height_age = 1.0
