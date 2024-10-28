@@ -1,5 +1,4 @@
 import dataclasses
-from enum import Enum
 from typing import Optional
 from dataclasses import dataclass
 from lukefi.metsi.data.conversion.internal2mela import mela_stand, mela_tree, mela_stratum
@@ -8,7 +7,7 @@ from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, Sit
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
 from lukefi.metsi.data.formats.util import convert_str_to_type
 from lukefi.metsi.data.layered_model import LayeredObject
-from lukefi.metsi.data.soa import Soable
+
 
 # NOTE:
 # * the deepcopy methods here are roughly equivalent to
