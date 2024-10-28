@@ -173,5 +173,5 @@ def stands_to_rsd_content(stands: list[ForestStand]) -> list[str]:
 
 
 def stands_to_rsds_content(stands: list[ForestStand]) -> list[str]:
-    """Generate RSD and RSTS file contents for the given list of ForestStand"""
+    """Generate RSDS file contents for the given list of ForestStand"""
     return outputtable_rows(stands, lambda stand: rsds_forest_stand_rows(stand))
