@@ -363,25 +363,25 @@ class XMLBuilder(ForestCentreBuilder):
         for oper in operations.values():
             (oper_type, oper_year) = oper
             if oper_type in (1,):
-                stand.cutting_year = oper_year # RSD record 28
-                stand.method_of_last_cutting = 4 # RSD record 31
+                stand.cutting_year = oper_year # RST record 28
+                stand.method_of_last_cutting = 4 # RST record 31
             elif oper_type in (2, 13, 20):
-                stand.cutting_year = oper_year # RSD record 28
-                stand.method_of_last_cutting = 3 # RSD record 31
+                stand.cutting_year = oper_year # RST record 28
+                stand.method_of_last_cutting = 3 # RST record 31
             elif oper_type in (3, 11, 12, 14, 91, 94):
-                stand.cutting_year = oper_year # RSD record 28
-                stand.method_of_last_cutting = 1 # RSD record 31
+                stand.cutting_year = oper_year # RST record 28
+                stand.method_of_last_cutting = 1 # RST record 31
             elif oper_type in (4, 15, 100):
-                stand.cutting_year = oper_year # RSD record 28
+                stand.cutting_year = oper_year # RST record 28
                 stand.method_of_last_cutting = 6 if stand.soil_peatland_category in (1,2,3) else 5
             elif oper_type in (6, 7, 102, 116, 123, 124):
-                stand.cutting_year = oper_year # RSD record 28
-                stand.method_of_last_cutting = 6 # RSD record 31
+                stand.cutting_year = oper_year # RST record 28
+                stand.method_of_last_cutting = 6 # RST record 31
             elif oper_type in (8, 101, 103, 104, 105, 106, 107, 108, 109,
                 110, 111, 112, 113, 114, 115, 117, 118,
                 119, 120, 121, 122, 125, 126, 127, 128):
-                stand.cutting_year = oper_year # RSD record 28
-                stand.method_of_last_cutting = 5 # RSD record 31
+                stand.cutting_year = oper_year # RST record 28
+                stand.method_of_last_cutting = 5 # RST record 31
             elif oper_type in (200, 201, 202, 203, 204, 205, 206, 207, 208,
                 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220,
                 221, 222, 223, 224, 225, 226, 227, 228, 300, 301, 302, 303,
@@ -390,19 +390,19 @@ class XMLBuilder(ForestCentreBuilder):
                 328, 601, 602, 603, 604, 605, 606, 607, 608, 609, 610, 611,
                 612, 613, 614, 615, 616, 617, 618, 619, 620, 621, 622, 623,
                 624, 625, 626, 627, 628, 629, 630):
-                stand.artificial_regeneration_year = oper_year # RSD record 25
+                stand.artificial_regeneration_year = oper_year # RST record 25
             elif oper_type in (401, 410, 420, 450):
-                stand.regeneration_area_cleaning_year = oper_year # RSD record 23
+                stand.regeneration_area_cleaning_year = oper_year # RST record 23
             elif oper_type in (501, 510, 511, 520, 521, 522, 523, 530, 531, 540, 550, 560, 960):
-                stand.soil_surface_preparation_year = oper_year # RSD record 21
+                stand.soil_surface_preparation_year = oper_year # RST record 21
             elif oper_type in (660, 670, 680, 690, 701, 730, 740, 745, 750, 760, 860, 870, 880, 890):
-                stand.young_stand_tending_year = oper_year # RSD record 26
+                stand.young_stand_tending_year = oper_year # RST record 26
             elif oper_type in (911, 912):
-                stand.fertilization_year = oper_year # RSD record 20
+                stand.fertilization_year = oper_year # RST record 20
             elif oper_type in (930, 940):
-                stand.drainage_year = oper_year # RSD record 19
+                stand.drainage_year = oper_year # RST record 19
             elif oper_type in (970,):
-                stand.pruning_year = oper_year # RSD record 27
+                stand.pruning_year = oper_year # RST record 27
             else:
                 UserWarning('Unable to spesify operation type {} for stand \'{}\''.format(oper_type, stand.identifier))
         return stand
@@ -411,31 +411,31 @@ class XMLBuilder(ForestCentreBuilder):
     def convert_stand_entry(self, estand: ET.Element) -> ForestStand:
         stand_basic_data = smk_util.parse_stand_basic_data(estand)
         stand = ForestStand()
-        stand.management_unit_id = None # RSD record 1
-        stand.year = smk_util.parse_year(stand_basic_data.StandBasicDataDate) # RSD record 2
-        stand.set_area(util.parse_type(stand_basic_data.Area, float)) # RSD record 3 and 4
+        stand.management_unit_id = None # RST record 1
+        stand.year = smk_util.parse_year(stand_basic_data.StandBasicDataDate) # RST record 2
+        stand.set_area(util.parse_type(stand_basic_data.Area, float)) # RST record 3 and 4
         (latitude, longitude, crs) = smk_util.parse_coordinates(estand)
-        stand.geo_location = (latitude, longitude, None, crs) # RSD record 5,6,8
-        stand.identifier = stand_basic_data.id # RSD record 7
-        stand.degree_days = None # RSD record 9
+        stand.geo_location = (latitude, longitude, None, crs) # RST record 5,6,8
+        stand.identifier = stand_basic_data.id # RST record 7
+        stand.degree_days = None # RST record 9
         # TODO: need to figure out the source for this in the XML
-        stand.owner_category = OwnerCategory.PRIVATE # RSD record 10
-        stand.land_use_category = fc2internal.convert_land_use_category(stand_basic_data.MainGroup) # RSD record 11
-        stand.soil_peatland_category = fc2internal.convert_soil_peatland_category(stand_basic_data.SubGroup) # RSD record 12
-        stand.site_type_category = fc2internal.convert_site_type_category(stand_basic_data.FertilityClass) # RSD record 13
-        stand.tax_class_reduction = 0 # RSD record 14
-        stand.tax_class = 0 # RSD record 15
-        stand.drainage_category = fc2internal.convert_drainage_category(stand_basic_data.DrainageState) # RSD record 16
-        stand.drainage_feasibility = True # RSD record 17
-        # RSD record 18 is '0' by default
+        stand.owner_category = OwnerCategory.PRIVATE # RST record 10
+        stand.land_use_category = fc2internal.convert_land_use_category(stand_basic_data.MainGroup) # RST record 11
+        stand.soil_peatland_category = fc2internal.convert_soil_peatland_category(stand_basic_data.SubGroup) # RST record 12
+        stand.site_type_category = fc2internal.convert_site_type_category(stand_basic_data.FertilityClass) # RST record 13
+        stand.tax_class_reduction = 0 # RST record 14
+        stand.tax_class = 0 # RST record 15
+        stand.drainage_category = fc2internal.convert_drainage_category(stand_basic_data.DrainageState) # RST record 16
+        stand.drainage_feasibility = True # RST record 17
+        # RST record 18 is '0' by default
         operations = smk_util.parse_stand_operations(estand, target_operations='past')
-        stand = self.set_stand_operations(stand, operations) # RSD records 19, 20, 21, 23, 25, 26, 27, 28 and 31
-        stand.natural_regeneration_feasibility = False # RSD record 22
-        stand.development_class = smk_util.parse_development_class(0) # RSD record 24
-        stand.forestry_centre_id = None # RSD record 29
+        stand = self.set_stand_operations(stand, operations) # RST records 19, 20, 21, 23, 25, 26, 27, 28 and 31
+        stand.natural_regeneration_feasibility = False # RST record 22
+        stand.development_class = smk_util.parse_development_class(0) # RST record 24
+        stand.forestry_centre_id = None # RST record 29
         stand.forest_management_category = smk_util.parse_forest_management_category(stand_basic_data.CuttingRestriction) or 1  # 30
-        stand.municipality_id = None # RSD record 32
-        # RSD record 33 and 34 unused
+        stand.municipality_id = None # RST record 32
+        # RST record 33 and 34 unused
         return stand
 
 
@@ -491,36 +491,36 @@ class GeoPackageBuilder(ForestCentreBuilder):
         :return: ForestStand object
         """
         stand = ForestStand()
-        stand.management_unit_id = None # RSD record 1
-        stand.year = smk_util.parse_year(entry.date) # RSD record 2
-        stand.set_area(entry.area - entry.areadecrease) # RSD record 3 and 4
-        # RSD records 5, 6 and 8
+        stand.management_unit_id = None # RST record 1
+        stand.year = smk_util.parse_year(entry.date) # RST record 2
+        stand.set_area(entry.area - entry.areadecrease) # RST record 3 and 4
+        # RST records 5, 6 and 8
         (latitude, longitude) = entry.centroid.get('centroid')
         stand.geo_location = (latitude,
                               longitude,
                               None,
                               entry.centroid.get('crs'))
-        stand.identifier = entry.standid # RSD record 7
-        stand.degree_days = None # RSD record 9
-        stand.owner_category = OwnerCategory.PRIVATE # RSD record 10
-        stand.land_use_category = fc2internal.convert_land_use_category(util.parse_type(entry.maingroup, str)) # RSD record 11
-        stand.soil_peatland_category = fc2internal.convert_soil_peatland_category(util.parse_type(entry.subgroup, str)) # RSD record 12
-        stand.site_type_category = fc2internal.convert_site_type_category(util.parse_type(entry.fertilityclass, str)) # RSD record 13
-        # RSD record 14
-        # RSD record 15
+        stand.identifier = entry.standid # RST record 7
+        stand.degree_days = None # RST record 9
+        stand.owner_category = OwnerCategory.PRIVATE # RST record 10
+        stand.land_use_category = fc2internal.convert_land_use_category(util.parse_type(entry.maingroup, str)) # RST record 11
+        stand.soil_peatland_category = fc2internal.convert_soil_peatland_category(util.parse_type(entry.subgroup, str)) # RST record 12
+        stand.site_type_category = fc2internal.convert_site_type_category(util.parse_type(entry.fertilityclass, str)) # RST record 13
+        # RST record 14
+        # RST record 15
         stand.drainage_category = fc2internal.convert_to_internal(
             util.parse_type(entry.drainagestate, int, str),
-            fc2internal.convert_drainage_category) # RSD record 16
-        stand.drainage_feasibility = True # RSD record 17
-        # RSD record 18 is '0' by default
-        # TODO: parse operations -> RSD records 19, 20, 21, 23, 25, 26, 27, 28 and 31
-        stand.natural_regeneration_feasibility = False # RSD record 22
-        stand.development_class = smk_util.parse_development_class(util.parse_type(entry.developmentclass, str)) # RSD record 24
-        stand.forestry_centre_id = None # RSD record 29
+            fc2internal.convert_drainage_category) # RST record 16
+        stand.drainage_feasibility = True # RST record 17
+        # RST record 18 is '0' by default
+        # TODO: parse operations -> RST records 19, 20, 21, 23, 25, 26, 27, 28 and 31
+        stand.natural_regeneration_feasibility = False # RST record 22
+        stand.development_class = smk_util.parse_development_class(util.parse_type(entry.developmentclass, str)) # RST record 24
+        stand.forestry_centre_id = None # RST record 29
         restrictioncode = entry.restrictioncode if entry.restrictiontype == 1 else 1
         stand.forest_management_category = smk_util.parse_forest_management_category(util.parse_type(restrictioncode, int, str)) # 30
-        stand.municipality_id = None # RSD record 32
-        # RSD record 33 and 34 unused
+        stand.municipality_id = None # RST record 32
+        # RST record 33 and 34 unused
         return stand
 
 

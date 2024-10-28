@@ -1,8 +1,8 @@
 """ Constant data indices used in building the output file """
 
 
-class RSDStandIndices:
-    """ RSD stand indices """
+class RSTStandIndices:
+    """ RST stand indices """
     man_unit = 0
     year = 1
     area = 2
@@ -39,8 +39,8 @@ class RSDStandIndices:
     system2 = 33
 
 
-class RSDTreeIndices:
-    """ RSD tree indices """
+class RSTTreeIndices:
+    """ RST tree indices """
     stems_per_ha = 0  # taulussa 3
     species = 1  # taulussa 4
     diameter = 2  # taulussa 5

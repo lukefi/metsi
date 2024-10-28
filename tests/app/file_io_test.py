@@ -21,9 +21,9 @@ class Test:
 class TestFileReading(unittest.TestCase):
     def test_determine_file_path(self):
         assertions = [
-            (('testdir', 'rsd'), (
-                Path('testdir', 'preprocessing_result.rsd'),
-                Path('testdir', 'preprocessing_result.rsds'))
+            (('testdir', 'rst'), (
+                Path('testdir', 'preprocessing_result.rst'),
+                Path('testdir', 'preprocessing_result.rsts'))
             ),
             (('testdir', 'csv'), ( Path('testdir', 'preprocessing_result.csv'), )), # single tuple
         ]
@@ -90,7 +90,7 @@ class TestFileReading(unittest.TestCase):
         self.assertDictEqual(data[0].__dict__, result[0].__dict__)
         shutil.rmtree('outdir')
 
-    def test_rsd(self):
+    def test_rst(self):
         data = [
             ForestStand(
                 identifier="123-234",
@@ -113,10 +113,10 @@ class TestFileReading(unittest.TestCase):
             )
         ]
         lukefi.metsi.app.file_io.prepare_target_directory("outdir")
-        target = Path("outdir", "output.rsd")
-        lukefi.metsi.app.file_io.rsd_writer(target, data)
+        target = Path("outdir", "output.rst")
+        lukefi.metsi.app.file_io.rst_writer(target, data)
 
-        #There is no rsd input so check sanity just by file existence and non-emptiness
+        #There is no rst input so check sanity just by file existence and non-emptiness
         exists = os.path.exists(target)
         size = os.path.getsize(target)
         self.assertTrue(exists)
@@ -124,7 +124,7 @@ class TestFileReading(unittest.TestCase):
         shutil.rmtree('outdir')
 
 
-    def test_rsds(self):
+    def test_rsts(self):
         data = [
             ForestStand(
                 identifier="123-234",
@@ -154,10 +154,10 @@ class TestFileReading(unittest.TestCase):
             )
         ]
         lukefi.metsi.app.file_io.prepare_target_directory("outdir")
-        target = Path("outdir", "output.rsds")
-        lukefi.metsi.app.file_io.rsds_writer(target, data)
+        target = Path("outdir", "output.rsts")
+        lukefi.metsi.app.file_io.rsts_writer(target, data)
 
-        # There is no rsd input so check sanity just by file existence and non-emptiness
+        # There is no rst input so check sanity just by file existence and non-emptiness
         exists = os.path.exists(target)
         size = os.path.getsize(target)
         self.assertTrue(exists)

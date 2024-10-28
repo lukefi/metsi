@@ -136,7 +136,7 @@ def determine_soil_surface_preparation_year(sourcevalue: str, year: int) -> Opti
 def determine_forest_maintenance_details(cutting_type_class: str, sourcevalue: str, year: int):
     """
     Return a triplet of (young_stand_tending_year, cutting_year, cutting_method). VMI source data is exclusive
-    between cutting and tending, i.e. the codes are overloaded into the same year class variable. RSD target format
+    between cutting and tending, i.e. the codes are overloaded into the same year class variable. RST target format
     allows separate value for both tending and cutting years, but this is impossible in source data.
     """
     operation_year = determine_forest_maintenance_year(sourcevalue, year)
@@ -146,7 +146,7 @@ def determine_forest_maintenance_details(cutting_type_class: str, sourcevalue: s
         return operation_year, None, None
     elif method == 0:
         # This case is necessary. Operations over 10 years old are listed as type 0, or no operation in VMI data.
-        # The actual year is still recorded, but we don't seem to want it in RSD target. This is based on original
+        # The actual year is still recorded, but we don't seem to want it in RST target. This is based on original
         # implementation of this application.
         return None, None, None
     else:
@@ -168,7 +168,7 @@ def determine_forest_maintenance_year(sourcevalue: str, year: int) -> Optional[i
 
 
 def determine_forest_maintenance_method(sourcevalue: str, cutting_year: Optional[int]) -> int:
-    """Map VMI cutting method to RSD cutting method if cutting year exists"""
+    """Map VMI cutting method to RST cutting method if cutting year exists"""
     if cutting_year is not None and cutting_year > 0:
         if sourcevalue == '0':
             return 0

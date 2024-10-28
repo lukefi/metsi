@@ -8,7 +8,7 @@ from collections.abc import Iterator, Callable
 import yaml
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, \
-    stands_to_rsd_content, stands_to_rsds_content
+    stands_to_rst_content, stands_to_rsts_content
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
 from lukefi.metsi.domain.forestry_types import StandList
@@ -48,8 +48,8 @@ def stand_writer(container_format: str) -> StandWriter:
         return (json_writer,)
     elif container_format == "csv":
         return (csv_writer,)
-    elif container_format == "rsd":
-        return (rsd_writer, rsds_writer)
+    elif container_format == "rst":
+        return (rst_writer, rsts_writer)
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
@@ -65,7 +65,7 @@ def object_writer(container_format: str) -> ObjectWriter:
 
 
 def determine_file_path(dir: Path, file_ext: str) -> list[Path]:
-    exts = [file_ext, 'rsds'] if file_ext == 'rsd' else [ file_ext ] 
+    exts = [file_ext, 'rsts'] if file_ext == 'rst' else [ file_ext ] 
     return tuple( Path(dir, f"preprocessing_result.{ext}") for ext in exts )
 
 
@@ -259,12 +259,12 @@ def csv_writer(filepath: Path, data: StandList):
     row_writer(filepath, stands_to_csv_content(data, ';'))
 
 
-def rsd_writer(filepath: Path, data: StandList):
-    row_writer(filepath, stands_to_rsd_content(data))
+def rst_writer(filepath: Path, data: StandList):
+    row_writer(filepath, stands_to_rst_content(data))
 
 
-def rsds_writer(filepath: Path, data: StandList):
-    row_writer(filepath, stands_to_rsds_content(data))
+def rsts_writer(filepath: Path, data: StandList):
+    row_writer(filepath, stands_to_rsts_content(data))
 
 
 def row_writer(filepath: Path, rows: list[str]):

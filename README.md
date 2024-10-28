@@ -125,9 +125,9 @@ modules into the exporting functionality.
 When phases are run in order on the same run, intermediate result files do not need to be written out. Data is kept and
 propagated in-memory.
 
-#### RSD format
+#### RST format
 
-Despite other output formats the computational units can be outputted as a RSD format which is in itself a special format used only by the Natural Resource Institutes MELA simulator. The RSD format is only genereted as preprocessing output and contains the reference tree information of forest stands. Along with the RSD format an RSDS format file is genereted which contains the stratum information of the computationals units.
+Despite other output formats the computational units can be outputted as a RST format which is in itself a special format used only by the Natural Resource Institutes MELA simulator. The RST format is only genereted as preprocessing output and contains the reference tree information of forest stands. Along with the RST format an RSTS format file is genereted which contains the stratum information of the computationals units.
 
 ### Run examples
 

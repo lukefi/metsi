@@ -1,9 +1,9 @@
-# Example for converting source data files to rsd
+# Example for converting source data files to rst
 
 #Application configuration values. Can be overriden by CLI arguments. May be commented out for None or default from Mela2Configuration.
 app_configuration:
   state_format: vmi12 #options: fdm, vmi12, vmi13, xml
-  preprocessing_output_container: rsd #options: pickle, json, csv, null, rsd (special case not usable as input container)
+  preprocessing_output_container: rst #options: pickle, json, csv, null, rst (special case not usable as input container)
   strategy: partial
   run_modes: preprocess
 
