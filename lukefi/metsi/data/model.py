@@ -5,7 +5,7 @@ from lukefi.metsi.data.conversion.internal2mela import mela_stand, mela_tree, me
 from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, \
     TreeSpecies, DrainageCategory, Storey
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
-from lukefi.metsi.data.formats.util import convert_str_to_type
+from lukefi.metsi.data.formats.util import convert_str_to_type, get_or_default
 from lukefi.metsi.data.layered_model import LayeredObject
 
 
@@ -218,7 +218,7 @@ class TreeStratum():
     
     def as_rsds_row(self):
         melaed = mela_stratum(self)
-        return [
+        rsds_result = [
             melaed.tree_number,
             0 if melaed.species is None else melaed.species.value,
             melaed.origin,
@@ -232,6 +232,7 @@ class TreeStratum():
             0 if melaed.storey is None else melaed.storey.value,
             melaed.number_of_generated_trees
         ]
+        return [ get_or_default(v, -1) for v in rsds_result ]
 
 @dataclass
 class ReferenceTree():
