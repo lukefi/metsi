@@ -99,7 +99,10 @@ def rst_forest_stand_rows(stand: ForestStand) -> list[str]:
 def rsts_forest_stand_rows(stand: ForestStand) -> list[str]:
     """Generate RSTS data file rows for a single ForestStand"""
     result = []
-    result.append(" ".join(map(rst_float, stand.as_rst_row())))
+    result.append(" ".join(chain(
+        [ str(parse_float(stand.identifier) or stand.stand_id) ],
+        map(rst_float, stand.as_rst_row())
+    )))
     for stratum in stand.tree_strata:
         result.append(" ".join(map(rst_float, stratum.as_rsts_row())))
     return result
