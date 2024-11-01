@@ -102,11 +102,13 @@ class VMI13StandIndices:
     section_x = 4
     test_area_number = 5
     stand_number = 6
+    lohkotarkenne = 7
     date = 9
     osuus9m = 14
     osuus4m = 15
+    county = 17
     forestry_centre = 18
-    municipality = 17
+    municipality = 19
     kitukunta = 20
     owner_group = 24
     lat = 26
@@ -191,10 +193,6 @@ vmi12_county_areas = [
     384.104671280277, 387.185442744553, 380.530710444382, 387.55872063968, 391.846213895394,
     455.901059564719, 773.027950310559, 451.83355704698, 791.65080, 10313.25275, 230.82912
 ]
-
-# Inventointialueiden koealojen pinta-alat(0=Ahve 1=V-Suomi 2=E-Suomi 3=Kai-PP 4=Lappi, 5=Y-Lappi)
-# tarkista Ahve ja Y-Lappi
-vmi13_county_areas = [343.0, 436.0, 343.0, 456.0, 784.0, 784.0]
 
 # scots pine, norway spruce, silver birch, downy birch, aspen, alder
 species_directly_mappable = ['1', '2', '3', '4', '5', '6']
