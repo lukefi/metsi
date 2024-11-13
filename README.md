@@ -1,8 +1,7 @@
 # Metsi forestry simulator
 
 Metsi forestry simulator is a Python based forest growth and maintenance operation simulator developed in Natural
-Resources Institute Finland. It is a part of a software collection to eventually replace the older Fortran based MELA
-simulator program developed since the 1980s.
+Resources Institute Finland.
 
 The simulator is a alternative state simulator operating upon forest state data. The state data is manipulated by
 **simulator operations** over a progression of time steps. The event and branching structure for simulator operations
@@ -14,7 +13,7 @@ with the simulator engine to produce alternative end results.
 
 To get started:
 
-* Install Python 3.10 for your platform.
+* Install Python >= 3.10  for your platform.
 * Install git for your platform.
 * Ensure that the commands `python`, `pip` and `git` are available in your command line interface (CLI). We assume a
   UNIX-like shell CLI such as Git Bash for Windows users.
@@ -88,7 +87,7 @@ Dependency libraries for this project are listed in `pyproject.toml`.
 
 The project contains a single application entry point. This is the `lukefi/metsi/app/metsi.py`.
 
-The application implements a 4 phase pipeline. These phases are: preprocess, simulate, postprocess and export. Each of
+The application implements a 4 phase pipeline. These phases are: __preprocess__, __simulate__, __postprocess__ and __export__. Each of
 the phases can be run independetly or as sequences, as long as their logical order for input data structuring is
 preserved. Each application phase uses the given YAML file (default `control.yaml`) as their configuration.
 
@@ -113,7 +112,7 @@ of associated reference trees and tree strata. The file can be of following type
 
 Input for postprocess and export phases is a directory produced by the simulate phase.
 
-There are several example input files in the project test resources `tests/resources/file_io_test` directory.
+There are several example input files in the project test resources `tests/resources/file_io_test` and `tests/data/resources` directories.
 
 ### Output types
 
@@ -134,6 +133,10 @@ modules into the exporting functionality.
 
 When phases are run in order on the same run, intermediate result files do not need to be written out. Data is kept and
 propagated in-memory.
+
+#### RST format
+
+Despite other output formats the computational units can be outputted as a RST format which is in itself a special format used only by the Natural Resource Institutes MELA simulator. The RST format is only genereted as preprocessing output and contains the reference tree information of forest stands. Along with the RST format an RSTS format file is genereted which contains the stratum information of the computationals units.
 
 ### Run examples
 
