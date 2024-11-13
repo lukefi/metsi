@@ -6,7 +6,7 @@ from tests.data.test_util import ConverterTestSuite, ForestBuilderTestBench
 vmi13_builder = ForestBuilderTestBench.vmi13_builder()
 
 class IoUtilsTest(ConverterTestSuite):
-    def test_rsd_float(self):
+    def test_rst_float(self):
         assertions = [
             ([123], "123.000000"),
             ([0], "0.000000"),
@@ -15,17 +15,27 @@ class IoUtilsTest(ConverterTestSuite):
             (["1.23"], "1.230000"),
             (["abc"], "0.000000")
         ]
-        self.run_with_test_assertions(assertions, rsd_float)
+        self.run_with_test_assertions(assertions, rst_float)
 
-    def test_rsd_forest_stand_rows(self):
+    def test_rst_forest_stand_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = rsd_forest_stand_rows(vmi13_stands[1])
+        result = rst_forest_stand_rows(vmi13_stands[1])
         self.assertEqual(4, len(result))
 
-    def test_rsd_rows(self):
+    def test_rsts_forest_stand_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = stands_to_rsd_content(vmi13_stands)
+        result = rsts_forest_stand_rows(vmi13_stands[1])
+        self.assertEqual(3, len(result))
+
+    def test_rst_rows(self):
+        vmi13_stands = vmi13_builder.build()
+        result = stands_to_rst_content(vmi13_stands)
         self.assertEqual(9, len(result))
+
+    def test_rsts_rows(self):
+        vmi13_stands = vmi13_builder.build()
+        result = stands_to_rsts_content(vmi13_stands)
+        self.assertEqual(6, len(result))
 
     def test_stands_to_csv(self):
         delimiter = ";"

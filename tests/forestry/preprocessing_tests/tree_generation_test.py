@@ -42,13 +42,14 @@ class TestTreeGeneration(unittest.TestCase):
         self.assertEqual(1.9357767362985978, result[0].stems_per_ha)
 
     def test_finalize_trees(self):
+        n_trees = 4
         stratum = TreeStratum()
         stratum.species = 1
         stratum.stand = '0-012-001-01-1'
         stratum.breast_height_age = 25.0
         stratum.biological_age = 32.0
         reference_trees = []
-        for i in range(4):
+        for i in range(n_trees):
             reference_trees.append(ReferenceTree())
         result = tree_generation.finalize_trees(reference_trees, stratum)
         self.assertEqual('0-012-001-01-1', result[0].stand)
@@ -61,6 +62,9 @@ class TestTreeGeneration(unittest.TestCase):
         self.assertEqual(32.0, result[1].biological_age)
         self.assertEqual(1, result[0].tree_number)
         self.assertEqual(2, result[1].tree_number)
+        # also test the inflating of TreeStratum.number_of_generated_trees
+        self.assertEqual(stratum.number_of_generated_trees, n_trees)
+
 
     def test_solve_tree_generation_strategy(self):
         # Test data generation

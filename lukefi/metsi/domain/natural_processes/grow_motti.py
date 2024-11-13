@@ -7,7 +7,7 @@ import pymotti
 
 
 def spe2motti(spe: int) -> pymotti.Species:
-    """Convert RSD species code to Motti.
+    """Convert RST species code to Motti.
 
     The coding almost matches directly, but we have combined black/gray alders
     while Motti distinguishes between them. The current implementation just
@@ -65,27 +65,27 @@ class MottiGrowthPredictor(pymotti.Predict):
 
     @property
     def mal(self) -> pymotti.LandUseCategoryVMI:
-        """Land use category. Our coding (RSD) matches Motti."""
+        """Land use category. Our coding (RST) matches Motti."""
         return pymotti.LandUseCategoryVMI(self.stand.land_use_category)
 
     @property
     def mty(self) -> pymotti.SiteTypeVMI:
-        """Site type category. Our coding (RSD) matches Motti."""
+        """Site type category. Our coding (RST) matches Motti."""
         return pymotti.SiteTypeVMI(self.stand.site_type_category)
 
     @property
     def alr(self) -> pymotti.SoilCategoryVMI:
-        """Soil category. Our coding (RSD) matches Motti."""
+        """Soil category. Our coding (RST) matches Motti."""
         return pymotti.SoilCategoryVMI(self.stand.soil_peatland_category)
 
     @property
     def verl(self) -> pymotti.TaxClass:
-        """Tax class. Our coding (RSD) matches Motti."""
+        """Tax class. Our coding (RST) matches Motti."""
         return pymotti.TaxClass(self.stand.tax_class)
 
     @property
     def verlt(self) -> pymotti.TaxClassReduction:
-        """Tax class reduction. Our coding (RSD) matches Motti."""
+        """Tax class reduction. Our coding (RST) matches Motti."""
         return pymotti.TaxClassReduction(self.stand.tax_class_reduction)
 
     # -- management variables --------------------
@@ -148,7 +148,7 @@ class MottiGrowthPredictor(pymotti.Predict):
 
     @cached_property
     def trees_snt(self) -> list[pymotti.Origin]:
-        """Origin of trees. Our coding (RSD) matches, but is offset by 1."""
+        """Origin of trees. Our coding (RST) matches, but is offset by 1."""
         # TODO: default origin should go into data loading, not here.
         return [pymotti.Origin(t.origin + 1) if t.origin is not None else pymotti.Origin.NATURAL
                 for t in self.stand.reference_trees]

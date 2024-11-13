@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
-from lukefi.metsi.data.formats.rsd_const import MSBInitialDataRecordConst as msb_meta
+from lukefi.metsi.data.formats.rst_const import MSBInitialDataRecordConst as msb_meta
 
 
 def recreate_stand_indices(stands: list[ForestStand]) -> list[ForestStand]:
@@ -36,7 +36,7 @@ def cleaned_output(stands: list[ForestStand]) -> list[ForestStand]:
     return stands
 
 
-def rsd_float(source: str or int or float or None) -> str:
+def rst_float(source: str or int or float or None) -> str:
     try:
         return f'{round(float(source), 6):.6f}'
     except:
@@ -51,8 +51,8 @@ def msb_metadata(stand: ForestStand) -> tuple[list[str], list[str], list[str]]:
         Initial data record tree set metadata
     """
     # TODO: this is not a desireable change but introduced as a user helper. First column should be stand id number
-    # for which we don't have a strict value, as long as it's internally unique in the RSD file. User needs
-    # back referencing possibility from RSD to actual forest stands in Forest Centre source. This is a hack to provide
+    # for which we don't have a strict value, as long as it's internally unique in the RST file. User needs
+    # back referencing possibility from RST to actual forest stands in Forest Centre source. This is a hack to provide
     # it. VMI stands should remain unaffected since their identifiers are not parseable as float values.
     outputtable_id = parse_float(stand.identifier) or stand.stand_id
 
@@ -63,36 +63,48 @@ def msb_metadata(stand: ForestStand) -> tuple[list[str], list[str], list[str]]:
         len(stand.reference_trees) * msb_meta.tree_record_length
     ])
     physical_record_metadata = [
-        rsd_float(outputtable_id),  # UID
+        rst_float(outputtable_id),  # UID
         str(sum([
             logical_record_length,
             msb_meta.logical_record_header_length
         ]))  # physical record length
     ]
     logical_record_metadata = [
-        rsd_float(msb_meta.logical_record_type),  # logical record type
-        rsd_float(logical_record_length),
-        rsd_float(msb_meta.stand_record_length)
+        rst_float(msb_meta.logical_record_type),  # logical record type
+        rst_float(logical_record_length),
+        rst_float(msb_meta.stand_record_length)
     ]
     logical_subrecord_metadata = [
-        rsd_float(len(stand.reference_trees)),
-        rsd_float(msb_meta.tree_record_length)
+        rst_float(len(stand.reference_trees)),
+        rst_float(msb_meta.tree_record_length)
     ]
     return physical_record_metadata, logical_record_metadata, logical_subrecord_metadata
 
 
-def rsd_forest_stand_rows(stand: ForestStand) -> list[str]:
-    """Generate RSD data file rows (with MSB metadata) for a single ForestStand"""
+def rst_forest_stand_rows(stand: ForestStand) -> list[str]:
+    """Generate RST data file rows (with MSB metadata) for a single ForestStand"""
     result = []
     msb_preliminary_records = msb_metadata(stand)
     result.append(" ".join(chain(
         msb_preliminary_records[0],
         msb_preliminary_records[1],
-        map(rsd_float, stand.as_rsd_row()),
+        map(rst_float, stand.as_rst_row()),
         msb_preliminary_records[2]
     )))
     for tree in stand.reference_trees:
-        result.append(" ".join(map(rsd_float, tree.as_rsd_row())))
+        result.append(" ".join(map(rst_float, tree.as_rst_row())))
+    return result
+
+
+def rsts_forest_stand_rows(stand: ForestStand) -> list[str]:
+    """Generate RSTS data file rows for a single ForestStand"""
+    result = []
+    result.append(" ".join(chain(
+        [ str(parse_float(stand.identifier) or stand.stand_id) ],
+        map(rst_float, stand.as_rst_row())
+    )))
+    for stratum in stand.tree_strata:
+        result.append(" ".join(map(rst_float, stratum.as_rsts_row())))
     return result
 
 
@@ -158,6 +170,11 @@ def outputtable_rows(stands: list[ForestStand], formatter: Callable[[list[Forest
     return result
 
 
-def stands_to_rsd_content(stands: list[ForestStand]) -> list[str]:
-    """Generate RSD file contents for the given list of ForestStand"""
-    return outputtable_rows(stands, lambda stand: rsd_forest_stand_rows(stand))
+def stands_to_rst_content(stands: list[ForestStand]) -> list[str]:
+    """Generate RST file contents for the given list of ForestStand"""
+    return outputtable_rows(stands, lambda stand: rst_forest_stand_rows(stand))
+
+
+def stands_to_rsts_content(stands: list[ForestStand]) -> list[str]:
+    """Generate RSTS file contents for the given list of ForestStand"""
+    return outputtable_rows(stands, lambda stand: rsts_forest_stand_rows(stand))
