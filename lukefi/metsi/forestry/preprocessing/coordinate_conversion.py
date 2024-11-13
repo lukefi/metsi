@@ -1,5 +1,6 @@
 import ctypes as cts
 from pathlib import Path
+from lukefi.metsi.data.model import ForestStand
     
 # Defining and initialize the external library 
 DLL_PATH = Path('lukefi', 'metsi', 'forestry', 'c', 'lib', 'ykjtm35.dll')
@@ -7,7 +8,7 @@ DLL = cts.CDLL(DLL_PATH)
 
 
 def _is_error(flag: int) -> bool:
-    return True if flag != 0 else False
+    return True if flag == 0 else False
 
 
 def _erts_tm35_to_ykj(u: float, v: float) -> tuple[float, float]:
@@ -49,7 +50,7 @@ def _erts_tm35_to_ykj(u: float, v: float) -> tuple[float, float]:
 def convert_location_to_ykj(stand: ForestStand) -> tuple[float, float, float, str]:
     """ Converts current coordinate system of the stand to match the YKJ (EPSG-2393) coordinate system """
     (latitude, longitude, heigh_above_sea_level, crs) = stand.geo_location
-    crs = 'EPSG-2393'
+    crs = 'EPSG:2393'
     (x, y) = _erts_tm35_to_ykj(latitude, longitude)    
     new_geo_location = (x, y, heigh_above_sea_level, crs)
     return new_geo_location 

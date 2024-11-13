@@ -71,3 +71,17 @@ class PreprocessingTest(unittest.TestCase):
         stand = ForestStand(area_weight=100.0, area_weight_factors=(0.0, 1.2))
         result = preprocessing.scale_area_weight([stand])
         self.assertEqual(result[0].area_weight, 120.0)
+
+    def test_coordinate_conversion_operation(self):
+        dummy_float = 0.0
+        dummy_str = 'dummy'
+        stand = ForestStand(geo_location=(6640610.26,
+                                          267924.92,
+                                          dummy_float,
+                                          dummy_str))
+        one_stand_list = [stand]
+        operation_params = { "target_system": 'YKJ' }
+        result = preprocessing.convert_coordinates(one_stand_list, **operation_params)
+        rstand = result[0] 
+        self.assertEqual(rstand.geo_location[0], 6643400.000631507)
+        self.assertEqual(rstand.geo_location[1], 3268000.003019635)
