@@ -195,9 +195,9 @@ def scale_area_weight(stands: list[ForestStand], **operation_params):
 def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str, Any]) -> list[ForestStand]:
     """ Preprocessing operation for converting the current coordinate system to target system
     
-    :target_system (optional): Spesified target system. Default is EPSG-2393
+    :target_system (optional): Spesified target system. Default is EPSG:2393
     """
-    defaults = ('EPSG-2393', 'YKJ')
+    defaults = ('EPSG:2393', 'YKJ')
     coord_system = operation_params.get('target_system', defaults[0])
     if coord_system in defaults:
         for s in stands:
