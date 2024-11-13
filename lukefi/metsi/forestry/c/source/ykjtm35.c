@@ -228,21 +228,6 @@ int tm35fin_to_ykj(double u, double v, double *x, double *y)
     return ykjtm35fin(u, v, x, y, 0);
 }
 
-int my_c_test(double a, double *b)
-{
-	*b = a * 2;
-    return 0;
-}
-
-int my_c_test2(double *a, double *b, double c)
-{
-	for (int i = 0; i < 3; i++) {
-		a[i] = c * 2;
-		b[i] = c * 10;
-	} 
-    return 0;
-}
-
 
 #ifdef TEST
 int main(int argc, char **argv)
