@@ -4,7 +4,7 @@ from lukefi.metsi.data.enums.internal import LandUseCategory
 from lukefi.metsi.domain.utils.filter import applyfilter
 from lukefi.metsi.forestry.forestry_utils import find_matching_storey_stratum_for_tree
 from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
-from lukefi.metsi.forestry.preprocessing.coordinate_conversion import convert_location_to_ykj
+from lukefi.metsi.forestry.preprocessing.coordinate_conversion import convert_location_to_ykj, CRS
 from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 from lukefi.metsi.forestry.preprocessing.tree_generation import trees_from_sapling_height_distribution
@@ -197,13 +197,14 @@ def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str,
     
     :target_system (optional): Spesified target system. Default is EPSG:2393
     """
-    defaults = ('EPSG:2393', 'YKJ')
-    coord_system = operation_params.get('target_system', defaults[0])
-    if coord_system in defaults:
+    defaults = CRS.EPSG_2393.value
+    target_system = operation_params.get('target_system', defaults[0])
+    if target_system in defaults:
         for s in stands:
             s.geo_location = convert_location_to_ykj(s)
     else:
-        Exception("Check definition of operation params. At the moment only \'{ default }\' conversion supported.".format(default = defaults[0]))
+        Exception("Check definition of operation params.\n"
+            "{default}\' conversion supported.".format(default = defaults[0]))
     return stands
 
 

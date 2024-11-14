@@ -3,6 +3,7 @@ import unittest
 import lukefi.metsi.domain.pre_ops as preprocessing
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.forestry.preprocessing.coordinate_conversion import CRS
 
 def generate_stand_with_saplings(sapling_tree_count, reference_tree_count):
     """generates a ForestStand with a given number of ReferenceTrees of which a given number is sapling trees"""
@@ -74,14 +75,24 @@ class PreprocessingTest(unittest.TestCase):
 
     def test_coordinate_conversion_operation(self):
         dummy_float = 0.0
-        dummy_str = 'dummy'
+        crs = CRS.EPSG_3067.name
         stand = ForestStand(geo_location=(6640610.26,
                                           267924.92,
                                           dummy_float,
-                                          dummy_str))
+                                          crs))
         one_stand_list = [stand]
-        operation_params = { "target_system": 'YKJ' }
-        result = preprocessing.convert_coordinates(one_stand_list, **operation_params)
-        rstand = result[0] 
-        self.assertEqual(rstand.geo_location[0], 6643400.000631507)
-        self.assertEqual(rstand.geo_location[1], 3268000.003019635)
+        valid_assertions = [
+            # these are the valid config level inputs
+            {}, # empty, default
+            { "target_system": 'YKJ' },
+            { "target_system": 'EPSG:2393' }
+        ]
+        for asse in valid_assertions:
+            result = preprocessing.convert_coordinates(one_stand_list, **asse)
+            rstand = result[0] 
+            self.assertEqual(rstand.geo_location[0], 6643400.000631507)
+            self.assertEqual(rstand.geo_location[1], 3268000.003019635)
+            self.assertEqual(rstand.geo_location[3], CRS.EPSG_2393.name)
+        invalid_assertion = { "target_system": "ASD" }
+        self.assertRaises(Exception,
+            preprocessing.convert_coordinates(ForestStand(), **invalid_assertion))
