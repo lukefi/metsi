@@ -220,6 +220,7 @@ class VMI12Builder(VMIBuilder):
         result: dict[str, ForestStand] = {}
         for i, row in enumerate(self.forest_stands):
             stand = self.convert_stand_entry(VMI12StandIndices, row, i + 1)
+            stand.additional_data = { k : v(row) for k, v in self.builder_flags['additional_indices'] }
             result[stand.identifier] = stand
         if self.builder_flags['strata']:
             for i, row in enumerate(self.tree_strata):
@@ -316,6 +317,7 @@ class VMI13Builder(VMIBuilder):
         result: dict[str, ForestStand] = {}
         for i, row in enumerate(self.forest_stands):
             stand = self.convert_stand_entry(VMI13StandIndices, row, i + 1)
+            stand.additional_data = { k : v(row) for k, v in self.builder_flags['additional_indices'].items() }
             result[stand.identifier] = stand
 
         if self.builder_flags['strata']:

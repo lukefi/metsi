@@ -8,7 +8,7 @@ from collections.abc import Iterator, Callable
 import yaml
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, \
-    stands_to_rst_content, stands_to_rsts_content
+    stands_to_rst_content, stands_to_rsts_content, stands_to_mela_par_file_content
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
 from lukefi.metsi.domain.forestry_types import StandList
@@ -49,7 +49,7 @@ def stand_writer(container_format: str) -> StandWriter:
     elif container_format == "csv":
         return (csv_writer,)
     elif container_format == "rst":
-        return (rst_writer, rsts_writer)
+        return (rst_writer, rsts_writer, par_writer)
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
@@ -65,7 +65,7 @@ def object_writer(container_format: str) -> ObjectWriter:
 
 
 def determine_file_path(dir: Path, file_ext: str) -> list[Path]:
-    exts = [file_ext, 'rsts'] if file_ext == 'rst' else [ file_ext ] 
+    exts = [file_ext, 'rsts', 'DAT'] if file_ext == 'rst' else [ file_ext ] 
     return tuple( Path(dir, f"preprocessing_result.{ext}") for ext in exts )
 
 
@@ -107,7 +107,7 @@ def external_reader(state_format: str, **builder_flags) -> StandReader:
         return lambda path: GeoPackageBuilder(builder_flags, path).build()
 
 
-def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
+def read_stands_from_file(app_config: MetsiConfiguration, additional_config: dict[dict[str, Callable]]) -> StandList:
     """
     Read a list of ForestStands from given file with given configuration. Directly reads FDM format data. Utilizes
     FDM ForestBuilder utilities to transform VMI12, VMI13 or Forest Centre data into FDM ForestStand format.
@@ -122,7 +122,8 @@ def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
             app_config.state_format,
             strata=app_config.strata,
             measured_trees=app_config.measured_trees,
-            strata_origin=app_config.strata_origin)(app_config.input_path)
+            strata_origin=app_config.strata_origin,
+            additional_indices=additional_config['c_variables'])(app_config.input_path)
     else:
         raise Exception(f"Unsupported state format '{app_config.state_format}'")
 
@@ -234,9 +235,22 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mets
                 write_derived_data_to_file(schedule.collected_data, filepath, app_arguments.derived_data_output_container)
 
 
+def prepare_control_structure(initial_control: dict[str, dict | list]):
+    init_additonal_data = initial_control.get('additional_config', None)
+    # prepare c variables
+    init_cvars = init_additonal_data.get('c_variables', None)
+    try:
+        prepared_cvars = { k: eval(v) for k, v in init_cvars.items() }
+    except:
+        return initial_control
+    initial_control['additional_config']['c_variables'] = (prepared_cvars)
+    return initial_control
+
+
 def simulation_declaration_from_yaml_file(file_path: str) -> dict:
     # TODO: content validation
-    return yaml.load(file_contents(file_path), Loader=yaml.CLoader)
+    return prepare_control_structure(
+        yaml.load(file_contents(file_path), Loader=yaml.CLoader))
 
 
 def pickle_writer(filepath: Path, data: ObjectLike):
@@ -265,6 +279,10 @@ def rst_writer(filepath: Path, data: StandList):
 
 def rsts_writer(filepath: Path, data: StandList):
     row_writer(filepath, stands_to_rsts_content(data))
+
+
+def par_writer(filepath: Path, data: StandList):
+    row_writer(filepath, stands_to_mela_par_file_content(data))
 
 
 def row_writer(filepath: Path, rows: list[str]):

@@ -420,6 +420,8 @@ class ForestStand():
     reference_trees: list[ReferenceTree] = dataclasses.field(default_factory=list)
     tree_strata: list[TreeStratum] = dataclasses.field(default_factory=list)
 
+    additional_data: Optional[dict[str, float]] = dataclasses.field(default_factory=dict)
+
     # unique identifier for entity within its domain
     identifier: Optional[str] = None
 
@@ -685,6 +687,12 @@ class ForestStand():
             None,
             melaed.dominant_storey_age,
         ]
+    
+    def additional_data_as_rst_row(self) -> list[float]:
+        ad = []
+        for _, v in self.additional_data.items():
+            ad.append(v)
+        return ad
 
 
 def create_layered_tree(**kwargs) -> LayeredObject[ReferenceTree]:
