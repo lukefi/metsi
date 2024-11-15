@@ -5,9 +5,10 @@ from collections.abc import Callable
 from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.formats.rst_const import MSBInitialDataRecordConst as msb_meta
+from lukefi.metsi.domain.forestry_types import StandList
 
 
-def recreate_stand_indices(stands: list[ForestStand]) -> list[ForestStand]:
+def recreate_stand_indices(stands: StandList) -> StandList:
     for idx, stand in enumerate(stands):
         stand.set_identifiers(idx + 1)
     return stands
@@ -19,7 +20,7 @@ def recreate_tree_indices(trees: list[ReferenceTree]) -> list[ReferenceTree]:
     return trees
 
 
-def cleaned_output(stands: list[ForestStand]) -> list[ForestStand]:
+def cleaned_output(stands: StandList) -> StandList:
     """Recreate forest stands for output:
         1) filtering out non-living reference trees
         2) recreating indices for reference trees
@@ -81,9 +82,28 @@ def msb_metadata(stand: ForestStand) -> tuple[list[str], list[str], list[str]]:
     return physical_record_metadata, logical_record_metadata, logical_subrecord_metadata
 
 
+def c_var_metadata(stand: ForestStand) -> tuple[list[float], list[float], list[float], list[float]]:
+    FIXED_TWO = 2
+    outputtable_id = parse_float(stand.identifier) or stand.stand_id # UID
+    cvars_len = len(stand.additional_data) 
+    total_length = FIXED_TWO + cvars_len
+    cvars_meta = map(rst_float, [outputtable_id, total_length, FIXED_TWO, cvars_len])
+    return tuple([x] for x in cvars_meta)
+
 def rst_forest_stand_rows(stand: ForestStand) -> list[str]:
     """Generate RST data file rows (with MSB metadata) for a single ForestStand"""
     result = []
+    # Additional data (a.k.a MELA C-variable) row
+    cvars_meta = c_var_metadata(stand)
+    cvars_row = " ".join(chain(
+        cvars_meta[0],
+        cvars_meta[1],
+        cvars_meta[2],
+        cvars_meta[3],
+        map(rst_float, stand.additional_data_as_rst_row()
+    )))
+    result.append(cvars_row)
+    # Forest stand row
     msb_preliminary_records = msb_metadata(stand)
     result.append(" ".join(chain(
         msb_preliminary_records[0],
@@ -91,6 +111,7 @@ def rst_forest_stand_rows(stand: ForestStand) -> list[str]:
         map(rst_float, stand.as_rst_row()),
         msb_preliminary_records[2]
     )))
+    # Reference tree row(s)
     for tree in stand.reference_trees:
         result.append(" ".join(map(rst_float, tree.as_rst_row())))
     return result
@@ -137,14 +158,14 @@ def stand_to_csv_rows(stand: ForestStand, delimeter: str) -> list[str]:
     return result
 
 
-def stands_to_csv_content(stands: list[ForestStand], delimeter: str) -> list[str]:
+def stands_to_csv_content(stands: StandList, delimeter: str) -> list[str]:
     result = []
     for stand in stands:
         result.extend(stand_to_csv_rows(stand, delimeter))
     return result
 
 
-def csv_content_to_stands(csv_content: list[list[str]]) -> list[ForestStand]:
+def csv_content_to_stands(csv_content: list[list[str]]) -> StandList:
     stands = []
     for row in csv_content:
         if row[0] == "stand":
@@ -163,18 +184,25 @@ def csv_content_to_stands(csv_content: list[list[str]]) -> list[ForestStand]:
     return stands
 
 
-def outputtable_rows(stands: list[ForestStand], formatter: Callable[[list[ForestStand]], list[str]]) -> list[str]:
+def outputtable_rows(stands: StandList, formatter: Callable[[StandList], list[str]]) -> list[str]:
     result = []
     for stand in cleaned_output(stands):
         result.extend(formatter(stand))
     return result
 
 
-def stands_to_rst_content(stands: list[ForestStand]) -> list[str]:
+def stands_to_rst_content(stands: StandList) -> list[str]:
     """Generate RST file contents for the given list of ForestStand"""
     return outputtable_rows(stands, lambda stand: rst_forest_stand_rows(stand))
 
 
-def stands_to_rsts_content(stands: list[ForestStand]) -> list[str]:
+def stands_to_rsts_content(stands: StandList) -> list[str]:
     """Generate RSTS file contents for the given list of ForestStand"""
     return outputtable_rows(stands, lambda stand: rsts_forest_stand_rows(stand))
+
+def stands_to_mela_par_file_content(stands: StandList) -> list[str]:
+    content = ['C_VARIABLES']
+    reference_stand = next(iter(stands))
+    content.extend([ k for k in reference_stand.additional_data.keys() ])
+    single_par_row = "#".join(content)
+    return [single_par_row]
