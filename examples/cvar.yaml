@@ -1,0 +1,56 @@
+# Example for collectin additional data by giving additional indices for the source data extraction
+
+#Application configuration values. Can be overriden by CLI arguments. May be commented out for None or default from Mela2Configuration.
+app_configuration:
+  state_format: vmi13 #options: fdm, vmi12, vmi13, xml
+  preprocessing_output_container: rst #options: pickle, json, csv, null, rst (special case not usable as input container)
+  strategy: partial
+  run_modes: preprocess
+
+preprocessing_params:
+  generate_reference_trees:
+    - n_trees: 10
+      method: weibull
+
+preprocessing_operations:
+  - generate_reference_trees
+
+additional_config:
+  c_variables:
+    vmi13:
+      METSIKKOvmi: 'int(data[5])*10 + int(data[6]) + int(data[9][4:6])/100'
+      #OMISTAJA: '10 if data[24]=="A" else data[24]'
+      OMISTAJA: '10 if data[VMI13StandIndices.owner_group]=="A" else data[VMI13StandIndices.owner_group]'
+      #FRA: 'data[46]'
+      FRA: 'data[VMI13StandIndices.fra_class]'
+      TURVEKANGASTYYPPI: 'data[56]'
+      ORGAANISEN_KERROKSEN_LAATU: 'data[64]'
+      ORGAANISEN_KERROKSEN_PAKSUUS: 'data[65]'
+    rst:
+      LASKENTAKUVIO: 'data[0]'
+      VUOSI: 'data[1]'
+      PINTA_alA: 'data[2]'
+      PUUSTON_KERROIN: 'data[3]'
+      PKOORD: 'data[4]'
+      IKOORD: 'data[5]'
+      METSIKKOrst: 'data[6]'
+      KORKEUS_MERENPINNASTA: 'data[7]'
+      LAMPOSUMMA: 'data[8]'
+      MAALUOKKA: 'data[10]'
+      ALARYHMA: 'data[11]'
+      KASVUPAIKKATYYPPI: 'data[12]'
+      OJITUSTILANNE: 'data[15]'
+      OJITUSVUOSI: 'data[18]'
+      MAANMUOKKAUSVUOSI: 'data[20]'
+      RAIVAUSVUOSI: 'data[22]'
+      VILJELYVUOSI: 'data[24]'
+      TAIMIKONHOITOVUOSI: 'data[25]'
+      HAKKUUVUOSI: 'data[27]'
+      METSAKESKUS: 'data[28]'
+      KASITTELYLUOKKA: 'data[29]'
+      HAKKUUTAPA: 'data[30]'
+      KUNTA: 'data[31]'
+      VMI_IKA: 'data[33]'
+      SATUNNAISLUKU: 'random.random()'
+    modules: {'random','lukefi.metsi.data.formats.vmi_const'}
+    prefix: 'lambda data: '

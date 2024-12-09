@@ -8,7 +8,6 @@ from lukefi.metsi.data.enums.mela import MelaLandUseCategory
 from lukefi.metsi.data.formats.util import convert_str_to_type, get_or_default
 from lukefi.metsi.data.layered_model import LayeredObject
 
-
 # NOTE:
 # * the deepcopy methods here are roughly equivalent to
 #       def __deepcopy__(self, memo):
@@ -693,8 +692,12 @@ class ForestStand():
         for _, v in self.additional_data.items():
             ad.append(v)
         return ad
-
-
+        
+    def add_additional_data_from_rst(self, cvars_rst_ctrl:dict):
+        ad = { k : v(self.as_rst_row()) for k, v in cvars_rst_ctrl.items()}
+        self.additional_data.update(ad)
+        return
+        
 def create_layered_tree(**kwargs) -> LayeredObject[ReferenceTree]:
     prototype = ReferenceTree()
     layered = LayeredObject(prototype)

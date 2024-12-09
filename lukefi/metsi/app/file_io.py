@@ -14,6 +14,7 @@ from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.core_types import CollectedData
 
+import importlib
 
 StandReader = Callable[[str], StandList]
 StandWriter = Callable[[Path, StandList], None]
@@ -107,7 +108,7 @@ def external_reader(state_format: str, **builder_flags) -> StandReader:
         return lambda path: GeoPackageBuilder(builder_flags, path).build()
 
 
-def read_stands_from_file(app_config: MetsiConfiguration, additional_config: dict[dict[str, Callable]]) -> StandList:
+def read_stands_from_file(app_config: MetsiConfiguration, additional_config: dict[dict[dict[str, Callable]]]) -> StandList:
     """
     Read a list of ForestStands from given file with given configuration. Directly reads FDM format data. Utilizes
     FDM ForestBuilder utilities to transform VMI12, VMI13 or Forest Centre data into FDM ForestStand format.
@@ -123,7 +124,7 @@ def read_stands_from_file(app_config: MetsiConfiguration, additional_config: dic
             strata=app_config.strata,
             measured_trees=app_config.measured_trees,
             strata_origin=app_config.strata_origin,
-            additional_indices=additional_config['c_variables'])(app_config.input_path)
+            additional_indices=additional_config['c_variables'] if 'c_variables' in additional_config else {})(app_config.input_path)
     else:
         raise Exception(f"Unsupported state format '{app_config.state_format}'")
 
@@ -199,11 +200,12 @@ def read_full_simulation_result_dirtree(source_path: Path) -> SimResults:
     return result
 
 
-def write_stands_to_file(result: StandList, filepaths: list[Path], state_output_container: str):
+def write_stands_to_file(result: StandList, filepaths: list[Path], state_output_container: str, control:dict):
     """Resolve a writer function for ForestStands matching the given state_output_container. Invokes write."""
     writers = stand_writer(state_output_container)
     for writer, filepath in zip(writers, filepaths):
-        writer(filepath, result)
+        #writer(filepath, result)
+        writer(filepath, result,control)
 
 
 def write_derived_data_to_file(result: CollectedData, filepath: Path, derived_data_output_container: str):
@@ -236,14 +238,40 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mets
 
 
 def prepare_control_structure(initial_control: dict[str, dict | list]):
-    init_additonal_data = initial_control.get('additional_config', None)
+    init_additional_data = initial_control.get('additional_config', None)
     # prepare c variables
-    init_cvars = init_additonal_data.get('c_variables', None)
-    try:
-        prepared_cvars = { k: eval(v) for k, v in init_cvars.items() }
-    except:
-        return initial_control
-    initial_control['additional_config']['c_variables'] = (prepared_cvars)
+    if init_additional_data is not None:
+        init_cvars = init_additional_data.get('c_variables', None)
+        if init_cvars is not None:
+            init_cvars_vmi12 = init_cvars.get('vmi12', None)
+            init_cvars_vmi13 = init_cvars.get('vmi13', None)
+            init_cvars_xml = init_cvars.get('xml', None)
+            init_cvars_gpkg = init_cvars.get('gpkg', None)
+            init_cvars_rst = init_cvars.get('rst', None)
+    
+            # modules needed in lambda functions
+            eval_globals = {}
+            if 'modules' in init_cvars:
+                for modulename in init_cvars['modules']:
+                    exec(f"{modulename} = importlib.import_module('{modulename}')")
+                    eval_globals[f"{modulename}"] = eval(f"{modulename}")
+            init_prefix = init_cvars.get('prefix',None)
+            prefix = init_prefix if init_prefix is not None else ""
+            if init_cvars_vmi12 is not None:
+                prepared_cvars_vmi12 = { k: eval(f"{prefix}{v}",eval_globals) for k, v in init_cvars_vmi12.items() }
+                initial_control['additional_config']['c_variables']['vmi12'] = (prepared_cvars_vmi12)
+            if init_cvars_vmi13 is not None:
+                prepared_cvars_vmi13 = { k: eval(f"{prefix}{v}",eval_globals) for k, v in init_cvars_vmi13.items() }
+                initial_control['additional_config']['c_variables']['vmi13'] = (prepared_cvars_vmi13)
+            if init_cvars_xml is not None:
+                prepared_cvars_xml = { k: eval(f"{prefix}{v}",eval_globals) for k, v in init_cvars_xml.items() }
+                initial_control['additional_config']['c_variables']['xml'] = (prepared_cvars_xml)
+            if init_cvars_gpkg is not None:
+                prepared_cvars_gpkg = { k: eval(f"{prefix}{v}",eval_globals) for k, v in init_cvars_gpkg.items() }
+                initial_control['additional_config']['c_variables']['gpkg'] = (prepared_cvars_gpkg)
+            if init_cvars_rst is not None:
+                prepared_cvars_rst = { k: eval(f"{prefix}{v}",eval_globals) for k, v in init_cvars_rst.items() }
+                initial_control['additional_config']['c_variables']['rst'] = (prepared_cvars_rst)
     return initial_control
 
 
@@ -253,7 +281,7 @@ def simulation_declaration_from_yaml_file(file_path: str) -> dict:
         yaml.load(file_contents(file_path), Loader=yaml.CLoader))
 
 
-def pickle_writer(filepath: Path, data: ObjectLike):
+def pickle_writer(filepath: Path, data: ObjectLike, control: dict):
     with open(filepath, 'wb') as f:
         pickle.dump(data, f, protocol=5)
 
@@ -263,26 +291,29 @@ def pickle_reader(file_path: str) -> ObjectLike:
         return pickle.load(f)
 
 
-def json_writer(filepath: Path, data: ObjectLike):
+def json_writer(filepath: Path, data: ObjectLike, control: dict):
     jsonpickle.set_encoder_options("json", indent=2)
     with open(filepath, 'w', newline='\n') as f:
         f.write(jsonpickle.encode(data))
 
 
-def csv_writer(filepath: Path, data: StandList):
+def csv_writer(filepath: Path, data: StandList, control: dict):
     row_writer(filepath, stands_to_csv_content(data, ';'))
 
 
-def rst_writer(filepath: Path, data: StandList):
-    row_writer(filepath, stands_to_rst_content(data))
+def rst_writer(filepath: Path, data: StandList, control: dict):
+    row_writer(filepath, stands_to_rst_content(data, control))
 
 
-def rsts_writer(filepath: Path, data: StandList):
+def rsts_writer(filepath: Path, data: StandList, control: dict):
     row_writer(filepath, stands_to_rsts_content(data))
 
 
-def par_writer(filepath: Path, data: StandList):
-    row_writer(filepath, stands_to_mela_par_file_content(data))
+def par_writer(filepath: Path, data: StandList, control: dict):
+    if 'additional_config' in control:
+        if 'c_variables' in control['additional_config']:
+            row_writer(filepath, stands_to_mela_par_file_content(data, 
+                control['additional_config']['c_variables']))
 
 
 def row_writer(filepath: Path, rows: list[str]):

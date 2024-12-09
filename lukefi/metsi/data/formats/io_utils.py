@@ -90,9 +90,9 @@ def c_var_metadata(stand: ForestStand) -> tuple[list[float], list[float], list[f
     cvars_meta = map(rst_float, [outputtable_id, total_length, FIXED_TWO, cvars_len])
     return tuple([x] for x in cvars_meta)
 
-def rst_forest_stand_rows(stand: ForestStand) -> list[str]:
-    """Generate RST data file rows (with MSB metadata) for a single ForestStand"""
-    result = []
+def c_var_rst_row(stand: ForestStand, c_var_ctrl: dict) -> str:
+    if 'rst' in c_var_ctrl:
+        stand.add_additional_data_from_rst(c_var_ctrl['rst'])
     # Additional data (a.k.a MELA C-variable) row
     cvars_meta = c_var_metadata(stand)
     cvars_row = " ".join(chain(
@@ -101,8 +101,17 @@ def rst_forest_stand_rows(stand: ForestStand) -> list[str]:
         cvars_meta[2],
         cvars_meta[3],
         map(rst_float, stand.additional_data_as_rst_row()
-    )))
-    result.append(cvars_row)
+    )))    
+    return cvars_row
+
+#def rst_forest_stand_rows(stand: ForestStand) -> list[str]:
+def rst_forest_stand_rows(stand: ForestStand, control: dict) -> list[str]:
+    """Generate RST data file rows (with MSB metadata) for a single ForestStand"""
+    result = []
+    #Add cvariables from rst
+    if 'additional_config' in control:
+        if 'c_variables' in control['additional_config']:
+            result.append(c_var_rst_row(stand, control['additional_config']['c_variables']))
     # Forest stand row
     msb_preliminary_records = msb_metadata(stand)
     result.append(" ".join(chain(
@@ -191,18 +200,21 @@ def outputtable_rows(stands: StandList, formatter: Callable[[StandList], list[st
     return result
 
 
-def stands_to_rst_content(stands: StandList) -> list[str]:
+def stands_to_rst_content(stands: StandList, control: dict) -> list[str]:
     """Generate RST file contents for the given list of ForestStand"""
-    return outputtable_rows(stands, lambda stand: rst_forest_stand_rows(stand))
+    return outputtable_rows(stands, lambda stand: rst_forest_stand_rows(stand, control))
 
 
 def stands_to_rsts_content(stands: StandList) -> list[str]:
     """Generate RSTS file contents for the given list of ForestStand"""
     return outputtable_rows(stands, lambda stand: rsts_forest_stand_rows(stand))
 
-def stands_to_mela_par_file_content(stands: StandList) -> list[str]:
+def stands_to_mela_par_file_content(stands: StandList, c_var_ctrl: dict) -> list[str]:
     content = ['C_VARIABLES']
     reference_stand = next(iter(stands))
     content.extend([ k for k in reference_stand.additional_data.keys() ])
-    single_par_row = "#".join(content)
+    #Add cvariables from rst
+    if 'rst' in c_var_ctrl:
+        content.extend([k for k in c_var_ctrl['rst'].keys()])
+    single_par_row = "\n#".join(content)
     return [single_par_row]

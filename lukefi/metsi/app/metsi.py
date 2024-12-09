@@ -24,7 +24,7 @@ def preprocess(config: MetsiConfiguration, control: dict, stands: StandList) -> 
     if config.preprocessing_output_container is not None:
         print_logline(f"Writing preprocessed data to '{config.target_directory}/preprocessing_result.{config.preprocessing_output_container}'")
         filepaths = determine_file_path(config.target_directory, config.preprocessing_output_container)
-        write_stands_to_file(result, filepaths, config.preprocessing_output_container)
+        write_stands_to_file(result, filepaths, config.preprocessing_output_container,control)
     return result
 
 
@@ -72,7 +72,8 @@ def main() -> int:
         prepare_target_directory(app_config.target_directory)
         print_logline("Reading input...")
         if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
-            input_data = read_stands_from_file(app_config, control_structure['additional_config'])
+            additional_config = control_structure['additional_config'] if 'additional_config' in control_structure else {}
+            input_data = read_stands_from_file(app_config,additional_config)
         elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.EXPORT]:
             input_data = read_full_simulation_result_dirtree(app_config.input_path)
         else:
