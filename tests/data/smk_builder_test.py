@@ -8,6 +8,8 @@ builder_flags = {
     'strata_origin': '1'
 }
 
+declared_conversions = {} # Not yet implemented (only vmi13 and -12 atm.)
+
 class TestXMLBuilder(unittest.TestCase):
     
     xml_data = 'SMK_source.xml'
@@ -15,7 +17,7 @@ class TestXMLBuilder(unittest.TestCase):
 
     with open(absolute_resource_path, 'r', encoding='utf-8') as f:
         xml_string = f.read()
-    smk_builder = XMLBuilder(builder_flags, xml_string)
+    smk_builder = XMLBuilder(builder_flags, declared_conversions, xml_string)
     smk_stands = smk_builder.build()
 
     def test_individual_smk_build_with_different_strata_origins(self):
@@ -26,10 +28,9 @@ class TestXMLBuilder(unittest.TestCase):
         ]
         for i in assertions:
             smk_builder = XMLBuilder(
-                {
-                    'strata_origin': i[0]
-                },
-                self.xml_string)
+                builder_flags={ 'strata_origin': i[0] },
+                declared_conversions={},
+                data=self.xml_string)
             stands = smk_builder.build()
             number_of_stratums = len(stands[0].tree_strata)
             self.assertEqual(i[1], number_of_stratums)
@@ -191,7 +192,7 @@ class TestGeoPackageBuilder(unittest.TestCase):
     gpkg_data = 'SMK_source.gpkg'
     absolute_resource_path = os.path.join(os.getcwd(), 'tests', 'data', 'resources', gpkg_data)
 
-    gpkg_builder = GeoPackageBuilder(builder_flags, absolute_resource_path)
+    gpkg_builder = GeoPackageBuilder(builder_flags, declared_conversions, absolute_resource_path)
     gpkg_stands = gpkg_builder.build()
 
     def test_different_strata_origins(self):
@@ -202,7 +203,11 @@ class TestGeoPackageBuilder(unittest.TestCase):
         ]
         for a in assertions:
             builder_flags = {'strata_origin': a[0]}
-            stands = GeoPackageBuilder(builder_flags, self.absolute_resource_path).build()
+            declared_conversions = {}
+            stands = GeoPackageBuilder(
+                builder_flags,
+                declared_conversions,
+                self.absolute_resource_path).build()
             number_of_stratums = reduce(lambda acc, s: acc + len(s.tree_strata), stands, 0)
             self.assertEqual(number_of_stratums, a[1])
 

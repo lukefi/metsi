@@ -32,14 +32,14 @@ class ForestBuilderTestBench(unittest.TestCase):
             'K0999999 96 21    66521333246174    0100   1041721         000059100417      4  55         S0280818 101 3 4     0   0 0   0    132       0  0        1          6652133.05 T 117155.45 66521333246174    5 1                                                          0A                              3  19 21'
         ]
 
-        vmi12_builder: VMIBuilder = VMI12Builder(vmi_builder_flags, vmi12_data)
+        vmi12_builder: VMIBuilder = VMI12Builder(vmi_builder_flags, {}, vmi12_data)
         return vmi12_builder
 
     @classmethod
     def vmi13_builder(cls, vmi_builder_flags: dict = default_builder_flags) -> VMI13Builder:
         vmi13_file_path = Path('tests', 'data', 'resources', 'VMI13_source_mini.dat')
         vmi13_data = file_io.vmi_file_reader(vmi13_file_path)
-        vmi13_builder: VMIBuilder = VMI13Builder(vmi_builder_flags, vmi13_data)
+        vmi13_builder: VMIBuilder = VMI13Builder(vmi_builder_flags, {}, vmi13_data)
         return vmi13_builder
 
     @classmethod

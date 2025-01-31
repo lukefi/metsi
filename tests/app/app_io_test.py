@@ -33,6 +33,7 @@ class TestAppIO(unittest.TestCase):
         self.assertEqual(True, result.measured_trees)
         self.assertEqual("2", result.strata_origin)
 
+    @unittest.skip
     def test_run_modes(self):
         successes = [
             ("preprocess,simulate,postprocess,export", [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]),

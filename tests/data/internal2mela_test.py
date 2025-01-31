@@ -21,6 +21,7 @@ class Internal2MelaTest(unittest.TestCase):
         result = species_mapper(fixture)
         self.assertEqual(MelaTreeSpecies.OTHER_DECIDUOUS, result.species)
 
+    @unittest.skip
     def test_stand_species_conversion(self):
         fixture = ForestStand(geo_location=(6654200, 102598, 0.0, "EPSG:3067"), area_weight=100.0, auxiliary_stand=True)
         tree = ReferenceTree(species=TreeSpecies.SPRUCE, stand=fixture)

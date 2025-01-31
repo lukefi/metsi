@@ -19,7 +19,7 @@ class IoUtilsTest(ConverterTestSuite):
 
     def test_rst_forest_stand_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = rst_forest_stand_rows(vmi13_stands[1])
+        result = rst_forest_stand_rows(vmi13_stands[1], additional_vars=[])
         self.assertEqual(4, len(result))
 
     def test_rsts_forest_stand_rows(self):
@@ -29,18 +29,21 @@ class IoUtilsTest(ConverterTestSuite):
 
     def test_rst_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = stands_to_rst_content(vmi13_stands)
-        self.assertEqual(9, len(result))
+        container = ExportableContainer(vmi13_stands, additional_vars=[])
+        result = stands_to_rst_content(container)
+        self.assertEqual(10, len(result))
 
     def test_rsts_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = stands_to_rsts_content(vmi13_stands)
-        self.assertEqual(6, len(result))
+        container = ExportableContainer(vmi13_stands, additional_vars=[])
+        result = stands_to_rsts_content(container)
+        self.assertEqual(7, len(result))
 
     def test_stands_to_csv(self):
         delimiter = ";"
         vmi13_stands = vmi13_builder.build()
-        result = stands_to_csv_content(vmi13_stands, delimiter)
+        container = ExportableContainer(vmi13_stands, additional_vars=[])
+        result = stands_to_csv_content(container, delimiter)
         self.assertEqual(13, len(result))
         
         #make sure that each type of a row has the same number of columns, since csv-->stand conversion relies on it
@@ -56,7 +59,7 @@ class IoUtilsTest(ConverterTestSuite):
         """tests that the roundtrip conversion stands-->csv-->stands maintains the stand structure"""
         vmi13_stands = vmi13_builder.build()
         delimiter = ";"
-        serialized = '\n'.join(stands_to_csv_content(vmi13_stands, delimiter))
+        serialized = '\n'.join(stands_to_csv_content(ExportableContainer(vmi13_stands, None), delimiter))
         deserialized = list(csv.reader(StringIO(serialized), delimiter=delimiter))
         stands_from_csv = csv_content_to_stands(deserialized)
         self.assertEqual(4, len(stands_from_csv))
