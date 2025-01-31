@@ -4,11 +4,10 @@
 app_configuration:
   state_format: fdm #options: fdm, vmi12, vmi13, xml
   state_input_container: csv #Only relevant with fdm state_format. Options: pickle, json
-  preprocessing_output_container: csv #options: pickle, json, csv, null, rst (special case not usable as input container)
   #state_output_container: csv #options: pickle, json, csv, null
   #derived_data_output_container: pickle #options: pickle, json, null
   strategy: partial
-  run_modes: preprocess
+  run_modes: preprocess,export_prepro
 
 preprocessing_operations:
   - do_nothing

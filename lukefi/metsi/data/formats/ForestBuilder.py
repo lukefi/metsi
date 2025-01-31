@@ -6,6 +6,7 @@ from lukefi.metsi.data.enums.internal import OwnerCategory
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.conversion import vmi2internal, fc2internal
 from lukefi.metsi.data.formats import smk_util, util, vmi_util, gpkg_util
+from lukefi.metsi.data.formats.declarative_conversion import ConversionMapper
 from abc import ABC, abstractmethod
 from lukefi.metsi.data.formats.vmi_const import VMI12StandIndices, VMI12TreeIndices, VMI12StratumIndices, \
     VMI13StandIndices, VMI13TreeIndices, VMI13StratumIndices
@@ -21,18 +22,20 @@ class ForestBuilder(ABC):
 class VMIBuilder(ForestBuilder):
     """Shared functionality of VMI* builders"""
 
-    def __init__(self, builder_flags: dict, data_rows: iter):
+    def __init__(self, builder_flags: dict, declared_conversions: dict, data_rows: iter):
         """
         Initialize instance variable lists for forest stands, reference trees and tree strata.
         Given source data is pre-parsed for data types 1, 2 and 3.
 
         :param builder_flags: building process spesific flags
+        :param declared_conversions: callable data extractor
         :param data_rows: Iterable raw data rows from a VMI source file
         """
         self.forest_stands: list[str] = []
         self.reference_trees: list[str] = []
         self.tree_strata: list[str] = []
         self.builder_flags = builder_flags
+        self.conversion_reader = ConversionMapper(declared_conversions)
 
         for row in data_rows:
             try:
@@ -48,8 +51,8 @@ class VMIBuilder(ForestBuilder):
                 print('warning: VMI row not addressable: ')
                 print('    ' + str(row))
 
-    def convert_stand_entry(self, indices: VMI12StandIndices or VMI13StandIndices,
-                            data_row: Sequence, stand_id: int or None = None) -> ForestStand:
+    def convert_stand_entry(self, indices: VMI12StandIndices | VMI13StandIndices,
+                            data_row: Sequence, stand_id: int | None = None) -> ForestStand:
         """Create a ForestStand out of given VMI type 1 data row using given data indices and order number"""
         result = ForestStand()
         result.identifier = vmi_util.generate_stand_identifier(data_row, indices)
@@ -106,9 +109,10 @@ class VMIBuilder(ForestBuilder):
         result.tuhon_ilmiasu = None if data_row[indices.tuhon_ilmiasu] in ('  ',' ', '.', '') else data_row[indices.tuhon_ilmiasu].strip()
         return result
 
-    def convert_stratum_entry(self, indices: VMI12StratumIndices or VMI13StratumIndices,
+    def convert_stratum_entry(self, indices: VMI12StratumIndices | VMI13StratumIndices,
                               data_row: Sequence) -> TreeStratum:
         result = TreeStratum()
+        # Fixed conversions
         result.identifier = vmi_util.generate_stratum_identifier(data_row, indices)
         result.species = vmi2internal.convert_species(data_row[indices.species])
         result.origin = vmi_util.determine_stratum_origin(data_row[indices.origin])
@@ -133,6 +137,8 @@ class VMIBuilder(ForestBuilder):
         result.lowest_living_branch_height = 0.0
         result.management_category = 1
         result.storey = vmi_util.determine_storey_for_stratum(data_row[indices.stratum_rank])
+        # Declared conversions
+        result = self.conversion_reader.apply_conversions(result, data_row)
         return result
 
     def remove_strata(self, stands: list[ForestStand]):
@@ -151,13 +157,20 @@ class VMIBuilder(ForestBuilder):
 class VMI12Builder(VMIBuilder):
     """VMI12 specific builder implementation"""
 
-    def __init__(self, builder_flags: dict, data_rows: list[str] = []):
+    def __init__(self,
+                 builder_flags: dict,
+                 declared_conversions: dict,
+                 data_rows: list[str] = []):
         # TODO: data_rows sanity check for VMI12
-        super().__init__(builder_flags, data_rows)
+        super().__init__(builder_flags, declared_conversions, data_rows)
 
     def convert_stand_entry(self, indices: VMI12StandIndices, data_row: Sequence,
                             stand_id: int or None = None) -> ForestStand:
-        """Create a ForestStand out of given VMI12 type 1 data row using given data indices and order number"""
+        """ 
+        Create a ForestStand out of given VMI12 type 1 data row using given data indices and order number.
+        Conversion variables are based fixed (model.py) or declared (control.yaml) source indices.
+        """
+        # Fixed conversions
         result = super().convert_stand_entry(indices, data_row, stand_id)
         result.year = vmi_util.parse_vmi12_date(data_row[indices.date]).year
         area_ha = vmi_util.determine_vmi12_area_ha(
@@ -196,13 +209,18 @@ class VMI12Builder(VMIBuilder):
             data_row[indices.vallitsevanjakson_d13ika],
             data_row[indices.vallitsevanjakson_ikalisays]
         )
+        # Declared conversions
+        result = self.conversion_reader.apply_conversions(result, data_row)
         return result
 
     def convert_tree_entry(self, indices: VMI12TreeIndices, data_row: Sequence):
+        # Fixed conversions
         result = super().convert_tree_entry(indices, data_row)
         result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=100.0)
         result.measured_height = vmi_util.determine_tree_height(data_row[indices.measured_height], conversion_factor=10.0)
         result.stems_per_ha = vmi_util.determine_stems_per_ha(result.breast_height_diameter, True)
+        # Declared conversions
+        result = self.conversion_reader.apply_conversions(result, data_row)
         return result
 
     def find_row_type(self, row: str):
@@ -220,8 +238,6 @@ class VMI12Builder(VMIBuilder):
         result: dict[str, ForestStand] = {}
         for i, row in enumerate(self.forest_stands):
             stand = self.convert_stand_entry(VMI12StandIndices, row, i + 1)
-            if 'vmi12' in self.builder_flags['additional_indices']:
-                stand.additional_data = { k : v(row) for k, v in self.builder_flags['additional_indices']['vmi12'] }
             result[stand.identifier] = stand
         if self.builder_flags['strata']:
             for i, row in enumerate(self.tree_strata):
@@ -244,10 +260,13 @@ class VMI12Builder(VMIBuilder):
 class VMI13Builder(VMIBuilder):
     """VMI13 specific builder implementation"""
 
-    def __init__(self,  builder_flags: dict, data_rows: list[str] = []):
+    def __init__(self,
+                 builder_flags: dict,
+                 declared_conversions: dict,
+                 data_rows: list[str] = []):
         pre_parsed_rows = map(lambda raw: raw.split(), data_rows)
         # TODO: data_rows sanity check for VMI13
-        super().__init__(builder_flags, pre_parsed_rows)
+        super().__init__(builder_flags, declared_conversions, pre_parsed_rows)
 
     def find_row_type(self, row: Sequence):
         """Return VMI13 data type of the row"""
@@ -257,6 +276,7 @@ class VMI13Builder(VMIBuilder):
                             data_row: Sequence,
                             stand_id: int or None = None) -> ForestStand:
         """Create a ForestStand out of given VMI13 type 1 data row using given data indices and order number"""
+        # Fixed conversions
         result = super().convert_stand_entry(indices, data_row, stand_id)
         result.year = vmi_util.parse_vmi13_date(data_row[indices.date]).year
         area_ha = vmi_util.determine_vmi13_area_ha(
@@ -299,13 +319,18 @@ class VMI13Builder(VMIBuilder):
         result.dominant_storey_age = vmi_util.determine_vmi13_dominant_storey_age(
             data_row[indices.vallitsevanjaksonika]
         )
+        # Declared conversions
+        result = self.conversion_reader.apply_conversions(result, data_row)
         return result
 
     def convert_tree_entry(self, indices: VMI13TreeIndices, data_row: Sequence):
+        # Fixed conversions
         result = super().convert_tree_entry(indices, data_row)
         result.height = vmi_util.determine_tree_height(data_row[indices.height], conversion_factor=100.0)
         result.measured_height = vmi_util.determine_tree_height(data_row[indices.measured_height], conversion_factor=10.0)
         result.stems_per_ha = vmi_util.determine_stems_per_ha(result.breast_height_diameter, False)
+        # Declared conversions
+        result = self.conversion_reader.apply_conversions(result, data_row)
         return result
 
     def build(self) -> list[ForestStand]:
@@ -318,8 +343,6 @@ class VMI13Builder(VMIBuilder):
         result: dict[str, ForestStand] = {}
         for i, row in enumerate(self.forest_stands):
             stand = self.convert_stand_entry(VMI13StandIndices, row, i + 1)
-            if 'vmi13' in self.builder_flags['additional_indices']:
-                stand.additional_data = { k : v(row) for k, v in self.builder_flags['additional_indices']['vmi13'].items() }
             result[stand.identifier] = stand
 
         if self.builder_flags['strata']:
@@ -363,10 +386,11 @@ class XMLBuilder(ForestCentreBuilder):
     xpath_stand = "st:Stands/st:Stand"
 
 
-    def __init__(self, builder_flags: dict, data: str):
+    def __init__(self, builder_flags: dict, declared_conversions: dict, data: str):
         self.root: ET.Element = ET.fromstring(data)
         self.builder_flags = builder_flags
         self.xpath_strata = self.xpath_strata.format(builder_flags['strata_origin'])
+        self.declared_conversions = declared_conversions # NOTE: not in use
 
 
     def set_stand_operations(self, stand: ForestStand, operations: dict[int, tuple[int, int]]) -> ForestStand:
@@ -489,11 +513,12 @@ class GeoPackageBuilder(ForestCentreBuilder):
     type_value = None
 
    
-    def __init__(self, builder_flags: dict, db_path: str):
+    def __init__(self, builder_flags: dict, declared_conversions: dict, db_path: str):
         """ Reads Geopackage format into pandas dataframe representing stands and strata """
         self.type_value = builder_flags['strata_origin']
         (self.stands,
          self.strata) = gpkg_util.read_geopackage(db_path, self.type_value)
+        self.declared_conversions = declared_conversions # NOTE: not in use
 
 
     def convert_stand_entry(self, entry: Series) -> ForestStand:

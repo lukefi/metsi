@@ -3,9 +3,8 @@
 #Application configuration values. Can be overriden by CLI arguments. May be commented out for None or default from Mela2Configuration.
 app_configuration:
   state_format: vmi13 #options: fdm, vmi12, vmi13, xml
-  preprocessing_output_container: rst #options: pickle, json, csv, null, rst (special case not usable as input container)
   strategy: partial
-  run_modes: preprocess
+  run_modes: preprocess,export_prepro
 
 preprocessing_params:
   generate_reference_trees:
@@ -15,9 +14,3 @@ preprocessing_params:
 preprocessing_operations:
   - generate_reference_trees
 
-additional_config:
-  c_variables:
-    fra_class: 'lambda data: data[46]'
-    soil_class: 'lambda data: data[66]'
-    maakunta: 'lambda data: data[17]'
-    stand_number: 'lambda data: data[6]'

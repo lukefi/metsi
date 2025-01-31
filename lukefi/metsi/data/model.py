@@ -1,7 +1,6 @@
 import dataclasses
 from typing import Optional
 from dataclasses import dataclass
-from lukefi.metsi.data.conversion.internal2mela import mela_stand, mela_tree, mela_stratum
 from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, \
     TreeSpecies, DrainageCategory, Storey
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
@@ -215,22 +214,20 @@ class TreeStratum():
         return result
     
     def as_rsts_row(self):
-        melaed = mela_stratum(self)
-        rsts_result = [
-            melaed.tree_number,
-            0 if melaed.species is None else melaed.species.value,
-            melaed.origin,
-            melaed.stems_per_ha,
-            melaed.mean_diameter,
-            melaed.mean_height,
-            melaed.breast_height_age,
-            melaed.biological_age,
-            melaed.basal_area,
-            melaed.sapling_stems_per_ha,
-            0 if melaed.storey is None else melaed.storey.value,
-            melaed.number_of_generated_trees
+        return  [
+            self.tree_number,
+            self.species,
+            self.origin,
+            self.stems_per_ha,
+            self.mean_diameter,
+            self.mean_height,
+            self.breast_height_age,
+            self.biological_age,
+            self.basal_area,
+            self.sapling_stems_per_ha,
+            self.storey,
+            self.number_of_generated_trees
         ]
-        return [ get_or_default(v, -1) for v in rsts_result ]
 
 @dataclass
 class ReferenceTree():
@@ -384,29 +381,23 @@ class ReferenceTree():
 
 
     def as_rst_row(self):
-        melaed = mela_tree(self)
-        saw_log_volume_reduction_factor = (
-            -1
-            if melaed.saw_log_volume_reduction_factor is None
-            else melaed.saw_log_volume_reduction_factor
-        )
         return [
-            melaed.stems_per_ha,
-            0 if melaed.species is None else melaed.species.value,
-            melaed.breast_height_diameter,
-            melaed.height,
-            melaed.breast_height_age,
-            melaed.biological_age,
-            saw_log_volume_reduction_factor,
-            melaed.pruning_year,
-            melaed.age_when_10cm_diameter_at_breast_height,
-            melaed.origin,
-            melaed.tree_number,
-            melaed.stand_origin_relative_position[0],
-            melaed.stand_origin_relative_position[1],
-            melaed.stand_origin_relative_position[2],
-            melaed.lowest_living_branch_height,
-            melaed.management_category,
+            self.stems_per_ha,
+            self.species,
+            self.breast_height_diameter,
+            self.height,
+            self.breast_height_age,
+            self.biological_age,
+            self.saw_log_volume_reduction_factor,
+            self.pruning_year,
+            self.age_when_10cm_diameter_at_breast_height,
+            self.origin,
+            self.tree_number,
+            self.stand_origin_relative_position[0],
+            self.stand_origin_relative_position[1],
+            self.stand_origin_relative_position[2],
+            self.lowest_living_branch_height,
+            self.management_category,
             None,
         ]
 
@@ -418,8 +409,6 @@ class ForestStand():
 
     reference_trees: list[ReferenceTree] = dataclasses.field(default_factory=list)
     tree_strata: list[TreeStratum] = dataclasses.field(default_factory=list)
-
-    additional_data: Optional[dict[str, float]] = dataclasses.field(default_factory=dict)
 
     # unique identifier for entity within its domain
     identifier: Optional[str] = None
@@ -539,9 +528,11 @@ class ForestStand():
     def has_strata(self):
         return len(self.tree_strata) > 0
 
-    def as_internal_csv_row(self) -> list[str]:
+    def as_internal_csv_row(self, decl_keys: list[str] = None) -> list[str]:
         result = ["stand", self.identifier]
         result.extend(self.as_internal_row())
+        if decl_keys is not None:
+            result.extend(self.get_value_list(decl_keys))
         return result
 
     def as_internal_row(self):
@@ -643,61 +634,53 @@ class ForestStand():
 
 
     def as_rst_row(self):
-        melaed = mela_stand(self)
-        forestry_centre_id = (
-            -1 if melaed.forestry_centre_id is None else melaed.forestry_centre_id
-        )
-        municipality_id = (
-            -1 if melaed.municipality_id is None else melaed.municipality_id
-        )
         return [
-            melaed.management_unit_id,
-            melaed.year,
-            melaed.area,
-            melaed.area_weight,
-            melaed.geo_location[0],
-            melaed.geo_location[1],
-            melaed.stand_id,
-            melaed.geo_location[2],
-            melaed.degree_days,
-            melaed.owner_category.value,
-            melaed.land_use_category.value,
-            0 if melaed.soil_peatland_category is None else melaed.soil_peatland_category.value,
-            0 if melaed.site_type_category is None else melaed.site_type_category.value,
-            melaed.tax_class_reduction,
-            melaed.tax_class,
-            0 if melaed.drainage_category is None else melaed.drainage_category.value,
-            melaed.drainage_feasibility,
+            self.management_unit_id,
+            self.year,
+            self.area,
+            self.area_weight,
+            self.geo_location[0],
+            self.geo_location[1],
+            self.stand_id,
+            self.geo_location[2],
+            self.degree_days,
+            self.owner_category.value,
+            self.land_use_category.value,
+            self.soil_peatland_category,
+            self.site_type_category,
+            self.tax_class_reduction,
+            self.tax_class,
+            self.drainage_category,
+            self.drainage_feasibility,
             None,
-            melaed.drainage_year,
-            melaed.fertilization_year,
-            melaed.soil_surface_preparation_year,
-            melaed.natural_regeneration_feasibility,
-            melaed.regeneration_area_cleaning_year,
-            melaed.development_class,
-            melaed.artificial_regeneration_year,
-            melaed.young_stand_tending_year,
-            melaed.pruning_year,
-            melaed.cutting_year,
-            forestry_centre_id,
-            melaed.forest_management_category,
-            melaed.method_of_last_cutting,
-            municipality_id,
+            self.drainage_year,
+            self.fertilization_year,
+            self.soil_surface_preparation_year,
+            self.natural_regeneration_feasibility,
+            self.regeneration_area_cleaning_year,
+            self.development_class,
+            self.artificial_regeneration_year,
+            self.young_stand_tending_year,
+            self.pruning_year,
+            self.cutting_year,
+            self.forestry_centre_id,
+            self.forest_management_category,
+            self.method_of_last_cutting,
+            self.municipality_id,
             None,
-            melaed.dominant_storey_age,
+            self.dominant_storey_age,
         ]
     
-    def additional_data_as_rst_row(self) -> list[float]:
+    def get_value_list(self, keys: list[str] = None) -> list:
+        """ Returns instance values as list based on keys.
+            If keys are not present all attribute values are returned """
         ad = []
-        for _, v in self.additional_data.items():
-            ad.append(v)
+        if keys is not None:
+            # NOTE: needs try-catch?
+            ad = [ getattr(self, k) for k in keys ]
         return ad
-        
-    def add_additional_data_from_rst(self, cvars_rst_ctrl:dict):
-        ad = { k : v(self.as_rst_row()) for k, v in cvars_rst_ctrl.items()}
-        self.additional_data.update(ad)
-        return
-        
+
+
 def create_layered_tree(**kwargs) -> LayeredObject[ReferenceTree]:
     prototype = ReferenceTree()
     layered = LayeredObject(prototype)

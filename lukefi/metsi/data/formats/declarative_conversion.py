@@ -19,10 +19,10 @@ class Conversion():
 
 class ConversionMapper():
 
-    def __init__(self, conversion_declaration: dict[str, Any]):
+    def __init__(self, conversion_declaration: dict[str, Conversion]):
           self.declaration = conversion_declaration
     
-    def _filter_declaration_by_instance(self, obj: Any) -> dict[str, Any]:
+    def _filter_declaration_by_instance(self, obj: Any) -> dict[str, Conversion]:
         subset = {}
         for k, dconv in self.declaration.items():
             if not dconv.object_type or (dconv.object_type and isinstance(obj, dconv.object_type)):

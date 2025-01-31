@@ -9,6 +9,7 @@ class RunMode(Enum):
     SIMULATE = "simulate"
     POSTPROCESS = "postprocess"
     EXPORT = "export"
+    EXPORT_PREPRO = "export_prepro"
 
 
 class MetsiConfiguration(SimpleNamespace):
@@ -19,7 +20,6 @@ class MetsiConfiguration(SimpleNamespace):
     state_format = "fdm"
     state_input_container = "csv"
     state_output_container = None
-    preprocessing_output_container = None
     derived_data_output_container = None
     formation_strategy = "partial"
     evaluation_strategy = "depth"
@@ -39,28 +39,6 @@ class MetsiConfiguration(SimpleNamespace):
         except:
             raise ValueError(f"Unable to parse run mode list '{modestring}'. "
                             f"Allowed modes: {','.join(map(lambda x: x.value, RunMode))}")
-        last = len(mode_candidates) - 1
-        for i, candidate in enumerate(mode_candidates):
-            if candidate == RunMode.PREPROCESS:
-                if i < last and mode_candidates[i + 1] != RunMode.SIMULATE:
-                    raise ValueError("Run mode 'preprocess' must be followed by 'simulate'")
-                if i != 0:
-                    raise ValueError("Run mode 'preprocess' must be the first mode")
-            if candidate == RunMode.SIMULATE:
-                if i > 1:
-                    raise ValueError("Run mode 'simulate' must be up to the second mode")
-                if i == 1 and mode_candidates[i - 1] != RunMode.PREPROCESS:
-                    raise ValueError("Run mode 'simulate' must be preceded by 'preprocess'")
-            if candidate == RunMode.POSTPROCESS:
-                if i < last - 1:
-                    raise ValueError("Run mode 'postprocess' must be second from last or last mode")
-                if i > 0 and mode_candidates[i - 1] != RunMode.SIMULATE:
-                    raise ValueError("Run mode 'postprocess' can be preceded only by 'simulate'")
-            if candidate == RunMode.EXPORT:
-                if i < last:
-                    raise ValueError("Run mode 'export' must be the last mode")
-                if i > 0 and mode_candidates[i - 1] not in (RunMode.SIMULATE, RunMode.POSTPROCESS):
-                    raise ValueError("Run mode 'export' must be preceded by 'simulate' or 'postprocess'")
         self.run_modes = mode_candidates
 
 
@@ -90,6 +68,7 @@ def generate_program_configuration(cli_args: argparse.Namespace, control_source:
     return result
 
 
+# NOTE: Q: käytetäänkö tätä edes missään?
 def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> argparse.Namespace:
     """If args Namespace has its given member as None, in-place replace it with value from defaults"""
     for member in [
