@@ -1,13 +1,19 @@
 import ctypes as cts
+import sys
 from pathlib import Path
 from enum import Enum
 from lukefi.metsi.data.model import ForestStand
 
 
-# Defining and initialize the external library 
-DLL_PATH = Path('lukefi', 'metsi', 'forestry', 'c', 'lib', 'ykjtm35.dll')
-DLL = cts.CDLL(DLL_PATH)
 
+# Defining and initialize the external library 
+lib_name = 'ykjtm35.dll' if sys.platform == "win32" else 'ykjtm35.so' 
+DLL_PATH = Path('lukefi', 'metsi', 'forestry', 'c', 'lib', lib_name)
+
+try:
+    DLL = cts.CDLL(DLL_PATH)
+except OSError as e:
+    print(f"Failed to load {lib_name}: {e}")
 
 def _is_error(flag: int) -> bool:
     return True if flag == 0 else False

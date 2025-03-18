@@ -1,31 +1,43 @@
-# ----- Variables -----------------------------------------
+# Variables
 
 LIBDIR := lib
 SOURCEDIR := source
-SOURCES = $( addprefix $(SOURCEDIR)/,ykjtm35.c triangles.h points.h )
-
-# ----- Target --------------------------------------------
-
-all: $(LIBDIR)/ykjtm35.dll
+SOURCES = $( addprefix $(SOURCEDIR)/, ykjtm35.c triangles.h points.h )
 
 
-# ----- Rules ---------------------------------------------
+# Detect the operating system
 
+ifeq ($(OS),Windows_NT)
+    TARGET := $(LIBDIR)/ykjtm35.dll
+    MKDIR := mkdir
+    RM := rmdir /S /Q
+else
+    TARGET := $(LIBDIR)/ykjtm35.so
+    OSFLAGS := -fPIC
+    MKDIR := mkdir -p
+    RM := rm -rf
+endif
+
+# Target
+
+all: $(TARGET)
+
+# Rules
 
 $(LIBDIR) :
-	mkdir $(LIBDIR)
+	$(MKDIR) $(LIBDIR)
 
 
 $(LIBDIR)/ykjtm35.o : $(SOURCES) | $(LIBDIR)
-	gcc -c $(SOURCEDIR)/ykjtm35.c -o $(LIBDIR)/ykjtm35.o
+	gcc -c $(SOURCEDIR)/ykjtm35.c -o $(LIBDIR)/ykjtm35.o $(OSFLAGS)
 
 
-$(LIBDIR)/ykjtm35.dll : $(LIBDIR)/ykjtm35.o
-	gcc -shared -o $(LIBDIR)/ykjtm35.dll $(LIBDIR)/ykjtm35.o
+$(TARGET) : $(LIBDIR)/ykjtm35.o
+	gcc -shared -o $(TARGET) $(LIBDIR)/ykjtm35.o
 
 
-# ----- Auxiliary -----------------------------------------
+# Auxiliary
 
 .PHONY : clean
 clean :
-	rm  -rf $(LIBDIR)
+	$(RM) $(LIBDIR)
