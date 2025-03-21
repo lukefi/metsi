@@ -11,12 +11,11 @@ from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, gen
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.app.export import export_files, export_preprocessed
-from lukefi.metsi.app.file_io import simulation_declaration_from_yaml_file, prepare_target_directory, read_stands_from_file, \
-    read_full_simulation_result_dirtree, determine_file_path, write_stands_to_file, write_full_simulation_result_dirtree
+from lukefi.metsi.app.file_io import prepare_target_directory, read_stands_from_file, \
+    read_full_simulation_result_dirtree, write_full_simulation_result_dirtree, read_control_module
 from lukefi.metsi.app.post_processing import post_process_alternatives
 from lukefi.metsi.app.simulator import simulate_alternatives
 from lukefi.metsi.app.console_logging import print_logline
-from control import read_control
 
 
 def preprocess(config: MetsiConfiguration, control: dict, stands: StandList) -> StandList:
@@ -51,11 +50,11 @@ def export(config: MetsiConfiguration, control: dict, data: SimResults) -> None:
 
 def export_prepro(config: MetsiConfiguration, control: dict, data: StandList) -> None:
     print_logline("Exporting preprocessing results...")
-    if control['export_prepro']:
+    if control.get('export_prepro', None):
         export_preprocessed(config.target_directory, control['export_prepro'], data)
     else:
         print_logline(f"Declaration for 'export_prerocessed' not found from control.")
-        print_logline(f"Check default control.py for an example")
+        print_logline(f"Skipping export of preprocessing results.")
 
 mode_runners = {
     RunMode.PREPROCESS: preprocess,
@@ -70,7 +69,7 @@ def main() -> int:
     cli_arguments = parse_cli_arguments(sys.argv[1:])
     control_file = MetsiConfiguration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
     try:
-        control_structure = read_control(control_file)
+        control_structure = read_control_module(control_file)
     except IOError:
         print(f"Application control file path '{control_file}' can not be read. Aborting....")
         return 1
@@ -79,7 +78,7 @@ def main() -> int:
         prepare_target_directory(app_config.target_directory)
         print_logline("Reading input...")
         if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
-            input_data = read_stands_from_file(app_config, control_structure.get('conversions', None))
+            input_data = read_stands_from_file(app_config, control_structure.get('conversions', {}))
         elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.EXPORT]:
             input_data = read_full_simulation_result_dirtree(app_config.input_path)
         else:

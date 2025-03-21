@@ -2,8 +2,10 @@ import unittest
 import os
 import shutil
 from pathlib import Path
+from unittest.mock import patch, MagicMock
+from importlib.util import spec_from_file_location, module_from_spec
 from lukefi.metsi.data.enums.internal import *
-import lukefi.metsi.app.file_io
+from lukefi.metsi.app import file_io
 from dataclasses import dataclass
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
@@ -29,27 +31,22 @@ class TestFileReading(unittest.TestCase):
             (('testdir', 'csv'), ( Path('testdir', 'preprocessing_result.csv'), )), # single tuple
         ]
         for a in assertions:
-            result = lukefi.metsi.app.file_io.determine_file_path(*a[0])
+            result = file_io.determine_file_path(*a[0])
             self.assertEqual(a[1], result) 
 
     def test_file_contents(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "test_dummy")
-        result = lukefi.metsi.app.file_io.file_contents(input_file_path)
+        result = file_io.file_contents(input_file_path)
         self.assertEqual("kissa123\n", result)
-
-    def test_simulation_declaration_from_yaml_file(self):
-        input_file_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "control.yaml")
-        result = lukefi.metsi.app.file_io.simulation_declaration_from_yaml_file(input_file_path)
-        self.assertEqual(1, len(result.keys()))
 
     def test_pickle(self):
         data = [
             Test(a=1),
             Test(a=2)
         ]
-        lukefi.metsi.app.file_io.prepare_target_directory('outdir')
-        lukefi.metsi.app.file_io.pickle_writer(Path('outdir', 'output.pickle'), data)
-        result = lukefi.metsi.app.file_io.pickle_reader('outdir/output.pickle')
+        file_io.prepare_target_directory('outdir')
+        file_io.pickle_writer(Path('outdir', 'output.pickle'), data)
+        result = file_io.pickle_reader('outdir/output.pickle')
         self.assertListEqual(data, result)
         os.remove('outdir/output.pickle')
         shutil.rmtree('outdir')
@@ -59,9 +56,9 @@ class TestFileReading(unittest.TestCase):
             Test(a=1),
             Test(a=2)
         ]
-        lukefi.metsi.app.file_io.prepare_target_directory('outdir')
-        lukefi.metsi.app.file_io.json_writer(Path('outdir', 'output.json'), data)
-        result = lukefi.metsi.app.file_io.json_reader('outdir/output.json')
+        file_io.prepare_target_directory('outdir')
+        file_io.json_writer(Path('outdir', 'output.json'), data)
+        result = file_io.json_reader('outdir/output.json')
         self.assertListEqual(data, result)
         os.remove('outdir/output.json')
         shutil.rmtree('outdir')
@@ -80,10 +77,10 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
-        lukefi.metsi.app.file_io.prepare_target_directory("outdir")
-        lukefi.metsi.app.file_io.csv_writer(Path("outdir", "output.csv"), data)
-        result = lukefi.metsi.app.file_io.csv_content_to_stands(
-            lukefi.metsi.app.file_io.csv_file_reader(Path("outdir/output.csv")))
+        file_io.prepare_target_directory("outdir")
+        file_io.csv_writer(Path("outdir", "output.csv"), data)
+        result = file_io.csv_content_to_stands(
+            file_io.csv_file_reader(Path("outdir/output.csv")))
         data[0].reference_trees[0].stand = None
         result[0].reference_trees[0].stand = None
         self.assertDictEqual(data[0].reference_trees[0].__dict__, result[0].reference_trees[0].__dict__)
@@ -115,9 +112,9 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
-        lukefi.metsi.app.file_io.prepare_target_directory("outdir")
+        file_io.prepare_target_directory("outdir")
         target = Path("outdir", "output.rst")
-        lukefi.metsi.app.file_io.rst_writer(target, data)
+        file_io.rst_writer(target, data)
 
         #There is no rst input so check sanity just by file existence and non-emptiness
         exists = os.path.exists(target)
@@ -156,9 +153,9 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
-        lukefi.metsi.app.file_io.prepare_target_directory("outdir")
+        file_io.prepare_target_directory("outdir")
         target = Path("outdir", "output.rsts")
-        lukefi.metsi.app.file_io.rsts_writer(target, data)
+        file_io.rsts_writer(target, data)
 
         # There is no rst input so check sanity just by file existence and non-emptiness
         exists = os.path.exists(target)
@@ -174,7 +171,7 @@ class TestFileReading(unittest.TestCase):
             state_format="fdm",
             state_input_container="pickle"
         )
-        unpickled_stands = lukefi.metsi.app.file_io.read_stands_from_file(config, {})
+        unpickled_stands = file_io.read_stands_from_file(config, {})
         self.assertEqual(len(unpickled_stands), 2)
         self.assertEqual(type(unpickled_stands[0]), ForestStand)
         self.assertEqual(type(unpickled_stands[0].tree_strata[0]), TreeStratum)
@@ -185,7 +182,7 @@ class TestFileReading(unittest.TestCase):
             state_format="fdm",
             state_input_container="json"
         )
-        stands_from_json = lukefi.metsi.app.file_io.read_stands_from_file(config, {})
+        stands_from_json = file_io.read_stands_from_file(config, {})
         self.assertEqual(len(stands_from_json), 2)
         self.assertEqual(type(stands_from_json[0]), ForestStand)
         self.assertEqual(type(stands_from_json[0].tree_strata[0]), TreeStratum)
@@ -196,7 +193,7 @@ class TestFileReading(unittest.TestCase):
             state_format="fdm",
             state_input_container="csv"
         )
-        stands_from_csv = lukefi.metsi.app.file_io.read_stands_from_file(config, {})
+        stands_from_csv = file_io.read_stands_from_file(config, {})
         self.assertEqual(len(stands_from_csv), 2)
         self.assertEqual(type(stands_from_csv[0]), ForestStand)
         self.assertEqual(type(stands_from_csv[0].tree_strata[0]), TreeStratum)
@@ -207,7 +204,7 @@ class TestFileReading(unittest.TestCase):
             state_format="vmi12",
             state_input_container=""
         )
-        stands = lukefi.metsi.app.file_io.read_stands_from_file(config, {})
+        stands = file_io.read_stands_from_file(config, {})
         self.assertEqual(len(stands), 4)
 
     def test_read_stands_from_vmi13_file(self):
@@ -216,7 +213,7 @@ class TestFileReading(unittest.TestCase):
             state_format="vmi13",
             state_input_container=""
         )
-        stands = lukefi.metsi.app.file_io.read_stands_from_file(config, {})
+        stands = file_io.read_stands_from_file(config, {})
         self.assertEqual(len(stands), 4)
 
     def test_read_stands_from_xml_file(self):
@@ -225,7 +222,7 @@ class TestFileReading(unittest.TestCase):
             state_format="xml",
             state_input_container=""
         )
-        stands = lukefi.metsi.app.file_io.read_stands_from_file(config, {})
+        stands = file_io.read_stands_from_file(config, {})
         self.assertEqual(len(stands), 2)
 
     def test_read_stands_from_gpkg_file(self):
@@ -234,18 +231,18 @@ class TestFileReading(unittest.TestCase):
             state_format="gpkg",
             state_input_container=""
         )
-        stands = lukefi.metsi.app.file_io.read_stands_from_file(config, {})
+        stands = file_io.read_stands_from_file(config, {})
         self.assertEqual(len(stands), 9)
 
     def test_read_schedule_payload_from_directory(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory/3/0")
-        result = lukefi.metsi.app.file_io.read_schedule_payload_from_directory(dir)
+        result = file_io.read_schedule_payload_from_directory(dir)
         self.assertEqual("3", result.computational_unit.identifier)
         self.assertEqual(2, len(result.collected_data.get_list_result("calculate_biomass")))
 
     def test_read_simulation_result_dirtree(self):
         dir = Path("tests/resources/file_io_test/testing_output_directory")
-        result = lukefi.metsi.app.file_io.read_full_simulation_result_dirtree(dir)
+        result = file_io.read_full_simulation_result_dirtree(dir)
         self.assertEqual(1, len(result.items()))
         self.assertEqual(1, len(result["3"]))
         self.assertEqual("3", result["3"][0].computational_unit.identifier)
@@ -257,4 +254,49 @@ class TestFileReading(unittest.TestCase):
             state_format="fdm",
             state_input_container="pickle"
         )
-        self.assertRaises(Exception, lukefi.metsi.app.file_io.read_stands_from_file, config)
+        self.assertRaises(Exception, file_io.read_stands_from_file, config)
+
+
+class TestReadControlModule(unittest.TestCase):
+    @patch("importlib.util.spec_from_file_location")
+    @patch("importlib.util.module_from_spec")
+    def test_read_control_module_success(self, mock_module_from_spec, mock_spec_from_file_location):
+        # Mock the control module
+        mock_spec = MagicMock()
+        mock_loader = MagicMock()
+        mock_spec.loader = mock_loader
+        mock_spec_from_file_location.return_value = mock_spec
+
+        mock_module = MagicMock()
+        mock_module.control_structure = {"key": "value"}
+        mock_module_from_spec.return_value = mock_module
+
+        # Call the function
+        control_path = str(Path("test_control.py").resolve())  # Resolve to absolute path
+        result = file_io.read_control_module(control_path, "control_structure")
+
+        # Assertions
+        mock_spec_from_file_location.assert_called_once_with("test_control", control_path)
+        mock_loader.exec_module.assert_called_once_with(mock_module)
+        self.assertEqual(result, {"key": "value"})
+
+    def test_read_control_module_attribute_error(self):
+        control_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "dummy_control.py")
+        with open(control_path, "w") as f:
+            f.write("some_variable = {'key': 'value'}")  # Create a dummy control file without the expected attribute
+
+        with self.assertRaises(AttributeError) as context:
+            file_io.read_control_module(control_path, control="nonexistent_control")
+
+        self.assertIn("Variable 'nonexistent_control' not found", str(context.exception))
+        os.remove(control_path)
+
+    @patch("importlib.util.spec_from_file_location")
+    def test_read_control_module_import_error(self, mock_spec_from_file_location):
+        # Simulate an import error
+        mock_spec_from_file_location.return_value = None
+
+        # Call the function and expect an ImportError
+        control_path = str(Path("test_control.py").resolve())  # Resolve to absolute path
+        with self.assertRaises(ImportError):
+            file_io.read_control_module(control_path, "control_structure")

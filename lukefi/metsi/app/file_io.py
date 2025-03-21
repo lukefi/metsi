@@ -1,11 +1,11 @@
 import csv
 import os
 import pickle
-from pathlib import Path
 import jsonpickle
+from pathlib import Path
+import importlib
 from typing import Any, Optional
 from collections.abc import Iterator, Callable
-import yaml
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, \
     stands_to_rst_content, stands_to_rsts_content, mela_par_file_content
@@ -15,8 +15,6 @@ from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
 from lukefi.metsi.domain.forestry_types import StandList, ForestStand
 from lukefi.metsi.sim.core_types import CollectedData
 from lukefi.metsi.data.formats.declarative_conversion import Conversion
-
-import importlib
 
 StandReader = Callable[[str], StandList]
 StandWriter = Callable[[Path, StandList], None]
@@ -241,41 +239,22 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mets
                 filepath = determine_file_path(schedule_dir, app_arguments.derived_data_output_container)
                 write_derived_data_to_file(schedule.collected_data, filepath, app_arguments.derived_data_output_container)
 
-# Control file reading - external .py modules
-# def read_from_external_declaration(main_module: dict, key: str) -> dict:
-#     external_decl = {}
-#     ext_paths = main_module.get(key, None)
-#     mod_names = [ path.split('.')[-2] for path in ext_paths ]
-#     mod_packages = [ '.'.join(path.split('.')[0:-2]) for path in ext_paths ]
 
-#     mods = [ 
-#         importlib.import_module(name, pkge) if name != pkge
-#             else importlib.import_module(name, None) 
-#         for name, pkge in zip(mod_names, mod_packages) ]
-#     # Declaration in .yaml and .py module must match
-#     for name, mod in zip(mod_names, mods): external_decl.update(getattr(mod, name))
-#     return external_decl
+def read_control_module(control_path: str, control: str = "control_structure") -> dict[str, Any]:
+    config_path = Path(control_path).resolve()  # Ensure absolute path
+    module_name = config_path.stem  # Extract filename without extension
 
-# control file utils
-# def prepare_control_structure(initial_control: dict[str, dict | list]):
-#     ext_mods = initial_control.get('external_modules', None)
-#     if ext_mods is None:
-#         return initial_control
-#     else:
-#         for k in ext_mods.keys():
-#             if k == 'conversions':
-#                 initial_control['conversions'] = read_from_external_declaration(ext_mods, k)
-#             if k == 'export_preprocessed':
-#                 initial_control['export_preprocessed'] = read_from_external_declaration(ext_mods, k)
-#             if k == 'other_modules':
-#                 raise Exception("Not implemented yet!")
-#         del initial_control['external_modules'] # clean control
-#     return initial_control
+    spec = importlib.util.spec_from_file_location(module_name, str(control_path))
+    if spec and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
 
-# Entry for control file reading
-def simulation_declaration_from_yaml_file(file_path: str) -> dict:
-    # TODO: content validation
-    return yaml.load(file_contents(file_path), Loader=yaml.CLoader)
+        if hasattr(module, control):  # Check if variable exists
+            return getattr(module, control)
+        else:
+            raise AttributeError(f"Variable '{control}' not found in {config_path}")
+    else:
+        raise ImportError(f"Could not load control module from {config_path}")
 
 
 ##### FileWriters start #####

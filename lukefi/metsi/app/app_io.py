@@ -15,7 +15,7 @@ class RunMode(Enum):
 class MetsiConfiguration(SimpleNamespace):
     input_path = None
     target_directory = None
-    control_file = "control.yaml"
+    control_file = "control.py"
     run_modes = [RunMode.PREPROCESS, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]
     state_format = "fdm"
     state_input_container = "csv"
@@ -33,13 +33,15 @@ class MetsiConfiguration(SimpleNamespace):
             kwargs.__delitem__('run_modes')
         super().__init__(**kwargs)
 
-    def set_run_modes(self, modestring: str):
+    def set_run_modes(self, run_modes: str):
         try:
-            mode_candidates = list(map(lambda x: RunMode(x), modestring.split(sep=",")))
-        except:
-            raise ValueError(f"Unable to parse run mode list '{modestring}'. "
-                            f"Allowed modes: {','.join(map(lambda x: x.value, RunMode))}")
-        self.run_modes = mode_candidates
+            if isinstance(run_modes, list):
+                self.run_modes = [RunMode(mode) for mode in run_modes]
+            else:
+                self.run_modes = [RunMode(mode) for mode in run_modes.split(",")]
+        except ValueError:
+            allowed_modes = ", ".join(mode.value for mode in RunMode)
+            raise ValueError(f"Invalid run modes '{run_modes}'. Allowed modes: {allowed_modes}")
 
 
 def remove_nones(source: dict) -> dict:
