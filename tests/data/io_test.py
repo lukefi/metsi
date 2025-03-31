@@ -52,20 +52,20 @@ class IoUtilsTest(ConverterTestSuite):
 
     def test_rst_rows(self):
         vmi13_stands = vmi13_builder.build()
-        container = ExportableContainer(vmi13_stands, additional_vars=[])
+        container = ExportableContainer(vmi13_stands, additional_vars=None)
         result = stands_to_rst_content(container)
         self.assertEqual(10, len(result))
 
     def test_rsts_rows(self):
         vmi13_stands = vmi13_builder.build()
-        container = ExportableContainer(vmi13_stands, additional_vars=[])
+        container = ExportableContainer(vmi13_stands, additional_vars=None)
         result = stands_to_rsts_content(container)
         self.assertEqual(7, len(result))
 
     def test_stands_to_csv(self):
         delimiter = ";"
         vmi13_stands = vmi13_builder.build()
-        container = ExportableContainer(vmi13_stands, additional_vars=[])
+        container = ExportableContainer(vmi13_stands, additional_vars=None)
         result = stands_to_csv_content(container, delimiter)
         self.assertEqual(13, len(result))
         

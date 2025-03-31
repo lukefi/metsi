@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Any
+from typing import Any, Optional
 from collections.abc import Callable
 
 from lukefi.metsi.app.app_types import ExportableContainer
@@ -109,7 +109,7 @@ def csv_value(source: Any) -> str:
     else:
         return str(source)
 
-def stand_to_csv_rows(stand: ForestStand, delimeter: str, additional_vars: list[str] = None) -> list[str]:
+def stand_to_csv_rows(stand: ForestStand, delimeter: str, additional_vars: Optional[list[str]]) -> list[str]:
     """converts the :stand:, its reference trees and tree strata to csv rows."""
     result = []
     result.append(delimeter.join(map(lambda x: csv_value(x), stand.as_internal_csv_row(additional_vars))))
