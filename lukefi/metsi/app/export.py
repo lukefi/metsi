@@ -37,7 +37,7 @@ def export_files(config: MetsiConfiguration, decl: list[dict], data: SimResults)
         print_logline(f"Exporting {export_module}...")
         handler()
 
-def export_preprocessed(target_directory: str, decl: list[dict], stands: StandList) -> None:
+def export_preprocessed(target_directory: str, decl: dict, stands: StandList) -> None:
     FILE_PREFIX = "preprocessing_result"
     output_formats = list(decl.keys())
     print_logline(f"Writing all preprocessed data to directory '{target_directory}'")
