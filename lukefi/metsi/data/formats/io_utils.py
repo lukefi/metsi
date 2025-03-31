@@ -91,7 +91,7 @@ def rst_forest_stand_rows(stand: ForestStand, additional_vars: list[str]) -> lis
     return result
 
 
-def rsts_forest_stand_rows(stand: ForestStand, _: list[str] = None) -> list[str]:
+def rsts_forest_stand_rows(stand: ForestStand) -> list[str]:
     """Generate RSTS data file rows for a single ForestStand """
     result = []
     result.append(" ".join(chain(
@@ -174,7 +174,7 @@ def stands_to_rst_content(container: ExportableContainer[ForestStand]) -> list[s
 
 def stands_to_rsts_content(container: ExportableContainer[ForestStand]) -> list[str]:
     """Generate RSTS file contents for the given list of ForestStand"""
-    return outputtable_rows(container, lambda stand, additional_vars: rsts_forest_stand_rows(stand, additional_vars))
+    return outputtable_rows(container, lambda stand, additional_vars: rsts_forest_stand_rows(stand))
 
 def mela_par_file_content(cvar_names: list[str]) -> list[str]:
     """ Par file content generalizes over all stands. Only single stand is needed """
