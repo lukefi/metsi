@@ -1,9 +1,32 @@
 import csv
+import unittest
 from io import StringIO
 from lukefi.metsi.data.formats.io_utils import *
 from tests.data.test_util import ConverterTestSuite, ForestBuilderTestBench
+from lukefi.metsi.data.formats.io_utils import c_var_rst_row
+from lukefi.metsi.data.model import ForestStand
 
 vmi13_builder = ForestBuilderTestBench.vmi13_builder()
+
+
+class TestCVarRstRow(unittest.TestCase):
+
+    def setUp(self):
+        # Mock ForestStand object
+        self.mock_stand = ForestStand(
+            identifier="123",
+            stand_id=1,
+            reference_trees=[],
+            tree_strata=[]
+        )
+        self.mock_stand.get_value_list = lambda cvar_decl: [1.23, 4.56, 7.89]  # Mock method
+
+    def test_c_var_rst_row(self):
+        cvar_decl = ["var1", "var2", "var3"]
+        result = c_var_rst_row(self.mock_stand, cvar_decl)
+        expected = "123.000000 5.000000 2.000000 3.000000 1.230000 4.560000 7.890000"
+        self.assertEqual(result, expected)
+
 
 class IoUtilsTest(ConverterTestSuite):
     def test_rst_float(self):

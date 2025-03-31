@@ -54,11 +54,11 @@ def msb_metadata(stand: ForestStand) -> tuple[list[str], list[str], list[str]]:
     return physical_record_metadata, logical_record_metadata, logical_subrecord_metadata
 
 
-def c_var_metadata(uid: float, cvars_len: int) -> tuple[list[float], list[float], list[float], list[float]]:
+def c_var_metadata(uid: float, cvars_len: int) -> list[str]:
     FIXED_TWO = 2
     total_length = FIXED_TWO + cvars_len
     cvars_meta = map(rst_float, [uid, total_length, FIXED_TWO, cvars_len])
-    return tuple([x] for x in cvars_meta)
+    return list(cvars_meta)
 
 def c_var_rst_row(stand: ForestStand, cvar_decl: list[str]) -> str:
     """ Content structure generation for a C-variable row """
@@ -66,10 +66,7 @@ def c_var_rst_row(stand: ForestStand, cvar_decl: list[str]) -> str:
         parse_float(stand.identifier) or stand.stand_id,
         len(cvar_decl))
     cvars_row = " ".join(chain(
-        cvars_meta[0],
-        cvars_meta[1],
-        cvars_meta[2],
-        cvars_meta[3],
+        cvars_meta,
         map(rst_float, stand.get_value_list(cvar_decl)
     )))    
     return cvars_row
