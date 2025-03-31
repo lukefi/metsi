@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
@@ -37,7 +38,6 @@ def export_files(config: MetsiConfiguration, decl: list[dict], data: SimResults)
         handler()
 
 def export_preprocessed(target_directory: str, decl: list[dict], stands: StandList) -> None:
-    """ NOTE: Q: Pitääkö kuviolistan kopioida per format? """
     FILE_PREFIX = "preprocessing_result"
     output_formats = list(decl.keys())
     print_logline(f"Writing all preprocessed data to directory '{target_directory}'")
@@ -51,7 +51,9 @@ def export_preprocessed(target_directory: str, decl: list[dict], stands: StandLi
             operation_chain = simple_processable_chain(operations,
                                                        operation_params,
                                                        exp_ops.operation_lookup)
-            modified_stands = evaluate_sequence(stands, *operation_chain)
+            modified_stands = evaluate_sequence(
+                copy.deepcopy(stands),
+                *operation_chain)
             result = ExportableContainer(modified_stands, additional_varnames)
         else:
             result = ExportableContainer(stands, additional_varnames)
