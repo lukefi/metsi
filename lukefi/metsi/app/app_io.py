@@ -70,7 +70,6 @@ def generate_program_configuration(cli_args: argparse.Namespace, control_source:
     return result
 
 
-# NOTE: Q: käytetäänkö tätä edes missään?
 def set_default_arguments(cli_args: argparse.Namespace, default_args: dict) -> argparse.Namespace:
     """If args Namespace has its given member as None, in-place replace it with value from defaults"""
     for member in [
