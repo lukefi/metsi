@@ -5,9 +5,6 @@ from random import random
 from examples.declarations.export_prepro import mela, csv_and_json
 
 
-def sum3(x,y,z):
-    return int(x)+int(y)+int(z)
-
 control_structure = {
     "app_configuration": {
         "state_format": "vmi13",  # options: fdm, vmi12, vmi13, xml, gpkg
@@ -242,7 +239,7 @@ control_structure = {
             'VAR0': Conversion(lambda: 123456789),
             'VAR1': Conversion(lambda x: int(x)*2, indices=(0,)),
             'VAR2': Conversion(lambda x: x, indices=(1,)),
-            'VAR3': Conversion(sum3, indices=(2, 3, 4)),
+            'VAR3': Conversion(lambda x,y,z: int(x) + int(y) + int(z), indices=(2, 3, 4)),
             'VAR4': Conversion(lambda x, y: pow(int(x), int(y)), indices=(2, 5)),
             'VAR5': Conversion(lambda x, y: pow(float(x), float(y)), indices=(3, 5)),
             'VAR_RANDOM': Conversion(random),
@@ -269,6 +266,7 @@ control_structure = {
     }
 }
 
+# The preprocessing export format is added as an external module
 control_structure['export_prepro'] = {}
 control_structure['export_prepro'].update(mela)
 control_structure['export_prepro'].update(csv_and_json)
