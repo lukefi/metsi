@@ -2,8 +2,8 @@ import csv
 import os
 import pickle
 import jsonpickle
-from pathlib import Path
 import importlib
+from pathlib import Path
 from typing import Any, Optional
 from collections.abc import Iterator, Callable
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
@@ -17,7 +17,7 @@ from lukefi.metsi.sim.core_types import CollectedData
 from lukefi.metsi.data.formats.declarative_conversion import Conversion
 
 StandReader = Callable[[str], StandList]
-StandWriter = Callable[[Path, StandList], None]
+StandWriter = Callable[[Path, ExportableContainer[ForestStand]], None]
 ObjectLike = StandList or SimResults or CollectedData
 ObjectWriter = Callable[[Path, ObjectLike], None]
 
