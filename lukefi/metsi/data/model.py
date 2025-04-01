@@ -676,8 +676,7 @@ class ForestStand():
             If keys are not present all attribute values are returned """
         ad = []
         if keys is not None:
-            # NOTE: needs try-catch?
-            ad = [ getattr(self, k) for k in keys ]
+            ad = [ getattr(self, k) for k in keys ] # Needs to fail noisy
         return ad
 
 
