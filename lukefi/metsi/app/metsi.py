@@ -58,10 +58,10 @@ def export_prepro(config: MetsiConfiguration, control: dict, data: StandList) ->
 
 mode_runners = {
     RunMode.PREPROCESS: preprocess,
+    RunMode.EXPORT_PREPRO: export_prepro,
     RunMode.SIMULATE: simulate,
     RunMode.POSTPROCESS: post_process,
-    RunMode.EXPORT: export,
-    RunMode.EXPORT_PREPRO: export_prepro
+    RunMode.EXPORT: export
 }
 
 
