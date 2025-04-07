@@ -8,6 +8,7 @@ from lukefi.metsi.data.enums.internal import *
 from lukefi.metsi.app import file_io
 from dataclasses import dataclass
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
+from lukefi.metsi.app.app_types import ExportableContainer
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
 
@@ -52,8 +53,10 @@ class TestFileReading(unittest.TestCase):
             Test(a=1),
             Test(a=2)
         ]
+        ec = ExportableContainer(export_objects=data, additional_vars=None)
+
         file_io.prepare_target_directory('outdir')
-        file_io.json_writer(Path('outdir', 'output.json'), data)
+        file_io.json_writer(Path('outdir', 'output.json'), ec)
         result = file_io.json_reader('outdir/output.json')
         self.assertListEqual(data, result)
         os.remove('outdir/output.json')
@@ -72,8 +75,10 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
+        ec = ExportableContainer(export_objects=data, additional_vars=None)
+        
         file_io.prepare_target_directory("outdir")
-        file_io.csv_writer(Path("outdir", "output.csv"), data)
+        file_io.csv_writer(Path("outdir", "output.csv"), ec)
         result = file_io.csv_content_to_stands(
             file_io.csv_file_reader(Path("outdir/output.csv")))
         data[0].reference_trees[0].stand = None
@@ -106,9 +111,11 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
+        ec = ExportableContainer(export_objects=data, additional_vars=None)
+
         file_io.prepare_target_directory("outdir")
         target = Path("outdir", "output.rst")
-        file_io.rst_writer(target, data)
+        file_io.rst_writer(target, ec)
 
         #There is no rst input so check sanity just by file existence and non-emptiness
         exists = os.path.exists(target)
@@ -146,9 +153,11 @@ class TestFileReading(unittest.TestCase):
                 ]
             )
         ]
+        ec = ExportableContainer(export_objects=data, additional_vars=None)
+
         file_io.prepare_target_directory("outdir")
         target = Path("outdir", "output.rsts")
-        file_io.rsts_writer(target, data)
+        file_io.rsts_writer(target, ec)
 
         # There is no rst input so check sanity just by file existence and non-emptiness
         exists = os.path.exists(target)
