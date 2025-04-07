@@ -9,6 +9,7 @@ import lukefi.metsi.domain.sim_ops
 import lukefi.metsi.sim.generators
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import ForestOpPayload
+from lukefi.metsi.app.enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, depth_first_evaluator, \
@@ -43,8 +44,8 @@ def run_stands(
 
 def resolve_formation_strategy(source: str) -> Runner[ForestOpPayload]:
     formation_strategy_map = {
-        'full': run_full_tree_strategy,
-        'partial': run_partial_tree_strategy
+        FormationStrategy.FULL: run_full_tree_strategy,
+        FormationStrategy.PARTIAL: run_partial_tree_strategy
     }
 
     try:
@@ -55,8 +56,8 @@ def resolve_formation_strategy(source: str) -> Runner[ForestOpPayload]:
 
 def resolve_evaluation_strategy(source: str) -> Evaluator[ForestOpPayload]:
     evaluation_strategy_map = {
-        'depth': depth_first_evaluator,
-        'chains': chain_evaluator
+        EvaluationStrategy.DEPTH: depth_first_evaluator,
+        EvaluationStrategy.CHAINS: chain_evaluator
     }
 
     try:

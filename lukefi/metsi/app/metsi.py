@@ -55,6 +55,7 @@ def export_prepro(config: MetsiConfiguration, control: dict, data: StandList) ->
     else:
         print_logline(f"Declaration for 'export_prerocessed' not found from control.")
         print_logline(f"Skipping export of preprocessing results.")
+    return data # returned as is just for workflow reasons
 
 mode_runners = {
     RunMode.PREPROCESS: preprocess,
@@ -67,7 +68,7 @@ mode_runners = {
 
 def main() -> int:
     cli_arguments = parse_cli_arguments(sys.argv[1:])
-    control_file = MetsiConfiguration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
+    control_file = MetsiConfiguration.control_file if cli_arguments["control_file"] is None else cli_arguments['control_file']
     try:
         control_structure = read_control_module(control_file)
     except IOError:
