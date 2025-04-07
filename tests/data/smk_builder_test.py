@@ -3,9 +3,10 @@ import os
 from functools import reduce
 from lukefi.metsi.data.formats.ForestBuilder import XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.enums.internal import *
+from lukefi.metsi.app.enum import StrataOrigin
 
 builder_flags = {
-    'strata_origin': '1'
+    'strata_origin': StrataOrigin.INVENTORY
 }
 
 declared_conversions = {} # Not yet implemented (only vmi13 and -12 atm.)
@@ -22,13 +23,12 @@ class TestXMLBuilder(unittest.TestCase):
 
     def test_individual_smk_build_with_different_strata_origins(self):
         assertions = [
-            ('1', 3),
-            ('2', 2),
-            (None, 0)
+            (1, 3),
+            (2, 2)
         ]
         for i in assertions:
             smk_builder = XMLBuilder(
-                builder_flags={ 'strata_origin': i[0] },
+                builder_flags={ 'strata_origin': StrataOrigin(i[0]) },
                 declared_conversions={},
                 data=self.xml_string)
             stands = smk_builder.build()
@@ -202,7 +202,7 @@ class TestGeoPackageBuilder(unittest.TestCase):
             (3, 0),
         ]
         for a in assertions:
-            builder_flags = {'strata_origin': a[0]}
+            builder_flags = {'strata_origin': StrataOrigin(a[0])}
             declared_conversions = {}
             stands = GeoPackageBuilder(
                 builder_flags,

@@ -19,7 +19,7 @@ class TestForestBuilderRun(unittest.TestCase):
         assertion = ('SMK_source.xml', 2)
         reference_file = Path('tests', 'data', 'resources', assertion[0])
         list_of_stands = XMLBuilder(
-            builder_flags={"strata_origin": "1", "measured_trees": False},
+            builder_flags={"strata_origin": StrataOrigin.INVENTORY, "measured_trees": False},
             declared_conversions={},
             data=xml_file_reader(reference_file)).build()
         result = len(list_of_stands)

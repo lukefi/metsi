@@ -389,7 +389,7 @@ class XMLBuilder(ForestCentreBuilder):
     def __init__(self, builder_flags: dict, declared_conversions: dict, data: str):
         self.root: ET.Element = ET.fromstring(data)
         self.builder_flags = builder_flags
-        self.xpath_strata = self.xpath_strata.format(builder_flags['strata_origin'])
+        self.xpath_strata = self.xpath_strata.format(builder_flags['strata_origin'].value)
         self.declared_conversions = declared_conversions # NOTE: not in use
 
 
