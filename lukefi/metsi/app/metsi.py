@@ -7,7 +7,7 @@ import traceback
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import lukefi.metsi.app.preprocessor
-from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_program_configuration, RunMode
+from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.app.export import export_files, export_preprocessed
@@ -74,7 +74,7 @@ def main() -> int:
         print(f"Application control file path '{control_file}' can not be read. Aborting....")
         return 1
     try:
-        app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+        app_config = generate_application_configuration( {**cli_arguments, **control_structure['app_configuration']} )
         prepare_target_directory(app_config.target_directory)
         print_logline("Reading input...")
         if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
