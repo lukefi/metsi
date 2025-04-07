@@ -1,6 +1,7 @@
 import unittest
 from lukefi.metsi.data.formats.ForestBuilder import VMI12Builder, VMI13Builder, XMLBuilder, GeoPackageBuilder
 from pathlib import Path
+from lukefi.metsi.app.enum import StrataOrigin
 
 
 def vmi_file_reader(file: Path) -> list[str]:
@@ -50,7 +51,7 @@ class TestForestBuilderRun(unittest.TestCase):
         assertion = (('SMK_source.gpkg', 'geopackage'), 9)
         reference_file = Path('tests', 'data', 'resources', assertion[0][0])
         list_of_stands = GeoPackageBuilder(
-            builder_flags={"strata_origin": "1"},
+            builder_flags={"strata_origin": StrataOrigin.INVENTORY},
             declared_conversions={},
             db_path=reference_file).build()
         result = len(list_of_stands)

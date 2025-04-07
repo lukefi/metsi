@@ -515,7 +515,7 @@ class GeoPackageBuilder(ForestCentreBuilder):
    
     def __init__(self, builder_flags: dict, declared_conversions: dict, db_path: str):
         """ Reads Geopackage format into pandas dataframe representing stands and strata """
-        self.type_value = builder_flags['strata_origin']
+        self.type_value = builder_flags['strata_origin'].value
         (self.stands,
          self.strata) = gpkg_util.read_geopackage(db_path, self.type_value)
         self.declared_conversions = declared_conversions # NOTE: not in use
