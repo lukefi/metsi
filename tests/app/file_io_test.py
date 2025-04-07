@@ -21,14 +21,10 @@ class Test:
 
 
 class TestFileReading(unittest.TestCase):
-    @unittest.skip
     def test_determine_file_path(self):
         assertions = [
-            (('testdir', 'rst'), (
-                Path('testdir', 'preprocessing_result.rst'),
-                Path('testdir', 'preprocessing_result.rsts'))
-            ),
-            (('testdir', 'csv'), ( Path('testdir', 'preprocessing_result.csv'), )), # single tuple
+            (('testdir', 'preprocessing_result.rst'), (Path('testdir', 'preprocessing_result.rst'))),
+            (('testdir', 'preprocessing_result.csv'), (Path('testdir', 'preprocessing_result.csv')))
         ]
         for a in assertions:
             result = file_io.determine_file_path(*a[0])
@@ -63,7 +59,6 @@ class TestFileReading(unittest.TestCase):
         os.remove('outdir/output.json')
         shutil.rmtree('outdir')
 
-    @unittest.skip
     def test_csv(self):
         data = [
             ForestStand(
@@ -89,7 +84,6 @@ class TestFileReading(unittest.TestCase):
         self.assertDictEqual(data[0].__dict__, result[0].__dict__)
         shutil.rmtree('outdir')
 
-    @unittest.skip
     def test_rst(self):
         data = [
             ForestStand(
@@ -123,7 +117,6 @@ class TestFileReading(unittest.TestCase):
         self.assertTrue(size > 0)
         shutil.rmtree('outdir')
 
-    @unittest.skip
     def test_rsts(self):
         data = [
             ForestStand(
