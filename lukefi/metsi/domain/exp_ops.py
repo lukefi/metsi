@@ -1,8 +1,10 @@
+""" Operations related for manipulating the exporting related formats.
+NOTE: Only for pipeline component 'export_prepro' """
 
 from lukefi.metsi.data.model import ReferenceTree
 from lukefi.metsi.domain.forestry_types import StandList
-from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.conversion.internal2mela import mela_stand
+from lukefi.metsi.app.utils import ConfigurationException
 
 
 def _recreate_stand_indices(stands: StandList) -> StandList:
@@ -39,6 +41,8 @@ def classify_values_to(stands: StandList, **operation_params) -> StandList:
     format = operation_params.get('format', None)
     if format == 'rst' or format == 'rsts':
         f = lambda s: mela_stand(s)
+    else:
+        raise ConfigurationException(f"unsupported format: {format}")
     return [ f(stand) for stand in stands ]
 
 
