@@ -1,9 +1,32 @@
 import csv
+import unittest
 from io import StringIO
 from lukefi.metsi.data.formats.io_utils import *
 from tests.data.test_util import ConverterTestSuite, ForestBuilderTestBench
+from lukefi.metsi.data.formats.io_utils import c_var_rst_row
+from lukefi.metsi.data.model import ForestStand
 
 vmi13_builder = ForestBuilderTestBench.vmi13_builder()
+
+
+class TestCVarRstRow(unittest.TestCase):
+
+    def setUp(self):
+        # Mock ForestStand object
+        self.mock_stand = ForestStand(
+            identifier="123",
+            stand_id=1,
+            reference_trees=[],
+            tree_strata=[]
+        )
+        self.mock_stand.get_value_list = lambda cvar_decl: [1.23, 4.56, 7.89]  # Mock method
+
+    def test_c_var_rst_row(self):
+        cvar_decl = ["var1", "var2", "var3"]
+        result = c_var_rst_row(self.mock_stand, cvar_decl)
+        expected = "123.000000 5.000000 2.000000 3.000000 1.230000 4.560000 7.890000"
+        self.assertEqual(result, expected)
+
 
 class IoUtilsTest(ConverterTestSuite):
     def test_rst_float(self):
@@ -19,7 +42,7 @@ class IoUtilsTest(ConverterTestSuite):
 
     def test_rst_forest_stand_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = rst_forest_stand_rows(vmi13_stands[1])
+        result = rst_forest_stand_rows(vmi13_stands[1], additional_vars=[])
         self.assertEqual(4, len(result))
 
     def test_rsts_forest_stand_rows(self):
@@ -29,18 +52,21 @@ class IoUtilsTest(ConverterTestSuite):
 
     def test_rst_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = stands_to_rst_content(vmi13_stands)
-        self.assertEqual(9, len(result))
+        container = ExportableContainer(vmi13_stands, additional_vars=None)
+        result = stands_to_rst_content(container)
+        self.assertEqual(10, len(result))
 
     def test_rsts_rows(self):
         vmi13_stands = vmi13_builder.build()
-        result = stands_to_rsts_content(vmi13_stands)
-        self.assertEqual(6, len(result))
+        container = ExportableContainer(vmi13_stands, additional_vars=None)
+        result = stands_to_rsts_content(container)
+        self.assertEqual(7, len(result))
 
     def test_stands_to_csv(self):
         delimiter = ";"
         vmi13_stands = vmi13_builder.build()
-        result = stands_to_csv_content(vmi13_stands, delimiter)
+        container = ExportableContainer(vmi13_stands, additional_vars=None)
+        result = stands_to_csv_content(container, delimiter)
         self.assertEqual(13, len(result))
         
         #make sure that each type of a row has the same number of columns, since csv-->stand conversion relies on it
@@ -56,7 +82,7 @@ class IoUtilsTest(ConverterTestSuite):
         """tests that the roundtrip conversion stands-->csv-->stands maintains the stand structure"""
         vmi13_stands = vmi13_builder.build()
         delimiter = ";"
-        serialized = '\n'.join(stands_to_csv_content(vmi13_stands, delimiter))
+        serialized = '\n'.join(stands_to_csv_content(ExportableContainer(vmi13_stands, None), delimiter))
         deserialized = list(csv.reader(StringIO(serialized), delimiter=delimiter))
         stands_from_csv = csv_content_to_stands(deserialized)
         self.assertEqual(4, len(stands_from_csv))

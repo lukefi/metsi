@@ -1,6 +1,7 @@
 import unittest
 from lukefi.metsi.data.formats.ForestBuilder import VMI12Builder, VMI13Builder, XMLBuilder, GeoPackageBuilder
 from pathlib import Path
+from lukefi.metsi.app.enum import StrataOrigin
 
 
 def vmi_file_reader(file: Path) -> list[str]:
@@ -17,8 +18,10 @@ class TestForestBuilderRun(unittest.TestCase):
     def test_run_smk_forest_builder_build(self):
         assertion = ('SMK_source.xml', 2)
         reference_file = Path('tests', 'data', 'resources', assertion[0])
-        list_of_stands = XMLBuilder({"strata_origin": "1", "measured_trees": False},
-                                             xml_file_reader(reference_file)).build()
+        list_of_stands = XMLBuilder(
+            builder_flags={"strata_origin": StrataOrigin.INVENTORY, "measured_trees": False},
+            declared_conversions={},
+            data=xml_file_reader(reference_file)).build()
         result = len(list_of_stands)
         self.assertEqual(result, assertion[1])
 
@@ -26,7 +29,10 @@ class TestForestBuilderRun(unittest.TestCase):
     def test_run_vmi12_forest_builder_build(self):
         assertion = ('VMI12_source_mini.dat', 4)
         reference_file = Path('tests', 'data', 'resources', assertion[0])
-        list_of_stands = VMI12Builder({"measured_trees": False, "strata": True}, vmi_file_reader(reference_file)).build()
+        list_of_stands = VMI12Builder(
+            builder_flags={"measured_trees": False, "strata": True},
+             declared_conversions={},
+             data_rows=vmi_file_reader(reference_file)).build()
         result = len(list_of_stands)
         self.assertEqual(result, assertion[1])
 
@@ -34,14 +40,19 @@ class TestForestBuilderRun(unittest.TestCase):
     def test_run_vmi13_forest_builder_build(self):
         assertion = ('VMI13_source_mini.dat', 4)
         reference_file = Path('tests', 'data', 'resources', assertion[0])
-        list_of_stands = VMI13Builder({"measured_trees": False, "strata": True}, vmi_file_reader(reference_file)).build()
+        list_of_stands = VMI13Builder(
+            builder_flags={"measured_trees": False, "strata": True},
+            declared_conversions={},
+            data_rows=vmi_file_reader(reference_file)).build()
         result = len(list_of_stands)
         self.assertEqual(result, assertion[1])
 
     def test_run_smk_geopackage_builder_build(self):
         assertion = (('SMK_source.gpkg', 'geopackage'), 9)
         reference_file = Path('tests', 'data', 'resources', assertion[0][0])
-        list_of_stands = GeoPackageBuilder({"strata_origin": "1"},
-                                             reference_file).build()
+        list_of_stands = GeoPackageBuilder(
+            builder_flags={"strata_origin": StrataOrigin.INVENTORY},
+            declared_conversions={},
+            db_path=reference_file).build()
         result = len(list_of_stands)
         self.assertEqual(result, assertion[1])

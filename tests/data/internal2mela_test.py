@@ -28,8 +28,8 @@ class Internal2MelaTest(unittest.TestCase):
         fixture.reference_trees.append(tree)
         fixture.tree_strata.append(stratum)
         result = mela_stand(fixture)
-        self.assertEqual(MelaTreeSpecies.NORWAY_SPRUCE, result.reference_trees[0].species)
-        self.assertEqual(MelaTreeSpecies.SCOTS_PINE, result.tree_strata[0].species)
+        self.assertEqual(MelaTreeSpecies.NORWAY_SPRUCE.value, result.reference_trees[0].species)
+        self.assertEqual(MelaTreeSpecies.SCOTS_PINE.value, result.tree_strata[0].species)
         self.assertEqual((6654.2, 102.598, 0.0, "EPSG:3067"), result.geo_location)
         self.assertEqual(100.0, result.area_weight)
 

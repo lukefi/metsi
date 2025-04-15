@@ -1,26 +1,27 @@
 import csv
 import os
 import pickle
-from pathlib import Path
 import jsonpickle
+import importlib
+from pathlib import Path
 from typing import Any, Optional
 from collections.abc import Iterator, Callable
-import yaml
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, \
-    stands_to_rst_content, stands_to_rsts_content
+    stands_to_rst_content, stands_to_rsts_content, mela_par_file_content
 from lukefi.metsi.app.app_io import MetsiConfiguration
+from lukefi.metsi.app.app_types import ExportableContainer
 from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
-from lukefi.metsi.domain.forestry_types import StandList
+from lukefi.metsi.domain.forestry_types import StandList, ForestStand
 from lukefi.metsi.sim.core_types import CollectedData
-
+from lukefi.metsi.data.formats.declarative_conversion import Conversion
 
 StandReader = Callable[[str], StandList]
-StandWriter = Callable[[Path, StandList], None]
+StandWriter = Callable[[Path, ExportableContainer[ForestStand]], None]
 ObjectLike = StandList or SimResults or CollectedData
 ObjectWriter = Callable[[Path, ObjectLike], None]
 
-
+# io_utils?
 def prepare_target_directory(path_descriptor: str) -> Path:
     """
     Sanity check a given directory path. Existing directory must be accessible for writing. Raise exception if directory
@@ -39,21 +40,30 @@ def prepare_target_directory(path_descriptor: str) -> Path:
         os.makedirs(path_descriptor)
         return Path(path_descriptor)
 
-
+# solve FileWriter - interface
 def stand_writer(container_format: str) -> StandWriter:
     """Return a serialization file writer function for a ForestDataPackage"""
     if container_format == "pickle":
-        return (pickle_writer,)
+        return pickle_writer
     elif container_format == "json":
-        return (json_writer,)
+        return json_writer
     elif container_format == "csv":
-        return (csv_writer,)
+        return csv_writer
     elif container_format == "rst":
-        return (rst_writer, rsts_writer)
+        return rst_writer
+    elif container_format == "rsts":
+        return rsts_writer
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
 
+# entry of FileWriter
+def write_stands_to_file(result: ExportableContainer[ForestStand], filepath: Path, state_output_container: str):
+    """Resolve a writer function for ForestStands matching the given state_output_container. Invokes write."""
+    writer = stand_writer(state_output_container)
+    writer(filepath, result)
+
+# solve ObjectWriter
 def object_writer(container_format: str) -> ObjectWriter:
     """Return a serialization file writer function for arbitrary data"""
     if container_format == "pickle":
@@ -63,17 +73,16 @@ def object_writer(container_format: str) -> ObjectWriter:
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
+# io_utils
+def determine_file_path(dir: Path, filename: str) -> Path:
+    return Path(dir, filename)
 
-def determine_file_path(dir: Path, file_ext: str) -> list[Path]:
-    exts = [file_ext, 'rsts'] if file_ext == 'rst' else [ file_ext ] 
-    return tuple( Path(dir, f"preprocessing_result.{ext}") for ext in exts )
-
-
+# io_utils
 def file_contents(file_path: str) -> str:
     with open(file_path, 'r') as f:
         return f.read()
 
-
+# solve FdmReader
 def fdm_reader(container_format: str) -> StandReader:
     """Resolve a reader function for FDM data containers"""
     if container_format == "pickle":
@@ -85,7 +94,7 @@ def fdm_reader(container_format: str) -> StandReader:
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
-
+# solve ObjectReader
 def object_reader(container_format: str) -> Any:
     if container_format == "pickle":
         return pickle_reader
@@ -94,20 +103,20 @@ def object_reader(container_format: str) -> Any:
     else:
         raise Exception(f"Unsupported container format '{container_format}'")
 
-
-def external_reader(state_format: str, **builder_flags) -> StandReader:
+# SourceDataReaders
+def external_reader(state_format: str, conversions, **builder_flags) -> StandReader:
     """Resolve and prepare a reader function for non-FDM data formats"""
     if state_format == "vmi13":
-        return lambda path: VMI13Builder(builder_flags, vmi_file_reader(path)).build()
+        return lambda path: VMI13Builder(builder_flags, conversions.get('vmi13', {}), vmi_file_reader(path)).build()
     elif state_format == "vmi12":
-        return lambda path: VMI12Builder(builder_flags, vmi_file_reader(path)).build()
+        return lambda path: VMI12Builder(builder_flags, conversions.get('vmi12', {}), vmi_file_reader(path)).build()
     elif state_format == "xml":
-        return lambda path: XMLBuilder(builder_flags, xml_file_reader(path)).build()
+        return lambda path: XMLBuilder(builder_flags, conversions.get('xml', {}), xml_file_reader(path)).build()
     elif state_format == "gpkg":
-        return lambda path: GeoPackageBuilder(builder_flags, path).build()
+        return lambda path: GeoPackageBuilder(builder_flags, conversions.get('gpkg', {}), path).build()    
 
-
-def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
+# source data main entry function
+def read_stands_from_file(app_config: MetsiConfiguration, conversions: dict[str, Conversion]) -> StandList:
     """
     Read a list of ForestStands from given file with given configuration. Directly reads FDM format data. Utilizes
     FDM ForestBuilder utilities to transform VMI12, VMI13 or Forest Centre data into FDM ForestStand format.
@@ -120,13 +129,14 @@ def read_stands_from_file(app_config: MetsiConfiguration) -> StandList:
     elif app_config.state_format in ("vmi13", "vmi12", "xml", "gpkg"):
         return external_reader(
             app_config.state_format,
+            conversions,
             strata=app_config.strata,
             measured_trees=app_config.measured_trees,
             strata_origin=app_config.strata_origin)(app_config.input_path)
     else:
         raise Exception(f"Unsupported state format '{app_config.state_format}'")
 
-
+# io_util?
 def scan_dir_for_file(dirpath: Path, basename: str, suffixes: list[str]) -> Optional[tuple[Path, str]]:
     """
     From given directory path, find the filename for given basename with list of possible file suffixes.
@@ -142,7 +152,7 @@ def scan_dir_for_file(dirpath: Path, basename: str, suffixes: list[str]) -> Opti
             return Path(dirpath, filename), suffix
     return None
 
-
+# io_util?
 def parse_file_or_default(file: Path, reader: Callable[[Path], Any], default=None) -> Optional[Any]:
     """Deserialize given file with given reader function or return default"""
     if os.path.exists(file):
@@ -150,7 +160,7 @@ def parse_file_or_default(file: Path, reader: Callable[[Path], Any], default=Non
     else:
         return default
 
-
+# SimResultReader utility - scans schedules from files
 def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload:
     """
     Create an OperationPayload from a directory which optionally contains usable unit_state and derived_data files.
@@ -169,14 +179,14 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload
         operation_history=[]
     )
 
-
+# io_util?
 def get_subdirectory_names(path: Path) -> list[str]:
     if not os.path.isdir(path):
         raise Exception(f"Given input path {path} is not a directory.")
     _, dirs, _ = next(os.walk(path))
     return dirs
 
-
+# SimResult entry function
 def read_full_simulation_result_dirtree(source_path: Path) -> SimResults:
     """
     Read simulation results from a given source directory, packing them into the simulation results dict structure.
@@ -197,20 +207,14 @@ def read_full_simulation_result_dirtree(source_path: Path) -> SimResults:
         result[stand_id] = payloads
     return result
 
-
-def write_stands_to_file(result: StandList, filepaths: list[Path], state_output_container: str):
-    """Resolve a writer function for ForestStands matching the given state_output_container. Invokes write."""
-    writers = stand_writer(state_output_container)
-    for writer, filepath in zip(writers, filepaths):
-        writer(filepath, result)
-
-
+# CollectedResults writer, done when SimResults are written.
+# - can be seen as indivudual entry for writing CollectedResults
 def write_derived_data_to_file(result: CollectedData, filepath: Path, derived_data_output_container: str):
     """Resolve a writer function for AggregatedResults matching the given derived_data_output_container. Invokes write."""
     writer = object_writer(derived_data_output_container)
     writer(filepath, result)
 
-
+# SimResult writer entry
 def write_full_simulation_result_dirtree(result: SimResults, app_arguments: MetsiConfiguration):
     """
     Unwraps the given simulation result structure into computational units and further into produced schedules.
@@ -227,46 +231,46 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mets
             if app_arguments.state_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
                 filepath = determine_file_path(schedule_dir, app_arguments.state_output_container)
-                write_stands_to_file([schedule.computational_unit], filepath, app_arguments.state_output_container)
+                write_stands_to_file(ExportableContainer([schedule.computational_unit], None),
+                                     filepath,
+                                     app_arguments.state_output_container)
             if app_arguments.derived_data_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
                 filepath = determine_file_path(schedule_dir, app_arguments.derived_data_output_container)
                 write_derived_data_to_file(schedule.collected_data, filepath, app_arguments.derived_data_output_container)
 
 
-def simulation_declaration_from_yaml_file(file_path: str) -> dict:
-    # TODO: content validation
-    return yaml.load(file_contents(file_path), Loader=yaml.CLoader)
+def read_control_module(control_path: str, control: str = "control_structure") -> dict[str, Any]:
+    config_path = Path(control_path).resolve()  # Ensure absolute path
+    module_name = config_path.stem  # Extract filename without extension
+
+    spec = importlib.util.spec_from_file_location(module_name, str(control_path))
+    if spec and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        if hasattr(module, control):  # Check if variable exists
+            return getattr(module, control)
+        else:
+            raise AttributeError(f"Variable '{control}' not found in {config_path}")
+    else:
+        raise ImportError(f"Could not load control module from {config_path}")
 
 
-def pickle_writer(filepath: Path, data: ObjectLike):
+##### FileWriters start #####
+def pickle_writer(filepath: Path, container: ObjectLike | ExportableContainer[ForestStand]):
+    outputtable = container.result_objects if type(container) is ExportableContainer else container
     with open(filepath, 'wb') as f:
-        pickle.dump(data, f, protocol=5)
+        pickle.dump(outputtable, f, protocol=5)
 
 
-def pickle_reader(file_path: str) -> ObjectLike:
-    with open(file_path, 'rb') as f:
-        return pickle.load(f)
-
-
-def json_writer(filepath: Path, data: ObjectLike):
+def json_writer(filepath: Path, container: ObjectLike | ExportableContainer[ForestStand]):
+    outputtable = container.export_objects if type(container) is ExportableContainer else container
     jsonpickle.set_encoder_options("json", indent=2)
     with open(filepath, 'w', newline='\n') as f:
-        f.write(jsonpickle.encode(data))
+        f.write(jsonpickle.encode(outputtable))
 
-
-def csv_writer(filepath: Path, data: StandList):
-    row_writer(filepath, stands_to_csv_content(data, ';'))
-
-
-def rst_writer(filepath: Path, data: StandList):
-    row_writer(filepath, stands_to_rst_content(data))
-
-
-def rsts_writer(filepath: Path, data: StandList):
-    row_writer(filepath, stands_to_rsts_content(data))
-
-
+# generic writer
 def row_writer(filepath: Path, rows: list[str]):
     with open(filepath, 'w', newline='\n') as file:
         for row in rows:
@@ -274,11 +278,29 @@ def row_writer(filepath: Path, rows: list[str]):
             file.write('\n')
 
 
-def json_reader(file_path: str) -> ObjectLike:
-    res = jsonpickle.decode(file_contents(file_path))
-    return res
+def csv_writer(filepath: Path, container: ExportableContainer[ForestStand]):
+    row_writer(filepath, stands_to_csv_content(container, ';'))
 
 
+def rst_writer(filepath: Path, container: ExportableContainer[ForestStand]):
+    rows = stands_to_rst_content(container)
+    row_writer(filepath, rows)
+    if container.additional_vars is not None:
+        par_writer(filepath, container.additional_vars)
+
+# NOTE: Q: Onko tarvetta räätälöidä tätä kontrollitasolla?
+# - voidaanko tälle tehdä sama kuin par_writerille?
+def rsts_writer(filepath: Path, container: ExportableContainer[ForestStand]):
+    row_writer(filepath, stands_to_rsts_content(container))
+
+
+def par_writer(filepath: Path, var_names: list[str]):
+    def to_par_filepath(filepath: Path):
+        dir_parts = list(filepath.parts)[0:-1]
+        return determine_file_path(os.path.join(*dir_parts), 'c-variables.par')
+    row_writer(to_par_filepath(filepath), mela_par_file_content(var_names))
+
+##### SourceFileReaders start #####
 def vmi_file_reader(file: Path) -> list[str]:
     with open(file, 'r', encoding='utf-8') as input_file:
         return input_file.readlines()
@@ -292,3 +314,13 @@ def xml_file_reader(file: Path) -> str:
 def csv_file_reader(file: Path) -> list[list[str]]:
     with open(file, 'r', encoding='utf-8') as input_file:
         return list(csv.reader(input_file, delimiter=';'))
+
+## ObjectFileReaders start ##
+def json_reader(file_path: str) -> ObjectLike:
+    res = jsonpickle.decode(file_contents(file_path))
+    return res
+
+
+def pickle_reader(file_path: str) -> ObjectLike:
+    with open(file_path, 'rb') as f:
+        return pickle.load(f)

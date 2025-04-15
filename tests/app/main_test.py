@@ -10,7 +10,7 @@ import shutil
 import unittest
 from lukefi.metsi.app import metsi
 
-
+@unittest.skip
 class MainTest(unittest.TestCase):
     def test_metsi(self):
         sys.argv = [

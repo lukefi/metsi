@@ -1,4 +1,5 @@
 from copy import copy
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.enums.mela import (
     MelaOwnerCategory, 
     MelaSiteTypeCategory, 
@@ -16,6 +17,7 @@ from lukefi.metsi.data.enums.internal import (
     DrainageCategory
     )
 from lukefi.metsi.data.conversion.util import apply_mappers
+from lukefi.metsi.data.formats.util import get_or_default
 # TODO: can we find a way to resolve the circular import introduced by trying to use these classes just for typing?
 # Even using the iffing below, pytest fails during top_level_collect
 # if typing.TYPE_CHECKING:
@@ -212,14 +214,14 @@ def mela_stratum(stratum):
     return apply_mappers(result, *default_mela_stratum_mappers)
 
 
-def mela_tree(tree):
+def mela_tree(tree: ReferenceTree) -> ReferenceTree:
     """Convert a ReferenceTree so that enumerated category variables are converted to Mela value space"""
     result = copy(tree)
     result.stand_origin_relative_position = copy(tree.stand_origin_relative_position)
     return apply_mappers(result, *default_mela_tree_mappers)
 
 
-def mela_stand(stand):
+def mela_stand(stand: ForestStand) -> ForestStand:
     """Convert a ForestStand so that enumerated category variables are converted to Mela value space"""
     result = copy(stand)
     result.geo_location = copy(stand.geo_location)
@@ -231,6 +233,35 @@ def mela_stand(stand):
     result.tree_strata = list(map(mela_stratum, result.tree_strata))
     for stratum in result.tree_strata:
         stratum.stand = result
+    # Some  fixed RST spesific classifier conversions TODO: find a better place for these.
+    ## stand level
+    result.forestry_centre_id = (-1 if result.forestry_centre_id is None
+                                 else result.forestry_centre_id)
+    result.municipality_id = (-1 if result.municipality_id is None
+                              else result.municipality_id)
+    result.soil_peatland_category = (0 if result.soil_peatland_category is None
+                                     else result.soil_peatland_category.value)
+    result.site_type_category = (0 if result.site_type_category is None
+                                 else result.site_type_category.value)
+    result.drainage_category = (0 if result.drainage_category is None
+                                 else result.drainage_category.value)
+    ## tree level
+    for t in result.reference_trees:
+        t.saw_log_volume_reduction_factor = (
+            -1
+            if t.saw_log_volume_reduction_factor is None
+            else t.saw_log_volume_reduction_factor
+        )
+        t.species = 0 if t.species is None else t.species.value
+    ## strata level
+    for s in result.tree_strata:
+        s.species = 0 if s.species is None else s.species.value
+        s.storey = 0 if s.storey is None else s.storey.value,
+        # all None values to -1
+        rsts_default = -1
+        for k, v in s.__dict__.items():
+            if v is None:
+                setattr(s, k, rsts_default)
     return result
 
 

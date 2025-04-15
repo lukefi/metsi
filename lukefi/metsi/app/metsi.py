@@ -7,12 +7,12 @@ import traceback
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import lukefi.metsi.app.preprocessor
-from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_program_configuration, RunMode
+from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
-from lukefi.metsi.app.export import export_files
-from lukefi.metsi.app.file_io import simulation_declaration_from_yaml_file, prepare_target_directory, read_stands_from_file, \
-    read_full_simulation_result_dirtree, determine_file_path, write_stands_to_file, write_full_simulation_result_dirtree
+from lukefi.metsi.app.export import export_files, export_preprocessed
+from lukefi.metsi.app.file_io import prepare_target_directory, read_stands_from_file, \
+    read_full_simulation_result_dirtree, write_full_simulation_result_dirtree, read_control_module
 from lukefi.metsi.app.post_processing import post_process_alternatives
 from lukefi.metsi.app.simulator import simulate_alternatives
 from lukefi.metsi.app.console_logging import print_logline
@@ -21,10 +21,6 @@ from lukefi.metsi.app.console_logging import print_logline
 def preprocess(config: MetsiConfiguration, control: dict, stands: StandList) -> StandList:
     print_logline("Preprocessing...")
     result = lukefi.metsi.app.preprocessor.preprocess_stands(stands, control)
-    if config.preprocessing_output_container is not None:
-        print_logline(f"Writing preprocessed data to '{config.target_directory}/preprocessing_result.{config.preprocessing_output_container}'")
-        filepaths = determine_file_path(config.target_directory, config.preprocessing_output_container)
-        write_stands_to_file(result, filepaths, config.preprocessing_output_container)
     return result
 
 
@@ -47,12 +43,23 @@ def post_process(config: MetsiConfiguration, control: dict, data: SimResults) ->
 
 
 def export(config: MetsiConfiguration, control: dict, data: SimResults) -> None:
-    print_logline("Exporting data...")
-    export_files(config, control['export'], data)
+    print_logline("Exporting simulation results...")
+    if control['export']:
+        export_files(config, control['export'], data)
 
+
+def export_prepro(config: MetsiConfiguration, control: dict, data: StandList) -> None:
+    print_logline("Exporting preprocessing results...")
+    if control.get('export_prepro', None):
+        export_preprocessed(config.target_directory, control['export_prepro'], data)
+    else:
+        print_logline(f"Declaration for 'export_prerocessed' not found from control.")
+        print_logline(f"Skipping export of preprocessing results.")
+    return data # returned as is just for workflow reasons
 
 mode_runners = {
     RunMode.PREPROCESS: preprocess,
+    RunMode.EXPORT_PREPRO: export_prepro,
     RunMode.SIMULATE: simulate,
     RunMode.POSTPROCESS: post_process,
     RunMode.EXPORT: export
@@ -61,18 +68,18 @@ mode_runners = {
 
 def main() -> int:
     cli_arguments = parse_cli_arguments(sys.argv[1:])
-    control_file = MetsiConfiguration.control_file if cli_arguments.control_file is None else cli_arguments.control_file
+    control_file = MetsiConfiguration.control_file if cli_arguments["control_file"] is None else cli_arguments['control_file']
     try:
-        control_structure = simulation_declaration_from_yaml_file(control_file)
+        control_structure = read_control_module(control_file)
     except IOError:
         print(f"Application control file path '{control_file}' can not be read. Aborting....")
         return 1
     try:
-        app_config = generate_program_configuration(cli_arguments, control_structure['app_configuration'])
+        app_config = generate_application_configuration( {**cli_arguments, **control_structure['app_configuration']} )
         prepare_target_directory(app_config.target_directory)
         print_logline("Reading input...")
         if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
-            input_data = read_stands_from_file(app_config)
+            input_data = read_stands_from_file(app_config, control_structure.get('conversions', {}))
         elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.EXPORT]:
             input_data = read_full_simulation_result_dirtree(app_config.input_path)
         else:

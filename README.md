@@ -5,7 +5,7 @@ Resources Institute Finland.
 
 The simulator is a alternative state simulator operating upon forest state data. The state data is manipulated by
 **simulator operations** over a progression of time steps. The event and branching structure for simulator operations
-is declared in a human-readable YAML format or directly by functional declaration. This declaration is used to generate
+is declared as functional declaration. This declaration is used to generate
 a **simulation event tree** holding the full branching possibilities for the simulation. The event tree is evaluated
 with the simulator engine to produce alternative end results.
 
@@ -78,15 +78,16 @@ Dependency libraries for this project are listed in `pyproject.toml`.
 
 The project contains a single application entry point. This is the `lukefi/metsi/app/metsi.py`.
 
-The application implements a 4 phase pipeline. These phases are: __preprocess__, __simulate__, __postprocess__ and __export__. Each of
+The application implements a 5 phase pipeline. These phases are: __preprocess__, __export_preprocess__, __simulate__, __postprocess__ and __export__. Each of
 the phases can be run independetly or as sequences, as long as their logical order for input data structuring is
-preserved. Each application phase uses the given YAML file (default `control.yaml`) as their configuration.
+preserved. Each application phase is inclued in python configuration file (default `control.py`).
 
 ### Phases
 
 | phase       | description                                                                            |
 |-------------|----------------------------------------------------------------------------------------|
 | preprocess  | Operations for filtering or modifying the input data set                               |
+| export preprocessed  | Operations for filtering or modifying the input data set                               |
 | simulate    | Discrete time-step simulation and data collection with given event tree and operations |
 | postprocess | Operations for further deriving and marshalling of data from the simulation results    |
 | export      | File output into different formats based on simulation or post-processing results      |
@@ -107,7 +108,7 @@ There are several example input files in the project test resources `tests/resou
 
 ### Output types
 
-Preprocessing generates a csv, pickle or json file with the computational units as a list. The data is always in FDM
+Preprocessing extracts and runs conversions for the input data. To export prerocessed data use the `export_prepro` pipeline component to generates different formats such as csv, pickle or json file with the computational units as a list. The data is always in FDM
 format. The file is written into the configured output directory as `preprocessing-result.{csv,pickle,json}`.
 
 Simulate collects a nested data structure containing the final states for each produced alternatives of each
@@ -125,11 +126,11 @@ modules into the exporting functionality.
 When phases are run in order on the same run, intermediate result files do not need to be written out. Data is kept and
 propagated in-memory.
 
-#### RST format
+#### RST and RSTS format
 
 Despite other output formats the computational units can be outputted as a RST format which is in itself a special format used only by the Natural Resource Institutes MELA simulator. The RST format is only genereted as preprocessing output and contains the reference tree information of forest stands. Along with the RST format an RSTS format file is genereted which contains the stratum information of the computationals units.
 
-### Run examples
+### Running the application
 
 Use the following command to output simulator application help menu.
 
@@ -137,15 +138,16 @@ Use the following command to output simulator application help menu.
 python -m lukefi.metsi.app.metsi --help
 ```
 
-Input path, output path and optionally the control file path must be supplied as CLI positional arguments. All other
-parameters in commands below can also be set in the `control.yaml` file `app_configuration` block. Control file settings
-override program defaults (see app/app_io.py MetsiConfiguration class). CLI arguments override the settings in the
-control file.
+Input path, output path and the control file path must be supplied as CLI positional arguments. All other application level configuration
+parameters in commands below should be set in the `control.py` file under the `app_configuration` key. Control file settings
+override program defaults (see app/app_io.py MetsiConfiguration class).
 
 **At the time of writing this, there are no post-processing operations ready to be used. Post-processing
 will `do_nothing`**
 
-All examples below default to `control.yaml` in the working directory as the control file source unless otherwise
+**Main documentation resource for all configuration is inclued in the `examples` directory and the `control.py` file.**
+
+All examples below default to `control.py` in the working directory as the control file source unless otherwise
 specified in the command line.
 
 Preprocessing, simulation and post-processing phases do not produce output files by default. Configuration for
@@ -153,80 +155,6 @@ preprocessing output container, state output container and derived data output c
 output files. The default mode of operation is to run the full pipeline and only the export phase will create files as
 configured.
 
-To run full pipeline from a VMI12 data source file using direct reference trees from the input data, run:
-
-```
-python -m lukefi.metsi.app.metsi --state-format vmi12 --measured-trees -r preprocess,simulate,postprocess,export vmi12.dat sim_outdir
-```
-
-To run full pipeline from a VMI13 data source file using direct reference trees from the input data, run:
-
-```
-python -m lukefi.metsi.app.metsi --state-format vmi13 --measured-trees -r preprocess,simulate,postprocess,export vmi13.dat sim_outdir
-```
-
-To run full pipeline from a Forest Centre .xml source file, run:
-
-```
-python -m lukefi.metsi.app.metsi --state-format xml -r preprocess,simulate,postprocess,export forest_centre.xml sim_outdir
-```
-
-To run full pipeline from a Forest Centre .gpkg source file, run:
-
-```
-python -m lukefi.metsi.app.metsi --state-format gpkg -r preprocess,simulate,postprocess,export geopackage.gpkg sim_outdir
-```
-
-To run full pipeline from a FDM formatted data from csv (or json or pickle with replacement below), run:
-
-```
-python -m lukefi.metsi.app.metsi --state-input-container csv -r preprocess,simulate,postprocess,export forest_data.csv sim_outdir
-```
-
-#### Preprocessing and simulation
-
-To run preprocess and simulate phases of the application, run the following command in the project root.
-The created output directory contains all generated variants for all computation units (ForestStand) along with derived
-data.
-
-```
-python -m lukefi.metsi.app.metsi --state-input-container pickle -r preprocess,simulate forest_data.pickle sim_outdir
-```
-
-In case you need to use a FDM formatted JSON file as the input and/or output file format, run:
-
-```
-python -m lukefi.metsi.app.metsi --state-input-container json --state-output-container json -r preprocess,simulate forest_data.json sim_outdir
-```
-
-To only run the preprocessor and produce output as `outdir/preprocessing_result.csv`, with a control yaml file in
-non-default location `my_project/control_preprocessing.yaml`, run:
-
-```
-python -m lukefi.metsi.app.metsi --preprocessing-output-container csv -r preprocess forest_data.pickle sim_outdir my_project/control_preprocessing.yaml
-```
-
-To use the preprocessed result file as input for a simulation, and produce schedule results in csv+json format run:
-
-```
-python -m lukefi.metsi.app.metsi --state-input-container csv --state-output-container csv --derived-data-output-container json -r simulate sim_outdir/preprocessing_result.csv sim_outdir my_project/control_simulate.yaml
-```
-
-#### Post-processing and export
-
-The output directory `outdir` from simulate is usable as input for the post-processing phase of the application.
-It will create a new directory `outdir2` with matching structure for its output with the following command:
-
-```
-python -m lukefi.metsi.app.metsi -r postprocess outdir outdir2 my_project/postprocessing_control.yaml
-```
-
-The output directory `outdir` from simulation (or `outdir2` from post-processing) can be used as input for the export
-phase as follows:
-
-```
-python -m lukefi.metsi.app.metsi -r export outdir outdir2 my_project/export_control.yaml
-```
 
 ## Operations
 
@@ -477,9 +405,12 @@ collections are:
 For example, to get the total stems per hectare in the years the operation is defined for, one would
 define ``report_state``'s operation parameters as:
 
-```yaml
-report_state:
-  - total_stems_per_ha: reference_trees.stems_per_ha
+```python
+"report_state": [
+  {
+    "total_stems_per_ha": "reference_trees.stems_per_ha"
+  }
+]
 ```
 
 The stand's reference trees are stored under the name ``reference_trees``, and the attributes defined for that name can
@@ -488,16 +419,26 @@ be used to get values. The returned `total_stems_per_ha` is the sum of the stand
 However, often one needs more detailed information about the state, and therefore filter only certain variables. For
 example, to get the stems per hectare of pines:
 
-```yaml
-report_state:
-  - total_stems_per_ha: reference_trees.stems_per_ha[reference_trees.species == 1]
+```python
+{
+  "report_state": [
+    {
+      "total_stems_per_ha": "reference_trees.stems_per_ha[reference_trees.species == 1]"
+    }
+  ]
+}
 ```
 
 or, to be even more fine-grained, get the stems_per_ha of pines that are not saplings:
 
-```yaml
-report_state:
-  - total_stems_per_ha: reference_trees.stems_per_ha[(reference_trees.species == 1) & (reference_trees.sapling == False)]
+```python
+{
+  "report_state": [
+    {
+      "total_stems_per_ha": "reference_trees.stems_per_ha[(reference_trees.species == 1) & (reference_trees.sapling == False)]"
+    }
+  ]
+}
 ```
 
 Notice the parentheses around the filter conditions, when using multiple conditions.
@@ -672,29 +613,26 @@ python -m unittest <test suite module.class path>
 
 # Application control
 
-A run is declared in the YAML file `control.yaml`.
+A run is declared in the YAML file `control.py`.
 
-1. Application configuration in `app_configuration` object. These may be overridden by equivalent command line
-   arguments. Note that e.g. `state_format` with `fdm` below is written as `--state-format fdm` when given as a command
-   line argument.
+1. Application configuration in `app_configuration` dictionary.
     1. `state_format` specifies the data format of the input computational units
         1. `fdm` is the standard Forest Data Model.
         2. `vmi12` and `vmi13` denote the VMI data format and container.
         3. `forest_centre` denotes the Forest Centre XML data format and container.
         4. `geo_package` denotes the Forest Centre GPKG data format and container.
     2. `state_input_container` is the file type for `fdm` data format. This may be `csv`, `pickle` or `json`.
-    3. `preprocessing_output_container` is the file type for outputting the `fdm` formatted state of computational units
-       after preprocessing operations. This may be `csv`, `pickle` or `json` or commented out for no output.
-    4. `state_output_container` is the file type for outputting the `fdm` formatted state of individual computational
+    3. `state_output_container` is the file type for outputting the `fdm` formatted state of individual computational
        units during and after the simulation. This may be `csv`, `pickle` or `json` or commented out for no output.
-    5. `derived_data_output_container` is the file type for outputting derived data during and after the simulation.
+    4. `derived_data_output_container` is the file type for outputting derived data during and after the simulation.
        This may be `pickle` or `json` or commented out for no output.
+    5. `run_modes` Metsi pipeline considers two conceptual parts. The data conversion and the simulation. From which first one is defined with the `preprocess` and `export_prepro` and the second one with `simulate`, `postprocess` and `export`.
     6. `strategy` is the simulation event tree formation strategy. Can be `partial` or `full`.
     7. `measured_trees` instructs the `vmi12` and `vmi13` data converters to choose reference trees from the source. `True` or `False`.
     8. `strata` instructs the `vmi12` and `vmi13` data converters strata from the source. `True` or `False`.
-    8. `strata_origin` instructs the `forest_centre` converter to choose only strata with certain origin to the
+    9. `strata_origin` instructs the `forest_centre` converter to choose only strata with certain origin to the
        result. `1`, `2` or `3`.
-    9. `multiprocessing` instructs the application to parallelizes the computation to available CPU cores in the
+    10. `multiprocessing` instructs the application to parallelizes the computation to available CPU cores in the
        system. `True` or `False`.
 2. Operaton run constrains in the object `run_constraints`
 3. Operation parameters in the object `operation_params`. Operation parameters may be declared as a list of 1 or more
@@ -709,13 +647,17 @@ A run is declared in the YAML file `control.yaml`.
 5. Preprocessing operations can be passed as a list of strings under `preprocessing_operations`, and their (optional)
    arguments under `preprocessing_params` as key-value pairs.
 6. Operation parameters that **exist in files** can be passed in `operation_file_params` as demonstated below:
-   ```yaml
-   operation_file_params:
-     first_thinning:
-       thinning_limits: /path/to/file/thinning-limits.txt
-     cross_cut_felled_trees:
-       timber_price_table: /path/to/file/timber-prices.csv
-   ```
+
+  ```python
+  operation_file_params = {
+    "first_thinning": {
+      "thinning_limits": "/path/to/file/thinning-limits.txt"
+    },
+    "cross_cut_felled_trees": {
+      "timber_price_table": "/path/to/file/timber-prices.csv"
+    }
+  }
+  ```
    Note, that it is the user's responsibility to provide the file in a valid format for each operation.
 7. Post-processing is controlled in the `post_processing` section of the file
     1. `operation_params` section sets key-value pairs to be passed as parameters to named post-processing operations
@@ -735,39 +677,58 @@ tree.
   again with `do_nothing` and `thinning` operations with two parameter sets, resulting in 9 branches.
 * At time point 15, `reporting` is done on the 9 individual state branches.
 
-```yaml
-# example of operation run constrains
-# minimum time interval constrain between thinnings is 10 years
-run_constraints:
-  thinning:
-    minimum_time_interval: 10
+```python
+# example of operation run constraints
+# minimum time interval constraint between thinnings is 10 years
+run_constraints = {
+  "thinning": {
+    "minimum_time_interval": 10
+  }
+}
 
 # example of operation parameters
 # reporting operation gets one parameter set
 # thinning operation gets two parameter sets
-operation_params:
-  reporting:
-    - level: 1
-  thinning:
-    - thinning_factor: 0.7
-      e: 0.2
-    - thinning_factor: 0.9
-      e: 0.1
+operation_params = {
+  "reporting": [
+    {"level": 1}
+  ],
+  "thinning": [
+    {"thinning_factor": 0.7, "e": 0.2},
+    {"thinning_factor": 0.9, "e": 0.1}
+  ]
+}
 
 # simulation_events are a collection of operations meant to be executed at
 # the specified time_points
-simulation_events:
-  - time_points: [ 5, 10 ]
-    generators:
-      - sequence:
-          - grow
-      - alternatives:
-          - do_nothing
-          - thinning
-  - time_points: [ 0, 15 ]
-    generators:
-      - sequence:
-          - reporting
+simulation_events = [
+  {
+    "time_points": [5, 10],
+    "generators": [
+      {
+        "sequence": [
+          "grow"
+        ]
+      },
+      {
+        "alternatives": [
+          "do_nothing",
+          "thinning"
+        ]
+      }
+    ]
+  },
+  {
+    "time_points": [0, 15],
+    "generators": [
+      {
+        "sequence": [
+          "reporting"
+        ]
+      }
+    ]
+  }
+]
 ```
 
 Event tree from declaration above
@@ -803,11 +764,15 @@ value.
 
 The following example removes all sapling trees, trees without stem count and stands without reference trees:
 
-```yaml
-preprocessing_params:
-  filter:
-    - remove trees: sapling or stems_per_ha == 0
-      remove: not reference_trees
+```python
+preprocessing_params = {
+  "filter": [
+    {
+      "remove trees": "sapling or stems_per_ha == 0",
+      "remove": "not reference_trees"
+    }
+  ]
+}
 ```
 
 Evaluation order is the order of parameters, so the example would first remove trees and then stands.
@@ -815,15 +780,19 @@ Evaluation order is the order of parameters, so the example would first remove t
 You can also reuse filters with named filters. A named filter is an expression given in the `named` parameter, and it
 can be used in other expressions (including other named filters). The following example is equivalent to the previous
 one:
-
-```yaml
-preprocessing_params:
-  filter:
-    - named:
-        nostems: stems_per_ha == 0
-        notrees: not reference_trees
-      remove trees: sapling or nostems
-      remove: notrees
+```python
+preprocessing_params = {
+  "filter": [
+    {
+      "named": {
+        "nostems": "stems_per_ha == 0",
+        "notrees": "not reference_trees"
+      },
+      "remove trees": "sapling or nostems",
+      "remove": "notrees"
+    }
+  ]
+}
 ```
 
 ## Simulator
@@ -836,7 +805,7 @@ The three important concepts in the `sim` package are **operations**, **processo
 An operation is a function whose responsiblities are 1) to trigger manipulation of simulation state and 2) to compute
 derived data about simulation state before and/or after state manipulation. For the purposes of the simulator, the
 operation is a partially applied function from the domain package (forestry) such that it will take only one argument.
-They are produced as lambda functions based on the `control.yaml` declaration.
+They are produced as lambda functions based on the `control.py` declaration.
 
 As an example, a single operation such as `grow` would receive a single argument of type `ForestStand` upon which it
 operates and finally returns a `ForestStand` for the modified/new state.
@@ -853,12 +822,12 @@ follows:
 * Create a record of the run in simulation run history.
 * Pack results as a new `OperationPayload` and return it.
 
-Processor functions are produced as lambda functions based on the `control.yaml` declaration.
+Processor functions are produced as lambda functions based on the `control.py` declaration.
 
 ### The event tree
 
 The event tree is a tree data structure where each individual node represents a prepared simulation operation. It is
-generated based on the `control.yaml` declaration. Unique operation chains are generated based on the event tree for
+generated based on the `control.py` declaration. Unique operation chains are generated based on the event tree for
 individual chain runs, or the event tree can be evaluated by depth-first walkthrough. This is controlled by the
 evaluation strategy.
 
@@ -874,7 +843,7 @@ The generators are chainable and nestable such that they can expand the event tr
 a previous generator's results. The `NestableGenerator` represents a tree structure for nested generator declarations.
 It is constructed from the `simulation_events` structure given from a configuration source. A `SimConfiguration`
 structure, likewise populated from a configuration source is used as a template for binding the created generator
-functions with prepared domain operation functions. The control source is an application's `control.yaml` file's dict
+functions with prepared domain operation functions. The control source is an application's `control.py` file's dict
 structure or another compatible source.
 
 `compose_nested` function executes the given `NestableGenerator` which in turn utilizes its prepared `sequence`
@@ -999,16 +968,27 @@ library(lmfor)
 
 To understand the partial tree strategy better, consider a simulator instruction such as:
 
-```yaml
-simulation_events:
-  - time_points: [ 0,5 ]
-    generators:
-      - sequence:
-          - grow
-      - alternatives:
-          - do_nothing
-          - thinning
+```python
+simulation_events = [
+  {
+    "time_points": [0, 5],
+    "generators": [
+      {
+        "sequence": [
+          "grow"
+        ]
+      },
+      {
+        "alternatives": [
+          "do_nothing",
+          "thinning"
+        ]
+      }
+    ]
+  }
+]
 ```
+
 
 which will produce a simulator tree as below:
 
@@ -1042,5 +1022,5 @@ operate depth-first within time points, but breadth-first across time points.__
 
 ## Notes for simulation creators
 
-Use the control.yaml structure declaration to control the simulation structure, domain operations and parameters that
+Use the control.py structure declaration to control the simulation structure, domain operations and parameters that
 are to be used.
