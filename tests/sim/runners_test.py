@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
 from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, SimConfiguration
 from lukefi.metsi.sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy, \
@@ -27,7 +28,11 @@ class RunnersTest(unittest.TestCase):
         self.assertRaises(Exception, prepared_function)
 
     def test_event_tree_formation_strategies_by_comparison(self):
-        declaration = read_control_module('tests\\resources\\runners_test\\branching.py')
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "branching.py").resolve())
+        declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
@@ -44,7 +49,11 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(results_partial, results_full)
 
     def test_full_formation_evaluation_strategies_by_comparison(self):
-        declaration = read_control_module('tests\\resources\\runners_test\\branching.py')
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "branching.py").resolve())
+        declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
@@ -67,7 +76,11 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(results_chains, results_depth)
 
     def test_partial_formation_evaluation_strategies_by_comparison(self):
-        declaration = read_control_module('tests\\resources\\runners_test\\branching.py')
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "branching.py").resolve())
+        declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
@@ -90,7 +103,11 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(results_chains, results_depth)
 
     def test_no_parameters_propagation(self):
-        declaration = read_control_module('tests\\resources\\runners_test\\no_parameters.py')
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "no_parameters.py").resolve())
+        declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
@@ -107,7 +124,11 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(5, results[0])
 
     def test_parameters_propagation(self):
-        declaration = read_control_module('tests\\resources\\runners_test\\parameters.py')
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "parameters.py").resolve())
+        declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
@@ -124,7 +145,11 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(9, results[0])
 
     def test_parameters_branching(self):
-        declaration = read_control_module('tests\\resources\\runners_test\\parameters_branching.py')
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "parameters_branching.py").resolve())
+        declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
