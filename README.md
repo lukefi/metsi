@@ -45,6 +45,15 @@ To be able to use forestry operations depending on R modules
 pip install .[rpy2]
 ```
 
+### C (optional)
+
+To be able to use forestry operations depending on C sources
+
+* Compile c sources by with `make`
+  * `Makefile` located in `lukefi/metsi/forestry/c`
+  * c sources located in `c/source`
+  * Running the `Makefile` generates a `c/lib` folder which includes the `.dll` files used by the operations
+
 ### Motti (optional)
 
 Access to this module is restricted to Natural Resources Institute Finland by special admission. Installing this will

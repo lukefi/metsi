@@ -1,10 +1,12 @@
+from typing import Any
+from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.enums.internal import LandUseCategory
-from lukefi.metsi.data.model import ForestStand, TreeStratum
+from lukefi.metsi.domain.utils.filter import applyfilter
 from lukefi.metsi.forestry.forestry_utils import find_matching_storey_stratum_for_tree
 from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
+from lukefi.metsi.forestry.preprocessing.coordinate_conversion import convert_location_to_ykj, CRS
 from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
-from lukefi.metsi.domain.utils.filter import applyfilter
 from lukefi.metsi.forestry.preprocessing.tree_generation import trees_from_sapling_height_distribution
 from lukefi.metsi.forestry.preprocessing.tree_generation_lm import tree_generation_lm
 from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
@@ -190,6 +192,22 @@ def scale_area_weight(stands: list[ForestStand], **operation_params):
     return stands
 
 
+def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str, Any]) -> list[ForestStand]:
+    """ Preprocessing operation for converting the current coordinate system to target system
+    
+    :target_system (optional): Spesified target system. Default is EPSG:2393
+    """
+    defaults = CRS.EPSG_2393.value
+    target_system = operation_params.get('target_system', defaults[0])
+    if target_system in defaults:
+        for s in stands:
+            s.geo_location = convert_location_to_ykj(s)
+    else:
+        Exception("Check definition of operation params.\n"
+            "{default}\' conversion supported.".format(default = defaults[0]))
+    return stands
+
+
 operation_lookup = {
     'filter': preproc_filter,
     'compute_location_metadata': compute_location_metadata,
@@ -198,5 +216,6 @@ operation_lookup = {
     'supplement_missing_tree_ages': supplement_missing_tree_ages,
     'supplement_missing_stratum_diameters': supplement_missing_stratum_diameters,
     'generate_sapling_trees_from_sapling_strata': generate_sapling_trees_from_sapling_strata,
-    'scale_area_weight': scale_area_weight
+    'scale_area_weight': scale_area_weight,
+    'convert_coordinates': convert_coordinates
 }

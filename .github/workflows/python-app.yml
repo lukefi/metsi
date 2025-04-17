@@ -48,6 +48,14 @@ jobs:
       with:
         cache-version: 2
 
+    - name: Compile shared libraries
+      run: |
+        make -C lukefi/metsi/forestry/c
+
     - name: Test with pytest
       run: |
         python -m pytest
+
+    - name: Clean up
+      run: |
+        make -C lukefi/metsi/forestry/c clean
