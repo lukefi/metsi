@@ -7,7 +7,6 @@ from typing import Any, Optional
 from collections.abc import Callable
 import numpy as np
 
-import yaml
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.sim.core_types import OpTuple, OperationPayload
@@ -79,9 +78,6 @@ def file_contents(file_path: str) -> str:
     with open(file_path, 'r') as f:
         return f.read()
 
-
-def load_yaml(file_name: str) -> dict:
-    return yaml.load(file_contents(os.path.join(os.getcwd(), "tests", "resources", file_name)), Loader=yaml.CLoader)
 
 def get_default_timber_price_table() -> str:
     return open("tests/resources/timber_price_table.csv", "r").read()
