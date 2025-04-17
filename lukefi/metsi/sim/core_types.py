@@ -14,6 +14,32 @@ class DeclaredEvents(SimpleNamespace):
 
 
 class SimConfiguration(SimpleNamespace):
+    """
+    A class to manage simulation configuration, including operations, generators, 
+    events, and time points.
+    Attributes:
+        operation_lookup: A mapping of operation names 
+            to their corresponding callable functions.
+        generator_lookup: A mapping of generator names 
+            to their corresponding callable functions.
+        operation_params: A dictionary containing 
+            parameters for each operation, where the key is the operation name and 
+            the value is a list of parameter dictionaries.
+        operation_file_params: A dictionary containing 
+            file-related parameters for operations, where the key is the operation 
+            name and the value is a dictionary of file parameters.
+        events: A list of declared events for the simulation.
+        run_constraints: A dictionary defining constraints for 
+            simulation runs, where the key is a constraint name and the value is a 
+            dictionary of constraint details.
+        time_points: A sorted list of unique time points derived from the 
+            declared simulation events.
+    Methods:
+        __init__(operation_lookup, generator_lookup, **kwargs):
+            Initializes the SimConfiguration instance with operation and generator 
+            lookups, and additional keyword arguments.
+    """
+    generator_lookup: dict[str, Callable] = {}
     operation_lookup: dict[str, Callable] = {}
     operation_params: dict[str, list[dict[str, Any]]] = {}
     operation_file_params: dict[str, dict[str, str]] = {}
@@ -21,11 +47,23 @@ class SimConfiguration(SimpleNamespace):
     run_constraints: dict[str, dict] = {}
     time_points = []
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.populate_simulation_events(self.simulation_events)
+    def __init__(self,
+                 operation_lookup: dict[str, Callable],
+                 generator_lookup: dict[str, Callable],
+                 **kwargs):
+        """
+        Initializes the core simulation object.
+        Args:
+            operation_lookup (dict): A dictionary mapping operation names to their corresponding handlers or functions.
+            generator_lookup (dict): A dictionary mapping generator names to their corresponding handlers or functions.
+            **kwargs: Additional keyword arguments to be passed to the parent class initializer.
+        """
+        super().__init__(operation_lookup=operation_lookup,
+                         generator_lookup=generator_lookup,
+                         **kwargs)
+        self._populate_simulation_events(self.simulation_events)
 
-    def populate_simulation_events(self, events: list):
+    def _populate_simulation_events(self, events: list):
         time_points = set()
         self.events = list()
         for event_set in events:

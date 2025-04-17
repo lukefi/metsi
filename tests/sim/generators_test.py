@@ -480,5 +480,8 @@ class TestGenerators(unittest.TestCase):
           }
             ]
         }
-        result = SimConfiguration(**declaration)
+        dummy_dict = {}
+        result = SimConfiguration(dummy_dict,
+                                  dummy_dict,
+                                  **declaration)
         self.assertEqual([0, 1, 4, 6, 8, 9, 10, 12, 100, 1000], result.time_points)
