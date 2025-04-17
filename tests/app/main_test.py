@@ -1,7 +1,6 @@
 """
 This file contains tests for the main functions of the simulator and post processing applications.
 The tests write into sys.argv to simulate calling the applications from the command line.
-NOTE: the tests use the control.yaml and pp_control.yaml files from the project root to easily test the most recent versions of them.
 """
 
 import os

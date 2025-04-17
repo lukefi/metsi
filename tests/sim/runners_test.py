@@ -1,10 +1,11 @@
 import unittest
+from pathlib import Path
 from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
 from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, SimConfiguration
 from lukefi.metsi.sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy, \
     chain_evaluator, depth_first_evaluator
-from tests.test_utils import raises, identity, none, collect_results, load_yaml, collecting_increment
-
+from tests.test_utils import raises, identity, none, collect_results, collecting_increment
+from lukefi.metsi.app.file_io import read_control_module
 
 class RunnersTest(unittest.TestCase):
     def test_sequence_success(self):
@@ -27,8 +28,14 @@ class RunnersTest(unittest.TestCase):
         self.assertRaises(Exception, prepared_function)
 
     def test_event_tree_formation_strategies_by_comparison(self):
-        declaration = load_yaml('runners_test/branching.yaml')
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "branching.py").resolve())
+        declaration = read_control_module(control_path)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
+                                  generator_lookup=GENERATOR_LOOKUP,
+                                  **declaration)
         print(config)
         initial = OperationPayload(
             computational_unit=1,
@@ -42,8 +49,14 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(results_partial, results_full)
 
     def test_full_formation_evaluation_strategies_by_comparison(self):
-        declaration = load_yaml('runners_test/branching.yaml')
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "branching.py").resolve())
+        declaration = read_control_module(control_path)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
+                                  generator_lookup=GENERATOR_LOOKUP,
+                                  **declaration)
         print(config)
         chains_payload = OperationPayload(
             computational_unit=1,
@@ -63,8 +76,14 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(results_chains, results_depth)
 
     def test_partial_formation_evaluation_strategies_by_comparison(self):
-        declaration = load_yaml('runners_test/branching.yaml')
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "branching.py").resolve())
+        declaration = read_control_module(control_path)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
+                                  generator_lookup=GENERATOR_LOOKUP,
+                                  **declaration)
         print(config)
         chains_payload = OperationPayload(
             computational_unit=1,
@@ -84,9 +103,15 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(results_chains, results_depth)
 
     def test_no_parameters_propagation(self):
-        declaration = load_yaml('runners_test/no_parameters.yaml')
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
-        print(config)
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "no_parameters.py").resolve())
+        declaration = read_control_module(control_path)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
+                                  generator_lookup=GENERATOR_LOOKUP,
+                                  **declaration)
+        # print(config)
         initial = OperationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
@@ -99,9 +124,15 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(5, results[0])
 
     def test_parameters_propagation(self):
-        declaration = load_yaml('runners_test/parameters.yaml')
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
-        print(config)
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "parameters.py").resolve())
+        declaration = read_control_module(control_path)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
+                                  generator_lookup=GENERATOR_LOOKUP,
+                                  **declaration)
+        # print(config)
         initial = OperationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
@@ -114,8 +145,14 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(9, results[0])
 
     def test_parameters_branching(self):
-        declaration = load_yaml('runners_test/parameters_branching.yaml')
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment}, generator_lookup=GENERATOR_LOOKUP, **declaration)
+        control_path = str(Path("tests",
+                                "resources",
+                                "runners_test",
+                                "parameters_branching.py").resolve())
+        declaration = read_control_module(control_path)
+        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
+                                  generator_lookup=GENERATOR_LOOKUP,
+                                  **declaration)
         initial = OperationPayload(
             computational_unit=1,
             collected_data=CollectedData(),

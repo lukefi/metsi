@@ -158,9 +158,9 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
 
 def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None, file_path_diameters: str = None) -> tuple[int, float]:
     """ Finds minimum age and and minimum mean diameter for clearcutting
-    a stand from parameter files defined in control. yaml. It is user's responsibility to provide it in correct format. 
+    a stand from parameter files defined in control.py. It is user's responsibility to provide it in correct format. 
     Parsing failure will raise an exception. 
-    If file not provided in control.yaml, the hardcoded structures will be used."""
+    If file not provided in control.py, the hardcoded structures will be used."""
     site_type_key = site_type_to_key(stand.site_type_category)
     species_key = species_to_key_clearcut(stand)
     if file_path_ages is not None:

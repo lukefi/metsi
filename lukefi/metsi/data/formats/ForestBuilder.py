@@ -168,7 +168,7 @@ class VMI12Builder(VMIBuilder):
                             stand_id: int or None = None) -> ForestStand:
         """ 
         Create a ForestStand out of given VMI12 type 1 data row using given data indices and order number.
-        Conversion variables are based fixed (model.py) or declared (control.yaml) source indices.
+        Conversion variables are based fixed source indices.
         """
         # Fixed conversions
         result = super().convert_stand_entry(indices, data_row, stand_id)
