@@ -167,7 +167,7 @@ configured.
 
 ## Operations
 
-See table below for a quick reference of forestry operations usable in control.yaml.
+See table below for a quick reference of forestry operations usable in control.py.
 
 | operation                                             | description                                                                                      | source                      | model library  |
 |-------------------------------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------|----------------|
@@ -195,7 +195,7 @@ Performes renewal operation planting which plants saplings on a empty stand.
 
 #### **parameters**
 
-| parameter name        | type   | description                                                                                                                                                        | location in control.yaml | notes                |
+| parameter name        | type   | description                                                                                                                                                        | location in control.py | notes                |
 |-----------------------|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|----------------------|
 | planting_instructions | string | In file rows represent site types, first column contains the tree species, second column the stems per hectar value and third column is the soil preparation type. | operation_file_params    | optional             |
 | tree_count            | int    | Number of sapling trees to be plante.                                                                                                                              | operation_params         | optional, default 10 |
@@ -222,7 +222,7 @@ area.
 
 #### **parameters**
 
-| parameter name  | type  | location in control.yaml | notes              |
+| parameter name  | type  | location in control.py | notes              |
 |-----------------|-------|--------------------------|--------------------|
 | thinning_limits | float | operation_file_params    | optional parameter |
 | e               | float | operation_params         | residue constant   |
@@ -257,7 +257,7 @@ area.
 
 #### **parameters**
 
-| parameter name  | type  | location in control.yaml | notes              |
+| parameter name  | type  | location in control.py | notes              |
 |-----------------|-------|--------------------------|--------------------|
 | thinning_limits | float | operation_file_params    | optional parameter |
 | e               | float | operation_params         | residue constant   |
@@ -292,7 +292,7 @@ area.
 
 #### **parameters**
 
-| parameter name  | type  | location in control.yaml | notes              |
+| parameter name  | type  | location in control.py | notes              |
 |-----------------|-------|--------------------------|--------------------|
 | thinning_limits | float | operation_file_params    | optional parameter |
 | e               | float | operation_params         | residue constant   |
@@ -327,7 +327,7 @@ stems.
 
 #### **parameters**
 
-| parameter name              | type  | location in control.yaml | notes             |
+| parameter name              | type  | location in control.py | notes             |
 |-----------------------------|-------|--------------------------|-------------------|
 | dominant_height_lower_bound | float | operation_params         |                   |
 | dominant_height_upper_bound | float | operation_params         |                   |
@@ -362,7 +362,7 @@ Compute total biomass tonnages of a single forest stand.
 
 #### **parameters**
 
-| parameter name | type | location in control.yaml | notes                    |
+| parameter name | type | location in control.py | notes                    |
 |----------------|------|--------------------------|--------------------------|
 | model_set      | int  | operation_params         | accepted values: 1 and 2 |
 
@@ -469,7 +469,7 @@ the `felled_trees` keyword.
 
 #### **parameters**
 
-| parameter name                | type   | description                                                                                                                                               | location in control.yaml | notes                                                              |
+| parameter name                | type   | description                                                                                                                                               | location in control.py | notes                                                              |
 |-------------------------------|--------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------|--------------------------------------------------------------------|
 | clearcutting_limits_ages      | string | In file the rows represent site type values and colums represent tree species and the values represent the smallest possible age enabled.                 | operation_file_params    | example file data/parameter_files/renewal_ages_southernFI.txt      |
 | clearcutting_limits_diameters | string | In file the rows represent site type values and colums represent tree species and the values represent smallest possible breast height diameters enabled. | operation_file_params    | example file data/parameter_files/renewal_diameters_southernFI.txt |
@@ -503,7 +503,7 @@ year when this operation is called.
 
 #### **parameters**
 
-| parameter name     | type       | location in control.yaml | notes                                                  |
+| parameter name     | type       | location in control.py | notes                                                  |
 |--------------------|------------|--------------------------|--------------------------------------------------------|
 | timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers                |
 | implementation     | str        | operation_params         | py and lupa (lua) implementations available |
@@ -532,7 +532,7 @@ trees if they were cross cut. Therefore, this operation is different from [clear
 
 #### **parameters**
 
-| parameter name     | type       | location in control.yaml | notes                                                  |
+| parameter name     | type       | location in control.py | notes                                                  |
 |--------------------|------------|--------------------------|--------------------------------------------------------|
 | timber_price_table | file (csv) | operation_file_params    | timber grades must be given as integers                |
 | implementation     | str        | operation_params         | py and lupa (lua) implementations available |
@@ -558,7 +558,7 @@ Calculates the Net Present Value (NPV) of a given schedule.
 
 #### **parameters**
 
-| parameter name | type        | location in control.yaml | notes                           |
+| parameter name | type        | location in control.py | notes                           |
 |----------------|-------------|--------------------------|---------------------------------|
 | interest_rates | list of int | operation_params         | e.g. [3], where 3 stands for 3% |
 | land_values    | file (json) | operation_file_params    |                                 |
@@ -622,7 +622,7 @@ python -m unittest <test suite module.class path>
 
 # Application control
 
-A run is declared in the YAML file `control.py`.
+A run is declared in the control file `control.py`.
 
 1. Application configuration in `app_configuration` dictionary.
     1. `state_format` specifies the data format of the input computational units
@@ -931,7 +931,7 @@ ensure that your function returns what is expected and behaves like it's intende
   above. A solution that doesn't require breaking functional purity can most certainly be found by developing the
   simulator and operations interface structure.
 * Coordinate with other developers when the work you do and models you write can be shared with other operations.
-* Coordinate with simulator creators about the parameters names and structures that can be passed from control.yaml
+* Coordinate with simulator creators about the parameters names and structures that can be passed from control.py
   file.
 
 ### Using R functions
@@ -951,7 +951,7 @@ The r_utils.py module contains functions and examples of how to bind into R func
 The `r` directory houses related R script and data files.
 
 An example implementation `lmfor_volume` exists for forest stand volume calculation.
-Currently, this can be taken into use with the `report_volume` operation function in the control.yaml, following the
+Currently, this can be taken into use with the `report_volume` operation function in the control.py, following the
 example below
 
 ```

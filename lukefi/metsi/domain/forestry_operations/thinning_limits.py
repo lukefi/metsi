@@ -541,9 +541,9 @@ def get_thinning_limits_from_parameter_file_contents(
 
 def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None) -> tuple[float, float]:
     """ Resolves lower and upper bound for thinning. Values are in meters (m).
-    :thinning_limits: thinning limits from a file parameter defined in control. yaml. It is user's responsibility to provide it in correct format. 
+    :thinning_limits: thinning limits from a file parameter defined in control.py It is user's responsibility to provide it in correct format. 
     Parsing failure will raise an exception. 
-    If file not provided in control.yaml, the hardcoded THINNING_LIMITS structure will be used."""
+    If file not provided in control.py, the hardcoded THINNING_LIMITS structure will be used."""
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
