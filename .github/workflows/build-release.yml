@@ -1,0 +1,34 @@
+name: Build and Release DLL
+
+on:
+  push:
+    tags:
+      - '*'  # Eg. 1.0.0 launches the workflow runner
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Make
+        uses: msys2/setup-msys2@v2
+        with:
+          install: make mingw-w64-x86_64-gcc
+          msystem: MINGW64
+
+      - name: Build .dll in c_extensions using Makefile
+        shell: msys2 {0}
+        run: |
+          cd lukefi/metsi/forestry/c
+          make
+
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            lukefi/metsi/forestry/c/lib/ykjtm35.dll
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
