@@ -5,13 +5,20 @@ from enum import Enum
 from lukefi.metsi.data.model import ForestStand
 
 
+def load_library(path):
+    """ Load a shared library from the given path, handling compatibility for Python < 3.12. """ 
+    if sys.version_info >= (3, 12):
+        return cts.CDLL(path)
+    else:
+        return cts.CDLL(str(path))
+
 
 # Defining and initialize the external library 
 lib_name = 'ykjtm35.dll' if sys.platform == "win32" else 'ykjtm35.so' 
 DLL_PATH = Path('lukefi', 'metsi', 'forestry', 'c', 'lib', lib_name)
 
 try:
-    DLL = cts.CDLL(DLL_PATH)
+    DLL = load_library(DLL_PATH)
 except OSError as e:
     print(f"Failed to load {lib_name}: {e}")
 
