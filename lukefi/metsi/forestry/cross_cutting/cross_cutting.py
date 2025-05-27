@@ -40,7 +40,6 @@ def apteeraus_Nasberg(T: np.ndarray, P: np.ndarray, m: int, n: int, div: int) ->
             # numpy array indexing: 1st row 2nd element: arr[0, 1]
             # in R it's the same order: arr[2, 3] --> the item on 2nd row and 3rd column
             # but whereas R-indexing is one-based, Python's is zero-based --> indexing has been offset by one
-            # t = int(i + P[j,2] / div) 
             offset = P[j,2] / div
             t = int(i + offset)
             if t < n:
