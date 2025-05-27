@@ -3,6 +3,7 @@ import numpy as np
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.forestry.cross_cutting import stem_profile
 from lukefi.metsi.forestry.cross_cutting.cross_cutting_lupa import cross_cut_lupa
+from numba import njit
 
 _cross_cut_species_mapper = {
     TreeSpecies.PINE: "pine",
@@ -16,6 +17,7 @@ ZERO_DIAMETER_DEFAULTS = ([3], [0.000045], [20])  # energy wood, m3, €/m3; val
 CrossCutFn = Callable[..., tuple[Sequence[int], Sequence[float], Sequence[float]]]
 
 
+@njit
 def apteeraus_Nasberg(T: np.ndarray, P: np.ndarray, m: int, n: int, div: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     This function has been ported from, and should be updated according to, the R implementation.
@@ -38,7 +40,9 @@ def apteeraus_Nasberg(T: np.ndarray, P: np.ndarray, m: int, n: int, div: int) ->
             # numpy array indexing: 1st row 2nd element: arr[0, 1]
             # in R it's the same order: arr[2, 3] --> the item on 2nd row and 3rd column
             # but whereas R-indexing is one-based, Python's is zero-based --> indexing has been offset by one
-            t = int(i + P[j,2] / div)
+            # t = int(i + P[j,2] / div) 
+            offset = P[j,2] / div
+            t = int(i + offset)
             if t < n:
                 d_top = T[t,0]
                 d_min = P[j, 1]
