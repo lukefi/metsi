@@ -178,7 +178,7 @@ static int find_triangle(double x, double y, int ykj)
     return current_triangle;
 }
 
-
+__declspec(dllexport)
 int ykjtm35fin(double x, double y, double *u, double *v, int ykjtotm35)
 {
     int i, tri;
@@ -216,13 +216,13 @@ int ykjtm35fin(double x, double y, double *u, double *v, int ykjtotm35)
     return 1;
 }
 
-
+__declspec(dllexport)
 int ykj_to_tm35fin(double x, double y, double *u, double *v)
 {
     return ykjtm35fin(x, y, u, v, 1);
 }
 
-
+__declspec(dllexport)
 int tm35fin_to_ykj(double u, double v, double *x, double *y)
 {
     return ykjtm35fin(u, v, x, y, 0);
