@@ -56,6 +56,10 @@ jobs:
       run: |
         python -m pytest
 
+    - name: Run Robot Framework Tests
+      run: |
+        robot tests/robot
+
     - name: Clean up
       run: |
         make -C lukefi/metsi/forestry/c clean
