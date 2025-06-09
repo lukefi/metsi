@@ -7,10 +7,10 @@ name: Run unit tests
 on:
   # trigger on push to main
   push:
-    branches: [ main ]
+    branches: [ main, RobotImplementation  ]
   # trigger on new PR to main 
   pull_request:
-    branches: [ main ]
+    branches: [ main, RobotImplementation  ]
   # enables manual triggering
   workflow_dispatch:
 
