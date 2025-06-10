@@ -19,11 +19,24 @@ Run Simulation And Compare Output Files
     Remove Directory  ${OUTPUT_DIR}  recursive=True
     Create Directory  ${OUTPUT_DIR}
 
+    # --- DEBUGGING: Log all paths before running ---
+    Log To Console    \n--- DEBUGGING ---
+    Log To Console    Current Directory: ${CURDIR}
+    Log To Console    Input JSON Path: ${INPUT_JSON}
+    Log To Console    Output Dir Path: ${OUTPUT_DIR}
+    Log To Console    Running Module:  ${MODULE}
+    Log To Console    -----------------\n
+
     # Run the simulation
-    ${result}=    Run Process    python    ${SCRIPT}    ${MODULE}    ${INPUT_JSON}    ${OUTPUT_DIR}    ${CONTROL_SCRIPT}    shell=True    stdout=YES    stderr=YES
+    ${result}=    Run Process    python    ${SCRIPT}    ${MODULE}    ${INPUT_JSON}    ${OUTPUT_DIR}    ${CONTROL_SCRIPT}    shell=True    stdout=YES    stderr=YES env:PYTHONPATH=.
+
     Log    STDOUT:\n${result.stdout}
     Log    STDERR:\n${result.stderr}
-    #Should Be Equal As Integers    ${result.rc}    0
+
+    Should Be Equal As Integers    ${result.rc}    0    msg=Python script failed! See STDERR log for details.
+
+    # This part will only run if the simulation succeeds
+    Log To Console    Simulation Succeeded. Verifying output files...
 
     # Verify all expected output files exist and match reference files
     ${files}=    List Directory  ${REFERENCE_DIR}

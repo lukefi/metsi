@@ -61,6 +61,7 @@ jobs:
         make -C lukefi/metsi/forestry/c clean
 
   robot-tests:
+    needs: unit-tests # Ensure unit tests run before robot tests
     name: Run Robot Framework Tests
     runs-on: ubuntu-latest
 
@@ -72,13 +73,22 @@ jobs:
         with:
           python-version: '3.12.5'
 
-      - name: Install Robot Framework
+
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install robotframework
+          # This is the critical step that installs numpy, numba, etc.
+          # It will also install robotframework if you add it to your [tests] dependencies
+          pip install .[tests] 
+          # You might not even need the next line if robotframework is in your project extras
+          pip install robotframework 
 
+      - name: Compile shared libraries
+        run: |
+          # This is also critical if your Python code uses these C libraries
+          make -C lukefi/metsi/forestry/c
+          
       - name: Run Robot Tests
-        working-directory: ./metsi 
         run: |
           robot tests/robot
 
