@@ -78,6 +78,7 @@ jobs:
           pip install robotframework
 
       - name: Run Robot Tests
+        working-directory: ./metsi 
         run: |
           robot tests/robot
 
