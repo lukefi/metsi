@@ -6,10 +6,10 @@ Library           Collections
 *** Variables ***
 ${SCRIPT}         -m
 ${MODULE}         lukefi.metsi.app.metsi
-${INPUT_JSON}     tests/robot/01_MK/in/demo.json
-${OUTPUT_DIR}     tests/robot/01_MK/out/test
-${CONTROL_SCRIPT}  tests/robot/01_MK/in/demo_control_sim2.py
-${REFERENCE_DIR}  tests/robot/01_MK/out/ref
+${INPUT_JSON}     ${CURDIR}/in/demo.json
+${OUTPUT_DIR}     ${CURDIR}/out/test
+${CONTROL_SCRIPT}  ${CURDIR}/in/demo_control_sim2.py
+${REFERENCE_DIR}  ${CURDIR}/out/ref
 
 *** Test Cases ***
 Run Simulation And Compare Output Files
