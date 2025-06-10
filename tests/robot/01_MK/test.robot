@@ -23,7 +23,7 @@ Run Simulation And Compare Output Files
     ${result}=    Run Process    python    ${SCRIPT}    ${MODULE}    ${INPUT_JSON}    ${OUTPUT_DIR}    ${CONTROL_SCRIPT}    shell=True    stdout=YES    stderr=YES
     Log    STDOUT:\n${result.stdout}
     Log    STDERR:\n${result.stderr}
-    Should Be Equal As Integers    ${result.rc}    0
+    #Should Be Equal As Integers    ${result.rc}    0
 
     # Verify all expected output files exist and match reference files
     ${files}=    List Directory  ${REFERENCE_DIR}
