@@ -97,16 +97,21 @@ jobs:
     - name: Compile shared libraries
       run: |
         make -C lukefi/metsi/forestry/c
-      - name: Run Robot Tests
-        run: |
-          robot tests/robot
 
-      - name: Archive Robot logs (optional)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: robot-logs
-          path: |
-            log.html
-            report.html
-            output.xml
+    - name: Run Robot Tests
+      run: |
+        robot tests/robot
+
+    - name: Archive Robot logs (optional)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: robot-logs
+        path: |
+          log.html
+          report.html
+          output.xml
+
+    - name: Clean up
+      run: |
+        make -C lukefi/metsi/forestry/c clean
