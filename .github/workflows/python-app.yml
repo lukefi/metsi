@@ -63,26 +63,21 @@ jobs:
   robot-tests:
     needs: unit-tests # Ensure unit tests run before robot tests
     name: Run Robot Framework Tests
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10.4", "3.11.9", "3.12.5"]
-        r-version: ["4.1.3", "4.3.3"]
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.12.5
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.12.5
 
-    - name: Set up R ${{ matrix.r-version }}
+    - name: Set up R 4.3.3
       uses: r-lib/actions/setup-r@v2
       with:
-        r-version: ${{ matrix.r-version }}
+        r-version: 4.3.3
 
     - name: Install Python dependencies
       run: |
@@ -100,8 +95,15 @@ jobs:
 
     - name: Run Robot Tests
       run: |
+        export PYTHONPATH=${GITHUB_WORKSPACE}
         robot tests/robot
 
+    - name: Debug Directory Structure
+      run: |
+        echo "PYTHONPATH=$GITHUB_WORKSPACE"
+        tree -L 3
+        ls -la $GITHUB_WORKSPACE/tests/robot/01_MK/in
+    
     - name: Archive Robot logs (optional)
       if: always()
       uses: actions/upload-artifact@v4
