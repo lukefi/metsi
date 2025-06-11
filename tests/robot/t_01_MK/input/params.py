@@ -1,4 +1,4 @@
-from demo.collectives import collectives
+from tests.robot.t_01_MK.input.collectives import collectives
 
 params = { 
    "first_thinning": [
