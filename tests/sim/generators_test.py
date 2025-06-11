@@ -40,7 +40,7 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [0, 1],
                     "generators": [
                         {
-                            "sequence": [
+                            sequence: [
                                 collecting_increment,
                                 collecting_increment
                             ]
@@ -49,8 +49,7 @@ class TestGenerators(unittest.TestCase):
                 }
             ]
         }
-        config = SimConfiguration(generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-                                  **declaration)
+        config = SimConfiguration(**declaration)
         generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
@@ -75,14 +74,13 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [1, 3],
                     "generators": [
                         {
-                            "sequence": [collecting_increment]
+                            sequence: [collecting_increment]
                         }
                     ]
                 }
             ]
         }
-        config = SimConfiguration(generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-                                  **declaration)
+        config = SimConfiguration(**declaration)
         generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
@@ -98,7 +96,7 @@ class TestGenerators(unittest.TestCase):
     def test_operation_run_constraints_fail(self):
         declaration = {
             "run_constraints": {
-                "inc": {
+                inc: {
                     "minimum_time_interval": 2
                 }
             },
@@ -107,18 +105,16 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [1, 3],
                     "generators": [
                         {
-                            "sequence": [
-                                "inc",
-                                "inc"
+                            sequence: [
+                                inc,
+                                inc
                             ]
                         }
                     ]
                 }
             ]
         }
-        config = SimConfiguration(operation_lookup={'inc': inc},
-                                  generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-                                  **declaration)
+        config = SimConfiguration(**declaration)
         generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
@@ -134,18 +130,16 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [0, 1],
                     "generators": [
                         {
-                            "sequence": [
-                                "inc",
-                                "inc"
+                            sequence: [
+                                inc,
+                                inc
                             ]
                         }
                     ]
                 }
             ]
         }
-        config = SimConfiguration(operation_lookup={'inc': inc},
-                                  generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-                                  **declaration)
+        config = SimConfiguration(**declaration)
         # generators for 2 time points'
         generators = lukefi.metsi.sim.generators.partial_tree_generators_by_time_point(config)
         self.assertEqual(2, len(generators.values()))
@@ -174,24 +168,24 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [0],
                     "generators": [
                         {
-                            "sequence": [
+                            sequence: [
                                 collecting_increment,  # 1
                                 {
-                                    "sequence": [
+                                    sequence: [
                                         collecting_increment  # 2
                                     ]
                                 },
                                 {
-                                    "alternatives": [
+                                    alternatives: [
                                         collecting_increment,  # 3
                                         {
-                                            "sequence": [
+                                            sequence: [
                                                 collecting_increment,  # 3
                                                 {
-                                                    "alternatives": [
+                                                    alternatives: [
                                                         collecting_increment,  # 4
                                                         {
-                                                            "sequence": [
+                                                            sequence: [
                                                                 collecting_increment,  # 4
                                                                 collecting_increment  # 5
                                                             ]
@@ -201,7 +195,7 @@ class TestGenerators(unittest.TestCase):
                                             ]
                                         },
                                         {
-                                            "sequence": [
+                                            sequence: [
                                                 collecting_increment,  # 3
                                                 collecting_increment,  # 4
                                                 collecting_increment,  # 5
@@ -218,8 +212,7 @@ class TestGenerators(unittest.TestCase):
                 }
             ]
         }
-        config = SimConfiguration(generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-                                  **declaration)
+        config = SimConfiguration(**declaration)
         generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         tree = compose_nested(generator)
         chains = tree.operation_chains()
@@ -262,12 +255,12 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [0],
                     "generators": [
                         {
-                            "sequence": [
+                            sequence: [
                                 increment,
                                 {
-                                    "alternatives": [
+                                    alternatives: [
                                         {
-                                            "sequence": [increment]
+                                            sequence: [increment]
                                         },
                                         inc_param
                                     ]
@@ -279,9 +272,7 @@ class TestGenerators(unittest.TestCase):
                 }
             ]
         }
-        config = SimConfiguration(
-            generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-            **declaration)
+        config = SimConfiguration(**declaration)
         generator = lukefi.metsi.sim.generators.full_tree_generators(config)
         tree = compose_nested(generator)
         chains = tree.operation_chains()
@@ -314,24 +305,24 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [0],
                     "generators": [
                         {
-                            "sequence": [
+                            sequence: [
                                 collecting_increment,
                                 {
-                                    "alternatives": [
+                                    alternatives: [
                                         {
-                                            "alternatives": [
+                                            alternatives: [
                                                 collecting_increment,
                                                 collecting_increment
                                             ]
                                         },
                                         {
-                                            "sequence": [
+                                            sequence: [
                                                 collecting_increment,
                                                 collecting_increment
                                             ]
                                         },
                                         {
-                                            "alternatives": [
+                                            alternatives: [
                                                 collecting_increment,
                                                 collecting_increment
                                             ]
@@ -351,15 +342,15 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [0],
                     "generators": [
                         {
-                            "sequence": [
+                            sequence: [
                                 collecting_increment,
                                 {
-                                    "alternatives": [
-                                        {"sequence": [collecting_increment]},
-                                        {"sequence": [collecting_increment]},
-                                        {"sequence": [collecting_increment, collecting_increment]},
-                                        {"sequence": [collecting_increment]},
-                                        {"sequence": [collecting_increment]}
+                                    alternatives: [
+                                        {sequence: [collecting_increment]},
+                                        {sequence: [collecting_increment]},
+                                        {sequence: [collecting_increment, collecting_increment]},
+                                        {sequence: [collecting_increment]},
+                                        {sequence: [collecting_increment]}
                                     ]
                                 },
                                 collecting_increment
@@ -370,10 +361,8 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         configs = [
-            SimConfiguration(generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-                             **declaration_one),
-            SimConfiguration(generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-                             **declaration_two)
+            SimConfiguration(**declaration_one),
+            SimConfiguration(**declaration_two)
         ]
         generators = [lukefi.metsi.sim.generators.full_tree_generators(config) for config in configs]
         trees = [compose_nested(generator) for generator in generators]
@@ -395,7 +384,7 @@ class TestGenerators(unittest.TestCase):
     def test_simulation_events_sequence_multiparameter_exception(self):
         declaration = {
             "operation_params": {
-                "inc": [
+                collecting_increment: [
                     {"param1": 1},
                     {"param1": 2}
                 ]
@@ -405,17 +394,15 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [0],
                     "generators": [
                         {
-                            "sequence": [
-                                "inc"
+                            sequence: [
+                                collecting_increment
                             ]
                         }
                     ]
                 }
             ]
         }
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-                                  **declaration)
+        config = SimConfiguration(**declaration)
         self.assertRaises(Exception, lukefi.metsi.sim.generators.full_tree_generators, config)
 
     def test_simple_processable_chain(self):
@@ -444,9 +431,9 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [0, 1, 4, 100, 1000, 8, 9],
                     "generators": [
                         {
-                            "sequence": [
-                                "inc",
-                                "inc"
+                            sequence: [
+                                inc,
+                                inc
                             ]
                         }
                     ]
@@ -455,9 +442,9 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [9, 8],
                     "generators": [
                         {
-                            "sequence": [
-                                "inc",
-                                "inc"
+                            sequence: [
+                                inc,
+                                inc
                             ]
                         }
                     ]
@@ -466,9 +453,9 @@ class TestGenerators(unittest.TestCase):
                     "time_points": [4, 6, 10, 12],
                     "generators": [
                         {
-                            "sequence": [
-                                "inc",
-                                "inc"
+                            sequence: [
+                                inc,
+                                inc
                             ]
                         }
                     ]
@@ -476,6 +463,5 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         dummy_dict = {}
-        result = SimConfiguration(dummy_dict,
-                                  **declaration)
+        result = SimConfiguration(**declaration)
         self.assertEqual([0, 1, 4, 6, 8, 9, 10, 12, 100, 1000], result.time_points)

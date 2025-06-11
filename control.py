@@ -19,6 +19,7 @@ from lukefi.metsi.domain.forestry_operations.thinning import (
 from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
 from lukefi.metsi.domain.pre_ops import generate_reference_trees, preproc_filter, scale_area_weight
 from lukefi.metsi.domain.forestry_operations.planting import planting
+from lukefi.metsi.sim.generators import alternatives, sequence
 from lukefi.metsi.sim.operations import do_nothing
 
 
@@ -60,13 +61,13 @@ control_structure = {
         {
             "time_points": [2020],
             "generators": [
-                {"sequence": [planting]}
+                {sequence: [planting]}
             ]
         },
         {
             "time_points": [2020, 2025, 2030, 2035, 2040, 2045, 2050],
             "generators": [
-                {"sequence": [
+                {sequence: [
                     cross_cut_standing_trees,
                     collect_standing_tree_properties,
                     calculate_npv,
@@ -79,14 +80,14 @@ control_structure = {
             "time_points": [2035, 2045],
             "generators": [
                 {
-                    "alternatives": [
+                    alternatives: [
                         do_nothing,
                         # "thinning_from_below",
                         # "thinning_from_above",
                         first_thinning,
                         even_thinning,
                         {
-                            "sequence": [
+                            sequence: [
                                 clearcutting,
                                 planting
                                 # operations for renewal after clearcutting go here
@@ -95,7 +96,7 @@ control_structure = {
                     ]
                 },
                 {
-                    "sequence": [
+                    sequence: [
                         cross_cut_felled_trees,
                         collect_felled_tree_properties
                     ]
@@ -105,19 +106,19 @@ control_structure = {
         {
             "time_points": [2020, 2030, 2040, 2050],
             "generators": [
-                {"sequence": [report_period]}
+                {sequence: [report_period]}
             ]
         },
         {
             "time_points": [2050],
             "generators": [
-                {"sequence": [report_collectives]}
+                {sequence: [report_collectives]}
             ]
         },
         {
             "time_points": [2020, 2025, 2030, 2035, 2040, 2045, 2050],
             "generators": [
-                {"sequence": [grow_acta]}
+                {sequence: [grow_acta]}
                 # "grow_motti"
             ]
         }
