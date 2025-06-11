@@ -28,7 +28,18 @@ Run Simulation And Compare Output Files
     Log To Console    -----------------\n
 
     # Run the simulation
-    ${result}=    Run Process    python    ${SCRIPT}    ${MODULE}    ${INPUT_JSON}    ${OUTPUT_DIR}    ${CONTROL_SCRIPT}    shell=True    stdout=YES    stderr=YES env:PYTHONPATH=.
+	${orig_env}=    Get Environment Variables
+	Set To Dictionary    ${orig_env}    PYTHONPATH=${EXECDIR}
+	${result}=    Run Process    python
+	...           ${SCRIPT}
+	...           ${MODULE}
+	...           ${INPUT_JSON}
+	...           ${OUTPUT_DIR}
+	...           ${CONTROL_SCRIPT}
+	...           shell=True
+	...           stdout=YES
+	...           stderr=YES
+	...           env=${orig_env}
 
     Log    STDOUT:\n${result.stdout}
     Log    STDERR:\n${result.stderr}
