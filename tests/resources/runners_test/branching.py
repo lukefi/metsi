@@ -1,6 +1,10 @@
+from lukefi.metsi.sim.operations import do_nothing
+from tests.test_utils import collecting_increment
+
+
 control_structure = {
   "run_constraints": {
-    "inc": {
+    collecting_increment: {
       "minimum_time_interval": 2
     }
   },
@@ -10,13 +14,13 @@ control_structure = {
       "generators": [
         {
           "sequence": [
-            "do_nothing"
+            do_nothing
           ]
         },
         {
           "alternatives": [
-            "do_nothing",
-            "inc"
+            do_nothing,
+            collecting_increment
           ]
         }
       ]

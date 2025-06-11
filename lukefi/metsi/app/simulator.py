@@ -5,7 +5,6 @@ import multiprocessing
 from lukefi.metsi.data.layered_model import LayeredObject
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
-import lukefi.metsi.domain.sim_ops
 import lukefi.metsi.sim.generators
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import ForestOpPayload
@@ -69,7 +68,6 @@ def resolve_evaluation_strategy(source: str) -> Evaluator[ForestOpPayload]:
 
 def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList):
     simconfig = SimConfiguration(
-        operation_lookup=lukefi.metsi.domain.sim_ops.operation_lookup,
         generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
         **control)
     formation_strategy = resolve_formation_strategy(config.formation_strategy)

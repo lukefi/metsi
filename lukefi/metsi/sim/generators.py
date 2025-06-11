@@ -1,7 +1,7 @@
 from typing import Any, Optional
 from collections.abc import Callable
 from lukefi.metsi.sim.core_types import EventTree, SimConfiguration, DeclaredEvents, OperationPayload, GeneratorFn
-from lukefi.metsi.sim.operations import prepared_processor, prepared_operation, resolve_operation
+from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
 from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_params
 
 
@@ -14,7 +14,7 @@ class NestableGenerator:
     prepared_generator: Optional[GeneratorFn] = None
     time_point: int = 0
     nested_generators: list['NestableGenerator']
-    free_operations: list[dict or str]
+    free_operations: list[dict | str]
     config: SimConfiguration
 
     def __init__(self,
@@ -53,7 +53,7 @@ class NestableGenerator:
                 # Preceding free operations must be wrapped as NestableGenerators
                 self.wrap_free_operations()
                 self.nested_generators.append(NestableGenerator(self.config, candidate, self.time_point))
-        elif isinstance(candidate, str):
+        else:
             # Encountered an operation tag.
             self.check_operation_sanity(candidate)
             self.free_operations.append(candidate)
@@ -168,17 +168,16 @@ def compose_nested(nestable_generator: NestableGenerator) -> EventTree:
     return root
 
 
-def simple_processable_chain(operation_tags: list[str], operation_params: dict, operation_lookup: dict) -> list[
-    Callable]:
+def simple_processable_chain(operation_tags: list[Callable], operation_params: dict) -> list[Callable]:
     """Prepare a list of partially applied (parametrized) operation functions based on given declaration of operation
     tags and operation parameters"""
     result = []
     for tag in operation_tags if operation_tags is not None else []:
         params = operation_params.get(tag, [{}])
         if len(params) > 1:
-            raise Exception("Trying to apply multiple parameter set for preprocessing operation \'{}\'. "
-                "Defining multiple parameter sets is only supported for alternative clause generators.".format(tag))
-        result.append(prepared_operation(resolve_operation(tag, operation_lookup), **params[0]))
+            raise Exception(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
+                "Defining multiple parameter sets is only supported for alternative clause generators.")
+        result.append(prepared_operation(tag, **params[0]))
     return result
 
 
@@ -214,7 +213,6 @@ def prepare_parametrized_operations(config: SimConfiguration,
         combined_params = merge_operation_params(parameter_set, this_operation_file_params)
         results.append(prepared_processor(
             operation_tag,
-            config.operation_lookup,
             time_point,
             operation_run_constraints,
             **combined_params))

@@ -206,16 +206,3 @@ def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str,
         Exception("Check definition of operation params.\n"
             "{default}\' conversion supported.".format(default = defaults[0]))
     return stands
-
-
-operation_lookup = {
-    'filter': preproc_filter,
-    'compute_location_metadata': compute_location_metadata,
-    'generate_reference_trees': generate_reference_trees,
-    'supplement_missing_tree_heights': supplement_missing_tree_heights,
-    'supplement_missing_tree_ages': supplement_missing_tree_ages,
-    'supplement_missing_stratum_diameters': supplement_missing_stratum_diameters,
-    'generate_sapling_trees_from_sapling_strata': generate_sapling_trees_from_sapling_strata,
-    'scale_area_weight': scale_area_weight,
-    'convert_coordinates': convert_coordinates
-}

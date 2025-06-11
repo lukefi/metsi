@@ -40,7 +40,6 @@ class SimConfiguration(SimpleNamespace):
             lookups, and additional keyword arguments.
     """
     generator_lookup: dict[str, Callable] = {}
-    operation_lookup: dict[str, Callable] = {}
     operation_params: dict[str, list[dict[str, Any]]] = {}
     operation_file_params: dict[str, dict[str, str]] = {}
     events: list[DeclaredEvents] = []
@@ -48,7 +47,6 @@ class SimConfiguration(SimpleNamespace):
     time_points = []
 
     def __init__(self,
-                 operation_lookup: dict[str, Callable],
                  generator_lookup: dict[str, Callable],
                  **kwargs):
         """
@@ -58,8 +56,7 @@ class SimConfiguration(SimpleNamespace):
             generator_lookup (dict): A dictionary mapping generator names to their corresponding handlers or functions.
             **kwargs: Additional keyword arguments to be passed to the parent class initializer.
         """
-        super().__init__(operation_lookup=operation_lookup,
-                         generator_lookup=generator_lookup,
+        super().__init__(generator_lookup=generator_lookup,
                          **kwargs)
         self._populate_simulation_events(self.simulation_events)
 
@@ -83,10 +80,10 @@ class EventTree:
     """
     operation: Callable = identity  # default to the identity function, essentially no-op
     branches: list['EventTree'] = []
-    previous: 'EventTree' or None = None
+    previous: 'EventTree | None' = None
 
-    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None,
-                 previous: 'EventTree' or None = None):
+    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] | None = None,
+                 previous: 'EventTree | None' = None):
         self.operation = operation if operation is not None else identity
         self.previous = previous
         self.branches = []

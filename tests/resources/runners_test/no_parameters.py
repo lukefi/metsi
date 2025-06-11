@@ -1,3 +1,6 @@
+from tests.test_utils import collecting_increment
+
+
 control_structure = {
   "simulation_events": [
     {
@@ -5,7 +8,7 @@ control_structure = {
       "generators": [
         {
           "sequence": [
-            "inc"
+            collecting_increment
           ]
         }
       ]

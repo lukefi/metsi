@@ -1,4 +1,25 @@
 from examples.declarations.export_prepro import csv_and_json
+from lukefi.metsi.domain.data_collection.biomass_repola import calculate_biomass
+from lukefi.metsi.domain.data_collection.cross_cutting import cross_cut_felled_trees, cross_cut_standing_trees
+from lukefi.metsi.domain.data_collection.marshalling import (
+    collect_felled_tree_properties,
+    collect_standing_tree_properties,
+    report_collectives,
+    report_period,
+    report_state
+)
+from lukefi.metsi.domain.data_collection.net_present_value import calculate_npv
+from lukefi.metsi.domain.forestry_operations.clearcut import clearcutting
+from lukefi.metsi.domain.forestry_operations.thinning import (
+    even_thinning,
+    first_thinning,
+    thinning_from_above,
+    thinning_from_below
+)
+from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
+from lukefi.metsi.domain.pre_ops import generate_reference_trees, preproc_filter, scale_area_weight
+from lukefi.metsi.domain.forestry_operations.planting import planting
+from lukefi.metsi.sim.operations import do_nothing
 
 
 control_structure = {
@@ -12,25 +33,25 @@ control_structure = {
         "run_modes": ["preprocess", "export_prepro", "simulate", "postprocess", "export"]
     },
     "preprocessing_operations": [
-        "scale_area_weight",
-        "generate_reference_trees",  # reference trees from strata, replaces existing reference trees
-        "filter"
+        scale_area_weight,
+        generate_reference_trees,  # reference trees from strata, replaces existing reference trees
+        preproc_filter
         # "supplement_missing_tree_heights",
         # "supplement_missing_tree_ages",
         # "generate_sapling_trees_from_sapling_strata"
     ],
     "preprocessing_params": {
-        "generate_reference_trees": [
+        generate_reference_trees: [
             {
                 "n_trees": 10,
                 "method": "weibull",
                 "debug": False
             }
         ],
-        "filter": [
+        preproc_filter: [
             {
                 "remove trees": "sapling or stems_per_ha == 0",
-                "remove stands": "site_type_category == 0", # not reference_trees
+                "remove stands": "site_type_category == 0",  # not reference_trees
                 "remove stands": "site_type_category == None"
             }
         ]
@@ -39,18 +60,18 @@ control_structure = {
         {
             "time_points": [2020],
             "generators": [
-                {"sequence": ["planting"]}
+                {"sequence": [planting]}
             ]
         },
         {
             "time_points": [2020, 2025, 2030, 2035, 2040, 2045, 2050],
             "generators": [
                 {"sequence": [
-                    "cross_cut_standing_trees",
-                    "collect_standing_tree_properties",
-                    "calculate_npv",
-                    "calculate_biomass",
-                    "report_state"
+                    cross_cut_standing_trees,
+                    collect_standing_tree_properties,
+                    calculate_npv,
+                    calculate_biomass,
+                    report_state
                 ]}
             ]
         },
@@ -59,15 +80,15 @@ control_structure = {
             "generators": [
                 {
                     "alternatives": [
-                        "do_nothing",
+                        do_nothing,
                         # "thinning_from_below",
                         # "thinning_from_above",
-                        "first_thinning",
-                        "even_thinning",
+                        first_thinning,
+                        even_thinning,
                         {
                             "sequence": [
-                                "clearcutting",
-                                "planting"
+                                clearcutting,
+                                planting
                                 # operations for renewal after clearcutting go here
                             ]
                         }
@@ -75,8 +96,8 @@ control_structure = {
                 },
                 {
                     "sequence": [
-                        "cross_cut_felled_trees",
-                        "collect_felled_tree_properties"
+                        cross_cut_felled_trees,
+                        collect_felled_tree_properties
                     ]
                 }
             ]
@@ -84,25 +105,25 @@ control_structure = {
         {
             "time_points": [2020, 2030, 2040, 2050],
             "generators": [
-                {"sequence": ["report_period"]}
+                {"sequence": [report_period]}
             ]
         },
         {
             "time_points": [2050],
             "generators": [
-                {"sequence": ["report_collectives"]}
+                {"sequence": [report_collectives]}
             ]
         },
         {
             "time_points": [2020, 2025, 2030, 2035, 2040, 2045, 2050],
             "generators": [
-                {"sequence": ["grow_acta"]}
+                {"sequence": [grow_acta]}
                 # "grow_motti"
             ]
         }
     ],
     "operation_params": {
-        "first_thinning": [
+        first_thinning: [
             {
                 "thinning_factor": 0.97,
                 "e": 0.2,
@@ -110,100 +131,115 @@ control_structure = {
                 "dominant_height_upper_bound": 16
             }
         ],
-        "thinning_from_below": [
+        thinning_from_below: [
             {
                 "thinning_factor": 0.97,
                 "e": 0.2
             }
         ],
-        "thinning_from_above": [
+        thinning_from_above: [
             {
                 "thinning_factor": 0.98,
                 "e": 0.2
             }
         ],
-        "even_thinning": [
+        even_thinning: [
             {
                 "thinning_factor": 0.9,
                 "e": 0.2
             }
         ],
-        "calculate_biomass": [
+        calculate_biomass: [
             {"model_set": 1}
         ],
-        "report_collectives": [
+        report_collectives: [
             {
                 "identifier": "identifier",
-                "npv_1_percent": "net_present_value.value[(net_present_value.interest_rate==1) & (net_present_value.time_point == 2050)]",
-                "npv_2_percent": "net_present_value.value[(net_present_value.interest_rate==2) & (net_present_value.time_point == 2050)]",
-                "npv_3_percent": "net_present_value.value[(net_present_value.interest_rate==3) & (net_present_value.time_point == 2050)]",
-                "npv_4_percent": "net_present_value.value[(net_present_value.interest_rate==4) & (net_present_value.time_point == 2050)]",
-                "npv_5_percent": "net_present_value.value[(net_present_value.interest_rate==5) & (net_present_value.time_point == 2050)]",
-                "stock_2020": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & (cross_cutting.time_point == 2020)]",
-                "stock_2030": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & (cross_cutting.time_point == 2030)]",
-                "stock_2040": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & (cross_cutting.time_point == 2040)]",
-                "stock_2050": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & (cross_cutting.time_point == 2050)]",
-                "harvest_2035": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & (cross_cutting.time_point == 2035)]",
-                "harvest_2045": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & (cross_cutting.time_point == 2045)]",
-                "harvest_period_2030": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & (cross_cutting.time_point >= 2020) & (cross_cutting.time_point < 2030)]",
-                "harvest_period_2040": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & (cross_cutting.time_point >= 2030) & (cross_cutting.time_point < 2040)]",
-                "harvest_period_2050": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & (cross_cutting.time_point >= 2040) & (cross_cutting.time_point < 2050)]"
+                "npv_1_percent": "net_present_value.value[(net_present_value.interest_rate==1) & "
+                "(net_present_value.time_point == 2050)]",
+                "npv_2_percent": "net_present_value.value[(net_present_value.interest_rate==2) & "
+                "(net_present_value.time_point == 2050)]",
+                "npv_3_percent": "net_present_value.value[(net_present_value.interest_rate==3) & "
+                "(net_present_value.time_point == 2050)]",
+                "npv_4_percent": "net_present_value.value[(net_present_value.interest_rate==4) & "
+                "(net_present_value.time_point == 2050)]",
+                "npv_5_percent": "net_present_value.value[(net_present_value.interest_rate==5) & "
+                "(net_present_value.time_point == 2050)]",
+                "stock_2020": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & "
+                "(cross_cutting.time_point == 2020)]",
+                "stock_2030": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & "
+                "(cross_cutting.time_point == 2030)]",
+                "stock_2040": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & "
+                "(cross_cutting.time_point == 2040)]",
+                "stock_2050": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & "
+                "(cross_cutting.time_point == 2050)]",
+                "harvest_2035": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & "
+                "(cross_cutting.time_point == 2035)]",
+                "harvest_2045": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & "
+                "(cross_cutting.time_point == 2045)]",
+                "harvest_period_2030": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & "
+                "(cross_cutting.time_point >= 2020) & (cross_cutting.time_point < 2030)]",
+                "harvest_period_2040": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & "
+                "(cross_cutting.time_point >= 2030) & (cross_cutting.time_point < 2040)]",
+                "harvest_period_2050": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & "
+                "(cross_cutting.time_point >= 2040) & (cross_cutting.time_point < 2050)]"
             }
         ],
-        "report_period": [
+        report_period: [
             {"overall_volume": "cross_cutting.volume_per_ha"}
         ],
-        "calculate_npv": [
+        calculate_npv: [
             {"interest_rates": [1, 2, 3, 4, 5]}
         ],
-        "collect_standing_tree_properties": [
-            {"properties": ["stems_per_ha", "species", "breast_height_diameter", "height", "breast_height_age", "biological_age", "saw_log_volume_reduction_factor"]}
+        collect_standing_tree_properties: [
+            {"properties": ["stems_per_ha", "species", "breast_height_diameter", "height",
+                            "breast_height_age", "biological_age", "saw_log_volume_reduction_factor"]}
         ],
-        "collect_felled_tree_properties": [
+        collect_felled_tree_properties: [
             {"properties": ["stems_per_ha", "species", "breast_height_diameter", "height"]}
         ],
-        "planting": [
+        planting: [
             {"tree_count": 10}
         ]
     },
     "operation_file_params": {
-        "thinning_from_above": {
+        thinning_from_above: {
             "thinning_limits": "data/parameter_files/Thin.txt"
         },
-        "cross_cut_felled_trees": {
+        cross_cut_felled_trees: {
             "timber_price_table": "data/parameter_files/timber_price_table.csv"
         },
-        "cross_cut_standing_trees": {
+        cross_cut_standing_trees: {
             "timber_price_table": "data/parameter_files/timber_price_table.csv"
         },
-        "clearcutting": {
+        clearcutting: {
             "clearcutting_limits_ages": "data/parameter_files/renewal_ages_southernFI.txt",
             "clearcutting_limits_diameters": "data/parameter_files/renewal_diameters_southernFI.txt"
         },
-        "planting": {
+        planting: {
             "planting_instructions": "data/parameter_files/planting_instructions.txt"
         },
-        "calculate_npv": {
+        calculate_npv: {
             "land_values": "data/parameter_files/land_values_per_site_type_and_interest_rate.json",
             "renewal_costs": "data/parameter_files/renewal_operation_pricing.csv"
         }
     },
     "run_constraints": {
-        "first_thinning": {
+        first_thinning: {
             "minimum_time_interval": 50
         },
-        "clearcutting": {
+        clearcutting: {
             "minimum_time_interval": 50
         }
     },
     "post_processing": {
         "operation_params": {
-            "do_nothing": [
+            do_nothing: [
                 {"param": "value"}
             ]
         },
         "post_processing": [
-            "do_nothing"
+            do_nothing
         ]
     },
     "export": [
@@ -231,7 +267,6 @@ control_structure = {
 }
 
 # The preprocessing export format is added as an external module
-control_structure['export_prepro'] = {}
-control_structure['export_prepro'].update(csv_and_json)
+control_structure['export_prepro'] = csv_and_json
 
-__all__ =['control_structure']
+__all__ = ['control_structure']

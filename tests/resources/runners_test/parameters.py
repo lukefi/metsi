@@ -1,6 +1,9 @@
+from tests.test_utils import collecting_increment
+
+
 control_structure = {
   "operation_params": {
-    "inc": [
+    collecting_increment: [
       {"incrementation": 2}
     ]
   },
@@ -10,7 +13,7 @@ control_structure = {
       "generators": [
         {
           "sequence": [
-            "inc"
+            collecting_increment
           ]
         }
       ]

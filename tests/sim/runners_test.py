@@ -33,8 +33,7 @@ class RunnersTest(unittest.TestCase):
                                 "runners_test",
                                 "branching.py").resolve())
         declaration = read_control_module(control_path)
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=GENERATOR_LOOKUP,
+        config = SimConfiguration(generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
         print(config)
         initial = OperationPayload(
@@ -108,8 +107,7 @@ class RunnersTest(unittest.TestCase):
                                 "runners_test",
                                 "no_parameters.py").resolve())
         declaration = read_control_module(control_path)
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=GENERATOR_LOOKUP,
+        config = SimConfiguration(generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
         # print(config)
         initial = OperationPayload(

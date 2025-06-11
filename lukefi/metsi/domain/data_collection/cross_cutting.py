@@ -81,7 +81,7 @@ def cross_cut_tree(
     return res
 
 
-def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+def cross_cut_felled_trees(payload: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Calculates cross cutting volumes and values for CrossCuttableTrees that haven't yet been cross cut.
     :returns: the same payload as was given as input, but with cross cutting results stored in the collected_data.
@@ -110,7 +110,7 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], **operation_parameters
     return payload
 
 
-def cross_cut_standing_trees(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+def cross_cut_standing_trees(payload: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Cross cuts the `payload`'s stand at its current state. Does not modify the state, only calculates and stores the result of cross cutting.
     The results are stored in collected_data.
