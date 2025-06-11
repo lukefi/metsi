@@ -97,12 +97,6 @@ jobs:
       run: |
         export PYTHONPATH=${GITHUB_WORKSPACE}
         robot tests/robot
-
-    - name: Debug Directory Structure
-      run: |
-        echo "PYTHONPATH=$GITHUB_WORKSPACE"
-        tree -L 3
-        ls -la $GITHUB_WORKSPACE/tests/robot/01_MK/in
     
     - name: Archive Robot logs (optional)
       if: always()
@@ -113,6 +107,7 @@ jobs:
           log.html
           report.html
           output.xml
+          tests/robot/SMK_01/out/
 
     - name: Clean up
       run: |

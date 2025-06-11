@@ -1,4 +1,4 @@
-from tests.robot.t_01_MK.input.params import params, param_files
+from tests.robot.SMK_01.input.params import params, param_files
 
 year_start = 2025
 
