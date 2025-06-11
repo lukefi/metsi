@@ -1,6 +1,7 @@
-from demo.params import params, param_files
+from tests.robot.t_01_MK.input.params import params, param_files
 
 year_start = 2025
+
 step = 5
 period = 10
 #nperiods = 5
