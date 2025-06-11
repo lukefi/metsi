@@ -4,7 +4,6 @@ import unittest
 
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.sim.core_types import OperationPayload, SimConfiguration, CollectedData
-from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, chain_evaluator, depth_first_evaluator
 
 optime = 0
@@ -26,22 +25,22 @@ def nodecount(x, sleeptime):
 def create_sim_configs(workload_time):
     """Create 4 simulation configurations with roughly 400 total full strategy nodes each, with increasing width of the tree"""
     return [
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
             {'time_points': list(range(400)), 'generators': [{'sequence': ['nodecount']}]}
         ]}),
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
             {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(6)), 'generators': [{'alternatives': ['nodecount', 'nodecount']}]}
         ]}),
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
             {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(4)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount']}]}
         ]}),
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
             {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(3)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]}
         ]}),
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, generator_lookup=GENERATOR_LOOKUP, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
             {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(3)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount', 'nodecount', 'nodecount']}]}
         ]})

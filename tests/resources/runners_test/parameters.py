@@ -1,3 +1,4 @@
+from lukefi.metsi.sim.generators import sequence
 from tests.test_utils import collecting_increment
 
 
@@ -12,7 +13,7 @@ control_structure = {
       "time_points": [1, 2, 3, 4],
       "generators": [
         {
-          "sequence": [
+          sequence: [
             collecting_increment
           ]
         }
