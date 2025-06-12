@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  unit-tests: 
+  run-unit-tests: 
     name: Run Unit Tests
     strategy:
       fail-fast: false
@@ -68,7 +68,7 @@ jobs:
         make -C lukefi/metsi/forestry/c clean
 
   robot-tests:
-    needs: unit-tests # Ensure unit tests run before robot tests
+    needs: run-unit-tests # Ensure unit tests run before robot tests
     name: Run Robot Framework Tests
 
     runs-on: ubuntu-latest
