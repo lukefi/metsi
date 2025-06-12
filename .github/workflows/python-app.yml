@@ -123,7 +123,9 @@ jobs:
   
   publish-test-results:
     name: "Publish Test Results"
-    needs: run-unit-tests
+    needs: |
+      run-unit-tests
+      robot-tests
     runs-on: ubuntu-latest
     permissions:
       checks: write
