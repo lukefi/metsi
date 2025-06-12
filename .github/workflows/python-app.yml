@@ -114,7 +114,7 @@ jobs:
           log.html
           report.html
           output.xml
-          tests/robot/SMK_01/out/
+          tests/robot/SMK_01/output/
 
     - name: Clean up
       run: |
