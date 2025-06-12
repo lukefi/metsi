@@ -103,7 +103,7 @@ jobs:
     - name: Run Robot Tests
       run: |
         export PYTHONPATH=${GITHUB_WORKSPACE}
-        robot tests/robot
+        robot --xunit xunit.xml tests/robot
     
     - name: Archive Robot logs (optional)
       if: always()
@@ -114,6 +114,7 @@ jobs:
           log.html
           report.html
           output.xml
+          xunit.xml
           tests/robot/SMK_01/output/
 
     - name: Clean up
