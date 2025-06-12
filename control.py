@@ -1,26 +1,7 @@
 from examples.declarations.export_prepro import csv_and_json
-from lukefi.metsi.domain.data_collection.biomass_repola import calculate_biomass
-from lukefi.metsi.domain.data_collection.cross_cutting import cross_cut_felled_trees, cross_cut_standing_trees
-from lukefi.metsi.domain.data_collection.marshalling import (
-    collect_felled_tree_properties,
-    collect_standing_tree_properties,
-    report_collectives,
-    report_period,
-    report_state
-)
-from lukefi.metsi.domain.data_collection.net_present_value import calculate_npv
-from lukefi.metsi.domain.forestry_operations.clearcut import clearcutting
-from lukefi.metsi.domain.forestry_operations.thinning import (
-    even_thinning,
-    first_thinning,
-    thinning_from_above,
-    thinning_from_below
-)
-from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
-from lukefi.metsi.domain.pre_ops import generate_reference_trees, preproc_filter, scale_area_weight
-from lukefi.metsi.domain.forestry_operations.planting import planting
-from lukefi.metsi.sim.generators import alternatives, sequence
-from lukefi.metsi.sim.operations import do_nothing
+from lukefi.metsi.domain.pre_ops import *
+from lukefi.metsi.domain.sim_ops import *
+from lukefi.metsi.sim.generators import *
 
 
 control_structure = {

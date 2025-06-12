@@ -170,7 +170,7 @@ def simple_processable_chain(operation_tags: list[Callable], operation_params: d
         params = operation_params.get(tag, [{}])
         if len(params) > 1:
             raise Exception(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
-                "Defining multiple parameter sets is only supported for alternative clause generators.")
+                            "Defining multiple parameter sets is only supported for alternative clause generators.")
         result.append(prepared_operation(tag, **params[0]))
     return result
 
@@ -248,3 +248,5 @@ def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int,
         generators_by_time_point[time_point] = wrapper_generator
     return generators_by_time_point
 
+
+__all__ = ['sequence', 'alternatives']
