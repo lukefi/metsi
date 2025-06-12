@@ -54,7 +54,14 @@ jobs:
 
     - name: Test with pytest
       run: |
-        python -m pytest
+        python -m pytest --junit-xml=pytest.xml
+      
+    - name: Upload testing results
+      if: (!cancelled())
+      uses: actions/upload-artifact@v4
+      with:
+        name: Test Results (Python ${{ matrix.python-version }}, R ${{ matrix.r-version}})
+        path: pytest.xml
 
     - name: Clean up
       run: |
@@ -112,3 +119,25 @@ jobs:
     - name: Clean up
       run: |
         make -C lukefi/metsi/forestry/c clean
+  
+  publish-test-results:
+    name: "Publish Test Results"
+    needs: run-unit-tests
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+      contents: read
+      issues: read
+    if: (!cancelled())
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: "artifacts/**/*.xml"
