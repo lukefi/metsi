@@ -8,9 +8,9 @@ Library           ${CURDIR}/../CustomCompareLibrary.py
 *** Variables ***
 ${SCRIPT}           -m
 ${MODULE}           lukefi.metsi.app.metsi
-${INPUT_JSON}       ${CURDIR}/input/demo.json
+${INPUT_JSON}       ${CURDIR}/input/demo.xml
 ${OUTPUT_DIR}       ${CURDIR}/output/test
-${CONTROL_SCRIPT}   ${CURDIR}/input/demo_control_sim2.py
+${CONTROL_SCRIPT}   ${CURDIR}/input/demo_control_all.py
 ${REFERENCE_DIR}    ${CURDIR}/output/ref
 ${TOLERANCE}        0.01  # Set your desired tolerance here
 
@@ -21,12 +21,6 @@ Run Simulation And Compare Output Files
     Remove Directory    ${OUTPUT_DIR}    recursive=True
     Create Directory    ${OUTPUT_DIR}
 
-    Log To Console    \n--- DEBUGGING ---
-    Log To Console    Current Directory: ${CURDIR}
-    Log To Console    Input JSON Path: ${INPUT_JSON}
-    Log To Console    Output Dir Path: ${OUTPUT_DIR}
-    Log To Console    Running Module:  ${MODULE}
-    Log To Console    -----------------\n
 
     ${orig_env}=    Get Environment Variables
     Set To Dictionary    ${orig_env}    PYTHONPATH=${EXECDIR}

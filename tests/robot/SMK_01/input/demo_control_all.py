@@ -1,7 +1,6 @@
 from tests.robot.SMK_01.input.params import params, param_files
 
 year_start = 2025
-
 step = 5
 period = 10
 #nperiods = 5
@@ -37,14 +36,45 @@ export_J = {
     
 control_structure = {
     "app_configuration": {
-        "state_format": "fdm",  # options: fdm, vmi12, vmi13, xml, gpkg
+        "state_format": "xml",  # options: fdm, vmi12, vmi13, xml, gpkg
+        "strata_origin": 2, 
         "state_input_container": "json",  # Only relevant with fdm state_format. Options: pickle, json
         # "state_output_container": "csv",  # options: pickle, json, csv, null
         # "derived_data_output_container": "pickle",  # options: pickle, json, null
         "formation_strategy": "full",
         "evaluation_strategy": "depth",
-        "run_modes": ["simulate", "export"]
+        "run_modes": ["preprocess", "export_prepro", "simulate", "export"]
     },
+
+    ## Preprocessing control declaration
+    "preprocessing_operations": [
+        "convert_coordinates",
+        "generate_reference_trees",  # reference trees from strata, replaces existing reference trees
+        "filter"
+    ],
+    "preprocessing_params": {
+        "generate_reference_trees": [
+            {
+                "n_trees": 10,
+                "method": "weibull",
+                "debug": False
+            }
+         ],    
+         "filter": [
+            {
+                "remove trees": "sapling or stems_per_ha == 0",
+                "remove stands": "site_type_category == 0", # not reference_trees
+                "remove stands": "site_type_category == None"
+            }
+         ]
+    },
+    'export_prepro': {
+      "csv": {}, # default csv export
+      "rst": {},
+      "json": {}      
+    },
+
+    ## Simulation control declaration
     "simulation_events": [
         {
             "time_points": [year_start],
@@ -112,7 +142,8 @@ control_structure = {
             "minimum_time_interval": 50
         }
     },
-    "export": [ export_J,
+    "export": [
+        export_J,
         {
             "format": "rm_schedules_events_timber",
             "filename": "timber_sums.txt"
