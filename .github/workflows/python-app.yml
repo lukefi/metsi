@@ -141,4 +141,6 @@ jobs:
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          files: "artifacts/**/*.xml"
+          files: |
+            "artifacts/**/pytest.xml"
+            "artifacts/**/xunit.xml"
