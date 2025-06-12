@@ -142,5 +142,5 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: |
-            "artifacts/**/pytest.xml"
-            "artifacts/**/xunit.xml"
+            artifacts/**/pytest.xml
+            artifacts/**/xunit.xml
