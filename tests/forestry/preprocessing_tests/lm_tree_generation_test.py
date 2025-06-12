@@ -99,5 +99,5 @@ class TestLmTreeGeneration(unittest.TestCase):
         stratum._trees = trees
         result = tree_generation_lm(stratum, DDY, G)
         self.assertEqual(7, len(result))
-        self.assertAlmostEqual(stratum.mean_height, mean([t.height for t in result]), delta=6)
-        self.assertAlmostEqual(stratum.mean_diameter, mean([t.breast_height_diameter for t in result]), delta=7)
+        self.assertAlmostEqual(stratum.mean_height, mean([t.height for t in result]), delta=4)
+        self.assertAlmostEqual(stratum.mean_diameter, mean([t.breast_height_diameter for t in result]), delta=4)

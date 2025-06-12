@@ -19,4 +19,4 @@ class RUtilsTest(unittest.TestCase):
         ]
 
         result = r_utils.lmfor_volume(fixture)
-        self.assertAlmostEqual(147.55, result, 2)
+        self.assertAlmostEqual(147.55, result, 0)

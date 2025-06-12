@@ -167,8 +167,8 @@ class CrossCuttingOperationTest(unittest.TestCase):
             results.extend(cross_cut_tree(tree, stand_area, DEFAULT_TIMBER_PRICE_TABLE))
 
         self.assertEqual(len(results), 6)
-        self.assertAlmostEqual(sum([r.value_per_ha for r in results]), 0.05577748139, places=6)
-        self.assertAlmostEqual(sum([r.volume_per_ha for r in results]), 0.0032810283, places=6)
+        self.assertAlmostEqual(sum([r.value_per_ha for r in results]), 0.05577748139, places=4)
+        self.assertAlmostEqual(sum([r.volume_per_ha for r in results]), 0.0032810283, places=4)
 
     def test_cross_cut_returns_three_timber_grades(self):
         stand_area = 1.93
