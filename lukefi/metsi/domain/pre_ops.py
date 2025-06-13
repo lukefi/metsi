@@ -1,3 +1,4 @@
+import traceback
 from typing import Any
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.enums.internal import LandUseCategory
@@ -7,16 +8,13 @@ from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
 from lukefi.metsi.forestry.preprocessing.coordinate_conversion import convert_location_to_ykj, CRS
 from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age_for_reference_trees
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
-from lukefi.metsi.forestry.preprocessing.tree_generation import trees_from_sapling_height_distribution
-from lukefi.metsi.forestry.preprocessing.tree_generation_lm import tree_generation_lm
 from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
     debug_output_row_from_comparison_set, debug_output_header_row
-import traceback
 
 
 def preproc_filter(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     named = operation_params.get("named", {})
-    for k,v in operation_params.items():
+    for k, v in operation_params.items():
         if k != "named":
             stands = applyfilter(stands, k, v, named)
     return stands
@@ -74,7 +72,8 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
         print(f"\rGenerating trees for stand {stand.identifier}    {i}/{len(stands)}", end="")
         stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
         for tree in stand_trees:
-            stratum = find_matching_storey_stratum_for_tree(tree, stand.tree_strata, stratum_association_diameter_threshold)
+            stratum = find_matching_storey_stratum_for_tree(
+                tree, stand.tree_strata, stratum_association_diameter_threshold)
             if stratum is None:
                 continue
             if stratum.__dict__.get('_trees') is not None:
@@ -95,7 +94,8 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
             try:
                 stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, **operation_params)
             except Exception as e:
-                print(f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, height {stratum.mean_height}, basal_area {stratum.basal_area}")
+                print(
+                    f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, height {stratum.mean_height}, basal_area {stratum.basal_area}")
                 print()
                 if debug:
                     traceback.print_exc()
@@ -183,7 +183,7 @@ def generate_sapling_trees_from_sapling_strata(stands: list[ForestStand], **oper
 
 def scale_area_weight(stands: list[ForestStand], **operation_params):
     """ Scales area weight of a stand.
-    
+
         Especially necessary for VMI tree generation cases.
         Should be used as precesing operation before the generation of reference trees.
     """
@@ -194,7 +194,7 @@ def scale_area_weight(stands: list[ForestStand], **operation_params):
 
 def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str, Any]) -> list[ForestStand]:
     """ Preprocessing operation for converting the current coordinate system to target system
-    
+
     :target_system (optional): Spesified target system. Default is EPSG:2393
     """
     defaults = CRS.EPSG_2393.value
@@ -203,19 +203,17 @@ def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str,
         for s in stands:
             s.geo_location = convert_location_to_ykj(s)
     else:
-        Exception("Check definition of operation params.\n"
-            "{default}\' conversion supported.".format(default = defaults[0]))
+        raise Exception("Check definition of operation params.\n"
+                        f"{defaults[0]}\' conversion supported.")
     return stands
 
 
-operation_lookup = {
-    'filter': preproc_filter,
-    'compute_location_metadata': compute_location_metadata,
-    'generate_reference_trees': generate_reference_trees,
-    'supplement_missing_tree_heights': supplement_missing_tree_heights,
-    'supplement_missing_tree_ages': supplement_missing_tree_ages,
-    'supplement_missing_stratum_diameters': supplement_missing_stratum_diameters,
-    'generate_sapling_trees_from_sapling_strata': generate_sapling_trees_from_sapling_strata,
-    'scale_area_weight': scale_area_weight,
-    'convert_coordinates': convert_coordinates
-}
+__all__ = ['preproc_filter',
+           'compute_location_metadata',
+           'generate_reference_trees',
+           'supplement_missing_tree_heights',
+           'supplement_missing_tree_ages',
+           'supplement_missing_stratum_diameters',
+           'generate_sapling_trees_from_sapling_strata',
+           'scale_area_weight',
+           'convert_coordinates']

@@ -20,10 +20,10 @@ def prepared_operation(operation_entrypoint: Callable, **operation_parameters):
     return lambda state: operation_entrypoint(state, **operation_parameters)
 
 
-def prepared_processor(operation_tag, processor_lookup, time_point: int, operation_run_constraints: dict,
+def prepared_processor(operation_tag, time_point: int, operation_run_constraints: dict,
                        **operation_parameters: dict):
     """prepares a processor function with an operation entrypoint"""
-    operation = prepared_operation(resolve_operation(operation_tag, processor_lookup), **operation_parameters)
+    operation = prepared_operation(operation_tag, **operation_parameters)
     return lambda payload: processor(payload, operation, operation_tag, time_point, operation_run_constraints, **operation_parameters)
 
 
@@ -54,18 +54,3 @@ def check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_
     if operation_last_run_time_point is not None and minimum_time_interval > (time_point - operation_last_run_time_point):
         raise UserWarning("{} aborted - last run at {}, time now {}, minimum time interval {}"
                               .format(operation_tag, operation_last_run_time_point, time_point, minimum_time_interval))
-
-
-def resolve_operation(tag: str, external_operation_lookup: dict) -> Callable:
-    operation = get_or_default(
-        external_operation_lookup.get(tag),
-        internal_operation_lookup.get(tag))
-    if operation is None:
-        raise Exception("Operation " + tag + " not available")
-    else:
-        return operation
-
-
-internal_operation_lookup = {
-    'do_nothing': do_nothing
-}

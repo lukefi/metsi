@@ -11,11 +11,11 @@ def split_sapling_trees(trees: list[ReferenceTree]) -> tuple[list[ReferenceTree]
     return saplings, matures
 
 
-def grow_acta(input: tuple[ForestStand, None], **operation_parameters) -> tuple[ForestStand, None]:
+def grow_acta(input_: tuple[ForestStand, None], /, **operation_parameters) -> tuple[ForestStand, None]:
     step = operation_parameters.get('step', 5)
-    stand, _ = input
+    stand, _ = input_
     if len(stand.reference_trees) == 0:
-        return input
+        return input_
     diameters, heights = grow_diameter_and_height(stand.reference_trees, step)
     stems = list(map(lambda x: x.stems_per_ha, stand.reference_trees))
     update_stand_growth(stand, diameters, heights, stems, step)

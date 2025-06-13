@@ -7,3 +7,4 @@ issues
 build
 *.egg-info
 **/c/lib
+tests/robot/**/output/test/

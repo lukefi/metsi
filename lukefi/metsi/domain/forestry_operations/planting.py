@@ -121,7 +121,7 @@ def plant(
     return (stand, collected_data)
 
 
-def planting(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+def planting(payload: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """ Checks weather stand has reference trees, if not function plant is called """
     stand, collected_data = payload
     tree_count = operation_parameters.get('tree_count', 10)

@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.0] - 2025-06-13
+
+### Changed
+
+- Control structure now contains direct function references instead of lookup strings for generators and operations
+
 ## [1.2.4] - 2025-06-12
 
 ### Added

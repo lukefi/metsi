@@ -10,7 +10,7 @@ def identity(x):
 
 class DeclaredEvents(SimpleNamespace):
     time_points: list[int] = []
-    generators: list[dict] = {}
+    generators: list[dict] = [{}]
 
 
 class SimConfiguration(SimpleNamespace):
@@ -18,10 +18,6 @@ class SimConfiguration(SimpleNamespace):
     A class to manage simulation configuration, including operations, generators, 
     events, and time points.
     Attributes:
-        operation_lookup: A mapping of operation names 
-            to their corresponding callable functions.
-        generator_lookup: A mapping of generator names 
-            to their corresponding callable functions.
         operation_params: A dictionary containing 
             parameters for each operation, where the key is the operation name and 
             the value is a list of parameter dictionaries.
@@ -35,32 +31,23 @@ class SimConfiguration(SimpleNamespace):
         time_points: A sorted list of unique time points derived from the 
             declared simulation events.
     Methods:
-        __init__(operation_lookup, generator_lookup, **kwargs):
+        __init__(**kwargs):
             Initializes the SimConfiguration instance with operation and generator 
             lookups, and additional keyword arguments.
     """
-    generator_lookup: dict[str, Callable] = {}
-    operation_lookup: dict[str, Callable] = {}
     operation_params: dict[str, list[dict[str, Any]]] = {}
     operation_file_params: dict[str, dict[str, str]] = {}
     events: list[DeclaredEvents] = []
     run_constraints: dict[str, dict] = {}
     time_points = []
 
-    def __init__(self,
-                 operation_lookup: dict[str, Callable],
-                 generator_lookup: dict[str, Callable],
-                 **kwargs):
+    def __init__(self, **kwargs):
         """
         Initializes the core simulation object.
         Args:
-            operation_lookup (dict): A dictionary mapping operation names to their corresponding handlers or functions.
-            generator_lookup (dict): A dictionary mapping generator names to their corresponding handlers or functions.
             **kwargs: Additional keyword arguments to be passed to the parent class initializer.
         """
-        super().__init__(operation_lookup=operation_lookup,
-                         generator_lookup=generator_lookup,
-                         **kwargs)
+        super().__init__(**kwargs)
         self._populate_simulation_events(self.simulation_events)
 
     def _populate_simulation_events(self, events: list):
@@ -83,10 +70,10 @@ class EventTree:
     """
     operation: Callable = identity  # default to the identity function, essentially no-op
     branches: list['EventTree'] = []
-    previous: 'EventTree' or None = None
+    previous: 'EventTree | None' = None
 
-    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] or None = None,
-                 previous: 'EventTree' or None = None):
+    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] | None = None,
+                 previous: 'EventTree | None' = None):
         self.operation = operation if operation is not None else identity
         self.previous = previous
         self.branches = []

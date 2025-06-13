@@ -49,8 +49,7 @@ def export_preprocessed(target_directory: str, decl: dict, stands: StandList) ->
         filepaths = determine_file_path(target_directory, file_name)
         if operations is not None:
             operation_chain = simple_processable_chain(operations,
-                                                       operation_params,
-                                                       exp_ops.operation_lookup)
+                                                       operation_params)
             modified_stands = evaluate_sequence(
                 copy.deepcopy(stands),
                 *operation_chain)

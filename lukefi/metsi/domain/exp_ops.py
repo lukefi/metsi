@@ -44,10 +44,3 @@ def classify_values_to(stands: StandList, **operation_params) -> StandList:
     else:
         raise ConfigurationException(f"unsupported format: {format}")
     return [ f(stand) for stand in stands ]
-
-
-operation_lookup = {
-    'prepare_rst_output': prepare_rst_output,
-    'classify_values_to': classify_values_to
-}
-

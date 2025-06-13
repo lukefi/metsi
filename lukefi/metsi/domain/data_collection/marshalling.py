@@ -19,8 +19,8 @@ def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
     return input
 
 
-def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
-    state, collected_data = input
+def report_state(input_: OpTuple[T], /, **operation_parameters) -> OpTuple[T]:
+    state, collected_data = input_
     res = _collector_wrapper(
         operation_parameters,
         lambda name: autocollective(getattr(state, name)),
@@ -30,15 +30,15 @@ def report_state(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T
         state=state
     )
     collected_data.store('report_state', res)
-    return input
+    return input_
 
 
-def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
-    stand, collected_data = input
+def collect_properties(input_: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+    stand, collected_data = input_
     output_name = operation_parameters.get('output_name', 'collect_properties')
     result_rows = []
     if not len(operation_parameters):
-        return input
+        return input_
     for key, properties in operation_parameters.items():
         objects: list[object]
         if isinstance(properties, str):
@@ -59,18 +59,18 @@ def collect_properties(input: OpTuple[ForestStand], **operation_parameters) -> O
     return stand, collected_data
 
 
-def collect_standing_tree_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+def collect_standing_tree_properties(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     properties = operation_parameters.get("properties")
-    return collect_properties(input, tree=properties, output_name="collect_standing_tree_properties")
+    return collect_properties(input_, tree=properties, output_name="collect_standing_tree_properties")
 
 
-def collect_felled_tree_properties(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+def collect_felled_tree_properties(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     properties = operation_parameters.get("properties")
-    return collect_properties(input, felled_trees=properties, output_name="collect_felled_tree_properties")
+    return collect_properties(input_, felled_trees=properties, output_name="collect_felled_tree_properties")
 
 
-def report_period(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
-    _, collected_data = input
+def report_period(input_: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
+    _, collected_data = input_
     last_period = collected_data.prev('report_period')
     t0 = collected_data.initial_time_point if last_period is None else list(collected_data.get('report_period').keys())[-1]
     res = _collector_wrapper(
@@ -81,4 +81,4 @@ def report_period(input: OpTuple[T], /, **operation_parameters: str) -> OpTuple[
         )
     )
     collected_data.store('report_period', res)
-    return input
+    return input_

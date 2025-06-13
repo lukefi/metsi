@@ -28,12 +28,12 @@ def _clearcut_with_output(
     return stand, collected_data
 
 
-def clearcutting(input: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+def clearcutting(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """checks if either stand mean age or stand basal area weighted mean
     diameter is over limits given in separate files.
     If yes, function clearcut is called
     """
-    stand, collected_data = input
+    stand, collected_data = input_
 
     if len(stand.reference_trees) > 0 and sum(x.breast_height_diameter for x in stand.reference_trees) > 0:
         age_limits_path = operation_parameters.get('clearcutting_limits_ages', None)

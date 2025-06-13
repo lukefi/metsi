@@ -373,10 +373,10 @@ def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, 
         biomasses.append(fn(tree, stand, treevolumes[i], wastevolumes[i], models) * tree.stems_per_ha)
     return sum(biomasses)
 
-def calculate_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTuple[ForestStand]:
+def calculate_biomass(input_: OpTuple[ForestStand], /, **operation_params) -> OpTuple[ForestStand]:
     """For the given ForestStand, this operation computes and stores the current biomass tonnage and difference to last
     calculation into the CollectedData structure."""
-    stand, collected_data = input
+    stand, collected_data = input_
     models = operation_params.get('model_set', 1)
 
     # TODO: need proper functionality to find tree volumes, model_set 2
@@ -388,4 +388,4 @@ def calculate_biomass(input: OpTuple[ForestStand], **operation_params) -> OpTupl
     biomass_data.time_point = collected_data.current_time_point
     collected_data.extend_list_result('calculate_biomass', [biomass_data])
 
-    return input
+    return input_
