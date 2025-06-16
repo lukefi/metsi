@@ -281,13 +281,13 @@ def read_control_module(control_path: str, control: str = "control_structure") -
 
 
 ##### FileWriters start #####
-def pickle_writer(filepath: Path, container: ObjectLike | ExportableContainer[ForestStand]):
+def pickle_writer(filepath: Path, container: ObjectLike | ExportableContainer):
     outputtable = container.export_objects if isinstance(container, ExportableContainer) else container
     with open(filepath, 'wb') as f:
         pickle.dump(outputtable, f, protocol=5)
 
 
-def json_writer(filepath: Path, container: ObjectLike | ExportableContainer[ForestStand]):
+def json_writer(filepath: Path, container: ObjectLike | ExportableContainer):
     outputtable = container.export_objects if isinstance(container, ExportableContainer) else container
     jsonpickle.set_encoder_options("json", indent=2)
     with open(filepath, 'w', newline='\n', encoding="utf-8") as f:
@@ -317,12 +317,12 @@ def rsts_writer(filepath: Path, container: ExportableContainer[ForestStand]):
     row_writer(filepath, stands_to_rsts_content(container))
 
 
-def npy_writer(filepath: Path, container: ExportableContainer[ForestStand]):
+def npy_writer(filepath: Path, container: ExportableContainer):
     stands = container.export_objects
     np.save(filepath, allow_pickle=True, arr=np.array(stands, dtype=object))
 
 
-def npz_writer(filepath: Path, container: ExportableContainer[ForestStand]):
+def npz_writer(filepath: Path, container: ExportableContainer):
     stands = container.export_objects
     np.savez(filepath, allow_pickle=True, *[np.array(stand) for stand in stands])
 
@@ -356,3 +356,15 @@ def json_reader(file_path: str | Path) -> StandList:
 def pickle_reader(file_path: str | Path) -> StandList:
     with open(file_path, 'rb') as f:
         return pickle.load(f)
+
+def npy_file_reader(file_path: str | Path) -> np.ndarray:
+    with open(file_path, 'rb') as f:
+        return np.load(f, allow_pickle=True)
+
+def npz_file_reader(file_path: str | Path):
+    with np.load(file_path, allow_pickle=True) as data:
+        retval = []
+        for v in data.values():
+            retval.append(v)
+    return retval
+    
