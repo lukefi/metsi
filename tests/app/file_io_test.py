@@ -4,7 +4,6 @@ import shutil
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 from dataclasses import dataclass
-import numpy as np
 from lukefi.metsi.app import file_io
 from lukefi.metsi.data.enums.internal import (
     DrainageCategory, LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, Storey, TreeSpecies)
@@ -82,6 +81,9 @@ class TestFileReading(unittest.TestCase):
         data = [[
             Test(a=1),
             Test(a=2)
+        ], [
+            Test(a=3),
+            Test(a=4)
         ]]
         ec = ExportableContainer(export_objects=data, additional_vars=None)
 
