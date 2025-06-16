@@ -1,4 +1,5 @@
 from pathlib import Path
+from collections import defaultdict
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.app.file_io import row_writer
 from lukefi.metsi.domain.utils.collectives import LazyListDataFrame
@@ -11,7 +12,11 @@ def scan_operation_type_for_event(year: int, cross_cut: list[CrossCutResult]) ->
         return val
     except:
         return 'unknown_operation'
-
+def group_crosscut_by_year_and_source(results: list[CrossCutResult]) -> dict[tuple[int, str], list[CrossCutResult]]:
+    grouped = defaultdict(list)
+    for r in results:
+        grouped[(r.time_point, r.source)].append(r)
+    return grouped
 
 def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
     """Create rows for events in a single schedule"""
@@ -20,8 +25,10 @@ def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
     standing_tree_data = derived_data.get('collect_standing_tree_properties')
     felled_tree_data = derived_data.get('collect_felled_tree_properties')
     cross_cut_results = derived_data.get('cross_cutting')
+    grouped = group_crosscut_by_year_and_source(cross_cut_results)
+
     for year, report in timber_events.items():
-        event_details = collect_timber_data_for_year(report, year, cross_cut_results)
+        event_details = collect_timber_data_for_year(report, year, grouped)
 
         for event in event_details:
             header = " ".join([str(event['event_type']), str(event['year']), str(event['source']), str(round(event['total'], 2)), "m3/ha"])
@@ -40,21 +47,27 @@ def collect_rows_for_events(derived_data: dict, data_source: str) -> list[str]:
                     retval.extend(tree_rows)
     return retval
 
+def find_volumes_for_source(grouped: dict[tuple[int, str], list[CrossCutResult]], year: int, source: str) -> list[float]:
+    filtered = grouped.get((year, source), [])
 
-def find_volumes_for_source(results: list[CrossCutResult], year: int, source: str) -> list[float]:
-    f = LazyListDataFrame(results)
+    def volume_sum(species_cond, grade):
+        return sum(
+            r.volume_per_ha
+            for r in filtered
+            if species_cond(r.species) and r.timber_grade == grade
+        )
+
     return [
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 1) & (f.timber_grade == 1) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 1) & (f.timber_grade == 2) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 1) & (f.timber_grade == 3) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 2) & (f.timber_grade == 1) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 2) & (f.timber_grade == 2) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & (f.species == 2) & (f.timber_grade == 3) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & ((f.species != 1) & (f.species !=2)) & (f.timber_grade == 1) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & ((f.species != 1) & (f.species !=2)) & (f.timber_grade == 2) & (f.source == source)]),
-        sum(f.volume_per_ha[(f.time_point == year) & ((f.species != 1) & (f.species !=2)) & (f.timber_grade == 3) & (f.source == source)])
+        volume_sum(lambda s: s == 1, 1),
+        volume_sum(lambda s: s == 1, 2),
+        volume_sum(lambda s: s == 1, 3),
+        volume_sum(lambda s: s == 2, 1),
+        volume_sum(lambda s: s == 2, 2),
+        volume_sum(lambda s: s == 2, 3),
+        volume_sum(lambda s: s != 1 and s != 2, 1),
+        volume_sum(lambda s: s != 1 and s != 2, 2),
+        volume_sum(lambda s: s != 1 and s != 2, 3),
     ]
-
 
 def collect_timber_data_for_year(report: dict, year: int, cross_cut_results: list[CrossCutResult]) -> list[dict]:
     """Compose collection objects for timber volume details"""
@@ -83,13 +96,14 @@ def prepare_schedules_file_content(data: SimResults, data_source: str) -> list[s
     """
     output_rows = []
     for stand_id, payload in data.items():
-        output_rows.append(f"Stand {stand_id} Area {payload[0].computational_unit.area}")
+        schedule_rows = [f"Stand {stand_id} Area {payload[0].computational_unit.area}"]
         for schedule_number, schedule_derived_data in enumerate(map(lambda x: x.collected_data, payload)):
-            output_rows.append(f"Schedule {schedule_number}")
-            prepared = collect_rows_for_events(schedule_derived_data, data_source)
-            output_rows.extend(prepared)
-            output_rows.append("")
-        output_rows.append("")
+            rows = [f"Schedule {schedule_number}"]
+            rows.extend(collect_rows_for_events(schedule_derived_data, data_source))
+            rows.append("")
+            schedule_rows.extend(rows)
+        schedule_rows.append("")
+        output_rows.extend(schedule_rows)
     return output_rows
 
 
