@@ -128,15 +128,14 @@ CONTAINERS = {
 }
 
 
-def vectorize(stands_: StandList, **operation_params) -> StandList:
-
+def vectorize(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     target = operation_params.get('target', None)
     if target is None:
         target = ['reference_trees', 'tree_strata']
     else:
         target = [target]
 
-    for stand in stands_:
+    for stand in stands:
         for t in target:
             attr_dict: dict[str, Any] = {}
 
@@ -151,13 +150,13 @@ def vectorize(stands_: StandList, **operation_params) -> StandList:
                 raise Exception(f"Unknown target type '{t}'")
             setattr(stand, t, container_obj().vectorize(attr_dict))
 
-    return stands_
+    return stands
 
 
 __all__ = ["vectorize"]
 
 if __name__ == "__main__":
-    stands = [ForestStand(reference_trees=[ReferenceTree(species=TreeSpecies(1)),
+    stands_ = [ForestStand(reference_trees=[ReferenceTree(species=TreeSpecies(1)),
                                            ReferenceTree(species=TreeSpecies(2))])]
-    vectorize(stands)
-    pprint(stands)
+    vectorize(stands_)
+    pprint(stands_)
