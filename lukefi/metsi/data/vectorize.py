@@ -1,38 +1,38 @@
+from dataclasses import dataclass
+from typing import Optional, Any
+from pprint import pprint
 import numpy as np
 import numpy.typing as npt
-from typing import Optional, Any
-from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.domain.forestry_types import StandList
-from dataclasses import dataclass
-from lukefi.metsi.data.formats.util import get_or_default 
-
 
 
 DTYPE_TREE = np.dtype([
-        ("identifier", "U20"),
-        ("tree_number", np.int32),
-        ("species", np.int32),
-        ("breast_height_diameter", np.float64),
-        ("height", np.float64),
-        ("measured_height", np.float64),
-        ("breast_height_age", np.float64),
-        ("biological_age", np.float64),
-        ("stems_per_ha", np.float64),
-        ("origin", np.int32),
-        ("management_category", np.int32),
-        ("saw_log_volume_reduction_factor", np.float64),
-        ("pruning_year", np.int16),
-        ("age_when_10cm_diameter_at_breast_height", np.int16),
-        ("stand_origin_relative_position", np.float64, (3,)),
-        ("lowest_living_branch_height", np.float64),
-        ("tree_category", np.str_),
-        ("storey", np.int32),
-        ("sapling", np.bool_),
-        ("tree_type", "U20"),
-        ("tuhon_ilmiasu", "U20"),
-        ("latvuskerros", np.float64) # NOTE: for benchmarking purposes
-    ])
-    
+    ("identifier", "U20"),
+    ("tree_number", np.int32),
+    ("species", np.int32),
+    ("breast_height_diameter", np.float64),
+    ("height", np.float64),
+    ("measured_height", np.float64),
+    ("breast_height_age", np.float64),
+    ("biological_age", np.float64),
+    ("stems_per_ha", np.float64),
+    ("origin", np.int32),
+    ("management_category", np.int32),
+    ("saw_log_volume_reduction_factor", np.float64),
+    ("pruning_year", np.int16),
+    ("age_when_10cm_diameter_at_breast_height", np.int16),
+    ("stand_origin_relative_position", np.float64, (3,)),
+    ("lowest_living_branch_height", np.float64),
+    ("tree_category", np.str_),
+    ("storey", np.int32),
+    ("sapling", np.bool_),
+    ("tree_type", "U20"),
+    ("tuhon_ilmiasu", "U20"),
+    ("latvuskerros", np.float64)  # NOTE: for benchmarking purposes
+])
+
 DTYPE_STRATA = np.dtype([
     ("identifier", "U20"),
     ("species", np.int32),
@@ -66,20 +66,20 @@ class VectorData():
         for k, v in attr_dict.items():
             setattr(self, k, np.array(self.defaultify(v, self.dtype[k]), self.dtype[k]))
             if not self.is_contiguous(k):
-                raise("Vectorized data is not contiguous")
+                raise Exception("Vectorized data is not contiguous")
         self.set_size(attr_dict)
         return self
 
     def is_contiguous(self, name):
         arr = getattr(self, name)
-        return True if arr.flags['CONTIGUOUS'] and arr.flags['C_CONTIGUOUS'] else False 
+        return bool(arr.flags['CONTIGUOUS']) and bool(arr.flags['C_CONTIGUOUS'])
 
     def set_size(self, attr_dict):
         size = len(attr_dict.get('identifier', []))
         setattr(self, 'size', size)
 
     def defaultify(self, values: list, dtype: npt.DTypeLike) -> list:
-        return [ self.to_default(v, dtype) for v in values]
+        return [self.to_default(v, dtype) for v in values]
 
     def to_default(self, value: Optional[Any], field_type: npt.DTypeLike) -> Any:
         """ Replace None with appropriate defaults based on field type. """
@@ -89,20 +89,22 @@ class VectorData():
         bool_default = False
         tuple_default = (np.nan, np.nan, np.nan)
         object_default = None
-        
+        retval: Any
+
         if value is None:
             if np.issubdtype(field_type, np.integer):
-                return int_default
+                retval = int_default
             elif np.issubdtype(field_type, np.floating):
-                return float_default
+                retval = float_default
             elif np.issubdtype(field_type, np.str_):
-                return str_default
+                retval = str_default
             elif np.issubdtype(field_type, np.bool_):
-                return bool_default
+                retval = bool_default
             elif np.issubdtype(field_type, np.void):
-                return tuple_default
+                retval = tuple_default
             else:
-                return object_default
+                retval = object_default
+            return retval
         return value
 
 
@@ -115,7 +117,7 @@ class ReferenceTrees(VectorData):
 
 @dataclass
 class Strata(VectorData):
-    
+
     def __init__(self):
         super().__init__(DTYPE_STRATA)
 
@@ -125,17 +127,18 @@ CONTAINERS = {
     "tree_strata": Strata
 }
 
-def vectorize(stands: StandList, **operation_params) -> StandList:
-   
+
+def vectorize(stands_: StandList, **operation_params) -> StandList:
+
     target = operation_params.get('target', None)
-    if target == None:
+    if target is None:
         target = ['reference_trees', 'tree_strata']
     else:
         target = [target]
 
-    for stand in stands:
+    for stand in stands_:
         for t in target:
-            attr_dict = {}
+            attr_dict: dict[str, Any] = {}
 
             for data in getattr(stand, t, []):
                 delattr(data, "stand")
@@ -144,14 +147,17 @@ def vectorize(stands: StandList, **operation_params) -> StandList:
 
             # Overwrite old forestry data
             container_obj = CONTAINERS.get(t)
+            if not container_obj:
+                raise Exception(f"Unknown target type '{t}'")
             setattr(stand, t, container_obj().vectorize(attr_dict))
 
-    return stands
+    return stands_
 
 
 __all__ = ["vectorize"]
 
 if __name__ == "__main__":
-    stands = [ForestStand(reference_trees=[ReferenceTree(species=1), ReferenceTree(species=2)])]
+    stands = [ForestStand(reference_trees=[ReferenceTree(species=TreeSpecies(1)),
+                                           ReferenceTree(species=TreeSpecies(2))])]
     vectorize(stands)
-    print()
+    pprint(stands)
