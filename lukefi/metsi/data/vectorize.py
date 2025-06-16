@@ -5,7 +5,6 @@ import numpy as np
 import numpy.typing as npt
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
-from lukefi.metsi.domain.forestry_types import StandList
 
 
 DTYPE_TREE = np.dtype([
