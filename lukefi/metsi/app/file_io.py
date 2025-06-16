@@ -5,6 +5,7 @@ import importlib.util
 from collections.abc import Iterator, Callable
 from pathlib import Path
 from typing import Any, Optional
+import numpy as np
 import jsonpickle
 from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, \
@@ -54,6 +55,10 @@ def stand_writer(container_format: str) -> StandWriter:
         return rst_writer
     if container_format == "rsts":
         return rsts_writer
+    if container_format == "npy":
+        return npy_writer
+    if container_format == "npz":
+        return npz_writer
     raise Exception(f"Unsupported container format '{container_format}'")
 
 
@@ -310,6 +315,16 @@ def rst_writer(filepath: Path, container: ExportableContainer[ForestStand]):
 # - voidaanko tälle tehdä sama kuin par_writerille?
 def rsts_writer(filepath: Path, container: ExportableContainer[ForestStand]):
     row_writer(filepath, stands_to_rsts_content(container))
+
+
+def npy_writer(filepath: Path, container: ExportableContainer[ForestStand]):
+    stands = container.export_objects
+    np.save(filepath, allow_pickle=True, arr=np.array(stands, dtype=object))
+
+
+def npz_writer(filepath: Path, container: ExportableContainer[ForestStand]):
+    stands = container.export_objects
+    np.savez(filepath, allow_pickle=True, *[np.array(stand) for stand in stands])
 
 
 def par_writer(filepath: Path, var_names: list[str]):
