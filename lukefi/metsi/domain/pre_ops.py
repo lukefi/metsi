@@ -10,6 +10,7 @@ from lukefi.metsi.forestry.preprocessing.age_supplementing import supplement_age
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
     debug_output_row_from_comparison_set, debug_output_header_row
+from lukefi.metsi.data.vectorize import vectorize
 
 
 def preproc_filter(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
@@ -216,4 +217,5 @@ __all__ = ['preproc_filter',
            'supplement_missing_stratum_diameters',
            'generate_sapling_trees_from_sapling_strata',
            'scale_area_weight',
-           'convert_coordinates']
+           'convert_coordinates',
+           'vectorize']
