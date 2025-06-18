@@ -9,7 +9,7 @@ import shutil
 import unittest
 from lukefi.metsi.app import metsi
 
-@unittest.skip
+@unittest.skip("Not working")
 class MainTest(unittest.TestCase):
     def test_metsi(self):
         sys.argv = [

@@ -4,7 +4,7 @@ from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.forestry.naturalprocess.grow_continuous import continuous_growth_r
 
-@unittest.skip
+@unittest.skip("Not working")
 class ContinuousGrowthTest(unittest.TestCase):
     def test_pukkala_grow(self):
         fixture = ForestStand(
