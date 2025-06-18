@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.5] - 2025-06-18
+
+### Added
+
+- Implemented partial file simulation #MELA2-45
+- Added Robot test SMK_02_partial 
+
 ## [1.2.4] - 2025-06-12
 
 ### Added

@@ -118,9 +118,9 @@ def j_out(data: SimResults,
           cvariables: list[str],
           xvariables: list[str]):
     """Write J files."""
-    with open(cda_filepath, "w") as f:
+    with open(cda_filepath, "a") as f:
         j_cda(f, data, cvariables)
-    with open(xda_filepath, "w") as f:
+    with open(xda_filepath, "a") as f:
         j_xda(f, data, xvariables)
 
 

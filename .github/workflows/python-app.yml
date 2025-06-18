@@ -115,7 +115,7 @@ jobs:
           report.html
           output.xml
           xunit.xml
-          tests/robot/SMK_01/output/
+          tests/robot/**/output/
 
     - name: Clean up
       run: |
