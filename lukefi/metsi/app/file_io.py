@@ -272,7 +272,7 @@ def json_writer(filepath: Path, container: ObjectLike | ExportableContainer[Fore
 
 # generic writer
 def row_writer(filepath: Path, rows: list[str]):
-    with open(filepath, 'w', newline='\n') as file:
+    with open(filepath, 'a', newline='\n') as file:
         for row in rows:
             file.write(row)
             file.write('\n')
