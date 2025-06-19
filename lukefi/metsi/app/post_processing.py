@@ -9,8 +9,7 @@ from lukefi.metsi.sim.runners import evaluate_sequence
 def post_process_alternatives(config: MetsiConfiguration, control: dict, input_data: SimResults):
     chain = simple_processable_chain(
         control.get('post_processing', []),
-        control.get('operation_params', {}),
-        operation_lookup
+        control.get('operation_params', {})
     )
     result = {}
     for identifier, schedules in input_data.items():

@@ -4,12 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.2.5] - 2025-06-16
+
+## [2.0.1] - 2025-06-16
 
 ### Changed
 
 - Perf: Improved export speed with grouping query #MELA2-44
 - Perf: Improved speed and memory with EventTree class internal changes
+
+## [2.0.0] - 2025-06-13
+
+### Changed
+
+- Control structure now contains direct function references instead of lookup strings for generators and operations
+
 
 ## [1.2.4] - 2025-06-12
 

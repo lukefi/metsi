@@ -1,12 +1,6 @@
-import os
-import queue
-import multiprocessing
-
 from lukefi.metsi.data.layered_model import LayeredObject
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
-import lukefi.metsi.domain.sim_ops
-import lukefi.metsi.sim.generators
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import ForestOpPayload
 from lukefi.metsi.app.enum import FormationStrategy, EvaluationStrategy
@@ -66,12 +60,8 @@ def resolve_evaluation_strategy(source: str) -> Evaluator[ForestOpPayload]:
         raise Exception("Unable to resolve event tree evaluation strategy '{}'".format(source))
 
 
-
 def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList):
-    simconfig = SimConfiguration(
-        operation_lookup=lukefi.metsi.domain.sim_ops.operation_lookup,
-        generator_lookup=lukefi.metsi.sim.generators.GENERATOR_LOOKUP,
-        **control)
+    simconfig = SimConfiguration(**control)
     formation_strategy = resolve_formation_strategy(config.formation_strategy)
     evaluation_strategy = resolve_evaluation_strategy(config.evaluation_strategy)
     result = run_stands(stands, simconfig, formation_strategy, evaluation_strategy)
