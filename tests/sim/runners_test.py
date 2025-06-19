@@ -1,6 +1,5 @@
 import unittest
 from pathlib import Path
-from lukefi.metsi.sim.generators import GENERATOR_LOOKUP
 from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, SimConfiguration
 from lukefi.metsi.sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy, \
     chain_evaluator, depth_first_evaluator
@@ -33,9 +32,7 @@ class RunnersTest(unittest.TestCase):
                                 "runners_test",
                                 "branching.py").resolve())
         declaration = read_control_module(control_path)
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=GENERATOR_LOOKUP,
-                                  **declaration)
+        config = SimConfiguration(**declaration)
         print(config)
         initial = OperationPayload(
             computational_unit=1,
@@ -55,7 +52,6 @@ class RunnersTest(unittest.TestCase):
                                 "branching.py").resolve())
         declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
         print(config)
         chains_payload = OperationPayload(
@@ -82,7 +78,6 @@ class RunnersTest(unittest.TestCase):
                                 "branching.py").resolve())
         declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
         print(config)
         chains_payload = OperationPayload(
@@ -108,9 +103,7 @@ class RunnersTest(unittest.TestCase):
                                 "runners_test",
                                 "no_parameters.py").resolve())
         declaration = read_control_module(control_path)
-        config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=GENERATOR_LOOKUP,
-                                  **declaration)
+        config = SimConfiguration(**declaration)
         # print(config)
         initial = OperationPayload(
             computational_unit=1,
@@ -130,7 +123,6 @@ class RunnersTest(unittest.TestCase):
                                 "parameters.py").resolve())
         declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
         # print(config)
         initial = OperationPayload(
@@ -151,7 +143,6 @@ class RunnersTest(unittest.TestCase):
                                 "parameters_branching.py").resolve())
         declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
-                                  generator_lookup=GENERATOR_LOOKUP,
                                   **declaration)
         initial = OperationPayload(
             computational_unit=1,
