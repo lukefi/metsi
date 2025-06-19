@@ -1,9 +1,6 @@
-from lukefi.metsi.forestry.cross_cutting.taper_curves import TAPER_CURVES
-import numpy as np 
+import numpy as np
 from numba import njit
-from scipy import integrate
-from enum import IntEnum
-from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.forestry.cross_cutting.taper_curves import TAPER_CURVES
 
 
 @njit(fastmath=True)
@@ -86,11 +83,12 @@ def _cpoly3(p: np.ndarray) -> np.ndarray:
 
     return b
 
+
 @njit(fastmath=True)
 def _dhat(h: np.ndarray, height: int, coef: np.ndarray) -> np.ndarray:
     n = len(h)
     dhat = np.zeros(n)
-    
+
     for i in range(n):
         x = (height - h[i]) / height
         x2 = x * x
@@ -151,7 +149,7 @@ def _ghat(h: float, height: int, coef: np.ndarray) -> float:
     x34 = x13 * x21
 
     d = (
-        x  * coef[0] +
+        x * coef[0] +
         x2 * coef[1] +
         x3 * coef[2] +
         x5 * coef[3] +
@@ -190,7 +188,6 @@ def _volume(hkanto: float, dbh: float, height: int, coeff: np.ndarray):
     return (v_cum, d_piece, h_piece)
 
 
-
 SPECIES_FOR_STEM_PROFILE = {
     "pine": 1,
     "spruce": 2,
@@ -198,14 +195,17 @@ SPECIES_FOR_STEM_PROFILE = {
     "alnus": 4
 }
 
-def create_tree_stem_profile(species_string: str, dbh: float, height: int, n: int, hkanto: float = 0.1, div: int = 10) -> np.ndarray:
+
+def create_tree_stem_profile(species_string: str, dbh: float, height: int, n: int,
+                             hkanto: float = 0.1, div: int = 10) -> np.ndarray:
     """
     This function has been ported from, and should be updated according to, the R implementation.
     """
     taper_curve = TAPER_CURVES.get(species_string, TAPER_CURVES["birch"])  # fallback default
     coefs = np.array(list(taper_curve["climbed"].values()))
 
-    species_code = SPECIES_FOR_STEM_PROFILE.get(species_string, SPECIES_FOR_STEM_PROFILE["birch"])  # default to "birch" → code 3
+    species_code = SPECIES_FOR_STEM_PROFILE.get(
+        species_string, SPECIES_FOR_STEM_PROFILE["birch"])  # default to "birch" → code 3
 
     p = _taper_curve_correction(dbh, height, species_code)
 
@@ -229,6 +229,3 @@ def create_tree_stem_profile(species_string: str, dbh: float, height: int, n: in
     T[:, 2] = v_cum
 
     return T
-
-
-
