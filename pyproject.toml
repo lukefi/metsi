@@ -20,7 +20,6 @@ authors = [
     { name = "Urho Niemelä" },
 ]
 dependencies = [
-    "pyyaml==6.0.2",
     "jsonpickle==3.0.1",
     "lupa==2.2",
     "geopandas == 1.0.1",
