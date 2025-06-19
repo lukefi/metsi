@@ -21,12 +21,12 @@ authors = [
 ]
 dependencies = [
     "pyyaml==6.0.2",
-    "jsonpickle==3.0.1",
-    "lupa==2.2",
-    "scipy==1.14.0",
-    "geopandas == 1.0.1",
-    "pandas == 2.2.2",
-    "rpy2==3.5.12",
+    "jsonpickle==4.1.1",
+    "lupa==2.5",
+    "scipy==1.15.3",
+    "geopandas == 1.1.0",
+    "pandas == 2.3.0",
+    "rpy2==3.6.1",
     "numba==0.61.2",
     "robotframework==7.3",
 ]
@@ -35,7 +35,7 @@ dependencies = [
 [project.optional-dependencies]
 tests = [
     "pytest",
-    "parameterized==0.8.1"
+    "parameterized==0.9.0"
 ]
 
 [project.scripts]
