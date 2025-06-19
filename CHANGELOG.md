@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.0] - 2025-06-19
+
+### Added
+
+- Added 'vectorize' pre-processing operation
+- Added 'npy' and 'npz' export_prepro options
 
 ## [2.0.1] - 2025-06-16
 
