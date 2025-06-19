@@ -31,8 +31,6 @@ Run Simulation And Compare Output Files
     ...           ${OUTPUT_DIR}
     ...           ${CONTROL_SCRIPT}
     ...           shell=True
-    ...           stdout=YES
-    ...           stderr=YES
     ...           env=${orig_env}
 
     Log    STDOUT:\n${result.stdout}
