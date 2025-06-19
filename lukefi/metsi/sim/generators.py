@@ -1,7 +1,7 @@
 from typing import Any, Optional
 from collections.abc import Callable
 from lukefi.metsi.sim.core_types import EventTree, SimConfiguration, DeclaredEvents, OperationPayload, GeneratorFn
-from lukefi.metsi.sim.operations import prepared_processor, prepared_operation, resolve_operation
+from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
 from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_params
 
 
@@ -14,7 +14,7 @@ class NestableGenerator:
     prepared_generator: Optional[GeneratorFn] = None
     time_point: int = 0
     nested_generators: list['NestableGenerator']
-    free_operations: list[dict or str]
+    free_operations: list[dict | str]
     config: SimConfiguration
 
     def __init__(self,
@@ -40,7 +40,7 @@ class NestableGenerator:
                 for op in self.free_operations:
                     ops = prepare_parametrized_operations(config, op, time_point)
                     prepared_operations.extend(ops)
-                self.prepared_generator = generator_function(self.generator_type, config.generator_lookup, *prepared_operations)
+                self.prepared_generator = generator_function(self.generator_type, *prepared_operations)
             else:
                 self.wrap_free_operations()
 
@@ -49,11 +49,11 @@ class NestableGenerator:
         individual operations as free operations into self state."""
         if isinstance(candidate, dict):
             # Encountered a nested generator.
-            if list(candidate.keys())[0] in ('sequence', 'alternatives'):
+            if list(candidate.keys())[0] in (sequence, alternatives):
                 # Preceding free operations must be wrapped as NestableGenerators
                 self.wrap_free_operations()
                 self.nested_generators.append(NestableGenerator(self.config, candidate, self.time_point))
-        elif isinstance(candidate, str):
+        else:
             # Encountered an operation tag.
             self.check_operation_sanity(candidate)
             self.free_operations.append(candidate)
@@ -61,7 +61,7 @@ class NestableGenerator:
     def check_operation_sanity(self, candidate: str):
         """Raise an Exception if operation candidate is not usable in current NestableGenerator context"""
         parameter_set_choices = self.config.operation_params.get(candidate, [{}])
-        if len(parameter_set_choices) > 1 and self.generator_type == 'sequence':
+        if len(parameter_set_choices) > 1 and self.generator_type == sequence:
             # TODO: for the time being, multiple parameter sets for sequence operations don't make sense
             # needs to be addressed during in-line parameters work in #211
             raise Exception("Alternatives by operation parameters not supported in sequences. Use "
@@ -99,12 +99,12 @@ class NestableGenerator:
         if self.prepared_generator is not None:
             return self.prepared_generator(previous)
         else:
-            if self.generator_type == 'sequence':
+            if self.generator_type == sequence:
                 current = previous
                 for child in self.nested_generators:
                     current = child.unwrap(current)
                 return current
-            elif self.generator_type == 'alternatives':
+            elif self.generator_type == alternatives:
                 current = []
                 for child in self.nested_generators:
                     current.extend(child.unwrap(previous))
@@ -150,12 +150,6 @@ def alternatives(parents: Optional[list[EventTree]] = None, *operations: Callabl
     return result
 
 
-GENERATOR_LOOKUP = {
-    'sequence': sequence,
-    'alternatives': alternatives,
-    }
-
-
 def compose_nested(nestable_generator: NestableGenerator) -> EventTree:
     """
     Generate a simulation EventTree using the given NestableGenerator.
@@ -168,17 +162,16 @@ def compose_nested(nestable_generator: NestableGenerator) -> EventTree:
     return root
 
 
-def simple_processable_chain(operation_tags: list[str], operation_params: dict, operation_lookup: dict) -> list[
-    Callable]:
+def simple_processable_chain(operation_tags: list[Callable], operation_params: dict) -> list[Callable]:
     """Prepare a list of partially applied (parametrized) operation functions based on given declaration of operation
     tags and operation parameters"""
     result = []
     for tag in operation_tags if operation_tags is not None else []:
         params = operation_params.get(tag, [{}])
         if len(params) > 1:
-            raise Exception("Trying to apply multiple parameter set for preprocessing operation \'{}\'. "
-                "Defining multiple parameter sets is only supported for alternative clause generators.".format(tag))
-        result.append(prepared_operation(resolve_operation(tag, operation_lookup), **params[0]))
+            raise Exception(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
+                            "Defining multiple parameter sets is only supported for alternative clause generators.")
+        result.append(prepared_operation(tag, **params[0]))
     return result
 
 
@@ -197,10 +190,10 @@ def generator_declarations_for_time_point(events: list[DeclaredEvents], time: in
     return generator_declarations
 
 
-def generator_function(key, generator_lookup: dict, *fns: Callable) -> GeneratorFn:
-    """Crate a generator function wrapper for function in generator_lookup by the key. Binds the
+def generator_function(key, *fns: Callable) -> GeneratorFn:
+    """Crate a generator function wrapper for function by the key. Binds the
     argument list of functions with the generator."""
-    return lambda parent_nodes: generator_lookup[key](parent_nodes, *fns)
+    return lambda parent_nodes: key(parent_nodes, *fns)
 
 
 def prepare_parametrized_operations(config: SimConfiguration,
@@ -214,7 +207,6 @@ def prepare_parametrized_operations(config: SimConfiguration,
         combined_params = merge_operation_params(parameter_set, this_operation_file_params)
         results.append(prepared_processor(
             operation_tag,
-            config.operation_lookup,
             time_point,
             operation_run_constraints,
             **combined_params))
@@ -228,10 +220,10 @@ def full_tree_generators(config: SimConfiguration) -> NestableGenerator:
     :param config: a prepared SimConfiguration object
     :return: a list of prepared generator functions
     """
-    wrapper = NestableGenerator(config, {'sequence': []}, 0)
+    wrapper = NestableGenerator(config, {sequence: []}, 0)
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
-        time_point_wrapper_declaration = {'sequence': generator_declarations}
+        time_point_wrapper_declaration = {sequence: generator_declarations}
         wrapper.nested_generators.append(NestableGenerator(config, time_point_wrapper_declaration, time_point))
     return wrapper
 
@@ -250,9 +242,11 @@ def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int,
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
         sequence_wrapper_declaration = {
-            'sequence': generator_declarations
+            sequence: generator_declarations
         }
         wrapper_generator = NestableGenerator(config, sequence_wrapper_declaration, time_point)
         generators_by_time_point[time_point] = wrapper_generator
     return generators_by_time_point
 
+
+__all__ = ['sequence', 'alternatives']

@@ -80,7 +80,7 @@ def _calculate_npv_for_rate(
     return npv
 
 
-def calculate_npv(payload: OpTuple[ForestStand], **operation_parameters) -> OpTuple[ForestStand]:
+def calculate_npv(payload: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Expects that the relevant cross cut operations have been done before this.
     Expects interest rates to be given as integers (e.g. 5) and that the interest rates in the land values file correspond to these values.
