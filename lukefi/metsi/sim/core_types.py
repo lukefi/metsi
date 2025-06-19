@@ -3,7 +3,7 @@ from copy import deepcopy, copy
 from types import SimpleNamespace
 from typing import Optional, Any, TypeVar, Generic
 from collections.abc import Callable
-
+import weakref
 def identity(x):
     return x
 
@@ -68,19 +68,29 @@ class EventTree:
     """
     Event represents a computational operation in a tree of following event paths.
     """
-    operation: Callable = identity  # default to the identity function, essentially no-op
-    branches: list['EventTree'] = []
-    previous: 'EventTree | None' = None
 
-    def __init__(self, operation: Callable[[Optional[Any]], Optional[Any]] | None = None,
-                 previous: 'EventTree | None' = None):
+    __slots__ = ('operation', 'branches', '_previous_ref', '__weakref__') 
+
+    def __init__(self, 
+                 operation: Optional[Callable[[Optional[Any]], Optional[Any]]] = None,
+                 previous: Optional['EventTree'] = None):
+
         self.operation = operation if operation is not None else identity
-        self.previous = previous
+        self._previous_ref = weakref.ref(previous) if previous else None
         self.branches = []
+
+    @property
+    def previous(self):
+        return self._previous_ref() if self._previous_ref else None
+    
+    @previous.setter
+    def previous(self, prev: Optional['EventTree']):
+        self._previous_ref = weakref.ref(prev) if prev else None
+
 
     def find_root(self: 'EventTree'):
         return self if self.previous is None else self.previous.find_root()
-
+        
     def attach(self, previous: 'EventTree'):
         self.previous = previous
         previous.add_branch(self)
@@ -132,7 +142,6 @@ class EventTree:
 
     def add_branch_from_operation(self, operation: Callable):
         self.add_branch(EventTree(operation, self))
-
 
 class CollectedData:
 
