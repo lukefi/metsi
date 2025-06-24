@@ -15,13 +15,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-unit-tests: 
-    name: Run Unit Tests
+  run-tests: 
+    name: Run Unit and Robot Tests
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10.4", "3.11.9", "3.12.5"]
-        r-version: ["4.1.3", "4.3.3"]
+        python-version: ["3.13.5"]
+        r-version: ["4.5.0"]
         
     runs-on: ubuntu-latest
 
@@ -56,74 +56,32 @@ jobs:
       run: |
         python -m pytest --junit-xml=pytest.xml
       
+    - name: Run Robot Tests
+      run: |
+        export PYTHONPATH=${GITHUB_WORKSPACE}
+        robot --xunit robottest.xml tests/robot
+
     - name: Upload testing results
       if: (!cancelled())
       uses: actions/upload-artifact@v4
       with:
         name: Test Results (Python ${{ matrix.python-version }}, R ${{ matrix.r-version}})
-        path: pytest.xml
-
-    - name: Clean up
-      run: |
-        make -C lukefi/metsi/forestry/c clean
-
-  robot-tests:
-    needs: run-unit-tests # Ensure unit tests run before robot tests
-    name: Run Robot Framework Tests
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up Python 3.12.5
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.12.5
-
-    - name: Set up R 4.3.3
-      uses: r-lib/actions/setup-r@v2
-      with:
-        r-version: 4.3.3
-
-    - name: Install Python dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install .[tests]
-
-    - name: Install R dependencies
-      uses: r-lib/actions/setup-r-dependencies@v2
-      with:
-        cache-version: 2
-
-    - name: Compile shared libraries
-      run: |
-        make -C lukefi/metsi/forestry/c
-
-    - name: Run Robot Tests
-      run: |
-        export PYTHONPATH=${GITHUB_WORKSPACE}
-        robot --xunit xunit.xml tests/robot
-    
-    - name: Archive Robot logs (optional)
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: robot-logs
         path: |
+          pytest.xml
           log.html
           report.html
           output.xml
-          xunit.xml
+          robottest.xml
           tests/robot/**/output/
 
     - name: Clean up
       run: |
         make -C lukefi/metsi/forestry/c clean
+
   
   publish-test-results:
     name: "Publish Test Results"
-    needs: [run-unit-tests, robot-tests]
+    needs: run-tests
     runs-on: ubuntu-latest
     permissions:
       checks: write
@@ -143,4 +101,4 @@ jobs:
         with:
           files: |
             artifacts/**/pytest.xml
-            artifacts/**/xunit.xml
+            artifacts/**/robottest.xml

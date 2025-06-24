@@ -58,7 +58,7 @@ evaluators = [
     depth_first_evaluator
 ]
 
-@unittest.skip
+@unittest.skip("Manual run only")
 class PerformanceTest(unittest.TestCase):
     def test_constant_work_performance(self):
         """This is a manual test case created for observing the choice of run strategies related to the shape of the

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.0.4] - 2025-06-23
+
+### Changed
+
+- Updated project dependencies to work with Python 3.13
+- Removed older versions of Python and R from pipeline matrix, added Python 3.13.5 and R 4.5.0
+
 ## [2.0.3] - 2025-06-23
 
 ### Changed

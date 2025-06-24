@@ -2,8 +2,7 @@ import unittest
 
 unrunnable = False
 try:
-    import rpy2
-    import rpy2.robjects as robjects
+    from rpy2 import robjects
 except ImportError:
     unrunnable = True
 
@@ -11,7 +10,7 @@ except ImportError:
 @unittest.skipIf(unrunnable, "rpy2 not installed")
 class RTest(unittest.TestCase):
     def test_init(self):
-        print(rpy2.__version__)
+        print(robjects.__version__)
 
     def test_sum(self):
         rsum = robjects.r['sum']
