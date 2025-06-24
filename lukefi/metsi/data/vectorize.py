@@ -153,9 +153,3 @@ def vectorize(stands: list[ForestStand], **operation_params) -> list[ForestStand
 
 
 __all__ = ["vectorize"]
-
-if __name__ == "__main__":
-    stands_ = [ForestStand(reference_trees=[ReferenceTree(species=TreeSpecies(1)),
-                                           ReferenceTree(species=TreeSpecies(2))])]
-    vectorize(stands_)
-    pprint(stands_)
