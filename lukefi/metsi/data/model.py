@@ -6,6 +6,7 @@ from lukefi.metsi.data.enums.internal import LandUseCategory, OwnerCategory, Sit
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
 from lukefi.metsi.data.formats.util import convert_str_to_type, get_or_default
 from lukefi.metsi.data.layered_model import LayeredObject
+from lukefi.metsi.data.vector_model import ReferenceTrees, Strata
 
 # NOTE:
 # * the deepcopy methods here are roughly equivalent to
@@ -409,6 +410,9 @@ class ForestStand():
 
     reference_trees: list[ReferenceTree] = dataclasses.field(default_factory=list)
     tree_strata: list[TreeStratum] = dataclasses.field(default_factory=list)
+
+    reference_trees_soa: ReferenceTrees = dataclasses.field(default_factory=ReferenceTrees)
+    tree_strata_soa: Strata = dataclasses.field(default_factory=Strata)
 
     # unique identifier for entity within its domain
     identifier: Optional[str] = None
