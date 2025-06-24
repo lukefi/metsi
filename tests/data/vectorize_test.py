@@ -1,6 +1,8 @@
 import copy
 import unittest
 
+import numpy as np
+
 from lukefi.metsi.data.vectorize import ReferenceTrees, Strata, vectorize
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
@@ -30,6 +32,8 @@ class TestVectorize(unittest.TestCase):
         self.assertIsInstance(TestVectorize.before[0].tree_strata, list)
         self.assertIsInstance(self.after[0].reference_trees, ReferenceTrees)
         self.assertIsInstance(self.after[0].tree_strata, Strata)
+        self.assertIsInstance(self.after[0].reference_trees.species, np.ndarray)
+        self.assertIsInstance(self.after[1].tree_strata.species, np.ndarray)
 
     def test_lengths(self):
         self.assertEqual(len(self.after), len(TestVectorize.before))
