@@ -226,18 +226,29 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mets
     :param app_arguments: application run configuration
     :return: None
     """
+    base_dir = f"{app_arguments.target_directory}/schedules"
     for stand_id, schedules in result.items():
         for i, schedule in enumerate(schedules):
             if app_arguments.state_output_container is not None:
-                schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
-                filepath = determine_file_path(schedule_dir, app_arguments.state_output_container)
+                schedule_dir = prepare_target_directory(f"{base_dir}/{stand_id}/{i}")
+                filename = f"unit_state.{app_arguments.state_output_container.value}"
+                filepath = determine_file_path(schedule_dir, filename)
                 write_stands_to_file(ExportableContainer([schedule.computational_unit], None),
                                      filepath,
                                      app_arguments.state_output_container)
             if app_arguments.derived_data_output_container is not None:
-                schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
-                filepath = determine_file_path(schedule_dir, app_arguments.derived_data_output_container)
-                write_derived_data_to_file(schedule.collected_data, filepath, app_arguments.derived_data_output_container)
+                schedule_dir = prepare_target_directory(f"{base_dir}/{stand_id}/{i}")
+                filename = f"derived_data.{app_arguments.derived_data_output_container.value}"
+                filepath = determine_file_path(schedule_dir, filename)
+                write_derived_data_to_file(schedule.collected_data, filepath, app_arguments.derived_data_output_container.value)
+   
+            # OPTIONAL – write operation_history for later replay
+            
+            if schedule.operation_history:
+                hist_file = determine_file_path(schedule_dir, "operation_history.pickle")
+                pickle_writer(hist_file, schedule.operation_history)
+            
+    
 
 
 def read_control_module(control_path: str, control: str = "control_structure") -> dict[str, Any]:
@@ -259,7 +270,8 @@ def read_control_module(control_path: str, control: str = "control_structure") -
 
 ##### FileWriters start #####
 def pickle_writer(filepath: Path, container: ObjectLike | ExportableContainer[ForestStand]):
-    outputtable = container.result_objects if type(container) is ExportableContainer else container
+    #outputtable = container.result_objects if type(container) is ExportableContainer else container
+    outputtable = container.export_objects if type(container) is ExportableContainer else container
     with open(filepath, 'wb') as f:
         pickle.dump(outputtable, f, protocol=5)
 

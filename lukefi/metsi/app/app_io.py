@@ -119,6 +119,7 @@ def parse_cli_arguments(args: list[str]) -> dict:
     parser.add_argument('input_path', help='Application input file or directory')
     parser.add_argument('target_directory', help='Directory path for program output')
     parser.add_argument('control_file', nargs='?', help='Application control declaration file')
+    parser.add_argument('--resimulate', help='Path to a saved schedule (…/results/Stand_1/2) to re-run', default=None)
     return parser.parse_args(args).__dict__
 
 

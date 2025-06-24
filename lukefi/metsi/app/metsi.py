@@ -1,10 +1,12 @@
 import os
 import sys
 import copy
-
+import shutil
+from pathlib import Path
 # TODO: find out what triggers FutureWarning behaviour in numpy
 import warnings
 import traceback
+
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from lukefi.metsi.app.preprocessor import (
@@ -13,13 +15,14 @@ from lukefi.metsi.app.preprocessor import (
     slice_stands_by_size
     )
 
-
+from lukefi.metsi.sim.util import history_to_events
 from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.app.export import export_files, export_preprocessed
 from lukefi.metsi.app.file_io import prepare_target_directory, read_stands_from_file, \
-    read_full_simulation_result_dirtree, write_full_simulation_result_dirtree, read_control_module
+    read_full_simulation_result_dirtree, write_full_simulation_result_dirtree, read_control_module, \
+    read_schedule_payload_from_directory, pickle_reader
 from lukefi.metsi.app.post_processing import post_process_alternatives
 from lukefi.metsi.app.simulator import simulate_alternatives
 from lukefi.metsi.app.console_logging import print_logline
@@ -35,6 +38,12 @@ def simulate(config: MetsiConfiguration, control: dict, stands: StandList) -> Si
     print_logline("Simulating alternatives...")
     result = simulate_alternatives(config, control, stands)
     if config.state_output_container is not None or config.derived_data_output_container is not None:
+        
+        schedules_path = os.path.join(config.target_directory, "schedules")
+        if os.path.exists(schedules_path) and os.path.isdir(schedules_path):
+            print_logline(f"Cleaning previous schedules at '{schedules_path}'")
+            shutil.rmtree(schedules_path)
+
         print_logline(f"Writing simulation results to '{config.target_directory}'")
         write_full_simulation_result_dirtree(result, config)
     return result
@@ -75,6 +84,9 @@ mode_runners = {
 
 def main() -> int:
     cli_arguments = parse_cli_arguments(sys.argv[1:])
+    resimulation_target   = cli_arguments.pop('resimulate', None)
+
+
     control_file = MetsiConfiguration.control_file if cli_arguments["control_file"] is None else cli_arguments['control_file']
     try:
         control_structure = read_control_module(control_file)
@@ -86,8 +98,68 @@ def main() -> int:
         prepare_target_directory(app_config.target_directory)
         print_logline("Reading input...")
 
+        #in case of resimulation..
+        if resimulation_target:
 
-        if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
+            resim_path = Path(resimulation_target)
+            stand_id = resim_path.parent.name
+            payload = read_schedule_payload_from_directory(resim_path)
+
+            # Try loading operation history (if saved)
+            hist_file = resim_path / "operation_history.pickle"
+            if hist_file.exists():
+                payload.operation_history = pickle_reader(hist_file)
+            else:
+                print_logline("⚠️  No operation history found; skipping event reconstruction.")
+
+            heavy_control = control_structure.copy()
+            '''
+            if payload.operation_history:
+                # 1. reconstruct exactly what was already run
+                past_events = history_to_events(payload.operation_history)
+
+                # 2. grab the remaining, future events straight from demo_control_all.py
+                #    (control_structure was read from that file, so this is exactly your original sequence)
+                #    we only keep those whose time_points fall *after* the last history entry
+                last_tp = max(entry[0] for entry in payload.operation_history)
+                original_events = control_structure["simulation_events"]
+                future_events = [
+                    ev for ev in original_events
+                    if any(tp > last_tp for tp in ev["time_points"])
+                ]
+
+                # 3. stitch them together
+                heavy_control["simulation_events"] = past_events + future_events
+
+                heavy_control["operation_params"] = control_structure["operation_params"]
+            '''
+
+            print_logline(f"Resimulating {resimulation_target} using control file: {control_file}")
+
+            resim_result = simulate_alternatives(app_config, heavy_control, [payload.computational_unit])
+            # —————— MERGE ORIGINAL COLLECTIVES ——————
+            # payload.collected_data was loaded from derived_data.pickle with all report_collectives
+            original_collectives = payload.collected_data.operation_results.get('report_collectives', {})
+            for schedules in resim_result.values():
+                for s in schedules:
+                    # ensure the old collectives are present for j_xda
+                    s.collected_data.operation_results.setdefault('report_collectives', {}) \
+                                        .update(original_collectives)
+
+            write_full_simulation_result_dirtree(resim_result, app_config)
+
+            # Post-process
+            if 'post_processing' in control_structure:
+                resim_result = post_process(app_config, control_structure, resim_result)
+
+            # Export
+            if 'export' in control_structure:
+                export(app_config, control_structure, resim_result)
+
+            print_logline("Resimulation complete; exiting.")
+            return 0
+        
+        elif app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
             # 1) read full stand list
             full_stands = read_stands_from_file(app_config, control_structure.get('conversions', {}))
 
@@ -123,8 +195,7 @@ def main() -> int:
 
         # clone config so we don’t stomp on the original
         cfg = copy.copy(app_config)
-        # cfg.target_directory = slice_target  # 🔁 leave this commented
-        cfg.target_directory = app_config.target_directory  # ✅ use original
+        cfg.target_directory = app_config.target_directory
 
         # feed this sub‐list of stands through the normal run_modes
         current = stands
