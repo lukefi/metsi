@@ -1,10 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional, Any
-from pprint import pprint
 import numpy as np
 import numpy.typing as npt
-from lukefi.metsi.data.enums.internal import TreeSpecies
-from lukefi.metsi.data.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.model import ForestStand
 
 
 DTYPE_TREE = np.dtype([
