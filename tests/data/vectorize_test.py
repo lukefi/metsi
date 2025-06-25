@@ -41,13 +41,10 @@ class TestVectorize(unittest.TestCase):
         self.assertEqual(len(self.after), len(TestVectorize.before))
 
     def test_species(self):
-        print("self.after")
         for before, after in zip(TestVectorize.before, self.after):
             for aso_tree, soa_tree_species in zip(before.reference_trees, after.reference_trees_soa.species if
                                                   after.reference_trees_soa.size > 0 else []):
                 self.assertEqual(aso_tree.species, soa_tree_species)
-                print("self.after")
             for aso_stratum, soa_stratum_species in zip(before.tree_strata, after.tree_strata_soa.species if
                                                         after.tree_strata_soa.size > 0 else []):
                 self.assertEqual(aso_stratum.species, soa_stratum_species)
-                print("self.after")
