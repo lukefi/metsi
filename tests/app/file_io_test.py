@@ -3,10 +3,10 @@ import os
 import shutil
 from pathlib import Path
 from unittest.mock import patch, MagicMock
-from importlib.util import spec_from_file_location, module_from_spec
-from lukefi.metsi.data.enums.internal import *
-from lukefi.metsi.app import file_io
 from dataclasses import dataclass
+from lukefi.metsi.app import file_io
+from lukefi.metsi.data.enums.internal import (
+    DrainageCategory, LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, Storey, TreeSpecies)
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.app.app_types import ExportableContainer
 
@@ -29,7 +29,7 @@ class TestFileReading(unittest.TestCase):
         ]
         for a in assertions:
             result = file_io.determine_file_path(*a[0])
-            self.assertEqual(a[1], result) 
+            self.assertEqual(a[1], result)
 
     def test_file_contents(self):
         input_file_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "test_dummy")
@@ -41,8 +41,9 @@ class TestFileReading(unittest.TestCase):
             Test(a=1),
             Test(a=2)
         ]
+        ec = ExportableContainer(export_objects=data, additional_vars=None)
         file_io.prepare_target_directory('outdir')
-        file_io.pickle_writer(Path('outdir', 'output.pickle'), data)
+        file_io.pickle_writer(Path('outdir', 'output.pickle'), ec)
         result = file_io.pickle_reader('outdir/output.pickle')
         self.assertListEqual(data, result)
         os.remove('outdir/output.pickle')
@@ -62,6 +63,37 @@ class TestFileReading(unittest.TestCase):
         os.remove('outdir/output.json')
         shutil.rmtree('outdir')
 
+    def test_npy(self):
+        data = [
+            Test(a=1),
+            Test(a=2)
+        ]
+        ec = ExportableContainer(export_objects=data, additional_vars=None)
+
+        file_io.prepare_target_directory('outdir')
+        file_io.npy_writer(Path('outdir', 'output.npy'), ec)
+        result = file_io.npy_file_reader('outdir/output.npy')
+        self.assertListEqual(data, result.tolist())
+        os.remove('outdir/output.npy')
+        shutil.rmtree('outdir')
+
+    def test_npz(self):
+        data = [[
+            Test(a=1),
+            Test(a=2)
+        ], [
+            Test(a=3),
+            Test(a=4)
+        ]]
+        ec = ExportableContainer(export_objects=data, additional_vars=None)
+
+        file_io.prepare_target_directory('outdir')
+        file_io.npz_writer(Path('outdir', 'output.npz'), ec)
+        result = file_io.npz_file_reader('outdir/output.npz')
+        self.assertListEqual(data, [subresult.tolist() for subresult in result])
+        os.remove('outdir/output.npz')
+        shutil.rmtree('outdir')
+
     def test_csv(self):
         data = [
             ForestStand(
@@ -76,7 +108,7 @@ class TestFileReading(unittest.TestCase):
             )
         ]
         ec = ExportableContainer(export_objects=data, additional_vars=None)
-        
+
         file_io.prepare_target_directory("outdir")
         file_io.csv_writer(Path("outdir", "output.csv"), ec)
         result = file_io.csv_content_to_stands(
@@ -117,7 +149,7 @@ class TestFileReading(unittest.TestCase):
         target = Path("outdir", "output.rst")
         file_io.rst_writer(target, ec)
 
-        #There is no rst input so check sanity just by file existence and non-emptiness
+        # There is no rst input so check sanity just by file existence and non-emptiness
         exists = os.path.exists(target)
         size = os.path.getsize(target)
         self.assertTrue(exists)
@@ -165,7 +197,6 @@ class TestFileReading(unittest.TestCase):
         self.assertTrue(exists)
         self.assertTrue(size > 0)
         shutil.rmtree('outdir')
-
 
     def test_read_stands_from_pickle_file(self):
         config = MetsiConfiguration(
@@ -237,14 +268,14 @@ class TestFileReading(unittest.TestCase):
         self.assertEqual(len(stands), 9)
 
     def test_read_schedule_payload_from_directory(self):
-        dir = Path("tests/resources/file_io_test/testing_output_directory/3/0")
-        result = file_io.read_schedule_payload_from_directory(dir)
+        dir_ = Path("tests/resources/file_io_test/testing_output_directory/3/0")
+        result = file_io.read_schedule_payload_from_directory(dir_)
         self.assertEqual("3", result.computational_unit.identifier)
         self.assertEqual(2, len(result.collected_data.get_list_result("calculate_biomass")))
 
     def test_read_simulation_result_dirtree(self):
-        dir = Path("tests/resources/file_io_test/testing_output_directory")
-        result = file_io.read_full_simulation_result_dirtree(dir)
+        dir_ = Path("tests/resources/file_io_test/testing_output_directory")
+        result = file_io.read_full_simulation_result_dirtree(dir_)
         self.assertEqual(1, len(result.items()))
         self.assertEqual(1, len(result["3"]))
         self.assertEqual("3", result["3"][0].computational_unit.identifier)
@@ -284,7 +315,7 @@ class TestReadControlModule(unittest.TestCase):
 
     def test_read_control_module_attribute_error(self):
         control_path = os.path.join(os.getcwd(), "tests", "resources", "file_io_test", "dummy_control.py")
-        with open(control_path, "w") as f:
+        with open(control_path, "w", encoding="utf-8") as f:
             f.write("some_variable = {'key': 'value'}")  # Create a dummy control file without the expected attribute
 
         with self.assertRaises(AttributeError) as context:
