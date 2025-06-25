@@ -242,8 +242,6 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mets
                 filepath = determine_file_path(schedule_dir, filename)
                 write_derived_data_to_file(schedule.collected_data, filepath, app_arguments.derived_data_output_container.value)
    
-            # OPTIONAL – write operation_history for later replay
-            
             if schedule.operation_history:
                 hist_file = determine_file_path(schedule_dir, "operation_history.pickle")
                 pickle_writer(hist_file, schedule.operation_history)
@@ -270,7 +268,6 @@ def read_control_module(control_path: str, control: str = "control_structure") -
 
 ##### FileWriters start #####
 def pickle_writer(filepath: Path, container: ObjectLike | ExportableContainer[ForestStand]):
-    #outputtable = container.result_objects if type(container) is ExportableContainer else container
     outputtable = container.export_objects if type(container) is ExportableContainer else container
     with open(filepath, 'wb') as f:
         pickle.dump(outputtable, f, protocol=5)

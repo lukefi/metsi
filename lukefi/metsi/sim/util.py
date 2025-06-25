@@ -30,11 +30,3 @@ def merge_operation_params(operation_params: dict, operation_file_params: dict) 
         raise Exception(f"parameter(s) {common_keys} were defined both in 'operation_param' and 'operation_file_param' sections in control.py. Please change the name of one of them.")
     else:
         return operation_params | operation_file_params # pipe is the merge operator
-
-def history_to_events(history):
-    by_tp = {}
-    for tp, tag, _ in history:
-        by_tp.setdefault(tp, []).append(tag)
-    return [{"time_points": [tp],
-                "generators":  [{"sequence": ops}]}
-                for tp, ops in by_tp.items()]

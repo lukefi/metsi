@@ -15,7 +15,6 @@ from lukefi.metsi.app.preprocessor import (
     slice_stands_by_size
     )
 
-from lukefi.metsi.sim.util import history_to_events
 from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
@@ -112,31 +111,11 @@ def main() -> int:
             else:
                 print_logline("⚠️  No operation history found; skipping event reconstruction.")
 
-            heavy_control = control_structure.copy()
-            '''
-            if payload.operation_history:
-                # 1. reconstruct exactly what was already run
-                past_events = history_to_events(payload.operation_history)
-
-                # 2. grab the remaining, future events straight from demo_control_all.py
-                #    (control_structure was read from that file, so this is exactly your original sequence)
-                #    we only keep those whose time_points fall *after* the last history entry
-                last_tp = max(entry[0] for entry in payload.operation_history)
-                original_events = control_structure["simulation_events"]
-                future_events = [
-                    ev for ev in original_events
-                    if any(tp > last_tp for tp in ev["time_points"])
-                ]
-
-                # 3. stitch them together
-                heavy_control["simulation_events"] = past_events + future_events
-
-                heavy_control["operation_params"] = control_structure["operation_params"]
-            '''
+            #heavy_control = control_structure.copy()
 
             print_logline(f"Resimulating {resimulation_target} using control file: {control_file}")
 
-            resim_result = simulate_alternatives(app_config, heavy_control, [payload.computational_unit])
+            resim_result = simulate_alternatives(app_config, control_structure, [payload.computational_unit])
             # —————— MERGE ORIGINAL COLLECTIVES ——————
             # payload.collected_data was loaded from derived_data.pickle with all report_collectives
             original_collectives = payload.collected_data.operation_results.get('report_collectives', {})
