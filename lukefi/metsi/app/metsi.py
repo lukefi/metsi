@@ -101,7 +101,6 @@ def main() -> int:
         if resimulation_target:
 
             resim_path = Path(resimulation_target)
-            stand_id = resim_path.parent.name
             payload = read_schedule_payload_from_directory(resim_path)
 
             # Try loading operation history (if saved)
@@ -111,13 +110,10 @@ def main() -> int:
             else:
                 print_logline("⚠️  No operation history found; skipping event reconstruction.")
 
-            #heavy_control = control_structure.copy()
-
             print_logline(f"Resimulating {resimulation_target} using control file: {control_file}")
 
             resim_result = simulate_alternatives(app_config, control_structure, [payload.computational_unit])
-            # —————— MERGE ORIGINAL COLLECTIVES ——————
-            # payload.collected_data was loaded from derived_data.pickle with all report_collectives
+            
             original_collectives = payload.collected_data.operation_results.get('report_collectives', {})
             for schedules in resim_result.values():
                 for s in schedules:
