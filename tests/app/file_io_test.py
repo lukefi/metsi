@@ -5,11 +5,10 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 from dataclasses import dataclass
 from lukefi.metsi.app import file_io
-from lukefi.metsi.data.enums.internal import (
-    DrainageCategory, LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory, Storey, TreeSpecies)
+from lukefi.metsi.data.enums.internal import (DrainageCategory, LandUseCategory, OwnerCategory, SiteType,
+                                              SoilPeatlandCategory, Storey, TreeSpecies)
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.app.app_types import ExportableContainer
-
 from lukefi.metsi.app.app_io import MetsiConfiguration
 
 
@@ -118,6 +117,10 @@ class TestFileReading(unittest.TestCase):
         self.assertDictEqual(data[0].reference_trees[0].__dict__, result[0].reference_trees[0].__dict__)
         data[0].reference_trees = []
         result[0].reference_trees = []
+        data[0].reference_trees_soa = None
+        result[0].reference_trees_soa = None
+        data[0].tree_strata_soa = None
+        result[0].tree_strata_soa = None
         self.assertDictEqual(data[0].__dict__, result[0].__dict__)
         shutil.rmtree('outdir')
 

@@ -1,7 +1,7 @@
 import unittest
 from lukefi.metsi.data.formats.ForestBuilder import VMI12Builder, VMI13Builder, XMLBuilder, GeoPackageBuilder
 from pathlib import Path
-from lukefi.metsi.app.enum import StrataOrigin
+from lukefi.metsi.app.metsi_enum import StrataOrigin
 
 
 def vmi_file_reader(file: Path) -> list[str]:

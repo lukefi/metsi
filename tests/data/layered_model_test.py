@@ -1,7 +1,6 @@
 import unittest
 from dataclasses import dataclass
 from typing import Optional
-from copy import copy, deepcopy
 from lukefi.metsi.data.layered_model import LayeredObject
 
 
@@ -10,7 +9,7 @@ class ExampleType:
     i: int = 1
     f: float = 1.0
     s: str = '1'
-    n: Optional = None
+    n: Optional[int] = None
 
 
 class LayeredModelTest(unittest.TestCase):
