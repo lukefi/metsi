@@ -169,14 +169,41 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload
     :param schedule_path: Path for a schedule directory
     :return: OperationPayload with computational_unit and collected_data if found
     """
+    # 1) Load unit_state (if any)
     unit_state_file, input_container = scan_dir_for_file(schedule_path, "unit_state", ["csv", "json", "pickle"])
+    stands = []
+    if unit_state_file:
+        stands = parse_file_or_default(
+            unit_state_file,
+            fdm_reader(input_container),
+            []
+        )
+
+    # 2) Load derived_data (if any)
     derived_data_file, derived_data_container = scan_dir_for_file(schedule_path, "derived_data", ["json", "pickle"])
-    stands = [] if unit_state_file is None else parse_file_or_default(unit_state_file, fdm_reader(input_container), [])
-    derived_data = None if derived_data_file is None else parse_file_or_default(derived_data_file, object_reader(derived_data_container))
+    derived_data = None
+    if derived_data_file:
+        derived_data = parse_file_or_default(
+            derived_data_file,
+            object_reader(derived_data_container)
+        )
+
+    # 3) Load operation_history.pickle (if it exists)
+    history_path = schedule_path / "operation_history.pickle"
+    operation_history = []
+    if history_path.exists():
+        operation_history = pickle_reader(history_path)
+
+    print(f"Loaded {unit_state_file} → {len(stands)} stand(s)")
+    print(f"Loaded {derived_data_file} → collected_data is {'present' if derived_data else 'missing'}")
+    print(f"Loaded operation_history → {len(operation_history)} steps")
+
+
+    # 4) Return the assembled payload
     return ForestOpPayload(
-        computational_unit=None if stands == [] else stands[0],
+        computational_unit=None if not stands else stands[0],
         collected_data=derived_data,
-        operation_history=[]
+        operation_history=operation_history
     )
 
 # io_util?

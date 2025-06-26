@@ -15,6 +15,8 @@ from lukefi.metsi.app.preprocessor import (
     slice_stands_by_size
     )
 
+from lukefi.metsi.sim.core_types import OperationPayload
+from lukefi.metsi.app.enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
@@ -25,7 +27,10 @@ from lukefi.metsi.app.file_io import prepare_target_directory, read_stands_from_
 from lukefi.metsi.app.post_processing import post_process_alternatives
 from lukefi.metsi.app.simulator import simulate_alternatives
 from lukefi.metsi.app.console_logging import print_logline
-
+from lukefi.metsi.app.app_types import ForestOpPayload
+from lukefi.metsi.data.layered_model import LayeredObject
+from lukefi.metsi.domain.sim_ops import *
+from lukefi.metsi.domain.pre_ops import *
 
 def preprocess(config: MetsiConfiguration, control: dict, stands: StandList) -> StandList:
     print_logline("Preprocessing...")
@@ -80,11 +85,60 @@ mode_runners = {
     RunMode.EXPORT: export
 }
 
+def replay_schedule(payload: ForestOpPayload) -> ForestOpPayload:
+    """
+    Given a loaded schedule payload, step through its recorded operation_history
+    ([(time_point, op_name, params), …]) and re-apply each op in turn.
+    """
+    if payload.collected_data is None:
+        raise RuntimeError("BUG: payload.collected_data is None before replaying — check deserialization")
+
+
+
+    # if your OperationPayload needs layering exactly as in simulate…
+    overlaid = LayeredObject(payload.computational_unit)
+    payload.computational_unit = overlaid
+
+    for (t, op_name, params) in payload.operation_history:
+        # Update time if collected_data is available
+        if payload.collected_data is not None:
+            payload.collected_data.current_time_point = t
+
+        # Resolve operation function
+        if callable(op_name):
+            op_fn = op_name
+        else:
+            op_fn = globals().get(op_name)
+        if op_fn is None:
+            name = getattr(op_name, "__name__", op_name)
+            raise RuntimeError(f"Cannot find operation '{name}' to replay")
+
+        # Run operation in legacy mode
+        result = op_fn((payload.computational_unit, payload.collected_data), **params)
+
+        if isinstance(result, tuple) and len(result) == 2:
+            new_stand, maybe_new_collected_data = result
+
+            # Only update collected_data if the op returned a non-None one
+            new_collected_data = (
+                maybe_new_collected_data if maybe_new_collected_data is not None
+                else payload.collected_data
+            )
+
+            # Rebuild payload
+            payload = OperationPayload(
+                computational_unit=new_stand,
+                collected_data=new_collected_data,
+                operation_history=payload.operation_history
+            )
+        else:
+            raise RuntimeError(f"Operation '{op_name}' returned unexpected result: {result}")
+
+    return payload
 
 def main() -> int:
     cli_arguments = parse_cli_arguments(sys.argv[1:])
     resimulation_target   = cli_arguments.pop('resimulate', None)
-
 
     control_file = MetsiConfiguration.control_file if cli_arguments["control_file"] is None else cli_arguments['control_file']
     try:
@@ -101,26 +155,32 @@ def main() -> int:
         if resimulation_target:
 
             resim_path = Path(resimulation_target)
+            '''
             payload = read_schedule_payload_from_directory(resim_path)
 
-            # Try loading operation history (if saved)
-            hist_file = resim_path / "operation_history.pickle"
-            if hist_file.exists():
-                payload.operation_history = pickle_reader(hist_file)
-            else:
-                print_logline("⚠️  No operation history found; skipping event reconstruction.")
-
             print_logline(f"Resimulating {resimulation_target} using control file: {control_file}")
-
             resim_result = simulate_alternatives(app_config, control_structure, [payload.computational_unit])
+            '''
+            # 1) load the last payload (unit_state, derived_data, operation_history)
+            payload = read_schedule_payload_from_directory(resim_path)
+            print_logline(f"Replaying schedule only for {resimulation_target} (no control file)…")
+
             
+            payload.collected_data.operation_results.clear()
+            # 2) replay exactly the same operations on that payload
+            new_payload = replay_schedule(payload)
+
+            # 3) wrap into the usual results dict and dump it
+            resim_result = { payload.computational_unit.identifier: [ new_payload ] }
+ 
             original_collectives = payload.collected_data.operation_results.get('report_collectives', {})
+            
             for schedules in resim_result.values():
                 for s in schedules:
                     # ensure the old collectives are present for j_xda
                     s.collected_data.operation_results.setdefault('report_collectives', {}) \
                                         .update(original_collectives)
-
+            
             write_full_simulation_result_dirtree(resim_result, app_config)
 
             # Post-process
