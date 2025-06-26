@@ -1,11 +1,11 @@
 from typing import Optional
 from collections.abc import Callable
 from copy import deepcopy
-from lukefi.metsi.sim.core_types import OperationPayload, CUType, SimConfiguration, EventTree
+from lukefi.metsi.sim.core_types import OperationPayload, SimConfiguration, EventTree
 from lukefi.metsi.sim.generators import full_tree_generators, compose_nested, partial_tree_generators_by_time_point
 
 
-def evaluate_sequence(payload, *operations: Callable) -> Optional:
+def evaluate_sequence(payload: OperationPayload, *operations: Callable) -> Optional[OperationPayload]:
     """
     Compute a single processing result for single data input.
 
@@ -34,7 +34,7 @@ def run_chains_iteratively(payload, chains: list[list[Callable]]) -> list:
     for chain in chains:
         try:
             results.append(evaluate_sequence(deepcopy(payload), *chain))
-        except UserWarning as e:
+        except UserWarning:
             ...
             # TODO aborted run reporting
     return results
@@ -49,7 +49,8 @@ def depth_first_evaluator(payload: OperationPayload, root_node: EventTree) -> li
     return root_node.evaluate(payload)
 
 
-def run_full_tree_strategy(payload: OperationPayload[CUType], config: SimConfiguration, evaluator=chain_evaluator) -> list[OperationPayload[CUType]]:
+def run_full_tree_strategy[T](payload: OperationPayload[T], config: SimConfiguration,
+                              evaluator=chain_evaluator) -> list[OperationPayload[T]]:
     """Process the given operation payload using a simulation state tree created from the declaration. Full simulation
     tree and operation chains are pre-generated for the run. This tree strategy creates the full theoretical branching
     tree for the simulation, carrying a significant memory and runtime overhead for large trees.
@@ -66,7 +67,8 @@ def run_full_tree_strategy(payload: OperationPayload[CUType], config: SimConfigu
     return result
 
 
-def run_partial_tree_strategy(payload: OperationPayload[CUType], config: SimConfiguration, evaluator=chain_evaluator) -> list[OperationPayload[CUType]]:
+def run_partial_tree_strategy[T](payload: OperationPayload[T], config: SimConfiguration,
+                                 evaluator=chain_evaluator) -> list[OperationPayload[T]]:
     """Process the given operation payload using a simulation state tree created from the declaration. The simulation
     tree and operation chains are generated and executed in order per simulation time point. This reduces the amount of
     redundant, always-failing operation chains and redundant branches of the simulation tree.
@@ -80,7 +82,7 @@ def run_partial_tree_strategy(payload: OperationPayload[CUType], config: SimConf
     root_nodes = {}
     results = [payload]
 
-    #build chains_by_time_point, which is a dict of chains
+    # build chains_by_time_point, which is a dict of chains
     for time_point, nestable_generator in generators_by_time_point.items():
         root_nodes[time_point] = compose_nested(nestable_generator)
 
