@@ -3,7 +3,7 @@ from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import ForestOpPayload
-from lukefi.metsi.app.enum import FormationStrategy, EvaluationStrategy
+from lukefi.metsi.app.metsi_enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, depth_first_evaluator, \
