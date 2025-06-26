@@ -400,8 +400,8 @@ class ForestStand():
     reference_trees: list[ReferenceTree] = dataclasses.field(default_factory=list)
     tree_strata: list[TreeStratum] = dataclasses.field(default_factory=list)
 
-    reference_trees_soa: ReferenceTrees = dataclasses.field(default_factory=ReferenceTrees)
-    tree_strata_soa: Strata = dataclasses.field(default_factory=Strata)
+    reference_trees_soa: Optional[ReferenceTrees] = None
+    tree_strata_soa: Optional[Strata] = None
 
     # unique identifier for entity within its domain
     identifier: str = ""
