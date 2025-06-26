@@ -235,7 +235,7 @@ class CollectedData:
         _upsert(self.get(keys[0]), value, *keys[1:])
 
 
-T = TypeVar("T", bound=LayeredObject)
+T = TypeVar("T")
 
 
 class OperationPayload(SimpleNamespace, Generic[T]):
@@ -245,12 +245,13 @@ class OperationPayload(SimpleNamespace, Generic[T]):
     collected_data: CollectedData
     operation_history: list[tuple[int, str, dict[str, dict]]]
 
-    def __copy__(self) -> "OperationPayload":
-        try:
+    def __copy__(self) -> "OperationPayload[T]":
+        copy_like: LayeredObject | T
+        if isinstance(self.computational_unit, LayeredObject):
             copy_like = self.computational_unit.new_layer()
             copy_like.reference_trees = [tree.new_layer() for tree in copy_like.reference_trees]
             copy_like.tree_strata = [stratum.new_layer() for stratum in copy_like.tree_strata]
-        except:
+        else:
             copy_like = deepcopy(self.computational_unit)
 
         return OperationPayload(
@@ -263,5 +264,5 @@ class OperationPayload(SimpleNamespace, Generic[T]):
 OpTuple = tuple[T, CollectedData]
 SourceData = list[T]
 Evaluator = Callable[[OperationPayload[T]], list[OperationPayload[T]]]
-Runner = Callable[[OperationPayload[T], dict, dict, Evaluator[T]], list[OperationPayload[T]]]
+Runner = Callable[[T, SimConfiguration, Evaluator[T]], list[T]]
 GeneratorFn = Callable[[Optional[list[EventTree]]], list[EventTree]]
