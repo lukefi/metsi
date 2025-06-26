@@ -1,7 +1,7 @@
-from lukefi.metsi.data.model import ForestStand
-from lukefi.metsi.sim.core_types import OperationPayload
 from dataclasses import dataclass
 from typing import Generic, TypeVar, List, Optional
+from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.sim.core_types import OperationPayload
 
 T = TypeVar("T")
 
