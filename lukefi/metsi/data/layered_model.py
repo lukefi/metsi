@@ -15,7 +15,7 @@ class LayeredObject[T]:
     def __setattr__(self, name: str, value: Any) -> None:
         object.__setattr__(self, name, value)
 
-    def new_layer(self):
+    def new_layer(self) -> "LayeredObject[LayeredObject[T]]":
         return LayeredObject(self)
 
     def fixate(self) -> "LayeredObject[T] | T":
