@@ -5,6 +5,8 @@ from types import SimpleNamespace
 from typing import NamedTuple, Optional, Any, TypeVar, Generic
 import weakref
 
+from lukefi.metsi.data.layered_model import LayeredObject
+
 
 def identity(x):
     return x
@@ -233,7 +235,7 @@ class CollectedData:
         _upsert(self.get(keys[0]), value, *keys[1:])
 
 
-T = TypeVar("T")
+T = TypeVar("T", bound=LayeredObject)
 
 
 class OperationPayload(SimpleNamespace, Generic[T]):
