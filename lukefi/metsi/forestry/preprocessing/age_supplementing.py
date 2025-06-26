@@ -43,7 +43,7 @@ def perform_supplementing(tree_and_strategy: list[tuple[ReferenceTree, Supplemen
     return reference_trees
 
 
-def final_tree_strategy(reference_tree):
+def final_tree_strategy(reference_tree: ReferenceTree):
     """ Final strategy for trees that have no age.
 
     param: reference_tree: Tree with no age
