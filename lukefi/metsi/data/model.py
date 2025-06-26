@@ -347,7 +347,7 @@ class ReferenceTree():
         result.origin = conv(row[3], int)
         result.stems_per_ha = conv(row[4], float)
         result.breast_height_diameter = conv(row[5], float)
-        result.height = conv(row[6], float) or 0.0
+        result.height = conv(row[6], float)
         result.measured_height = conv(row[7], float)
         result.breast_height_age = conv(row[8], float)
         result.biological_age = conv(row[9], float)
