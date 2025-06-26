@@ -84,8 +84,8 @@ class VMIBuilder(ForestBuilder):
         result.basal_area = util.parse_type(data_row[indices.pohjapintaala], float)
         return result
 
-    def convert_tree_entry(self, indices: VMI12TreeIndices or VMI13TreeIndices,
-                           data_row: Sequence) -> ReferenceTree:
+    def convert_tree_entry(self, indices: VMI12TreeIndices | VMI13TreeIndices,
+                           data_row: list[str]) -> ReferenceTree:
         result = ReferenceTree()
         result.tree_category = data_row[indices.tree_category]
         result.identifier = vmi_util.generate_tree_identifier(data_row, indices)
@@ -110,7 +110,7 @@ class VMIBuilder(ForestBuilder):
         return result
 
     def convert_stratum_entry(self, indices: VMI12StratumIndices | VMI13StratumIndices,
-                              data_row: Sequence) -> TreeStratum:
+                              data_row: list[str]) -> TreeStratum:
         result = TreeStratum()
         # Fixed conversions
         result.identifier = vmi_util.generate_stratum_identifier(data_row, indices)
