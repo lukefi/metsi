@@ -1,14 +1,16 @@
 from collections import OrderedDict
+from collections.abc import Callable
 from copy import deepcopy, copy
 from types import SimpleNamespace
-from typing import Optional, Any, TypeVar, Generic
-from collections.abc import Callable
+from typing import NamedTuple, Optional, Any, TypeVar, Generic
 import weakref
+
+
 def identity(x):
     return x
 
 
-class DeclaredEvents(SimpleNamespace):
+class DeclaredEvents(NamedTuple):
     time_points: list[int] = []
     generators: list[dict] = [{}]
 
@@ -39,7 +41,7 @@ class SimConfiguration(SimpleNamespace):
     operation_file_params: dict[str, dict[str, str]] = {}
     events: list[DeclaredEvents] = []
     run_constraints: dict[str, dict] = {}
-    time_points = []
+    time_points: list[int] = []
 
     def __init__(self, **kwargs):
         """
@@ -69,28 +71,27 @@ class EventTree:
     Event represents a computational operation in a tree of following event paths.
     """
 
-    __slots__ = ('operation', 'branches', '_previous_ref', '__weakref__') 
+    __slots__ = ('operation', 'branches', '_previous_ref', '__weakref__')
 
-    def __init__(self, 
+    def __init__(self,
                  operation: Optional[Callable[[Optional[Any]], Optional[Any]]] = None,
                  previous: Optional['EventTree'] = None):
 
         self.operation = operation if operation is not None else identity
         self._previous_ref = weakref.ref(previous) if previous else None
-        self.branches = []
+        self.branches: list[EventTree] = []
 
     @property
     def previous(self):
         return self._previous_ref() if self._previous_ref else None
-    
+
     @previous.setter
     def previous(self, prev: Optional['EventTree']):
         self._previous_ref = weakref.ref(prev) if prev else None
 
-
     def find_root(self: 'EventTree'):
         return self if self.previous is None else self.previous.find_root()
-        
+
     def attach(self, previous: 'EventTree'):
         self.previous = previous
         previous.add_branch(self)
@@ -122,19 +123,17 @@ class EventTree:
         current = self.operation(payload)
         if len(self.branches) == 0:
             return [current]
-        elif len(self.branches) == 1:
+        if len(self.branches) == 1:
             return self.branches[0].evaluate(current)
-        elif len(self.branches) > 1:
-            results = []
-            for branch in self.branches:
-                try:
-                    results.extend(branch.evaluate(copy(current)))
-                except UserWarning:
-                    ...
-            if len(results) == 0:
-                raise UserWarning(f"Branch aborted with all children failing")
-            else:
-                return results
+        results = []
+        for branch in self.branches:
+            try:
+                results.extend(branch.evaluate(copy(current)))
+            except UserWarning:
+                ...
+        if len(results) == 0:
+            raise UserWarning("Branch aborted with all children failing")
+        return results
 
     def add_branch(self, et: 'EventTree'):
         et.previous = self
@@ -142,6 +141,7 @@ class EventTree:
 
     def add_branch_from_operation(self, operation: Callable):
         self.add_branch(EventTree(operation, self))
+
 
 class CollectedData:
 
@@ -155,21 +155,20 @@ class CollectedData:
         self.current_time_point: int = current_time_point or initial_time_point or 0
         self.initial_time_point: int = initial_time_point or 0
 
-    def _copy_op_results(self, value: Any) -> dict or list:
+    def _copy_op_results(self, value: Any) -> dict | list:
         """
         optimises the deepcopy of self by shallow copying dict and list type operation_results.
         This relies on the assumption that an operation result is not modified after it's stored.
         """
         if isinstance(value, dict):
             return OrderedDict(value.items())
-        elif isinstance(value, list):
+        if isinstance(value, list):
             return list(value)
-        else:
-            return deepcopy(value)
+        return deepcopy(value)
 
     def __copy__(self) -> "CollectedData":
         return CollectedData(
-            operation_results={k: self._copy_op_results(v) for k,v in self.operation_results.items()},
+            operation_results={k: self._copy_op_results(v) for k, v in self.operation_results.items()},
             current_time_point=self.current_time_point,
             initial_time_point=self.initial_time_point
         )
@@ -208,13 +207,14 @@ class CollectedData:
         larger than 1; this method is not intended to be used for upserting values  directly
         under operation_results.
         """
-        def _upsert(d:dict, value: dict, *keys):
+        def _upsert(d: dict, value: dict, *keys):
             if len(keys) == 1:
                 try:
                     if keys[0] in d.keys():
-                        # a dictionary will be updated with a dictionary, but other types will overrider the existing value
+                        # a dictionary will be updated with a dictionary,
+                        # but other types will overrider the existing value
                         if isinstance(value, dict) and isinstance(d[keys[0]], dict):
-                            d.get(keys[0]).update(value)
+                            d[keys[0]].update(value)
                         else:
                             d[keys[0]] = value
                     else:
@@ -222,23 +222,24 @@ class CollectedData:
                 except KeyError:
                     d[keys[0]] = value
                 return d
-            else:
-                key = keys[0]
-                d[key] = _upsert(d.get(key, {}), value, *keys[1:])
-                return d
+
+            key = keys[0]
+            d[key] = _upsert(d.get(key, {}), value, *keys[1:])
+            return d
 
         if len(keys) < 2:
             raise ValueError("At least two keys must be provided.")
 
         _upsert(self.get(keys[0]), value, *keys[1:])
 
-CUType = TypeVar("CUType")  # CU for Computational Unit
+
+T = TypeVar("T")
 
 
-class OperationPayload(SimpleNamespace, Generic[CUType]):
+class OperationPayload(SimpleNamespace, Generic[T]):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
-    computational_unit: CUType
+    computational_unit: T
     collected_data: CollectedData
     operation_history: list[tuple[int, str, dict[str, dict]]]
 
@@ -251,14 +252,14 @@ class OperationPayload(SimpleNamespace, Generic[CUType]):
             copy_like = deepcopy(self.computational_unit)
 
         return OperationPayload(
-            computational_unit = copy_like,
-            collected_data = copy(self.collected_data),
-            operation_history = list(self.operation_history)
+            computational_unit=copy_like,
+            collected_data=copy(self.collected_data),
+            operation_history=list(self.operation_history)
         )
 
 
-OpTuple = tuple[CUType, CollectedData]
-SourceData = list[CUType]
-Evaluator = Callable[[OperationPayload[CUType]], list[OperationPayload[CUType]]]
-Runner = Callable[[OperationPayload[CUType], dict, dict, Evaluator[CUType]], list[OperationPayload[CUType]]]
+OpTuple = tuple[T, CollectedData]
+SourceData = list[T]
+Evaluator = Callable[[OperationPayload[T]], list[OperationPayload[T]]]
+Runner = Callable[[OperationPayload[T], dict, dict, Evaluator[T]], list[OperationPayload[T]]]
 GeneratorFn = Callable[[Optional[list[EventTree]]], list[EventTree]]
