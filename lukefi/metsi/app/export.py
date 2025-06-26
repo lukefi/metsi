@@ -7,7 +7,6 @@ from lukefi.metsi.app.export_handlers.j import j_out, parse_j_config
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.app.export_handlers.rm_timber import rm_schedules_events_timber, rm_schedules_events_trees
 from lukefi.metsi.app.file_io import write_stands_to_file, determine_file_path
-from lukefi.metsi.domain import exp_ops 
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.generators import simple_processable_chain
 from lukefi.metsi.sim.runners import evaluate_sequence
@@ -38,14 +37,13 @@ def export_files(config: MetsiConfiguration, decl: list[dict], data: SimResults)
         handler()
 
 def export_preprocessed(target_directory: str, decl: dict, stands: StandList) -> None:
-    FILE_PREFIX = "preprocessing_result"
     output_formats = list(decl.keys())
     print_logline(f"Writing all preprocessed data to directory '{target_directory}'")
-    for format in output_formats:
-        operations = decl[format].get('operations', None)
-        operation_params = decl[format].get('operation_params', None)
-        additional_varnames = decl[format].get('additional_variables', None)
-        file_name = f"{FILE_PREFIX}.{format}"
+    for output_format in output_formats:
+        operations = decl[output_format].get('operations', None)
+        operation_params = decl[output_format].get('operation_params', None)
+        additional_varnames = decl[output_format].get('additional_variables', None)
+        file_name = f"preprocessing_result.{output_format}"
         filepaths = determine_file_path(target_directory, file_name)
         if operations is not None:
             operation_chain = simple_processable_chain(operations,
@@ -57,4 +55,4 @@ def export_preprocessed(target_directory: str, decl: dict, stands: StandList) ->
         else:
             result = ExportableContainer(stands, additional_varnames)
         print_logline(f"Writing preprocessed data to '{target_directory}\{file_name}'")
-        write_stands_to_file(result, filepaths, format)
+        write_stands_to_file(result, filepaths, output_format)
