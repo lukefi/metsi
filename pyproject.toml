@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-tests = ["pytest", "parameterized==0.9.0", "robotframework==7.3"]
+tests = ["pytest", "pytest-cov", "parameterized==0.9.0", "robotframework==7.3"]
 
 [project.scripts]
 metsi = "lukefi.metsi.app.metsi:main"
