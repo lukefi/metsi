@@ -198,14 +198,14 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload
     )
 
 # io_util?
-def get_subdirectory_names(path: Path) -> list[str]:
+def get_subdirectory_names(path: str | Path) -> list[str]:
     if not os.path.isdir(path):
         raise Exception(f"Given input path {path} is not a directory.")
     _, dirs, _ = next(os.walk(path))
     return dirs
 
 # SimResult entry function
-def read_full_simulation_result_dirtree(source_path: Path) -> SimResults:
+def read_full_simulation_result_dirtree(source_path: str | Path) -> SimResults:
     """
     Read simulation results from a given source directory, packing them into the simulation results dict structure.
     Utilizes a directory scanner function to find unit_state and derived_data files for known possible container
@@ -367,4 +367,3 @@ def npz_file_reader(file_path: str | Path):
         for v in data.values():
             retval.append(v)
     return retval
-    

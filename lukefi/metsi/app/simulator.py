@@ -36,7 +36,7 @@ def run_stands(
     return retval
 
 
-def resolve_formation_strategy(source: str) -> Runner[ForestOpPayload]:
+def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestOpPayload]:
     formation_strategy_map = {
         FormationStrategy.FULL: run_full_tree_strategy,
         FormationStrategy.PARTIAL: run_partial_tree_strategy
@@ -44,11 +44,11 @@ def resolve_formation_strategy(source: str) -> Runner[ForestOpPayload]:
 
     try:
         return formation_strategy_map[source]
-    except Exception:
-        raise Exception("Unable to resolve event tree formation strategy '{}'".format(source))
+    except Exception as e:
+        raise Exception(f"Unable to resolve event tree formation strategy '{source}'") from e
 
 
-def resolve_evaluation_strategy(source: str) -> Evaluator[ForestOpPayload]:
+def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestOpPayload]:
     evaluation_strategy_map = {
         EvaluationStrategy.DEPTH: depth_first_evaluator,
         EvaluationStrategy.CHAINS: chain_evaluator
@@ -56,8 +56,8 @@ def resolve_evaluation_strategy(source: str) -> Evaluator[ForestOpPayload]:
 
     try:
         return evaluation_strategy_map[source]
-    except Exception:
-        raise Exception("Unable to resolve event tree evaluation strategy '{}'".format(source))
+    except Exception as e:
+        raise Exception(f"Unable to resolve event tree evaluation strategy '{source}'") from e
 
 
 def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList):

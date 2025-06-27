@@ -54,5 +54,5 @@ def export_preprocessed(target_directory: str, decl: dict, stands: StandList) ->
             result = ExportableContainer(modified_stands, additional_varnames)
         else:
             result = ExportableContainer(stands, additional_varnames)
-        print_logline(f"Writing preprocessed data to '{target_directory}\{file_name}'")
+        print_logline(f"Writing preprocessed data to '{target_directory}\\{file_name}'")
         write_stands_to_file(result, filepaths, output_format)

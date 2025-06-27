@@ -263,6 +263,6 @@ class OperationPayload(SimpleNamespace, Generic[T]):
 
 OpTuple = tuple[T, CollectedData]
 SourceData = list[T]
-Evaluator = Callable[[OperationPayload[T]], list[OperationPayload[T]]]
+Evaluator = Callable[[OperationPayload[T], EventTree], list[OperationPayload[T]]]
 Runner = Callable[[T, SimConfiguration, Evaluator[T]], list[T]]
 GeneratorFn = Callable[[Optional[list[EventTree]]], list[EventTree]]
