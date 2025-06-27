@@ -13,7 +13,7 @@ from lukefi.metsi.app.preprocessor import (
     slice_stands_by_size
     )
 
-
+from pathlib import Path
 from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
@@ -64,6 +64,39 @@ def export_prepro(config: MetsiConfiguration, control: dict, data: StandList) ->
         print_logline(f"Skipping export of preprocessing results.")
     return data # returned as is just for workflow reasons
 
+def remove_existing_export_files(config: MetsiConfiguration, control: dict):
+    """Remove known export and preprocessing output files from target_directory"""
+    target_dir = Path(config.target_directory).resolve()
+    safe_targets = set()
+
+    # Collect export files from control["export"]
+    if 'export' in control:
+        for decl in control['export']:
+            fmt = decl.get('format')
+            if fmt == 'J':
+                xda = decl.get('xda_filename', "data.xda")
+                cda = decl.get('cda_filename', "data.cda")
+                safe_targets.add(xda)
+                safe_targets.add(cda)
+            elif 'filename' in decl:
+                safe_targets.add(decl['filename'])
+
+    # Add preprocessing known output names
+    if 'export_prepro' in control:
+        for ext in control['export_prepro'].keys():
+            safe_targets.add(f"preprocessing_result.{ext}")
+
+    # Delete all collected files if they exist in the correct directory
+    for filename in safe_targets:
+        file_path = target_dir / filename
+        try:
+            if file_path.exists() and file_path.resolve().parent == target_dir:
+                file_path.unlink()
+        except Exception as e:
+            print_logline(f"Warning: Failed to delete file {file_path}: {e}")
+
+
+
 mode_runners = {
     RunMode.PREPROCESS: preprocess,
     RunMode.EXPORT_PREPRO: export_prepro,
@@ -85,7 +118,9 @@ def main() -> int:
         app_config = generate_application_configuration( {**cli_arguments, **control_structure['app_configuration']} )
         prepare_target_directory(app_config.target_directory)
         print_logline("Reading input...")
-
+        
+        #deleting old target files
+        remove_existing_export_files(app_config, control_structure)
 
         if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
             # 1) read full stand list
@@ -123,8 +158,7 @@ def main() -> int:
 
         # clone config so we don’t stomp on the original
         cfg = copy.copy(app_config)
-        # cfg.target_directory = slice_target  # 🔁 leave this commented
-        cfg.target_directory = app_config.target_directory  # ✅ use original
+        cfg.target_directory = app_config.target_directory
 
         # feed this sub‐list of stands through the normal run_modes
         current = stands
