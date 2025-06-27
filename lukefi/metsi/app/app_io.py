@@ -23,7 +23,7 @@ class MetsiConfiguration(SimpleNamespace):
     # Default configuration values
     control_file = "control.py"
     input_path = ""
-    target_directory = None
+    target_directory = ""
     run_modes = [RunMode.PREPROCESS, RunMode.EXPORT_PREPRO, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]
     state_format = StateFormat.FDM
     state_input_container = StateInputFormat.CSV
