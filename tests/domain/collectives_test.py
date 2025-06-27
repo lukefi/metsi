@@ -1,13 +1,13 @@
 from types import SimpleNamespace
 import unittest
-from lukefi.metsi.domain.utils.collectives import CollectibleNDArray, autocollective, collect_all, compile, getvarfn
+from lukefi.metsi.domain.utils.collectives import CollectibleNDArray, autocollective, collect_all, compile_collector, getvarfn
 import numpy as np
 
 
 class CollectivesTest(unittest.TestCase):
 
     def test_compile(self):
-        f = compile("a+len(b)")
+        f = compile_collector("a+len(b)")
         getvar = getvarfn(a=1, b=[3,4])
         self.assertEqual(f(getvar), 1+2)
 
@@ -46,7 +46,7 @@ class CollectivesTest(unittest.TestCase):
         )
 
     def test_undefined(self):
-        f = compile("x")
+        f = compile_collector("x")
         getvar = getvarfn()
         with self.assertRaises(NameError):
             f(getvar)

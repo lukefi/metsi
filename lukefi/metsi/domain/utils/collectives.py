@@ -37,7 +37,7 @@ class Globals(dict):
 
 
 @lru_cache
-def compile(expr: str) -> CollectFn:
+def compile_collector(expr: str) -> CollectFn:
     """Compile a Python expression `expr` into a collector function.
 
     :param expr: A python expression that evaluates to the value of the collected variable.
@@ -59,7 +59,7 @@ def collect_all(collectives: dict[str, str], getvar: GetVarFn) -> dict[str, Any]
     :param collective: Collective expressions keyed by name.
     :param getvar: Values of global variables.
     :return: Values of the collective variables keyed by name."""
-    return {k: compile(v)(getvar) for k,v in collectives.items()}
+    return {k: compile_collector(v)(getvar) for k,v in collectives.items()}
 
 
 def getvarfn(*xs: Any, **named: Any) -> GetVarFn:

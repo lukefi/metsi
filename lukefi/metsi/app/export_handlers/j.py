@@ -1,12 +1,12 @@
 import bisect
-from functools import cache
+from functools import cache, partial
 from pathlib import Path
 from typing import TypeVar, Generic, Any, Union, IO
 from collections.abc import Iterator, Iterable
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults
-from lukefi.metsi.domain.utils.collectives import CollectFn, GetVarFn, compile, getvarfn, autocollective
+from lukefi.metsi.domain.utils.collectives import CollectFn, GetVarFn, compile_collector, getvarfn, autocollective
 from lukefi.metsi.sim.core_types import OperationPayload
 
 T = TypeVar("T")
@@ -26,7 +26,7 @@ class CollectiveSeries(Generic[T]):
             start, stop, stride = idx.indices(self.idx[-1])
             first = bisect.bisect_left(self.idx, start)
             last = bisect.bisect_right(self.idx, stop)
-            indices = [i for i in range(first, last) if (self.idx[i]-start)%stride == 0]
+            indices = [i for i in range(first, last) if (self.idx[i]-start) % stride == 0]
         else:
             try:
                 it = iter(idx)
@@ -35,8 +35,8 @@ class CollectiveSeries(Generic[T]):
             else:
                 indices = [self.idx.index(i) for i in it]
         return CollectiveSeries(
-            data = [self.data[i] for i in indices],
-            index = [self.idx[i] for i in indices]
+            data=[self.data[i] for i in indices],
+            index=[self.idx[i] for i in indices]
         )
 
     def __iter__(self) -> Iterator[T]:
@@ -46,7 +46,7 @@ class CollectiveSeries(Generic[T]):
 def getseries(schedule: OperationPayload, name: str) -> CollectiveSeries:
     """Get a `CollectiveSeries` for the collective `name` from an `OperationPayload`."""
     data, index = [], []
-    for t,c in schedule.collected_data.operation_results["report_collectives"].items(): # type: ignore
+    for t, c in schedule.collected_data.operation_results["report_collectives"].items():  # type: ignore
         if name in c:
             data.append(c[name])
             index.append(t)
@@ -56,6 +56,7 @@ def getseries(schedule: OperationPayload, name: str) -> CollectiveSeries:
 def j_row(out: IO, fns: list[CollectFn], getvar: GetVarFn):
     """Write a row to a J file."""
     buf = []
+    n = None
     for f in fns:
         v = f(getvar)
         if isinstance(v, str) or not isinstance(v, Iterable):
@@ -67,10 +68,10 @@ def j_row(out: IO, fns: list[CollectFn], getvar: GetVarFn):
             buf.extend(it)
             n = len(buf) - l
         if hasattr(f, "n"):
-            if n != f.n:
-                raise RuntimeError(f"Collector {f} yielded an inconsistent number of results: {f.n} != {n}")
+            if n != getattr(f, "n"):
+                raise RuntimeError(f"Collector {f} yielded an inconsistent number of results: {getattr(f, "n")} != {n}")
         else:
-            f.n = n
+            setattr(f, "n", n)
     out.write("\t".join(map(str, buf)))
     out.write("\n")
 
@@ -80,34 +81,35 @@ def j_xda(out: IO, data: SimResults, xvariables: list[str]):
     collectives = {
         k for schedules in data.values()
         for payload in schedules
-        for c in payload.collected_data.operation_results["report_collectives"].values() # type: ignore
+        for c in payload.collected_data.operation_results["report_collectives"].values()  # type: ignore
         for k in c
     }
-    xvars = list(map(compile, xvariables or collectives))
+    xvars = list(map(compile_collector, xvariables or collectives))
     for schedules in data.values():
         for s in schedules:
             j_row(
-                out = out,
-                fns = xvars,
-                getvar = cache(getvarfn(
-                    lambda name: (
-                        getseries(s, name) if name in collectives
-                        else autocollective(getattr(s.computational_unit, name))
-                    )
+                out=out,
+                fns=xvars,
+                getvar=cache(getvarfn(
+                    partial(lambda name, sched: (
+                        getseries(sched, name) if name in collectives
+                        else autocollective(getattr(sched.computational_unit, name))
+                    ), sched=s)
                 ))
             )
 
 
 def j_cda(out: IO, data: SimResults, cvariables: list[str]):
     """Write cdata file."""
-    cvars = list(map(compile, ["len(schedules)", *cvariables]))
+    cvars = list(map(compile_collector, ["len(schedules)", *cvariables]))
     for schedules in data.values():
         j_row(
-            out = out,
-            fns = cvars,
-            getvar = cache(getvarfn(
-                lambda name: autocollective(getattr(schedules[0].computational_unit, name)),
-                schedules = schedules
+            out=out,
+            fns=cvars,
+            getvar=cache(getvarfn(
+                partial(lambda name, sched: autocollective(
+                    getattr(sched[0].computational_unit, name)), sched=schedules),
+                schedules=schedules
             ))
         )
 
@@ -118,9 +120,9 @@ def j_out(data: SimResults,
           cvariables: list[str],
           xvariables: list[str]):
     """Write J files."""
-    with open(cda_filepath, "a") as f:
+    with open(cda_filepath, "a", encoding="utf-8") as f:
         j_cda(f, data, cvariables)
-    with open(xda_filepath, "a") as f:
+    with open(xda_filepath, "a", encoding="utf-8") as f:
         j_xda(f, data, xvariables)
 
 

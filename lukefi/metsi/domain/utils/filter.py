@@ -1,6 +1,6 @@
 from typing import Any, Literal
 from lukefi.metsi.data.model import ForestStand
-from lukefi.metsi.domain.utils.collectives import GetVarFn, compile, getvarfn
+from lukefi.metsi.domain.utils.collectives import GetVarFn, compile_collector, getvarfn
 
 Verb = Literal["select", "remove"]
 Object = Literal["stands", "trees", "strata"]
@@ -22,7 +22,7 @@ def parsecommand(command: str) -> tuple[Verb, Object]:
 
 
 def makegetvarfn(named: dict[str, str], *args: Any, **kwargs: Any) -> GetVarFn:
-    getnamed = lambda name: compile(named[name])(getvar)
+    getnamed = lambda name: compile_collector(named[name])(getvar)
     getvar = getvarfn(*args, getnamed, **kwargs)
     return getvar
 
@@ -33,7 +33,7 @@ def applyfilter(
     expr: str,
     named: dict[str, str] = {}
 ) -> list[ForestStand]:
-    predicate = compile(expr)
+    predicate = compile_collector(expr)
     verb, object = parsecommand(command)
     if verb == "remove":
         p = predicate
