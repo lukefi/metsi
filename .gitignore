@@ -7,4 +7,12 @@ issues
 build
 *.egg-info
 **/c/lib
+
+# Robot Framework output
 tests/robot/**/output/test/
+output.xml
+log.html
+report.html
+
+# Pytest coverage output
+.coverage
