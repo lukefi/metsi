@@ -197,7 +197,7 @@ def generator_function(key, *fns: Callable) -> GeneratorFn:
 
 
 def prepare_parametrized_operations(config: SimConfiguration,
-                                    operation_tag: str,
+                                    operation_tag: Callable,
                                     time_point: int) -> list[Callable[[Any], OperationPayload]]:
     parameter_set_choices = config.operation_params.get(operation_tag, [{}])
     operation_run_constraints = config.run_constraints.get(operation_tag)
@@ -213,18 +213,41 @@ def prepare_parametrized_operations(config: SimConfiguration,
     return results
 
 
+def _insert_transtion_as_first_generator(generator_declarations, config, step):
+    """ Inserts defined transition and its step parameter as the first event to the list of declared generators """
+    transition = config.transition['operation']
+    _transtion_declaration: dict[Callable, list[Callable]] = { sequence: [transition] }
+
+    generator_declarations.insert(0, _transtion_declaration)
+    # Overrides the step parameter for current transtion
+    config.operation_params[transition] = [{"step": step}]
+    return generator_declarations
+
+
 def full_tree_generators(config: SimConfiguration) -> NestableGenerator:
     """
     Create a NestableGenerator describing a single simulator run.
 
+    Resolves and insert transition with corresponding step between two time points to the generator declarations.
+
     :param config: a prepared SimConfiguration object
     :return: a list of prepared generator functions
     """
-    wrapper = NestableGenerator(config, {sequence: []}, 0)
+    ROOT_TIME_POINT = 0
+    ROOT_GENERATOR = {sequence: []}
+    
+    wrapper = NestableGenerator(config,
+                                ROOT_GENERATOR,
+                                ROOT_TIME_POINT)
+    prev_time_point = config.transition['start_year']
     for time_point in config.time_points:
+        step = time_point - prev_time_point
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
+        if step > 0:
+            generator_declarations = _insert_transtion_as_first_generator(generator_declarations, config, step)
         time_point_wrapper_declaration = {sequence: generator_declarations}
         wrapper.nested_generators.append(NestableGenerator(config, time_point_wrapper_declaration, time_point))
+        prev_time_point = time_point
     return wrapper
 
 

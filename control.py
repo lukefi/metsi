@@ -10,7 +10,7 @@ control_structure = {
         # "state_input_container": "csv",  # Only relevant with fdm state_format. Options: pickle, json
         # "state_output_container": "csv",  # options: pickle, json, csv, null
         # "derived_data_output_container": "pickle",  # options: pickle, json, null
-        "formation_strategy": "partial",
+        "formation_strategy": "full",
         "evaluation_strategy": "depth",
         "run_modes": ["preprocess", "export_prepro", "simulate", "postprocess", "export"]
     },
@@ -38,6 +38,10 @@ control_structure = {
             }
         ]
     },
+    "transition": {
+        "start_year": 2018,
+        "operation": grow_acta,
+    },
     "simulation_events": [
         {
             "time_points": [2020],
@@ -46,7 +50,7 @@ control_structure = {
             ]
         },
         {
-            "time_points": [2020, 2025, 2030, 2035, 2040, 2045, 2050],
+            "time_points": [2020, 2023, 2030, 2035, 2040, 2045, 2050], 
             "generators": [
                 {sequence: [
                     cross_cut_standing_trees,
@@ -94,13 +98,6 @@ control_structure = {
             "time_points": [2050],
             "generators": [
                 {sequence: [report_collectives]}
-            ]
-        },
-        {
-            "time_points": [2020, 2025, 2030, 2035, 2040, 2045, 2050],
-            "generators": [
-                {sequence: [grow_acta]}
-                # "grow_motti"
             ]
         }
     ],
