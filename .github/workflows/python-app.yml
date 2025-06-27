@@ -54,7 +54,7 @@ jobs:
 
     - name: Test with pytest
       run: |
-        python -m pytest --junit-xml=pytest.xml --cov=lukefi --cov-report xml
+        python -m pytest --junit-xml=pytest.xml --cov=lukefi --cov-report xml --cov-branch
       
     - name: Run Robot Tests
       run: |
@@ -108,3 +108,11 @@ jobs:
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: artifacts/**/coverage.xml
+          format: markdown
+          output: both
+          badge: true
+          fail_below_min: true
+          hide_complexity: true
+          hide_branch_rate: false
+          indicators: true
+          thresholds: '60 80'
