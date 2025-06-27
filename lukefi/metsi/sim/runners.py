@@ -1,11 +1,10 @@
-from typing import Optional
 from collections.abc import Callable
 from copy import deepcopy
 from lukefi.metsi.sim.core_types import OperationPayload, SimConfiguration, EventTree
 from lukefi.metsi.sim.generators import full_tree_generators, compose_nested, partial_tree_generators_by_time_point
 
 
-def evaluate_sequence(payload: OperationPayload, *operations: Callable) -> Optional[OperationPayload]:
+def evaluate_sequence[T](payload: T, *operations: Callable[[T], T]) -> T:
     """
     Compute a single processing result for single data input.
 
