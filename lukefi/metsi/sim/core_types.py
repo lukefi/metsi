@@ -40,6 +40,7 @@ class SimConfiguration(SimpleNamespace):
     events: list[DeclaredEvents] = []
     run_constraints: dict[str, dict] = {}
     time_points = []
+    transition: dict[str, Callable | int] = {}
 
     def __init__(self, **kwargs):
         """

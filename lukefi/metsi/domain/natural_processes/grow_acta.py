@@ -13,6 +13,7 @@ def split_sapling_trees(trees: list[ReferenceTree]) -> tuple[list[ReferenceTree]
 
 def grow_acta(input_: tuple[ForestStand, None], /, **operation_parameters) -> tuple[ForestStand, None]:
     step = operation_parameters.get('step', 5)
+    print("step:", step)
     stand, _ = input_
     if len(stand.reference_trees) == 0:
         return input_
