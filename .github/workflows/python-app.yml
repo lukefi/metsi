@@ -60,7 +60,8 @@ jobs:
     - name: Run mypy
       continue-on-error: true
       run: |
-        mypy -p lukefi
+        sudo apt-get install -y jq
+        mypy -p lukefi --output=json | jq -r '"::\(.severity) title=Mypy issue,file=\(.file),line=\(.line),col=\(.column)::\(.message)"'
 
     - name: Test with pytest
       run: |
