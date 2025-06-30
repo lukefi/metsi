@@ -24,7 +24,7 @@ def collect_rows_for_events(derived_data: CollectedData, data_source: str) -> li
     timber_events = derived_data.get('report_state')
     standing_tree_data = derived_data.get('collect_standing_tree_properties')
     felled_tree_data = derived_data.get('collect_felled_tree_properties')
-    cross_cut_results = derived_data.get('cross_cutting')
+    cross_cut_results: list[CrossCutResult] = derived_data.get('cross_cutting')
     grouped = group_crosscut_by_year_and_source(cross_cut_results)
 
     for year, _ in timber_events.items():

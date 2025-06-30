@@ -181,7 +181,7 @@ class CollectedData:
         except (KeyError, StopIteration):
             return None
 
-    def get(self, tag: str) -> OrderedDict[int, Any]:
+    def get(self, tag: str) -> Any:
         try:
             return self.operation_results[tag]
         except KeyError:
