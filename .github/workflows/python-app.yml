@@ -57,6 +57,11 @@ jobs:
       run: |
         pylint lukefi --output-format=github
 
+    - name: Run mypy
+      continue-on-error: true
+      run: |
+        mypy -p lukefi
+
     - name: Test with pytest
       run: |
         python -m pytest --junit-xml=pytest.xml --cov=lukefi --cov-report xml --cov-branch
