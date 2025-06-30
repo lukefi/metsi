@@ -32,7 +32,8 @@ tests = [
     "pytest-cov",
     "parameterized==0.9.0",
     "robotframework==7.3",
-    "pylint==3.3.7,"
+    "pylint==3.3.7",
+    "mypy==1.16.1",
 ]
 
 [project.scripts]
