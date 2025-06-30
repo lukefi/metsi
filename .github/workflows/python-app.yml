@@ -52,6 +52,17 @@ jobs:
       run: |
         make -C lukefi/metsi/forestry/c
 
+    - name: Run pylint
+      continue-on-error: true
+      run: |
+        pylint lukefi --output-format=github
+
+    - name: Run mypy
+      continue-on-error: true
+      run: |
+        sudo apt-get install -y jq
+        mypy -p lukefi --output=json | jq -r '"::\(.severity) title=Mypy issue,file=\(.file),line=\(.line),col=\(.column)::\(.message)"'
+
     - name: Test with pytest
       run: |
         python -m pytest --junit-xml=pytest.xml --cov=lukefi --cov-report xml --cov-branch
