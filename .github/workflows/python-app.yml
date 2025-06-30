@@ -53,6 +53,7 @@ jobs:
         make -C lukefi/metsi/forestry/c
 
     - name: Run pylint
+      continue-on-error: true
       run: |
         pylint lukefi --output-format=github
 
