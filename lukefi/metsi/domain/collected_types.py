@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.app.utils import MetsiException
 
 
 @dataclass
@@ -53,7 +54,7 @@ class BiomassData:
                 roots=self.roots + other.roots
             )
         else:
-            raise Exception("Can only do addition between numbers and BiomassData, not {}".format(type(other)))
+            raise MetsiException("Can only do addition between numbers and BiomassData, not {}".format(type(other)))
 
     def __sub__(self, other):
         return self + (other * - 1)
@@ -63,7 +64,7 @@ class BiomassData:
 
     def __rmul__(self, factor):
         if not isinstance(factor, (int, float)):
-            raise Exception("Can multiply BiomassData only with float or int, not {}".format(type(factor)))
+            raise MetsiException("Can multiply BiomassData only with float or int, not {}".format(type(factor)))
         return BiomassData(
             stem_wood=self.stem_wood * factor,
             stem_bark=self.stem_bark * factor,

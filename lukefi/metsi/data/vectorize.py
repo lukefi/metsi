@@ -1,6 +1,7 @@
 from typing import Any
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.vector_model import ReferenceTrees, Strata
+from lukefi.metsi.app.utils import MetsiException
 
 
 CONTAINERS = {
@@ -43,7 +44,7 @@ def vectorize(stands: list[ForestStand], **operation_params) -> list[ForestStand
             # Overwrite old forestry data
             container_obj = CONTAINERS.get(t)
             if not container_obj:
-                raise Exception(f"Unknown target type '{t}'")
+                raise MetsiException(f"Unknown target type '{t}'")
             setattr(stand, f"{t}_soa", container_obj().vectorize(attr_dict))
 
     return stands

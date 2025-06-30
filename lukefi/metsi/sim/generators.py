@@ -3,6 +3,7 @@ from collections.abc import Callable
 from lukefi.metsi.sim.core_types import EventTree, SimConfiguration, DeclaredEvents, OperationPayload, GeneratorFn
 from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
 from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_params
+from lukefi.metsi.app.utils import MetsiException
 
 
 class NestableGenerator:
@@ -64,7 +65,7 @@ class NestableGenerator:
         if len(parameter_set_choices) > 1 and self.generator_type == sequence:
             # TODO: for the time being, multiple parameter sets for sequence operations don't make sense
             # needs to be addressed during in-line parameters work in #211
-            raise Exception("Alternatives by operation parameters not supported in sequences. Use "
+            raise MetsiException("Alternatives by operation parameters not supported in sequences. Use "
                             "alternatives clause for operation {} in time point {} or reduce operation parameter "
                             "set size to 0 or 1.".format(candidate, self.time_point))
 
@@ -169,7 +170,7 @@ def simple_processable_chain(operation_tags: list[Callable], operation_params: d
     for tag in operation_tags if operation_tags is not None else []:
         params = operation_params.get(tag, [{}])
         if len(params) > 1:
-            raise Exception(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
+            raise MetsiException(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
                             "Defining multiple parameter sets is only supported for alternative clause generators.")
         result.append(prepared_operation(tag, **params[0]))
     return result

@@ -13,6 +13,7 @@ from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.domain.utils.enums import SiteTypeKey
 from lukefi.metsi.domain.utils.conversion import site_type_to_key
+from lukefi.metsi.app.utils import MetsiException
 
 class CountyKey(Enum):
     EASTERN_FINLAND = 'eastern_finland'
@@ -495,7 +496,7 @@ def create_thinning_limits_table(file_path: str) -> list:
     # this function is based on the structure in data/parameter_files/Thin.txt.
     # for now, to catch a file with a differing structure, raise an error if the row and column numbers do not match.
     if len(table) != 64 or len(table[0]) != 9:
-        raise Exception('Thinning limits file has unexpected structure. Expected 64 rows and 9 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
+        raise MetsiException('Thinning limits file has unexpected structure. Expected 64 rows and 9 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
     else:
         return table
 

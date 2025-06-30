@@ -5,6 +5,8 @@ from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.domain.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
 from lukefi.metsi.domain.utils.conversion import site_type_to_key
 from lukefi.metsi.domain.collected_types import PriceableOperationInfo
+from lukefi.metsi.app.utils import MetsiException
+
 
 DEFAULT_INSTRUCTIONS = {
         SiteTypeKey.OMT: {
@@ -38,7 +40,7 @@ def create_planting_instructions_table(file_path: str) -> list:
     table = [row.split() for row in table]
 
     if len(table) != 4 or len(table[0]) != 3:
-        raise Exception('Planting instructions file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
+        raise MetsiException('Planting instructions file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
     else:
         return table
 

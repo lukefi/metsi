@@ -3,6 +3,7 @@ from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.utils.collectives import property_collector, autocollective, _collector_wrapper
 from lukefi.metsi.sim.core_types import OpTuple
 from lukefi.metsi.sim.operations import T
+from lukefi.metsi.app.utils import MetsiException
 
 
 def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
@@ -44,7 +45,7 @@ def collect_properties(input_: OpTuple[ForestStand], **operation_parameters) -> 
         if isinstance(properties, str):
             properties = [properties]
         elif not isinstance(properties, list):
-            raise Exception(f"Properties to collect must be a list of strings or a single string for {key}")
+            raise MetsiException(f"Properties to collect must be a list of strings or a single string for {key}")
         if key == "stand":
             objects = [stand]
         elif key == "tree":

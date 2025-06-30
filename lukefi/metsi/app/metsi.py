@@ -20,6 +20,7 @@ from lukefi.metsi.app.file_io import prepare_target_directory, read_stands_from_
 from lukefi.metsi.app.post_processing import post_process_alternatives
 from lukefi.metsi.app.simulator import simulate_alternatives
 from lukefi.metsi.app.console_logging import print_logline
+from lukefi.metsi.app.utils import MetsiException
 
 
 def preprocess(config: MetsiConfiguration, control: dict, stands: StandList) -> StandList:
@@ -141,7 +142,7 @@ def main() -> int:
         elif app_config.run_modes[0] in [RunMode.POSTPROCESS, RunMode.EXPORT]:
             input_data = read_full_simulation_result_dirtree(app_config.input_path)
         else:
-            raise Exception("Can not determine input data for unknown run mode")
+            raise MetsiException("Can not determine input data for unknown run mode")
     except Exception:
         traceback.print_exc()
         print("Aborting run...")

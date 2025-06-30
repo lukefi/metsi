@@ -1,4 +1,7 @@
 """ App utility functions """
 
-class ConfigurationException(Exception):
+class MetsiException(Exception):
+    """ Base type for Metsi exceptions """
+
+class ConfigurationException(MetsiException):
     """ Custom exception for invalid user control and configurations settings """

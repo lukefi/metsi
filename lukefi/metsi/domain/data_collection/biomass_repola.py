@@ -4,6 +4,7 @@ from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.domain.collected_types import BiomassData
 from lukefi.metsi.sim.core_types import OpTuple
+from lukefi.metsi.app.utils import MetsiException
 
 
 # Sources
@@ -336,7 +337,7 @@ def tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, m
             roots=roots_biomass_1(tree)
         )
     else:
-        raise Exception(f"Incorrect model set definition in control file value '{models}' is unknown")
+        raise MetsiException(f"Incorrect model set definition in control file value '{models}' is unknown")
 
 
 def small_tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> BiomassData:

@@ -2,6 +2,8 @@ from typing import Any, Optional
 import numpy as np
 import numpy.typing as npt
 
+from lukefi.metsi.app.utils import MetsiException
+
 DTYPES_TREE: dict[str, npt.DTypeLike] = {
     "identifier": np.dtype("U20"),
     "tree_number": np.int32,
@@ -59,7 +61,7 @@ class VectorData():
         for k, v in attr_dict.items():
             setattr(self, k, np.array(self.defaultify(v, self.dtypes[k]), self.dtypes[k]))
             if not self.is_contiguous(k):
-                raise Exception("Vectorized data is not contiguous")
+                raise MetsiException("Vectorized data is not contiguous")
         self.set_size(attr_dict)
         return self
 

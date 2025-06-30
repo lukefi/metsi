@@ -14,6 +14,8 @@ from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.domain.forestry_operations.thinning_limits import SiteTypeKey, SpeciesKey, site_type_to_key
+from lukefi.metsi.app.utils import MetsiException
+
 
 RENEWAL_DIAMETERS = {
         SiteTypeKey.OMT: {
@@ -79,7 +81,7 @@ def create_clearcutting_limits_table(file_path: str) -> list:
     table = [row.split() for row in table]
     
     if len(table) != 4 or len(table[0]) != 5:
-        raise Exception('Clearcutting limits file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
+        raise MetsiException('Clearcutting limits file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
     else:
         return table
 

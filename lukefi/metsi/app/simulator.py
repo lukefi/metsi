@@ -9,6 +9,7 @@ from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, depth_first_evaluator, \
     chain_evaluator
 from lukefi.metsi.sim.core_types import CollectedData, Runner, SimConfiguration, Evaluator
+from lukefi.metsi.app.utils import MetsiException
 
 
 def run_stands(
@@ -45,7 +46,7 @@ def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestOpPayl
     try:
         return formation_strategy_map[source]
     except Exception as e:
-        raise Exception(f"Unable to resolve event tree formation strategy '{source}'") from e
+        raise MetsiException(f"Unable to resolve event tree formation strategy '{source}'") from e
 
 
 def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestOpPayload]:
@@ -57,7 +58,7 @@ def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestO
     try:
         return evaluation_strategy_map[source]
     except Exception as e:
-        raise Exception(f"Unable to resolve event tree evaluation strategy '{source}'") from e
+        raise MetsiException(f"Unable to resolve event tree evaluation strategy '{source}'") from e
 
 
 def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList):

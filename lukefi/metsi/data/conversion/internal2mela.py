@@ -18,6 +18,8 @@ from lukefi.metsi.data.enums.internal import (
     )
 from lukefi.metsi.data.conversion.util import apply_mappers
 from lukefi.metsi.data.formats.util import get_or_default
+from lukefi.metsi.app.utils import MetsiException
+
 # TODO: can we find a way to resolve the circular import introduced by trying to use these classes just for typing?
 # Even using the iffing below, pytest fails during top_level_collect
 # if typing.TYPE_CHECKING:
@@ -197,7 +199,7 @@ def stand_location_converter(target):
     elif target.geo_location[3] == 'EPSG:2393':
         lat, lon = (target.geo_location[0] / 1000, target.geo_location[1] / 1000 - 3000)
     else:
-        raise Exception("Unsupported CRS {} for stand {}".format(target.geo_location[3], target.identifier))
+        raise MetsiException("Unsupported CRS {} for stand {}".format(target.geo_location[3], target.identifier))
 
     target.geo_location = (
         lat,

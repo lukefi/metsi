@@ -11,6 +11,7 @@ from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 from lukefi.metsi.forestry.preprocessing.tree_generation_validation import create_stratum_tree_comparison_set, \
     debug_output_row_from_comparison_set, debug_output_header_row
 from lukefi.metsi.data.vectorize import vectorize
+from lukefi.metsi.app.utils import MetsiException
 
 
 def preproc_filter(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
@@ -38,7 +39,7 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
         elif stand.geo_location[3] == 'EPSG:2393':
             lat, lon = (stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
         else:
-            raise Exception("Unsupported CRS {} for stand {}".format(stand.geo_location[3], stand.identifier))
+            raise MetsiException("Unsupported CRS {} for stand {}".format(stand.geo_location[3], stand.identifier))
 
         if stand.geo_location[2] is None:
             stand.geo_location = (
@@ -204,7 +205,7 @@ def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str,
         for s in stands:
             s.geo_location = convert_location_to_ykj(s)
     else:
-        raise Exception("Check definition of operation params.\n"
+        raise MetsiException("Check definition of operation params.\n"
                         f"{defaults[0]}\' conversion supported.")
     return stands
 

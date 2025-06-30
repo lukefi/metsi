@@ -4,6 +4,7 @@ from functools import lru_cache, cache
 from typing import Any, Optional
 from collections.abc import Iterator, Callable
 import numpy as np
+from lukefi.metsi.app.utils import MetsiException
 
 GetVarFn = Callable[[str], Any]
 """A function that returns the value of a global variable given its name."""
@@ -139,7 +140,7 @@ def property_collector(objects: list[object], properties: list[str]) -> list[lis
         row = []
         for p in properties:
             if not hasattr(o, p):
-                raise Exception(f"Unknown property {p} in {o.__class__}")
+                raise MetsiException(f"Unknown property {p} in {o.__class__}")
             val = o.__getattribute__(p) or 0.0
             if isinstance(val, Enum):
                 val = val.value

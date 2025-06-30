@@ -16,6 +16,7 @@ from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
 from lukefi.metsi.domain.forestry_types import StandList, ForestStand
 from lukefi.metsi.sim.core_types import CollectedData
 from lukefi.metsi.data.formats.declarative_conversion import Conversion
+from lukefi.metsi.app.utils import MetsiException
 
 StandReader = Callable[[str | Path], StandList]
 StandWriter = Callable[[Path, ExportableContainer[ForestStand]], None]
@@ -35,7 +36,7 @@ def prepare_target_directory(path_descriptor: str) -> Path:
     if os.path.exists(path_descriptor):
         if os.path.isdir(path_descriptor) and os.access(path_descriptor, os.W_OK):
             return Path(path_descriptor)
-        raise Exception(
+        raise MetsiException(
             f"Output directory {path_descriptor} not available. Ensure it is a writable and empty, "
             "or a non-existing directory.")
 
@@ -59,7 +60,7 @@ def stand_writer(container_format: str) -> StandWriter:
         return npy_writer
     if container_format == "npz":
         return npz_writer
-    raise Exception(f"Unsupported container format '{container_format}'")
+    raise MetsiException(f"Unsupported container format '{container_format}'")
 
 
 # entry of FileWriter
@@ -75,7 +76,7 @@ def object_writer(container_format: str) -> ObjectWriter:
         return pickle_writer
     if container_format == "json":
         return json_writer
-    raise Exception(f"Unsupported container format '{container_format}'")
+    raise MetsiException(f"Unsupported container format '{container_format}'")
 
 # io_utils
 def determine_file_path(dir_: str | Path, filename: str) -> Path:
@@ -95,7 +96,7 @@ def fdm_reader(container_format: str) -> StandReader:
         return json_reader
     if container_format == "csv":
         return lambda path: csv_content_to_stands(csv_file_reader(path))
-    raise Exception(f"Unsupported container format '{container_format}'")
+    raise MetsiException(f"Unsupported container format '{container_format}'")
 
 # solve ObjectReader
 def object_reader(container_format: str) -> Any:
@@ -103,7 +104,7 @@ def object_reader(container_format: str) -> Any:
         return pickle_reader
     if container_format == "json":
         return json_reader
-    raise Exception(f"Unsupported container format '{container_format}'")
+    raise MetsiException(f"Unsupported container format '{container_format}'")
 
 # SourceDataReaders
 def external_reader(state_format: str, conversions, **builder_flags) -> StandReader:
@@ -116,7 +117,7 @@ def external_reader(state_format: str, conversions, **builder_flags) -> StandRea
         return lambda path: XMLBuilder(builder_flags, conversions.get('xml', {}), xml_file_reader(path)).build()
     if state_format == "gpkg":
         return lambda path: GeoPackageBuilder(builder_flags, conversions.get('gpkg', {}), str(path)).build()
-    raise Exception(f"Unsupported state format '{state_format}'")
+    raise MetsiException(f"Unsupported state format '{state_format}'")
 
 # source data main entry function
 def read_stands_from_file(app_config: MetsiConfiguration, conversions: dict[str, Conversion]) -> StandList:
@@ -136,7 +137,7 @@ def read_stands_from_file(app_config: MetsiConfiguration, conversions: dict[str,
             strata=app_config.strata,
             measured_trees=app_config.measured_trees,
             strata_origin=app_config.strata_origin)(app_config.input_path)
-    raise Exception(f"Unsupported state format '{app_config.state_format}'")
+    raise MetsiException(f"Unsupported state format '{app_config.state_format}'")
 
 # io_util?
 def scan_dir_for_file(dirpath: Path, basename: str, suffixes: list[str]) -> Optional[tuple[Path, str]]:
@@ -146,7 +147,7 @@ def scan_dir_for_file(dirpath: Path, basename: str, suffixes: list[str]) -> Opti
     :returns a pair with full filename and matching suffix
     """
     if not os.path.isdir(dirpath):
-        raise Exception(f"Given input path {dirpath} is not a directory.")
+        raise MetsiException(f"Given input path {dirpath} is not a directory.")
     _, _, files = next(os.walk(dirpath))
     filenames_with_suffix = list(map(lambda suffix: (f"{basename}.{suffix}", suffix), suffixes))
     for filename, suffix in filenames_with_suffix:
@@ -200,7 +201,7 @@ def read_schedule_payload_from_directory(schedule_path: Path) -> ForestOpPayload
 # io_util?
 def get_subdirectory_names(path: str | Path) -> list[str]:
     if not os.path.isdir(path):
-        raise Exception(f"Given input path {path} is not a directory.")
+        raise MetsiException(f"Given input path {path} is not a directory.")
     _, dirs, _ = next(os.walk(path))
     return dirs
 

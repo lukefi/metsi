@@ -5,6 +5,7 @@ from datetime import datetime as dt
 from lukefi.metsi.data.enums.internal import Storey
 from lukefi.metsi.data.formats.util import get_or_default, parse_float, parse_int
 from lukefi.metsi.data.formats.vmi_const import vmi12_county_areas, VMI12StandIndices, VMI13StandIndices
+from lukefi.metsi.app.utils import MetsiException
 from shapely.geometry import Point
 from geopandas import GeoSeries
 
@@ -176,7 +177,7 @@ def _solve_vmi13_county_areas(county: int, lohkomuoto: int, lohkotarkenne: int) 
     elif county == 21 and lohkomuoto == 0 and lohkotarkenne == 0:
         return 164.2650475
     else:
-        raise Exception("Unable to solve vmi13 country area weight for values: \
+        raise MetsiException("Unable to solve vmi13 country area weight for values: \
                         county {}, lohkomuoto {} and lohkotarkenne {}"
                         .format(county, lohkomuoto, lohkotarkenne))
 
@@ -389,7 +390,7 @@ def determine_owner_group(sourcevalue: str) -> int:
     elif sourcevalue in ['6', '9']:
         return 4
     else:
-        raise Exception('Unknown source value for owner_group')
+        raise MetsiException('Unknown source value for owner_group')
 
 
 def parse_forestry_centre(forestry_centre: str) -> int:
