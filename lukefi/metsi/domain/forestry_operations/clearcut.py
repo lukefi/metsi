@@ -47,6 +47,7 @@ def clearcutting(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpT
 
         if age_limit_reached or diameter_limit_reached:
             stand, collected_data = _clearcut_with_output(stand, collected_data,'clearcutting')
+            print("clearcut")
             return (stand, collected_data)
         else:
             raise UserWarning("Unable to perform clearcutting")

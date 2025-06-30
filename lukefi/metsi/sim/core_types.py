@@ -70,7 +70,7 @@ class EventTree:
     Event represents a computational operation in a tree of following event paths.
     """
 
-    __slots__ = ('operation', 'branches', '_previous_ref', '__weakref__') 
+    __slots__ = ('operation', 'state', "time_point", "done_oper", 'branches', '_previous_ref', '__weakref__') 
 
     def __init__(self, 
                  operation: Optional[Callable[[Optional[Any]], Optional[Any]]] = None,
@@ -79,6 +79,9 @@ class EventTree:
         self.operation = operation if operation is not None else identity
         self._previous_ref = weakref.ref(previous) if previous else None
         self.branches = []
+        self.state = None
+        self.done_oper = None
+        self.time_point = -1
 
     @property
     def previous(self):
@@ -121,13 +124,17 @@ class EventTree:
         :return: list of result payloads from this EventTree or as concatenated from its branches
         """
         current = self.operation(payload)
+        self.state = current.computational_unit # save state
+        self.done_oper = current.operation_history[-1][1].__name__ if len(current.operation_history) > 0 else None  # operation tag
+        self.time_point = current.operation_history[-1][0] if len(current.operation_history) > 0 else None
+
         if len(self.branches) == 0:
             return [current]
         elif len(self.branches) == 1:
             return self.branches[0].evaluate(current)
         elif len(self.branches) > 1:
             results = []
-            for branch in self.branches:
+            for idx, branch in enumerate(self.branches):
                 try:
                     results.extend(branch.evaluate(copy(current)))
                 except UserWarning:

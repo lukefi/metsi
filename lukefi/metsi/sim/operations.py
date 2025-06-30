@@ -12,6 +12,7 @@ def _get_operation_last_run(operation_history: list[tuple[int, str]], operation_
 
 
 def do_nothing(data: T, **kwargs) -> T:
+    print("don_nothing")
     return data
 
 
@@ -30,6 +31,7 @@ def prepared_processor(operation_tag, time_point: int, operation_run_constraints
 def processor(payload: OperationPayload, operation: Callable[[OpTuple], OpTuple], operation_tag, time_point: int,
               operation_run_constraints: Optional[dict], **operation_parameters: dict) -> OperationPayload:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
+    print("time_point: ", time_point)
     if operation_run_constraints is not None:
         current_operation_last_run_time_point = _get_operation_last_run(payload.operation_history, operation_tag)
         check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_constraints, current_operation_last_run_time_point)

@@ -45,8 +45,19 @@ def chain_evaluator(payload: OperationPayload, root_node: EventTree) -> list[Ope
     return run_chains_iteratively(payload, chains)
 
 
+# class StateTree():
+#   self.state # tilatieto payload.computation_unit
+#   self.related_schedules # vaihtoehdon id:t (eg. listana) inkrementoidaan kun noustaan rekursiosta
+#   self.done_operation # operaatio ja parametri kokonaisuus (katso operation_history)
+#   self.time_point # aikapiste
+
 def depth_first_evaluator(payload: OperationPayload, root_node: EventTree) -> list[OperationPayload]:
-    return root_node.evaluate(payload)
+    # state_tree = StateTree() # Kerätään tulokset tulos puuhun
+    # end_payloads = root_node.evaluate(payload, state_tree)
+    end_payloads = root_node.evaluate(payload)
+    # NOTE: Huomaa, että ne EventTree sisältää koko teoreettisen vaihtoehtopuun, kun evaluate on suoritettu root_node haarat joita ei suoriteta ovat state == None
+    # State treen ei tarvitse sisältää ollenkaan niitä solmuja jotka on state == None
+    return end_payloads
 
 
 def run_full_tree_strategy(payload: OperationPayload[CUType], config: SimConfiguration, evaluator=chain_evaluator) -> list[OperationPayload[CUType]]:

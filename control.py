@@ -39,67 +39,33 @@ control_structure = {
         ]
     },
     "transition": {
-        "start_year": 2018,
+        "start_year": 2020,
         "operation": grow_acta,
     },
     "simulation_events": [
         {
-            "time_points": [2020],
+            "time_points": [2020, 2027, 2040],  
             "generators": [
-                {sequence: [planting]}
-            ]
-        },
-        {
-            "time_points": [2020, 2023, 2030, 2035, 2040, 2045, 2050], 
-            "generators": [
-                {sequence: [
-                    cross_cut_standing_trees,
-                    collect_standing_tree_properties,
-                    calculate_npv,
-                    calculate_biomass,
-                    report_state
+                {alternatives: [
+                    do_nothing,
+                    first_thinning,
+                    clearcutting
                 ]}
             ]
-        },
-        {
-            "time_points": [2035, 2045],
-            "generators": [
-                {
-                    alternatives: [
-                        do_nothing,
-                        # "thinning_from_below",
-                        # "thinning_from_above",
-                        first_thinning,
-                        even_thinning,
-                        {
-                            sequence: [
-                                clearcutting,
-                                planting
-                                # operations for renewal after clearcutting go here
-                            ]
-                        }
-                    ]
-                },
-                {
-                    sequence: [
-                        cross_cut_felled_trees,
-                        collect_felled_tree_properties
-                    ]
-                }
-            ]
-        },
-        {
-            "time_points": [2020, 2030, 2040, 2050],
-            "generators": [
-                {sequence: [report_period]}
-            ]
-        },
-        {
-            "time_points": [2050],
-            "generators": [
-                {sequence: [report_collectives]}
-            ]
         }
+        # {
+        #     "time_points": [2040],
+        #     "generators": [
+        #         {sequence: [clearcutting]}
+        #     ]
+        # },
+        # {
+        #     "time_points": [2030],
+        #     "generators": [
+        #         {alternatives: [clearcutting,
+        #                         do_nothing]}
+        #     ]
+        # }
     ],
     "operation_params": {
         first_thinning: [
@@ -203,14 +169,6 @@ control_structure = {
             "renewal_costs": "data/parameter_files/renewal_operation_pricing.csv"
         }
     },
-    "run_constraints": {
-        first_thinning: {
-            "minimum_time_interval": 50
-        },
-        clearcutting: {
-            "minimum_time_interval": 50
-        }
-    },
     "post_processing": {
         "operation_params": {
             do_nothing: [
@@ -221,28 +179,28 @@ control_structure = {
             do_nothing
         ]
     },
-    "export": [
-        {
-            "format": "J",
-            "cvariables": [
-                "identifier", "year", "site_type_category", "land_use_category", "soil_peatland_category"
-            ],
-            "xvariables": [
-                "identifier", "npv_1_percent", "npv_2_percent", "npv_3_percent", "npv_4_percent", "npv_5_percent",
-                "stock_2020", "stock_2030", "stock_2040", "stock_2050",
-                "harvest_2035", "harvest_2045",
-                "harvest_period_2030", "harvest_period_2040", "harvest_period_2050"
-            ]
-        },
-        {
-            "format": "rm_schedules_events_timber",
-            "filename": "timber_sums.txt"
-        },
-        {
-            "format": "rm_schedules_events_trees",
-            "filename": "trees.txt"
-        }
-    ]
+    # "export": [
+    #     {
+    #         "format": "J",
+    #         "cvariables": [
+    #             "identifier", "year", "site_type_category", "land_use_category", "soil_peatland_category"
+    #         ],
+    #         "xvariables": [
+    #             "identifier", "npv_1_percent", "npv_2_percent", "npv_3_percent", "npv_4_percent", "npv_5_percent",
+    #             "stock_2020", "stock_2030", "stock_2040", "stock_2050",
+    #             "harvest_2035", "harvest_2045",
+    #             "harvest_period_2030", "harvest_period_2040", "harvest_period_2050"
+    #         ]
+    #     },
+    #     {
+    #         "format": "rm_schedules_events_timber",
+    #         "filename": "timber_sums.txt"
+        #     },
+    #     {
+    #         "format": "rm_schedules_events_trees",
+    #         "filename": "trees.txt"
+    #     }
+    # ]
 }
 
 # The preprocessing export format is added as an external module
