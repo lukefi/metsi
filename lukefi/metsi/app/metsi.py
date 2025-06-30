@@ -92,7 +92,7 @@ def remove_existing_export_files(config: MetsiConfiguration, control: dict):
         try:
             if file_path.exists() and file_path.resolve().parent == target_dir:
                 file_path.unlink()
-        except Exception as e:
+        except (OSError, FileNotFoundError) as e:
             print_logline(f"Warning: Failed to delete file {file_path}: {e}")
 
 
@@ -143,7 +143,7 @@ def main() -> int:
             input_data = read_full_simulation_result_dirtree(app_config.input_path)
         else:
             raise MetsiException("Can not determine input data for unknown run mode")
-    except Exception:
+    except Exception: # pylint: disable=broad-exception-caught
         traceback.print_exc()
         print("Aborting run...")
         return 1

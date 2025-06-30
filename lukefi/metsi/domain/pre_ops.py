@@ -95,7 +95,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
             stratum_trees = []
             try:
                 stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, **operation_params)
-            except Exception as e:
+            except Exception as e: # pylint: disable=broad-exception-caught
                 print(
                     f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, height {stratum.mean_height}, basal_area {stratum.basal_area}")
                 print()

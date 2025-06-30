@@ -43,10 +43,9 @@ def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestOpPayl
         FormationStrategy.PARTIAL: run_partial_tree_strategy
     }
 
-    try:
+    if source in formation_strategy_map:
         return formation_strategy_map[source]
-    except Exception as e:
-        raise MetsiException(f"Unable to resolve event tree formation strategy '{source}'") from e
+    raise MetsiException(f"Unable to resolve event tree formation strategy '{source}'")
 
 
 def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestOpPayload]:
@@ -55,10 +54,9 @@ def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestO
         EvaluationStrategy.CHAINS: chain_evaluator
     }
 
-    try:
+    if source in evaluation_strategy_map:
         return evaluation_strategy_map[source]
-    except Exception as e:
-        raise MetsiException(f"Unable to resolve event tree evaluation strategy '{source}'") from e
+    raise MetsiException(f"Unable to resolve event tree evaluation strategy '{source}'")
 
 
 def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList):
