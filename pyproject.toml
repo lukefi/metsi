@@ -35,7 +35,8 @@ tests = [
     "pylint==3.3.7",
     "mypy==1.16.1",
     "types-lupa",
-    "pandas-stubs"
+    "pandas-stubs",
+    "types-shapely"
 ]
 
 [project.scripts]
