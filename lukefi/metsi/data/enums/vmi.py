@@ -35,9 +35,10 @@ class VmiSpecies(Enum):
     UNKNOWN = None
 
     @classmethod
-    def _missing_(cls, name):
-        if name == "0":
+    def _missing_(cls, value):
+        if value == "0":
             return cls.UNKNOWN
+        return None
 
 
 class VmiLandUseCategory(Enum):
@@ -56,21 +57,21 @@ class VmiLandUseCategory(Enum):
 
 class VmiOwnerCategory(Enum):
     UNKNOWN = "0"
-    #private
+    # private
     PRIVATE = "1"
-    #enterprise
+    # enterprise
     FOREST_INDUSTRY_ENTERPRISE = "2"
     OTHER_ENTERPRISE = "3"
-    #state forest
-    METSAHALLITUS = "4" 
+    # state forest
+    METSAHALLITUS = "4"
     OTHER_STATE_AGENCY = "5"
-    #communities
-    FOREST_COOP = "6" # = yhteismetsä
+    # communities
+    FOREST_COOP = "6"  # = yhteismetsä
     MUNICIPALITY = "7"
     CONGREGATION = "8"
     OTHER_COMMUNITY = "9"
-    #jakamaton 
-    UNDIVIDED = "A" # = jakamaton kuolinpesä
+    # jakamaton
+    UNDIVIDED = "A"  # = jakamaton kuolinpesä
 
 
 class VmiSoilPeatlandCategory(Enum):
@@ -78,6 +79,7 @@ class VmiSoilPeatlandCategory(Enum):
     SPRUCE_MIRE = '2'
     PINE_MIRE = '3'
     TREELESS_MIRE = '4'
+
 
 class VmiSiteType(Enum):
     LEHTO = '1'
@@ -90,6 +92,7 @@ class VmiSiteType(Enum):
     LAKIMETSA_TAI_TUNTURIHAVUMETSA = '8'
     TUNTURIKOIVIKKO = 'T'
     AVOTUNTURI = 'A'
+
 
 class VmiDrainageCategory(Enum):
     OJITTAMATON_KANGAS_TAI_SUO = '0'
@@ -125,4 +128,3 @@ class VmiTreeStorey(Enum):
     UNDER_SPARE_1 = 'E'
     OVER_SPARE_1 = 'F'
     OVER_SPARE_2 = 'G'
-

@@ -1,7 +1,7 @@
 import unittest
 from copy import deepcopy
 from lukefi.metsi.data.formats import vmi_const
-from lukefi.metsi.data.formats.ForestBuilder import *
+from lukefi.metsi.data.formats.forest_builder import *
 from lukefi.metsi.data.enums.internal import *
 from tests.data.test_util import ForestBuilderTestBench
 

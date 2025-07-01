@@ -4,7 +4,7 @@ from lukefi.metsi.data.enums.internal import (
     DrainageCategory, LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory)
 
 
-def parse_type[T:Union[int, float, str]](source: str, *ts: type[T]):
+def parse_type[T:Union[int, float, str]](source, *ts: type[T]):
     ''' Generic version of  parse_int and parse_float utilities'''
     ts_ = list(ts)
     try:

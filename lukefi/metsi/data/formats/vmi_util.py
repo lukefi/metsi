@@ -4,7 +4,7 @@ from datetime import datetime as dt
 
 from lukefi.metsi.data.enums.internal import Storey
 from lukefi.metsi.data.formats.util import get_or_default, parse_float, parse_int
-from lukefi.metsi.data.formats.vmi_const import vmi12_county_areas, VMI12StandIndices, VMI13StandIndices
+from lukefi.metsi.data.formats.vmi_const import vmi12_county_areas
 from lukefi.metsi.app.utils import MetsiException
 from shapely.geometry import Point
 from geopandas import GeoSeries
@@ -401,25 +401,25 @@ def parse_forestry_centre(forestry_centre: str) -> int:
 
 
 def determine_forest_management_category(land_category: int, forestry_centre: int, muuttujat: Sequence,
-                                         owner_group: int, indices: VMI12StandIndices or VMI13StandIndices,
+                                         owner_group: int, indices: dict,
                                          is_vmi12: bool = True) -> int:
     """Determine forest management category  for given conditions."""
 
     fmc = 1
-    other_values = muuttujat[indices.muut_arvot]
+    other_values = muuttujat[indices["muut_arvot"]]
 
     # TODO: VMI13 full data shows regression with land category comparison. Probably a bug
     if is_vmi12:
         fmc = determine_fmc_by_land_category(fmc, land_category)
     fmc = determine_fmc_by_production_limitations(fmc, other_values, owner_group,
-                                                  muuttujat[indices.puuntuotannon_rajoitus],
-                                                  muuttujat[indices.puuntuotannon_rajoitus_tarkenne],
-                                                  muuttujat[indices.suojametsakoodi])
+                                                  muuttujat[indices["puuntuotannon_rajoitus"]],
+                                                  muuttujat[indices["puuntuotannon_rajoitus_tarkenne"]],
+                                                  muuttujat[indices["suojametsakoodi"]])
     # fmc = determine_fmc_by_natura_area(fmc, muuttujat[indices.naturaaluekoodi])
-    fmc = determine_fmc_by_aland_centre(fmc, muuttujat[indices.ahvenanmaan_markkinahakkuualue], forestry_centre,
+    fmc = determine_fmc_by_aland_centre(fmc, muuttujat[indices["ahvenanmaan_markkinahakkuualue"]], forestry_centre,
                                         other_values)
     forest_management_category_override = determine_fmc_by_test_area_handling_class(
-        muuttujat[indices.koealan_kasittelyluokka])
+        muuttujat[indices["koealan_kasittelyluokka"]])
 
     # VMI-raj korvataan tiukemmalla MH-rajoituksella
     fmc = max(fmc, forest_management_category_override)
@@ -577,7 +577,9 @@ def determine_tree_height(height_sourcevalue: str, conversion_factor: float = 10
     return h/conversion_factor if h>0 else None
 
 
-def determine_stems_per_ha(diameter: float, is_vmi12) -> float:
+def determine_stems_per_ha(diameter: float | None, is_vmi12: bool) -> float:
+    if diameter is None:
+        raise MetsiException("Missing diameter")
     medium_diameter_vmi_constant = 5.64 if is_vmi12 else 4.0
     if 0.0 < diameter < 4.5:
         return round(1.5 / (3.141592653589793 * ((diameter / 2) / 100.0) ** 2), 0)
@@ -589,31 +591,31 @@ def determine_stems_per_ha(diameter: float, is_vmi12) -> float:
         return 1.0
 
 
-def generate_stand_identifier(row: Sequence, indices: VMI12StandIndices or VMI13StandIndices) -> str:
-    return row[indices.lohkomuoto] + "-" + \
-           row[indices.section_y] + "-" + \
-           row[indices.section_x] + "-" + \
-           row[indices.test_area_number] + "-" + \
-           row[indices.stand_number]
+def generate_stand_identifier(row: Sequence, indices: dict) -> str:
+    return row[indices["lohkomuoto"]] + "-" + \
+           row[indices["section_y"]] + "-" + \
+           row[indices["section_x"]] + "-" + \
+           row[indices["test_area_number"]] + "-" + \
+           row[indices["stand_number"]]
 
 
-def generate_tree_identifier(row: Sequence, indices: VMI12StandIndices or VMI13StandIndices) -> str:
-    return row[indices.lohkomuoto] + "-" + \
-           row[indices.section_y] + "-" + \
-           row[indices.section_x] + "-" + \
-           row[indices.test_area_number] + "-" + \
-           row[indices.stand_number] + "-" + \
-           row[indices.tree_number] + "-" + \
+def generate_tree_identifier(row: Sequence, indices: dict) -> str:
+    return row[indices["lohkomuoto"]] + "-" + \
+           row[indices["section_y"]] + "-" + \
+           row[indices["section_x"]] + "-" + \
+           row[indices["test_area_number"]] + "-" + \
+           row[indices["stand_number"]] + "-" + \
+           row[indices["tree_number"]] + "-" + \
            "tree"
 
 
-def generate_stratum_identifier(row: Sequence, indices: VMI12StandIndices or VMI13StandIndices) -> str:
-    return row[indices.lohkomuoto] + "-" + \
-           row[indices.section_y] + "-" + \
-           row[indices.section_x] + "-" + \
-           row[indices.test_area_number] + "-" + \
-           row[indices.stand_number] + "-" + \
-           row[indices.stratum_number] + "-" + \
+def generate_stratum_identifier(row: Sequence, indices: dict) -> str:
+    return row[indices["lohkomuoto"]] + "-" + \
+           row[indices["section_y"]] + "-" + \
+           row[indices["section_x"]] + "-" + \
+           row[indices["test_area_number"]] + "-" + \
+           row[indices["stand_number"]] + "-" + \
+           row[indices["stratum_number"]] + "-" + \
            "stratum"
 
 
@@ -639,7 +641,7 @@ def determine_stratum_origin(source_origin: str) -> int:
 
 def determine_stratum_age_values(biological_age_source: str,
                                  breast_height_age_source: str,
-                                 height: Optional[float]) -> Optional[tuple[float,float]]:
+                                 height: Optional[float]) -> tuple[float,float]:
     """ Determinates biological age and breast height age for vmi source data.
 
         param: biological_age_source: Stratum biological age or age increase value as vmi source value.

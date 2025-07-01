@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Optional
 import numpy as np
 import jsonpickle
-from lukefi.metsi.data.formats.ForestBuilder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
+from lukefi.metsi.data.formats.forest_builder import VMI13Builder, VMI12Builder, XMLBuilder, GeoPackageBuilder
 from lukefi.metsi.data.formats.io_utils import stands_to_csv_content, csv_content_to_stands, \
     stands_to_rst_content, stands_to_rsts_content, mela_par_file_content
 from lukefi.metsi.app.app_io import MetsiConfiguration

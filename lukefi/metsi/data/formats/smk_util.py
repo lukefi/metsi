@@ -141,7 +141,7 @@ def parse_drainage_category(source: str) -> int or None:
     else:
         return util.parse_int(source)
     
-def parse_development_class(source: str) -> int:
+def parse_development_class(source) -> int:
     """ TODO: Waiting for future implementation.
 
     At the moment (22.9.2023) development class variable is extracted
@@ -149,10 +149,11 @@ def parse_development_class(source: str) -> int:
     For that reason constant zero is returned.
 
     :returns: zero """
+    _ = source
     return 0
 
 
-def parse_forest_management_category(source: str) -> int or float or None:
+def parse_forest_management_category(source: str) -> int | float | None:
     try:
         if source in ('1'):
             # No hold-over (ylispuu)

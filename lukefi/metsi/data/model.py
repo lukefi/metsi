@@ -1,6 +1,7 @@
 import dataclasses
 from typing import Optional
 from dataclasses import dataclass
+from lukefi.metsi.app.utils import MetsiException
 from lukefi.metsi.data.enums.internal import (LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory,
                                               TreeSpecies, DrainageCategory, Storey)
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
@@ -438,7 +439,7 @@ class ForestStand():
     pruning_year: Optional[int] = None
     cutting_year: Optional[int] = None
     forestry_centre_id: Optional[int] = None
-    forest_management_category: Optional[int] = None
+    forest_management_category: Optional[int | float] = None
     method_of_last_cutting: Optional[int] = None
     municipality_id: Optional[int] = None
     dominant_storey_age: Optional[float] = None
@@ -476,22 +477,22 @@ class ForestStand():
     def __hash__(self):
         return id(self)
 
-    def set_identifiers(self, stand_id: int, management_unit_id: Optional[int] = None):
+    def set_identifiers(self, stand_id: Optional[int], management_unit_id: Optional[int] = None):
         self.stand_id = stand_id
         self.management_unit_id = (
             stand_id if management_unit_id is None else management_unit_id
         )
 
-    def set_area(self, area_ha: float):
+    def set_area(self, area_ha: float | None):
+        if area_ha is None:
+            raise MetsiException("Area missing")
         if self.is_auxiliary():
             self.area = 0.0
         else:
             self.area = area_ha
         self.area_weight = area_ha
 
-    def set_geo_location(
-        self, lat: float, lon: float, height: float, system: str = "EPSG:3067"
-    ):
+    def set_geo_location(self, lat: Optional[float], lon: Optional[float], height: float, system: str = "EPSG:3067"):
         if not lat or not lon:
             raise ValueError("Invalid source values for geo location")
         self.geo_location = (lat, lon, height, system)

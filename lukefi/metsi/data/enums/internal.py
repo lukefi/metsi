@@ -6,6 +6,7 @@ class MetsiEnum(IntEnum):
     def __str__(self):
         return self.__int__().__str__()
 
+
 class TreeSpecies(MetsiEnum):
     """This list is formed by combining VMI and Forest centre species 
     and listing all the distinct ones. UNKNOWN (38) is not part of either list, 
@@ -133,10 +134,10 @@ class OwnerCategory(MetsiEnum):
 
 
 class SoilPeatlandCategory(MetsiEnum):
-    MINERAL_SOIL = 1 # kangas
-    SPRUCE_MIRE = 2 # korpi
-    PINE_MIRE = 3 # räme
-    TREELESS_MIRE = 4 # avosuo. Conversion to MELA's Neva or Letto is made with siteType
+    MINERAL_SOIL = 1  # kangas
+    SPRUCE_MIRE = 2  # korpi
+    PINE_MIRE = 3  # räme
+    TREELESS_MIRE = 4  # avosuo. Conversion to MELA's Neva or Letto is made with siteType
 
 
 class SiteType(MetsiEnum):
@@ -161,6 +162,7 @@ class DrainageCategory(MetsiEnum):
     DITCHED_MIRE = 6
     TRANSFORMING_MIRE = 7
     TRANSFORMED_MIRE = 8
+
 
 class Storey(MetsiEnum):
     INDETERMINATE = 0

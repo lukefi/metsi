@@ -1,29 +1,23 @@
 from copy import copy
-from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.data.enums.mela import (
-    MelaOwnerCategory, 
-    MelaSiteTypeCategory, 
-    MelaSoilAndPeatlandCategory, 
-    MelaTreeSpecies, 
+    MelaOwnerCategory,
+    MelaSiteTypeCategory,
+    MelaSoilAndPeatlandCategory,
+    MelaTreeSpecies,
     MelaLandUseCategory,
     MelaDrainageCategory
-    )
+)
 from lukefi.metsi.data.enums.internal import (
-    SiteType, 
-    SoilPeatlandCategory, 
-    TreeSpecies, 
-    OwnerCategory, 
+    SiteType,
+    SoilPeatlandCategory,
+    TreeSpecies,
+    OwnerCategory,
     LandUseCategory,
     DrainageCategory
-    )
+)
 from lukefi.metsi.data.conversion.util import apply_mappers
-from lukefi.metsi.data.formats.util import get_or_default
 from lukefi.metsi.app.utils import MetsiException
-
-# TODO: can we find a way to resolve the circular import introduced by trying to use these classes just for typing?
-# Even using the iffing below, pytest fails during top_level_collect
-# if typing.TYPE_CHECKING:
-#    from forestdatamodel.model import ForestStand, TreeStratum, ReferenceTree
 
 
 species_map = {
@@ -113,7 +107,7 @@ _site_type_map = {
 }
 
 
-#this doesn't have a mapping for TREELESS_MIRE, as its mapping to MELA values is determined by the SiteType category. 
+# this doesn't have a mapping for TREELESS_MIRE, as its mapping to MELA values is determined by the SiteType category.
 _soil_peatland_map = {
     SoilPeatlandCategory.MINERAL_SOIL: MelaSoilAndPeatlandCategory.MINERAL_SOIL,
     SoilPeatlandCategory.SPRUCE_MIRE: MelaSoilAndPeatlandCategory.PEATLAND_SPRUCE_MIRE,
@@ -153,8 +147,10 @@ def drainage_category_mapper(target):
 
 
 def soil_peatland_mapper(target):
-    """If the internal SoilPeatlandCategory is TREELESS_MIRE, determining the soil or peatland type for MELA requires knowing the site type (fertility type).
-    Make sure to set it first, because otherwise this method is unable to determine soil_peatland_category and sets it to None.
+    """
+    If the internal SoilPeatlandCategory is TREELESS_MIRE, determining the soil or peatland type for MELA
+    requires knowing the site type (fertility type). Make sure to set it first, because otherwise this method
+    is unable to determine soil_peatland_category and sets it to None.
     """
 
     if target.soil_peatland_category == SoilPeatlandCategory.TREELESS_MIRE:
@@ -165,11 +161,11 @@ def soil_peatland_mapper(target):
             target.soil_peatland_category = MelaSoilAndPeatlandCategory.PEATLAND_RICH_TREELESS_MIRE
         else:
             target.soil_peatland_category = MelaSoilAndPeatlandCategory.PEATLAND_BARREN_TREELESS_MIRE
-    else: 
+    else:
         target.soil_peatland_category = _soil_peatland_map.get(target.soil_peatland_category)
-    
+
     return target
-    
+
 
 def land_use_mapper(target):
     """in-place mapping from internal LandUseCategory to MelaLandUseCategory"""
@@ -199,7 +195,7 @@ def stand_location_converter(target):
     elif target.geo_location[3] == 'EPSG:2393':
         lat, lon = (target.geo_location[0] / 1000, target.geo_location[1] / 1000 - 3000)
     else:
-        raise MetsiException("Unsupported CRS {} for stand {}".format(target.geo_location[3], target.identifier))
+        raise MetsiException(f"Unsupported CRS {target.geo_location[3]} for stand {target.identifier}")
 
     target.geo_location = (
         lat,
@@ -236,7 +232,7 @@ def mela_stand(stand: ForestStand) -> ForestStand:
     for stratum in result.tree_strata:
         stratum.stand = result
     # Some  fixed RST spesific classifier conversions TODO: find a better place for these.
-    ## stand level
+    # stand level
     result.forestry_centre_id = (-1 if result.forestry_centre_id is None
                                  else result.forestry_centre_id)
     result.municipality_id = (-1 if result.municipality_id is None
@@ -246,8 +242,8 @@ def mela_stand(stand: ForestStand) -> ForestStand:
     result.site_type_category = (0 if result.site_type_category is None
                                  else result.site_type_category.value)
     result.drainage_category = (0 if result.drainage_category is None
-                                 else result.drainage_category.value)
-    ## tree level
+                                else result.drainage_category.value)
+    # tree level
     for t in result.reference_trees:
         t.saw_log_volume_reduction_factor = (
             -1
@@ -255,7 +251,7 @@ def mela_stand(stand: ForestStand) -> ForestStand:
             else t.saw_log_volume_reduction_factor
         )
         t.species = 0 if t.species is None else t.species.value
-    ## strata level
+    # strata level
     for s in result.tree_strata:
         s.species = 0 if s.species is None else s.species.value
         s.storey = 0 if s.storey is None else s.storey.value,
@@ -270,8 +266,8 @@ def mela_stand(stand: ForestStand) -> ForestStand:
 default_mela_tree_mappers = [species_mapper]
 default_mela_stratum_mappers = [species_mapper]
 default_mela_stand_mappers = [stand_location_converter,
-                              owner_mapper, 
-                              land_use_mapper, 
-                              site_type_mapper, 
+                              owner_mapper,
+                              land_use_mapper,
+                              site_type_mapper,
                               soil_peatland_mapper,
                               drainage_category_mapper]
