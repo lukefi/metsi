@@ -34,7 +34,8 @@ tests = [
     "robotframework==7.3",
     "pylint==3.3.7",
     "mypy==1.16.1",
-    "types-lupa==2.4.0.20250112"
+    "types-lupa",
+    "pandas-stubs"
 ]
 
 [project.scripts]
