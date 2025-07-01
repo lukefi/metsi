@@ -25,9 +25,13 @@ def get_operation_file_params(operation_tag: Callable, operation_file_params: di
 
 
 def merge_operation_params(operation_params: dict, operation_file_params: dict) -> dict:
-    """Attempts to join the two dicts supplied as arguments. Will throw an exception if the dicts share one or more common keys. This is to prevent overwriting a parameter with another."""
+    """
+    Attempts to join the two dicts supplied as arguments. Will throw an exception if the dicts share one or more
+    common keys. This is to prevent overwriting a parameter with another.
+    """
     common_keys = operation_params.keys() & operation_file_params.keys()
     if common_keys:
-        raise MetsiException(f"parameter(s) {common_keys} were defined both in 'operation_param' and 'operation_file_param' sections in control.py. Please change the name of one of them.")
-    else:
-        return operation_params | operation_file_params # pipe is the merge operator
+        raise MetsiException(
+            f"parameter(s) {common_keys} were defined both in 'operation_param' and 'operation_file_param' sections "
+            "in control.py. Please change the name of one of them.")
+    return operation_params | operation_file_params  # pipe is the merge operator

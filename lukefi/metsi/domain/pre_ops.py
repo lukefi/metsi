@@ -1,6 +1,6 @@
 import traceback
 from typing import Any
-from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.data.enums.internal import LandUseCategory
 from lukefi.metsi.domain.utils.filter import applyfilter
 from lukefi.metsi.forestry.forestry_utils import find_matching_storey_stratum_for_tree
@@ -30,17 +30,20 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
     """
     _ = operation_params
     # import constrained to here as pymotti is an optional dependency
-    from pymotti.lasum import ilmanor
-    from pymotti.coord import etrs_tm35_to_ykj as conv
-    from pymotti.kor import xkor
+    from pymotti.lasum import ilmanor # type: ignore # pylint: disable=import-error,import-outside-toplevel
+    from pymotti.coord import etrs_tm35_to_ykj as conv # type: ignore # pylint: disable=import-error,import-outside-toplevel
+    from pymotti.kor import xkor # type: ignore # pylint: disable=import-error,import-outside-toplevel
 
     for stand in stands:
-        if stand.geo_location[3] == 'EPSG:3067':
-            lat, lon = conv(stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
-        elif stand.geo_location[3] == 'EPSG:2393':
-            lat, lon = (stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
+        if stand.geo_location is not None and stand.geo_location[0] is not None and stand.geo_location[1] is not None:
+            if stand.geo_location[3] == 'EPSG:3067':
+                lat, lon = conv(stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
+            elif stand.geo_location[3] == 'EPSG:2393':
+                lat, lon = (stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
+            else:
+                raise MetsiException(f"Unsupported CRS {stand.geo_location[3]} for stand {stand.identifier}")
         else:
-            raise MetsiException("Unsupported CRS {} for stand {}".format(stand.geo_location[3], stand.identifier))
+            raise MetsiException("No geolocation data")
 
         if stand.geo_location[2] is None:
             stand.geo_location = (
@@ -73,7 +76,8 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     stratum_association_diameter_threshold = operation_params.get('stratum_association_diameter_threshold', 2.5)
     for i, stand in enumerate(stands):
         print(f"\rGenerating trees for stand {stand.identifier}    {i}/{len(stands)}", end="")
-        stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier)
+        stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier if
+                             tree.identifier is not None else "")
         for tree in stand_trees:
             stratum = find_matching_storey_stratum_for_tree(
                 tree, stand.tree_strata, stratum_association_diameter_threshold)
@@ -90,24 +94,24 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                     tree.measured_height or 'NA',
                     tree.stems_per_ha or 'NA'
                 ])
-        stand.tree_strata.sort(key=lambda stratum: stratum.identifier)
-        new_trees = []
+        stand.tree_strata.sort(key=lambda stratum: stratum.identifier if stratum.identifier is not None else "")
+        new_trees: list[ReferenceTree] = []
         for stratum in stand.tree_strata:
-            stratum_trees = []
+            stratum_trees: list[ReferenceTree] = []
             try:
                 stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, **operation_params)
-            except Exception as e: # pylint: disable=broad-exception-caught
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(
-                    f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, height {stratum.mean_height}, basal_area {stratum.basal_area}")
+                    f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, "
+                    f"height {stratum.mean_height}, basal_area {stratum.basal_area}")
                 print()
                 if debug:
                     traceback.print_exc()
                     continue
-                else:
-                    raise e
+                raise e
             stand_tree_count = len(new_trees)
             for i, tree in enumerate(stratum_trees):
-                tree.identifier = "{}-{}-tree".format(stand.identifier, stand_tree_count + i + 1)
+                tree.identifier = f"{stand.identifier}-{stand_tree_count + i + 1}-tree"
                 new_trees.append(tree)
             validation_set = create_stratum_tree_comparison_set(stratum, stratum_trees)
 
@@ -118,25 +122,25 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
                     stratum.mean_height,
                     stand.basal_area,
                     stratum.basal_area,
-                    stratum.species.value,
+                    stratum.species.value if stratum.species is not None else None,
                     stand.degree_days
                 ])
                 debug_output_rows.append(debug_output_row_from_comparison_set(stratum, validation_set))
         stand.reference_trees = new_trees
     print()
     if debug:
-        import csv
-        with open('debug_generated_tree_results.csv', 'w', newline='\n') as csvfile:
+        import csv  # pylint: disable=import-outside-toplevel
+        with open('debug_generated_tree_results.csv', 'w', newline='\n', encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile, delimiter=';')
             writer.writerow(debug_output_header_row())
             writer.writerows(debug_output_rows)
         if len(debug_strata_rows) > 1:
-            with open('r_strata.dat', 'w', newline='\n') as stratum_file:
+            with open('r_strata.dat', 'w', newline='\n', encoding="utf-8") as stratum_file:
                 writer = csv.writer(stratum_file, delimiter=' ')
                 writer.writerow(["stratum", "DGM", "HGM", "G", "Gos", "spe", "DDY"])
                 writer.writerows(debug_strata_rows)
         if len(debug_tree_rows) > 1:
-            with open('r_trees.dat', 'w', newline='\n') as tree_file:
+            with open('r_trees.dat', 'w', newline='\n', encoding="utf-8") as tree_file:
                 writer = csv.writer(tree_file, delimiter=' ')
                 writer.writerow(["stratum", "lpm", "height", "lkm"])
                 writer.writerows(debug_tree_rows)
@@ -145,6 +149,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
 
 def supplement_missing_tree_heights(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Fill in missing (None or nonpositive) tree heights from Näslund height curve """
+    _ = operation_params
     for stand in stands:
         for tree in stand.reference_trees:
             if (tree.height or 0) <= 0:
@@ -154,6 +159,7 @@ def supplement_missing_tree_heights(stands: list[ForestStand], **operation_param
 
 def supplement_missing_tree_ages(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Attempt to fill in missing (None or nonpositive) tree ages using strata ages or other reference tree ages"""
+    _ = operation_params
     for stand in stands:
         supplement_age_for_reference_trees(stand.reference_trees, stand.tree_strata)
     return stands
@@ -161,6 +167,7 @@ def supplement_missing_tree_ages(stands: list[ForestStand], **operation_params) 
 
 def supplement_missing_stratum_diameters(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Attempt to fill in missing (None) stratum mean diameters using mean height """
+    _ = operation_params
     for stand in stands:
         for stratum in stand.tree_strata:
             if stratum.mean_diameter is None:
@@ -173,6 +180,7 @@ def supplement_missing_stratum_diameters(stands: list[ForestStand], **operation_
 
 def generate_sapling_trees_from_sapling_strata(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
     """ Create sapling reference trees from sapling strata """
+    _ = operation_params
     for stand in stands:
         for stratum in stand.tree_strata:
             if stratum.sapling_stratum:
@@ -180,7 +188,7 @@ def generate_sapling_trees_from_sapling_strata(stands: list[ForestStand], **oper
                 stand.reference_trees.append(sapling)
                 sapling.stand = stand
                 tree_number = len(stand.reference_trees) + 1
-                sapling.identifier = "{}-{}-tree".format(stand.identifier, tree_number)
+                sapling.identifier = f"{stand.identifier}-{tree_number}-tree"
     return stands
 
 
@@ -190,6 +198,7 @@ def scale_area_weight(stands: list[ForestStand], **operation_params):
         Especially necessary for VMI tree generation cases.
         Should be used as precesing operation before the generation of reference trees.
     """
+    _ = operation_params
     for stand in stands:
         stand.area_weight = stand.area_weight * stand.area_weight_factors[1]
     return stands
@@ -207,7 +216,7 @@ def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str,
             s.geo_location = convert_location_to_ykj(s)
     else:
         raise MetsiException("Check definition of operation params.\n"
-                        f"{defaults[0]}\' conversion supported.")
+                             f"{defaults[0]}\' conversion supported.")
     return stands
 
 
