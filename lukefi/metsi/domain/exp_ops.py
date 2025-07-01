@@ -25,6 +25,7 @@ def prepare_rst_output(stands: StandList, **operation_params) -> StandList:
         2) recreating indices for reference trees
         3) filtering out non-forestland stands and empty auxiliary stands
         4) recreating indices for stands"""
+    _ = operation_params
     for stand in stands:
         stand.reference_trees = [t for t in stand.reference_trees if t.is_living()]
         stand.reference_trees = _recreate_tree_indices(stand.reference_trees)
@@ -38,9 +39,7 @@ def prepare_rst_output(stands: StandList, **operation_params) -> StandList:
 
 def classify_values_to(stands: StandList, **operation_params) -> StandList:
     """ Give format as parameter """
-    format = operation_params.get('format', None)
-    if format == 'rst' or format == 'rsts':
-        f = lambda s: mela_stand(s)
-    else:
-        raise ConfigurationException(f"unsupported format: {format}")
-    return [ f(stand) for stand in stands ]
+    format_ = operation_params.get('format', None)
+    if format_ not in ('rst', 'rsts'):
+        raise ConfigurationException(f"unsupported format: {format_}")
+    return [ mela_stand(stand) for stand in stands ]

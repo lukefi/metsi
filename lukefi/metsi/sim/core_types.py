@@ -14,7 +14,7 @@ def identity(x):
 
 class DeclaredEvents(NamedTuple):
     time_points: list[int] = []
-    generators: list[dict] = [{}]
+    generators: list[dict[Callable, list[Callable]]] = [{}]
 
 
 class SimConfiguration(SimpleNamespace):
@@ -39,10 +39,10 @@ class SimConfiguration(SimpleNamespace):
             Initializes the SimConfiguration instance with operation and generator 
             lookups, and additional keyword arguments.
     """
-    operation_params: dict[str, list[dict[str, Any]]] = {}
+    operation_params: dict[Callable, list[dict[str, Any]]] = {}
     operation_file_params: dict[str, dict[str, str]] = {}
     events: list[DeclaredEvents] = []
-    run_constraints: dict[str, dict] = {}
+    run_constraints: dict[Callable, dict] = {}
     time_points: list[int] = []
 
     def __init__(self, **kwargs):
@@ -243,7 +243,7 @@ class OperationPayload(SimpleNamespace, Generic[T]):
     operation calls. """
     computational_unit: T
     collected_data: CollectedData
-    operation_history: list[tuple[int, str, dict[str, dict]]]
+    operation_history: list[tuple[int, Callable, dict[str, dict]]]
 
     def __copy__(self) -> "OperationPayload[T]":
         copy_like: LayeredObject | T

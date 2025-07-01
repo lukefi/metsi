@@ -28,6 +28,7 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
     These properties are: height above sea level, temperature sum, sea effect, lake effect, monthly temperature and
     monthly rainfall
     """
+    _ = operation_params
     # import constrained to here as pymotti is an optional dependency
     from pymotti.lasum import ilmanor
     from pymotti.coord import etrs_tm35_to_ykj as conv
