@@ -3,25 +3,26 @@ from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.domain.collected_types import CrossCuttableTree
 from lukefi.metsi.sim.core_types import CollectedData, OpTuple
 
+
 def _clearcut_with_output(
-    stand:ForestStand,
-    collected_data: CollectedData,
-    tag: str) -> OpTuple[ForestStand]:
+        stand: ForestStand,
+        collected_data: CollectedData,
+        tag: str) -> OpTuple[ForestStand]:
     """Clears the stand's reference tree list
     :returns: clearcut stand and removed trees as CrosCuttableTrees
     """
     trees = [
-            CrossCuttableTree(
-                t.stems_per_ha,
-                t.species,
-                t.breast_height_diameter,
-                t.height,
-                'harvested',
-                tag,
-                collected_data.current_time_point
-                )
-                for t in stand.reference_trees
-            ]
+        CrossCuttableTree(
+            t.stems_per_ha,
+            t.species,
+            t.breast_height_diameter,
+            t.height,
+            'harvested',
+            tag,
+            collected_data.current_time_point
+        )
+        for t in stand.reference_trees
+    ]
     collected_data.extend_list_result("felled_trees", trees)
     stand.reference_trees = []
 
@@ -46,11 +47,9 @@ def clearcutting(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpT
             f=lambda x: x.breast_height_diameter * futil.calculate_basal_area(x))
 
         if age_limit_reached or diameter_limit_reached:
-            stand, collected_data = _clearcut_with_output(stand, collected_data,'clearcutting')
+            stand, collected_data = _clearcut_with_output(stand, collected_data, 'clearcutting')
             return (stand, collected_data)
         else:
             raise UserWarning("Unable to perform clearcutting")
     else:
         raise UserWarning("Unable to perform clearcutting")
-
-

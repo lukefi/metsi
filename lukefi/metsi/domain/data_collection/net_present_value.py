@@ -3,27 +3,27 @@ from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.collected_types import CrossCutResult, NPVResult, PriceableOperationInfo
 from lukefi.metsi.domain.utils.file_io import get_renewal_costs_as_dict, get_land_values_as_dict
 
+SOIL_PEATLAND_CATEGORY_MAPPING = {
+    1: "mineral_soils",
+    2: "spruce_mires",
+    3: "pine_mires",
+    4: "treeless_mires",
+    5: "treeless_mires"
+}
+
+SITE_TYPE_MAPPING = {
+    1: "very_rich_sites",
+    2: "rich_sites",
+    3: "damp_sites",
+    4: "sub_dry_sites",
+    5: "dry_sites",
+    6: "barren_sites",
+    7: "rocky_or_sandy_sites",
+    8: "open_mountains"
+}
+
 
 def _get_bare_land_value(land_values: dict, soil_peatland_category: int, site_type: int, interest_rate: int) -> float:
-
-    SOIL_PEATLAND_CATEGORY_MAPPING = {
-        1: "mineral_soils",
-        2: "spruce_mires",
-        3: "pine_mires",
-        4: "treeless_mires",
-        5: "treeless_mires"
-    }
-
-    SITE_TYPE_MAPPING = {
-        1: "very_rich_sites",
-        2: "rich_sites",
-        3: "damp_sites",
-        4: "sub_dry_sites",
-        5: "dry_sites",
-        6: "barren_sites",
-        7: "rocky_or_sandy_sites",
-        8: "open_mountains"
-    }
 
     soil_peatland_key = SOIL_PEATLAND_CATEGORY_MAPPING.get(soil_peatland_category)
     site_type_key = SITE_TYPE_MAPPING.get(site_type)
@@ -42,7 +42,7 @@ def _calculate_npv_for_rate(
     land_values: dict,
     renewal_costs: dict,
     int_r: int
-    ) -> float:
+) -> float:
 
     cc_results = collected_data.get_list_result("cross_cutting")
     renewal_results = collected_data.get_list_result("renewal")
@@ -59,9 +59,11 @@ def _calculate_npv_for_rate(
         npv += discounted_revenue
 
     # 2. add discounted value of standing tree stock at the current time point.
-    standing_cc_results = list(filter(lambda x: x.source == "standing" and x.time_point == current_time_point, cc_results))
+    standing_cc_results = list(filter(lambda x: x.source == "standing" and x.time_point ==
+                               current_time_point, cc_results))
     if len(stand.reference_trees) > 0 and len(standing_cc_results) == 0:
-        raise UserWarning("NPV calculation did not find cross cut results for standing trees. Did you forget to declare the 'cross_cut_standing_trees' operation before 'calculate_npv'?")
+        raise UserWarning("NPV calculation did not find cross cut results for standing trees. Did you forget "
+                          "to declare the 'cross_cut_standing_trees' operation before 'calculate_npv'?")
     else:
         y: CrossCutResult
         for y in standing_cc_results:
@@ -83,7 +85,8 @@ def _calculate_npv_for_rate(
 def calculate_npv(payload: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Expects that the relevant cross cut operations have been done before this.
-    Expects interest rates to be given as integers (e.g. 5) and that the interest rates in the land values file correspond to these values.
+    Expects interest rates to be given as integers (e.g. 5) and that the interest rates
+    in the land values file correspond to these values.
     """
     stand, collected_data = payload
 
@@ -97,4 +100,3 @@ def calculate_npv(payload: OpTuple[ForestStand], /, **operation_parameters) -> O
         collected_data.extend_list_result("net_present_value", [npv_data])
 
     return payload
-

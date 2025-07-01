@@ -6,18 +6,18 @@ from lukefi.metsi.sim.operations import T
 from lukefi.metsi.app.utils import MetsiException
 
 
-def report_collectives(input: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
-    state, collected_data = input
+def report_collectives(input_: OpTuple[T], /, **collectives: str) -> OpTuple[T]:
+    state, collected_data = input_
     res = _collector_wrapper(
         collectives,
         lambda name: autocollective(getattr(state, name)),
         lambda name: autocollective(collected_data.operation_results[name]),
-        state = state,
-        collected_data = collected_data.operation_results,
-        time = collected_data.current_time_point
+        state=state,
+        collected_data=collected_data.operation_results,
+        time=collected_data.current_time_point
     )
     collected_data.store('report_collectives', res)
-    return input
+    return input_
 
 
 def report_state(input_: OpTuple[T], /, **operation_parameters) -> OpTuple[T]:
@@ -53,7 +53,8 @@ def collect_properties(input_: OpTuple[ForestStand], **operation_parameters) -> 
         elif key == "stratum":
             objects = stand.tree_strata
         else:
-            objects = list(filter(lambda obj: obj.time_point == collected_data.current_time_point, collected_data.get_list_result(key)))
+            objects = list(filter(lambda obj: obj.time_point == collected_data.current_time_point,
+                           collected_data.get_list_result(key)))
         collected = property_collector(objects, properties)
         result_rows.extend(collected)
     collected_data.store(output_name, result_rows)
@@ -73,7 +74,8 @@ def collect_felled_tree_properties(input_: OpTuple[ForestStand], /, **operation_
 def report_period(input_: OpTuple[T], /, **operation_parameters: str) -> OpTuple[T]:
     _, collected_data = input_
     last_period = collected_data.prev('report_period')
-    t0 = collected_data.initial_time_point if last_period is None else list(collected_data.get('report_period').keys())[-1]
+    t0 = collected_data.initial_time_point if last_period is None else list(
+        collected_data.get('report_period').keys())[-1]
     res = _collector_wrapper(
         operation_parameters,
         lambda name: autocollective(

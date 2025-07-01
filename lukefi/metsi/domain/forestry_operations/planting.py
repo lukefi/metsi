@@ -9,27 +9,28 @@ from lukefi.metsi.app.utils import MetsiException
 
 
 DEFAULT_INSTRUCTIONS = {
-        SiteTypeKey.OMT: {
-            'species': 1,
-            'stems/ha': 2000,
-            'soil preparation': 3
-        },
-        SiteTypeKey.MT: {
-            'species': 1,
-            'stems/ha': 2000,
-            'soil preparation': 3
-        },
-        SiteTypeKey.VT: {
-            'species': 1,
-            'stems/ha': 2000,
-            'soil preparation': 1
-        },
-        SiteTypeKey.CT: {
-            'species': 1,
-            'stems/ha': 2000,
-            'soil preparation': 1
-        }
+    SiteTypeKey.OMT: {
+        'species': 1,
+        'stems/ha': 2000,
+        'soil preparation': 3
+    },
+    SiteTypeKey.MT: {
+        'species': 1,
+        'stems/ha': 2000,
+        'soil preparation': 3
+    },
+    SiteTypeKey.VT: {
+        'species': 1,
+        'stems/ha': 2000,
+        'soil preparation': 1
+    },
+    SiteTypeKey.CT: {
+        'species': 1,
+        'stems/ha': 2000,
+        'soil preparation': 1
     }
+}
+
 
 @cache
 def create_planting_instructions_table(file_path: str) -> list:
@@ -40,13 +41,15 @@ def create_planting_instructions_table(file_path: str) -> list:
     table = [row.split() for row in table]
 
     if len(table) != 4 or len(table[0]) != 3:
-        raise MetsiException('Planting instructions file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
+        raise MetsiException('Planting instructions file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(
+            len(table), len(table[0])))
     else:
         return table
 
+
 def get_planting_instructions_from_parameter_file_contents(
     file_path: str,
-    ) -> dict:
+) -> dict:
     instructions = create_planting_instructions_table(file_path)
     INSTRUCTIONS = {
         SiteTypeKey.OMT: {
@@ -72,6 +75,7 @@ def get_planting_instructions_from_parameter_file_contents(
     }
     return INSTRUCTIONS
 
+
 def get_planting_instructions(site_type_category: int, file_path_instructions: str = None) -> dict:
     site_type_key = site_type_to_key(site_type_category)
     if file_path_instructions is not None:
@@ -81,6 +85,7 @@ def get_planting_instructions(site_type_category: int, file_path_instructions: s
         regen = DEFAULT_INSTRUCTIONS[site_type_key]
     return regen
 
+
 def plant(
     stand: ForestStand,
     collected_data: CollectedData,
@@ -89,12 +94,12 @@ def plant(
     rt_count: int,
     rt_stems: int,
     soil_preparation: SoilPreparationKey
-    ) -> OpTuple[ForestStand]:
+) -> OpTuple[ForestStand]:
 
     regeneration_description = {
         'regeneration': RegenerationKey.PLANTED,
         'soil preparation': soil_preparation,
-        'species':regen_species,
+        'species': regen_species,
         'stems_per_ha': rt_count*rt_stems
     }
 
@@ -114,10 +119,10 @@ def plant(
     collected_data.store(tag, regeneration_description)
     collected_data.extend_list_result(
         "renewal",
-        [ PriceableOperationInfo(
+        [PriceableOperationInfo(
             operation="planting",
-            units=stand.area, #TODO: planting may not be priced per hectare
-            time_point=collected_data.current_time_point) ]
+            units=stand.area,  # TODO: planting may not be priced per hectare
+            time_point=collected_data.current_time_point)]
     )
 
     return (stand, collected_data)
@@ -141,4 +146,4 @@ def planting(payload: OpTuple[ForestStand], /, **operation_parameters) -> OpTupl
         tree_count,
         regen['stems/ha'],
         regen['soil preparation'])
-    return (stand,output_planting)
+    return (stand, output_planting)
