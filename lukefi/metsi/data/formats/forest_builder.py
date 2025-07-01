@@ -1,6 +1,6 @@
 from collections.abc import Sequence, Iterable
 from abc import ABC, abstractmethod
-from typing import Optional, overload
+from typing import overload
 import xml.etree.ElementTree as ET
 from pandas import DataFrame, Series
 

@@ -17,7 +17,9 @@ def parse_type[T:Union[int, float, str]](source, *ts: type[T]):
         return None
 
 
-def parse_int(source: str) -> Optional[int]:
+def parse_int(source: str | None) -> Optional[int]:
+    if source is None:
+        return None
     try:
         return int(source)
     except (ValueError, TypeError):
