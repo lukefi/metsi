@@ -26,7 +26,9 @@ def parse_int(source: str | None) -> Optional[int]:
         return None
 
 
-def parse_float(source: str) -> Optional[float]:
+def parse_float(source: str | None) -> Optional[float]:
+    if source is None:
+        return None
     try:
         return float(source)
     except (ValueError, TypeError):

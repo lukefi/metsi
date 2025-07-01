@@ -1,13 +1,13 @@
 from typing import Optional
 from collections.abc import Sequence
 from datetime import datetime as dt
+from shapely.geometry import Point
+from geopandas import GeoSeries
 
 from lukefi.metsi.data.enums.internal import Storey
 from lukefi.metsi.data.formats.util import get_or_default, parse_float, parse_int
 from lukefi.metsi.data.formats.vmi_const import vmi12_county_areas
 from lukefi.metsi.app.utils import MetsiException
-from shapely.geometry import Point
-from geopandas import GeoSeries
 
 
 def determine_area_factors(small_tree_sourcevalue: str, big_tree_sourcevalue: str) -> tuple[float, float]:
@@ -36,7 +36,7 @@ def determine_artificial_regeneration_year(regeneration: str, regeneration_year:
 
 def determine_development_class(dev_class_source: str) -> int:
     if dev_class_source in ('1', '2', '3', '4', '5', '6', '7', '8', '9'):
-        return parse_int(dev_class_source)
+        return int(dev_class_source)
     else:
         return 0
 
@@ -127,13 +127,13 @@ def _solve_vmi13_county_areas(county: int, lohkomuoto: int, lohkotarkenne: int) 
         if lohkomuoto == 2:
             return 347.828958275767
     elif county == 7 and lohkomuoto == 2 and lohkotarkenne == 0:
-            return 342.438585979628
+        return 342.438585979628
     elif county == 8 and lohkomuoto == 2 and lohkotarkenne == 0:
-            return 349.917881811205
+        return 349.917881811205
     elif county == 9 and lohkomuoto == 2 and lohkotarkenne == 0:
-            return 350.8972332
+        return 350.8972332
     elif county == 10 and lohkomuoto == 2 and lohkotarkenne == 0:
-            return 340.4779333
+        return 340.4779333
     elif county == 11:
         if lohkomuoto == 1:
             return 436.521343
@@ -145,20 +145,20 @@ def _solve_vmi13_county_areas(county: int, lohkomuoto: int, lohkotarkenne: int) 
         if lohkomuoto == 2:
             return 351.5358362
     elif county == 13 and lohkomuoto == 1 and lohkotarkenne == 0:
-            return 435.9383152
+        return 435.9383152
     elif county == 14 and lohkomuoto == 1 and lohkotarkenne == 0:
-            return 429.5909091
+        return 429.5909091
     elif county == 15 and lohkomuoto == 1 and lohkotarkenne == 0:
-            return 434.9541716
+        return 434.9541716
     elif county == 16 and lohkomuoto == 1 and lohkotarkenne == 0:
-            return 435.0433276
+        return 435.0433276
     elif county == 17 and lohkotarkenne == 0:
         if lohkomuoto == 3:
             return 457.7258227
-        if lohkomuoto == 4: 
+        if lohkomuoto == 4:
             return 747.6246246
     elif county == 18 and lohkomuoto == 3 and lohkotarkenne == 0:
-            return 455.8440533
+        return 455.8440533
     elif county == 19:
         if lohkomuoto == 4:
             if lohkotarkenne == 0:
@@ -176,10 +176,9 @@ def _solve_vmi13_county_areas(county: int, lohkomuoto: int, lohkotarkenne: int) 
                 return 10756.11645
     elif county == 21 and lohkomuoto == 0 and lohkotarkenne == 0:
         return 164.2650475
-    else:
-        raise MetsiException("Unable to solve vmi13 country area weight for values: \
-                        county {}, lohkomuoto {} and lohkotarkenne {}"
-                        .format(county, lohkomuoto, lohkotarkenne))
+
+    raise MetsiException(f"Unable to solve vmi13 country area weight for values: \
+                        county {county}, lohkomuoto {lohkomuoto} and lohkotarkenne {lohkotarkenne}")
 
 
 def determine_vmi13_area_ha(county: int, lohkomuoto: int, lohkotarkenne: int) -> float:
@@ -266,7 +265,7 @@ def convert_vmi12_geolocation(lat_source: str, lon_source: str) -> tuple[float, 
     :param lon_source: EPSG:2393 longitude
     :return: lat, lon tuple in EPSG:3067
     """
-    point = GeoSeries([Point(parse_float(lon_source), parse_float(lat_source))], crs='EPSG:2393')
+    point = GeoSeries([Point(float(lon_source), float(lat_source))], crs='EPSG:2393')
     point = point.to_crs(3067)
     return round(point.centroid.y[0]), round(point.centroid.x[0])
 
@@ -280,8 +279,8 @@ def convert_vmi12_approximate_geolocation(lat_source: str, lon_source: str) -> t
 
     :return (lat,lon): latitude,longitude pair
     """
-    lat = parse_float(lat_source)
-    lon = parse_float(lon_source) - 3000000
+    lat = float(lat_source)
+    lon = float(lon_source) - 3000000
     return lat, lon
 
 
@@ -307,7 +306,7 @@ def parse_vmi13_date(date_string: str) -> dt:
     return dt.strptime(date_string, '%Y%m%d')
 
 
-def transform_vmi12_height_above_sea_level(sourcevalue: str) -> float or None:
+def transform_vmi12_height_above_sea_level(sourcevalue: str) -> float | None:
     """
     Transform given VMI12 number value string from desimeters to meters.
     Returning float, or None on error.
@@ -318,7 +317,7 @@ def transform_vmi12_height_above_sea_level(sourcevalue: str) -> float or None:
         return None
 
 
-def transform_vmi13_height_above_sea_level(sourcevalue: str) -> float or None:
+def transform_vmi13_height_above_sea_level(sourcevalue: str) -> float | None:
     """Return given number value string as float, or None on error"""
     try:
         return float(sourcevalue)
@@ -326,7 +325,7 @@ def transform_vmi13_height_above_sea_level(sourcevalue: str) -> float or None:
         return None
 
 
-def transform_vmi_degree_days(sourcevalue: str) -> float or None:
+def transform_vmi_degree_days(sourcevalue: str) -> float | None:
     """Return given number value string as float or None on error"""
     try:
         return float(sourcevalue)
@@ -352,7 +351,7 @@ def determine_tax_class_reduction(sourcevalue: str) -> int:
         return 0
 
 
-def determine_tax_class(sourcevalue: str, maaluokka: str = '0') -> int:
+def determine_tax_class(sourcevalue: str) -> int:
     """
     Map and return number valued source string as int for values [0,4] => [1,5]. Otherwise 0.
     """
@@ -396,7 +395,7 @@ def determine_owner_group(sourcevalue: str) -> int:
 def parse_forestry_centre(forestry_centre: str) -> int:
     try:
         return int(forestry_centre)
-    except:
+    except (ValueError, TypeError):
         return 10
 
 
@@ -535,10 +534,9 @@ def vmi_codevalue(source: str) -> Optional[str]:
         return None
     return value
 
-def determine_tree_age_values(
-        chest_height_age_source: str,
-        age_increase_source: str,
-        total_age_source: str) -> tuple[int, int]:
+
+def determine_tree_age_values(chest_height_age_source: str, age_increase_source: str,
+                              total_age_source: str) -> tuple[int | None, int | None]:
     chest_height_age = parse_int(chest_height_age_source)
     age_increase = parse_int(age_increase_source)
     total_age = parse_int(total_age_source)
@@ -573,8 +571,8 @@ def determine_tree_height(height_sourcevalue: str, conversion_factor: float = 10
     :param species:
     :return:
     """
-    h = get_or_default(parse_float((vmi_codevalue(height_sourcevalue))), 0.0)
-    return h/conversion_factor if h>0 else None
+    h = get_or_default(parse_float(vmi_codevalue(height_sourcevalue)), 0.0)
+    return h/conversion_factor if h > 0 else None
 
 
 def determine_stems_per_ha(diameter: float | None, is_vmi12: bool) -> float:
@@ -593,30 +591,30 @@ def determine_stems_per_ha(diameter: float | None, is_vmi12: bool) -> float:
 
 def generate_stand_identifier(row: Sequence, indices: dict) -> str:
     return row[indices["lohkomuoto"]] + "-" + \
-           row[indices["section_y"]] + "-" + \
-           row[indices["section_x"]] + "-" + \
-           row[indices["test_area_number"]] + "-" + \
-           row[indices["stand_number"]]
+        row[indices["section_y"]] + "-" + \
+        row[indices["section_x"]] + "-" + \
+        row[indices["test_area_number"]] + "-" + \
+        row[indices["stand_number"]]
 
 
 def generate_tree_identifier(row: Sequence, indices: dict) -> str:
     return row[indices["lohkomuoto"]] + "-" + \
-           row[indices["section_y"]] + "-" + \
-           row[indices["section_x"]] + "-" + \
-           row[indices["test_area_number"]] + "-" + \
-           row[indices["stand_number"]] + "-" + \
-           row[indices["tree_number"]] + "-" + \
-           "tree"
+        row[indices["section_y"]] + "-" + \
+        row[indices["section_x"]] + "-" + \
+        row[indices["test_area_number"]] + "-" + \
+        row[indices["stand_number"]] + "-" + \
+        row[indices["tree_number"]] + "-" + \
+        "tree"
 
 
 def generate_stratum_identifier(row: Sequence, indices: dict) -> str:
     return row[indices["lohkomuoto"]] + "-" + \
-           row[indices["section_y"]] + "-" + \
-           row[indices["section_x"]] + "-" + \
-           row[indices["test_area_number"]] + "-" + \
-           row[indices["stand_number"]] + "-" + \
-           row[indices["stratum_number"]] + "-" + \
-           "stratum"
+        row[indices["section_y"]] + "-" + \
+        row[indices["section_x"]] + "-" + \
+        row[indices["test_area_number"]] + "-" + \
+        row[indices["stand_number"]] + "-" + \
+        row[indices["stratum_number"]] + "-" + \
+        "stratum"
 
 
 def determine_stratum_tree_height(source_height: str) -> Optional[float]:
@@ -639,9 +637,10 @@ def determine_stratum_origin(source_origin: str) -> int:
     else:
         return 0
 
+
 def determine_stratum_age_values(biological_age_source: str,
                                  breast_height_age_source: str,
-                                 height: Optional[float]) -> tuple[float,float]:
+                                 height: Optional[float]) -> tuple[float, float]:
     """ Determinates biological age and breast height age for vmi source data.
 
         param: biological_age_source: Stratum biological age or age increase value as vmi source value.
