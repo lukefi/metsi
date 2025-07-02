@@ -69,9 +69,41 @@ class VectorModelTest(unittest.TestCase):
         self.assertEqual(self.vector_data.y[2], 5)
         self.assertEqual(self.vector_data.z[2], 6.0)
 
+    def test_create_multiple(self):
+        self.vector_data.create([{"x": 1, "y": 2, "z": 3.0}, {"x": 4, "y": 5, "z": 6.0}, {"x": 7, "y": 8, "z": 9.0}])
+        self.vector_data.create([{"x": 10, "y": 11, "z": 12.0}, {"x": 13, "y": 14,
+                                "z": 15.0}, {"x": 16, "y": 17, "z": 18.0}], index=[1, 2, 3])
+
+        self.assertEqual(len(self.vector_data.x), 6)
+        self.assertEqual(len(self.vector_data.y), 6)
+        self.assertEqual(len(self.vector_data.z), 6)
+
+        self.assertEqual(self.vector_data.x[0], 1)
+        self.assertEqual(self.vector_data.y[0], 2)
+        self.assertEqual(self.vector_data.z[0], 3.0)
+
+        self.assertEqual(self.vector_data.x[1], 10)
+        self.assertEqual(self.vector_data.y[1], 11)
+        self.assertEqual(self.vector_data.z[1], 12.0)
+
+        self.assertEqual(self.vector_data.x[2], 4)
+        self.assertEqual(self.vector_data.y[2], 5)
+        self.assertEqual(self.vector_data.z[2], 6.0)
+
+        self.assertEqual(self.vector_data.x[3], 13)
+        self.assertEqual(self.vector_data.y[3], 14)
+        self.assertEqual(self.vector_data.z[3], 15.0)
+
+        self.assertEqual(self.vector_data.x[4], 7)
+        self.assertEqual(self.vector_data.y[4], 8)
+        self.assertEqual(self.vector_data.z[4], 9.0)
+
+        self.assertEqual(self.vector_data.x[5], 16)
+        self.assertEqual(self.vector_data.y[5], 17)
+        self.assertEqual(self.vector_data.z[5], 18.0)
+
     def test_read(self):
-        self.vector_data.create({"x": 1, "y": 2, "z": 3.0})
-        self.vector_data.create({"x": 4, "y": 5, "z": 6.0})
+        self.vector_data.create([{"x": 1, "y": 2, "z": 3.0}, {"x": 4, "y": 5, "z": 6.0}])
         self.vector_data.create({"x": 7}, 1)
 
         self.assertDictEqual(self.vector_data.read(0), {"x": 1, "y": 2, "z": 3.0})
