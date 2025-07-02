@@ -6,6 +6,7 @@ from lukefi.metsi.sim.generators import (
     full_tree_generators,
     compose_nested,
     partial_tree_generators_by_time_point)
+from lukefi.metsi.sim.state_tree import StateTree
 
 
 def evaluate_sequence[T](payload: T, *operations: Callable[[T], T]) -> T:
@@ -49,7 +50,8 @@ def chain_evaluator[T](payload: T, root_node: EventTree[T]) -> list[T]:
 
 
 def depth_first_evaluator[T](payload: T, root_node: EventTree[T]) -> list[T]:
-    return root_node.evaluate(payload)
+    state_tree: StateTree[T] = StateTree()
+    return root_node.evaluate(payload, state_tree)
 
 
 def run_full_tree_strategy[T](payload: OperationPayload[T], config: SimConfiguration,
