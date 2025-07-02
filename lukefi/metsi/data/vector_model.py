@@ -120,7 +120,8 @@ class VectorData():
                 vector: npt.NDArray = getattr(self, key)
                 if not vector.flags.writeable:
                     # Vector is read-only, must copy first.
-                    setattr(self, key, vector.copy())
+                    vector = vector.copy()
+                    setattr(self, key, vector)
                     vector.flags.writeable = True
                 vector[index] = value
 
