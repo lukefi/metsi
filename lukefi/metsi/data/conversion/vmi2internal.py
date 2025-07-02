@@ -141,6 +141,7 @@ _tree_storey_map = {
     VmiTreeStorey.OVER_SPARE_2: Storey.SPARE
 }
 
+
 def is_empty_vmi_str(candidate: str) -> bool:
     return candidate in ('', ' ', '.')
 
@@ -167,7 +168,7 @@ def convert_soil_peatland_category(code: str) -> Optional[SoilPeatlandCategory]:
 
 
 def convert_land_use_category(lu_code: str) -> LandUseCategory:
-    """sanitization of lu_code is the responsibility of the caller, 
+    """sanitization of lu_code is the responsibility of the caller,
     meaning that this conversion will fail e.g. if the parameter is a lower-case letter."""
     vmi_category = VmiLandUseCategory(lu_code)
     return _land_use_map[vmi_category]

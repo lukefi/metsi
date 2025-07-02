@@ -572,7 +572,7 @@ def determine_tree_height(height_sourcevalue: str, conversion_factor: float = 10
     :return:
     """
     h = get_or_default(parse_float(vmi_codevalue(height_sourcevalue)), 0.0)
-    return h/conversion_factor if h > 0 else None
+    return h / conversion_factor if h > 0 else None
 
 
 def determine_stems_per_ha(diameter: float | None, is_vmi12: bool) -> float:

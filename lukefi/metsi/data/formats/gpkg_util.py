@@ -7,7 +7,7 @@ import numpy as np
 
 
 def _read_stand_geometry(path: str) -> geopandas.GeoDataFrame:
-    ''' 
+    '''
     NOTE: Stand geometry is read with geopandas. This could be done purely with SQLite using spatialite library
     but as installation of spatialite would assume manual it was desided to be done with geopandas. Problems with
     using geopandas to read geometry information is that it is 100-times slower than pure SQL request.

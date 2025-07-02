@@ -25,7 +25,7 @@ def export_files(config: MetsiConfiguration, decl: list[dict], data: SimResults)
         elif export_module == "rm_schedules_events_timber":
             filename1 = export_module_declaration.get("filename", "rm_schedule_timber_year_sums.txt")
             target_path1 = Path(config.target_directory, filename1)
-            output_handlers.append((export_module, partial(rm_schedules_events_timber,target_path1, data)))
+            output_handlers.append((export_module, partial(rm_schedules_events_timber, target_path1, data)))
         elif export_module == "rm_schedules_events_trees":
             filename2 = export_module_declaration.get("filename", "rm_schedule_trees.txt")
             target_path2 = Path(config.target_directory, filename2)
@@ -35,6 +35,7 @@ def export_files(config: MetsiConfiguration, decl: list[dict], data: SimResults)
     for export_module, handler in output_handlers:
         print_logline(f"Exporting {export_module}...")
         handler()
+
 
 def export_preprocessed(target_directory: str, decl: dict, stands: StandList) -> None:
     output_formats = list(decl.keys())

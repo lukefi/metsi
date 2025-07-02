@@ -22,23 +22,27 @@ def weibull_coeffs(diameter: float, basal_area: float, min_diameter: Optional[fl
     :param min_diameter: (optional) Should be a value between [0.0, 4.5]
     :return weight coefficients (a, b, c) used in the Weibull distribution calculation
     """
-    w1 = pre_util.get_or_default(min_diameter, math.exp(-1.306454 + (1.154433 * math.log(diameter)) + (math.pow(0.33956, 2) / 2.0)))
-    w3 = math.exp(0.64788 - (0.005558 * basal_area) + (0.025530 * diameter) + (math.pow(0.35365,2) / 2.0))
+    w1 = pre_util.get_or_default(min_diameter, math.exp(-1.306454 + (1.154433 *
+                                 math.log(diameter)) + (math.pow(0.33956, 2) / 2.0)))
+    w3 = math.exp(0.64788 - (0.005558 * basal_area) + (0.025530 * diameter) + (math.pow(0.35365, 2) / 2.0))
     w2 = (diameter - w1) / (pow((-math.log(0.5)), (1.0 / w3)))
     if w2 < 0.0:
         w2 = 0.0
     return w1, w2, w3
 
 
-def weibull(n_samples: int, diameter: float, basal_area: float, height: float, min_diameter: Optional[float] = None) -> list[ReferenceTree]:
-    """ Computes Stems per hectare and diameter for given number of refernece trees. The values are driven from the Weibull distribution.
+def weibull(n_samples: int, diameter: float, basal_area: float, height: float,
+            min_diameter: Optional[float] = None) -> list[ReferenceTree]:
+    """ Computes Stems per hectare and diameter for given number of refernece trees.
+        The values are driven from the Weibull distribution.
 
     :param n_samples: Number of trees to be created
     :param diameter: Average diameter (cm)
     :param basal_area: Basal area
     :param height: Average height (m)
-    :param min_diameter: (optional) Minimum diameter used in weight calculation. If given should be a value between [0.0, 4.5]
-    :return Given number of trees containing stems per hectare and diameters (cm) as object instance members.
+    :param min_diameter: (optional) Minimum diameter used in weight calculation.
+                         If given should be a value between [0.0, 4.5].
+    :return: Given number of trees containing stems per hectare and diameters (cm) as object instance members.
     """
     (a, b, c) = weibull_coeffs(diameter, basal_area, min_diameter)
 
@@ -64,7 +68,7 @@ def weibull(n_samples: int, diameter: float, basal_area: float, height: float, m
         if xx >= ax:
             f = 1.0
 
-        p = f - f1 # precentual ratio of stems in sample i
+        p = f - f1  # precentual ratio of stems in sample i
         f1 = f
 
         stems = (12732.4 * basal_area) / math.pow(computed_diameter, 2.0)
@@ -125,16 +129,20 @@ def diameter_model_siipilehto(height_rt: float, height: float, diameter: float, 
     lndiJS = (
         0.3904
         + 0.9119 * math.log(height_rt - 1.0)
-        + 0.05318 * height_rt \
+        + 0.05318 * height_rt
         - 1.0845 * math.log(height)
         + 0.9468 * math.log(diameter + 1)
         - 0.0311 * dominant_height
     )
-    dvari = 0.000478 + 0.000305 + 0.03199 # for bias correction
+    dvari = 0.000478 + 0.000305 + 0.03199  # for bias correction
     return math.exp(lndiJS + dvari / 2.0)
 
 
-def predict_sapling_diameters(reference_trees: list[ReferenceTree], height: float, diameter: float, dominant_height: float) -> list[ReferenceTree]:
+def predict_sapling_diameters(
+        reference_trees: list[ReferenceTree],
+        height: float,
+        diameter: float,
+        dominant_height: float) -> list[ReferenceTree]:
     """ Logic for predicting sapling diameters.
 
     Diameters are predicted via Valkonen's diameter height model or Siipilehto's diameter model.
@@ -200,27 +208,28 @@ def weibull_sapling(height: float, stem_count: float, dominant_height: float, n_
     # KHar Error correction: Siipilehto 2009, Forest ecology...  p. 8, formula 6
     # Height must be logarithmic.
     b = math.exp(b0
-        + b1 * math.log(height)
-        + b2 / math.log(dominant_height/height + 0.4)
-    )
+                 + b1 * math.log(height)
+                 + b2 / math.log(dominant_height / height + 0.4)
+                 )
     c = math.exp(
         c0
         + c1 * height
         + c2 * dominant_height
         + c3 * math.log(stem_count)
-        + c4 / math.log(dominant_height / height +0.4)
+        + c4 / math.log(dominant_height / height + 0.4)
     )
 
     # Weibull height distribution is known, trees are picked up from the distribution
     classN = 1 / float(n_trees)    # stem number from class border
     Nh = stem_count / float(n_trees)        # frequency
     classH = classN / 2          # for the class center
-    result=[]
+    result = []
 
     for i in range(n_trees):
         reference_tree = ReferenceTree()
-        Ph = float(i+1) * classN - classH         # class center
-        hi = b * (-math.log(1.0 - Ph))**(1.0 / c) + a   # picking up height from the cumulative Weibull distribution. Analytical solution.
+        Ph = float(i + 1) * classN - classH         # class center
+        # picking up height from the cumulative Weibull distribution. Analytical solution.
+        hi = b * (-math.log(1.0 - Ph))**(1.0 / c) + a
         reference_tree.height = round(hi, 2)
 
         reference_tree.stems_per_ha = Nh
@@ -251,7 +260,7 @@ def sapling_height_distribution(stratum: TreeStratum, dominant_height: float, n_
             dominant_height,
             n_trees
         )
-        dominant_height=1.05*stratum.mean_height
+        dominant_height = 1.05 * stratum.mean_height
         return predict_sapling_diameters(
             result,
             stratum.mean_height,

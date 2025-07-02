@@ -197,7 +197,7 @@ class VMI12Builder(VMIBuilder):
         super().__init__(builder_flags, declared_conversions, data_rows)
 
     def convert_stand_entry(self, indices, data_row, stand_id: int | None = None) -> ForestStand:
-        """ 
+        """
         Create a ForestStand out of given VMI12 type 1 data row using given data indices and order number.
         Conversion variables are based fixed source indices.
         """
@@ -611,7 +611,7 @@ class GeoPackageBuilder(ForestCentreBuilder):
 
     def build(self) -> list[ForestStand]:
         """ Converts geopackage into list of ForestStand objects.
-        :return: List of ForestStand objects 
+        :return: List of ForestStand objects
         """
         stands = []
         for _, rowi in self.stands.iterrows():

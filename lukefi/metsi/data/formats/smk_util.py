@@ -242,7 +242,7 @@ def parse_coordinates(estand: Element) -> tuple[float, float, str] | tuple[None,
 def calculate_stand_basal_area(strata: list[TreeStratum]) -> float:
     def f(s):
         try:
-            return round(math.pi / 4 * math.pow(s.mean_diameter/100, 2) * s.stems_per_ha, 2)
+            return round(math.pi / 4 * math.pow(s.mean_diameter / 100, 2) * s.stems_per_ha, 2)
         except TypeError:
             return 0.0
     basal_areas = [stratum.basal_area if stratum.basal_area is not None else f(stratum) for stratum in strata]

@@ -1,5 +1,4 @@
 """ Module contains forestry domain spesific model functions """
-import math
 from typing import Optional
 from lukefi.metsi.data.enums.internal import TreeSpecies
 
@@ -20,7 +19,8 @@ NASLUND_PINE_OR_OTHER_CONIFEROUS = [
     TreeSpecies.THUJA,
     TreeSpecies.UNKNOWN_CONIFEROUS,
     TreeSpecies.YEW,
-    ]
+]
+
 
 def naslund_height(diameter: float | None, species: TreeSpecies | None) -> Optional[float]:
     """
@@ -51,9 +51,9 @@ def naslund_correction(species: TreeSpecies, diameter: float, height: float) -> 
     ''' Height correction coefficient by Naslund height model
 
         :spe: tree stratum species
-        :diameter: tree stratum diameter 
+        :diameter: tree stratum diameter
         :height: tree stratum height
         :return: height correction coefficient
     '''
     h_computed = naslund_height(diameter, species)
-    return height/h_computed
+    return height / h_computed

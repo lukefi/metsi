@@ -16,7 +16,11 @@ def determine_hmalli_value(species: TreeSpecies):
         return 3
 
 
-def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_area: float, **params) -> list[ReferenceTree]:
+def tree_generation_lm(
+        stratum: TreeStratum,
+        degree_days: float,
+        stand_basal_area: float,
+        **params) -> list[ReferenceTree]:
     global lm_tree_generation_loaded
     dir = Path(__file__).parent.parent.resolve() / "r"
     growth_script_file = dir / "lm_tree_generation.R"
@@ -38,8 +42,8 @@ def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_are
 
     tree_data = {
         'lpm': robjects.FloatVector([tree.breast_height_diameter or robjects.NA_Real for tree in source_trees]),
-        'height': robjects.FloatVector([robjects.NA_Real if tree.tuhon_ilmiasu in ('2', '61', '62', '71', '72') \
-            else (tree.measured_height or robjects.NA_Real) for tree in source_trees]),
+        'height': robjects.FloatVector([robjects.NA_Real if tree.tuhon_ilmiasu in ('2', '61', '62', '71', '72')
+                                        else (tree.measured_height or robjects.NA_Real) for tree in source_trees]),
         'lkm': robjects.FloatVector([tree.stems_per_ha or robjects.NA_Real for tree in source_trees])
     }
     df = robjects.DataFrame(stratum_data)
@@ -64,5 +68,5 @@ def tree_generation_lm(stratum: TreeStratum, degree_days: float, stand_basal_are
             biological_age=stratum.biological_age,
             sapling=result_df.rx2(11)[i] < 1.3
         ))
-    
+
     return trees

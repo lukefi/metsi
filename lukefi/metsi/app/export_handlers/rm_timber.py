@@ -51,7 +51,8 @@ def collect_rows_for_events(derived_data: CollectedData, data_source: str) -> li
     return retval
 
 
-def find_volumes_for_source(grouped: dict[tuple[int, str], list[CrossCutResult]], year: int, source: str) -> list[float]:
+def find_volumes_for_source(grouped: dict[tuple[int, str], list[CrossCutResult]],
+                            year: int, source: str) -> list[float]:
     filtered = grouped.get((year, source), [])
 
     def volume_sum(species_cond, grade):
@@ -74,7 +75,8 @@ def find_volumes_for_source(grouped: dict[tuple[int, str], list[CrossCutResult]]
     ]
 
 
-def collect_timber_data_for_year(year: int, cross_cut_results: dict[tuple[int, str], list[CrossCutResult]]) -> list[dict]:
+def collect_timber_data_for_year(
+        year: int, cross_cut_results: dict[tuple[int, str], list[CrossCutResult]]) -> list[dict]:
     """Compose collection objects for timber volume details"""
     stock = find_volumes_for_source(cross_cut_results, year, "standing")
     timber = find_volumes_for_source(cross_cut_results, year, "harvested")
@@ -98,7 +100,8 @@ def prepare_schedules_file_content(data: SimResults, data_source: str) -> list[s
     years within.
 
     :param data: SimResults package
-    :param data_source: "trees" for standing/harvested tree variables content, "timber" for standing/harvested timber volume content
+    :param data_source: "trees" for standing/harvested tree variables content, 
+                        "timber" for standing/harvested timber volume content
     :return: list of strings representing file rows
     """
     output_rows = []

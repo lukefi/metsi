@@ -26,7 +26,7 @@ class CollectiveSeries(Generic[T]):
             start, stop, stride = idx.indices(self.idx[-1])
             first = bisect.bisect_left(self.idx, start)
             last = bisect.bisect_right(self.idx, stop)
-            indices = [i for i in range(first, last) if (self.idx[i]-start) % stride == 0]
+            indices = [i for i in range(first, last) if (self.idx[i] - start) % stride == 0]
         else:
             try:
                 it = iter(idx)

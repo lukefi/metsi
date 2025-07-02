@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from lukefi.metsi.data.model import ForestStand
 
+
 def iterative_thinning(
         stand: ForestStand,
         thinning_factor: float,

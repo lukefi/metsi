@@ -10,7 +10,8 @@ initialised = False
 
 
 def get_r_with_sourced_scripts() -> robjects.R:
-    """Returns the R instance that has sourced all required R-scripts. During sourcing, the working directory is set to .../forestryfunctions, after which it's set back to the initial directory."""
+    """Returns the R instance that has sourced all required R-scripts. During sourcing, the working directory is set to
+    .../forestryfunctions, after which it's set back to the initial directory."""
     global initialised
     r = robjects.r
 
@@ -38,7 +39,7 @@ lmfor_species_map = {
 
 
 def lmfor_volume(stand: ForestStand) -> float:
-    
+
     r = get_r_with_sourced_scripts()
     volmods_path = Path(__file__).parent.resolve() / "r" / "vol_mods_final_LM.rds"
 
@@ -53,6 +54,7 @@ def lmfor_volume(stand: ForestStand) -> float:
     volumes = list(r['compute_tree_volumes'](df, str(volmods_path)))
     total_volume = sum(volumes)
     return total_volume
+
 
 def convert_r_named_list_to_py_dict(named_list) -> dict[Any, Any]:
     return dict(zip(named_list.names, [list(i) for i in named_list]))

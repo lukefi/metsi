@@ -42,4 +42,4 @@ def classify_values_to(stands: StandList, **operation_params) -> StandList:
     format_ = operation_params.get('format', None)
     if format_ not in ('rst', 'rsts'):
         raise ConfigurationException(f"unsupported format: {format_}")
-    return [ mela_stand(stand) for stand in stands ]
+    return [mela_stand(stand) for stand in stands]

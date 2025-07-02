@@ -3,14 +3,14 @@ import sys
 import copy
 import traceback
 from typing import Callable
+from pathlib import Path
 
 from lukefi.metsi.app.preprocessor import (
     preprocess_stands,
     slice_stands_by_percentage,
     slice_stands_by_size
-    )
+)
 
-from pathlib import Path
 from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
@@ -96,7 +96,6 @@ def remove_existing_export_files(config: MetsiConfiguration, control: dict):
             print_logline(f"Warning: Failed to delete file {file_path}: {e}")
 
 
-
 mode_runners: dict[RunMode, Callable] = {
     RunMode.PREPROCESS: preprocess,
     RunMode.EXPORT_PREPRO: export_prepro,
@@ -119,8 +118,8 @@ def main() -> int:
         app_config = generate_application_configuration({**cli_arguments, **control_structure['app_configuration']})
         prepare_target_directory(app_config.target_directory)
         print_logline("Reading input...")
-        
-        #deleting old target files
+
+        # deleting old target files
         remove_existing_export_files(app_config, control_structure)
 
         if app_config.run_modes[0] in [RunMode.PREPROCESS, RunMode.SIMULATE]:
@@ -143,7 +142,7 @@ def main() -> int:
             input_data = read_full_simulation_result_dirtree(app_config.input_path)
         else:
             raise MetsiException("Can not determine input data for unknown run mode")
-    except Exception: # pylint: disable=broad-exception-caught
+    except Exception:  # pylint: disable=broad-exception-caught
         traceback.print_exc()
         print("Aborting run...")
         return 1

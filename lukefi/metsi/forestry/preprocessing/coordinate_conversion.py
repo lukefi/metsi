@@ -6,15 +6,15 @@ from lukefi.metsi.data.model import ForestStand
 
 
 def load_library(path):
-    """ Load a shared library from the given path, handling compatibility for Python < 3.12. """ 
+    """ Load a shared library from the given path, handling compatibility for Python < 3.12. """
     if sys.version_info >= (3, 12):
         return cts.CDLL(path)
     else:
         return cts.CDLL(str(path))
 
 
-# Defining and initialize the external library 
-lib_name = 'ykjtm35.dll' if sys.platform == "win32" else 'ykjtm35.so' 
+# Defining and initialize the external library
+lib_name = 'ykjtm35.dll' if sys.platform == "win32" else 'ykjtm35.so'
 DLL_PATH = Path('lukefi', 'metsi', 'forestry', 'c', 'lib', lib_name)
 
 try:
@@ -22,18 +22,19 @@ try:
 except OSError as e:
     print(f"Failed to load {lib_name}: {e}")
 
+
 def _is_error(flag: int) -> bool:
     return True if flag == 0 else False
 
 
 def _erts_tm35_to_ykj(u: float, v: float) -> tuple[float, float]:
     """ Convert ETRS-TM35FIN (EPSG:3067) coordinates to YKJ (Yhtenaiskoordinaatisto)
-    
+
     :param u: latitude coordinate
     :param v: longitude coordinate
     :return YKJ coordinates tuple
     """
-    
+
     # Type initialization for the input
     f = DLL.tm35fin_to_ykj
     f.argtypes = [
@@ -54,16 +55,16 @@ def _erts_tm35_to_ykj(u: float, v: float) -> tuple[float, float]:
     # Error handeling
     if _is_error(response):
         print("Error in call function {f} located in {dll}".format(
-            f = f.__name__,
-            dll = str(DLL_PATH))
+            f=f.__name__,
+            dll=str(DLL_PATH))
         )
-    
+
     # Return actual values of the pointers
     return (x_ptr.value, y_ptr.value)
 
 
-class CRS(Enum): 
-    EPSG_3067 = ('EPSG:3067', 'ERTS-TM35', 'ETRS-TM35FIN') 
+class CRS(Enum):
+    EPSG_3067 = ('EPSG:3067', 'ERTS-TM35', 'ETRS-TM35FIN')
     EPSG_2393 = ('EPSG:2393', 'YKJ')
 
     @property
@@ -84,18 +85,18 @@ def convert_location_to_ykj(stand: ForestStand) -> tuple[float, float, float, st
     (latitude, longitude, heigh_above_sea_level, crs) = stand.geo_location
     if _is_ykj(crs):
         # Already in EPSG:2393. No need to convert.
-        return stand.geo_location 
+        return stand.geo_location
     elif _is_erts(crs):
         crs = CRS.EPSG_2393.name
-        (x, y) = _erts_tm35_to_ykj(latitude, longitude)    
+        (x, y) = _erts_tm35_to_ykj(latitude, longitude)
         new_geo_location = (x, y, heigh_above_sea_level, crs)
         return new_geo_location
     else:
         Exception(
-        "Error while converting from {current_crs} to {target_crs}. Check the source crs.\n"
-        "We only support {current_crs} as source crs at the moment.".format(
-            current_crs = CRS.EPSG_3067.name,
-            target_crs = CRS.EPSG_2393.name))
-    
+            "Error while converting from {current_crs} to {target_crs}. Check the source crs.\n"
+            "We only support {current_crs} as source crs at the moment.".format(
+                current_crs=CRS.EPSG_3067.name,
+                target_crs=CRS.EPSG_2393.name))
+
 
 __all__ = ['convert_location_to_ykj', 'CRS']

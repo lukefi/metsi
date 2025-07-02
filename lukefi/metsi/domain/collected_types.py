@@ -90,10 +90,10 @@ class CrossCutResult:
 
     # what's the right word here? "real", "absolute", something else?
     def get_real_volume(self) -> float:
-        return self.volume_per_ha*self.stand_area
+        return self.volume_per_ha * self.stand_area
 
     def get_real_value(self) -> float:
-        return self.value_per_ha*self.stand_area
+        return self.value_per_ha * self.stand_area
 
 
 @dataclass

@@ -22,6 +22,7 @@ sitetype_map = {
 
 pukkala_loaded = False
 
+
 def continuous_growth_r(stand: ForestStand, step: int = 5) -> ForestStand:
     """Pukkala growth models implemented by Lauri Mehtätalo"""
     if len(stand.reference_trees) == 0:
@@ -55,8 +56,8 @@ def continuous_growth_r(stand: ForestStand, step: int = 5) -> ForestStand:
     for s in range(step):
         df = robjects.r['grow'](df, path=str(dir) + '/', standArea=stand.area, perLength=1)
         # TODO: R scripts need some refactoring; predheight is not quite usable
-        #robjects.r[f'source'](str(dir / "hdmod.R"))
-        #df = robjects.r['predheight'](df)
+        # robjects.r[f'source'](str(dir / "hdmod.R"))
+        # df = robjects.r['predheight'](df)
         results = list(df)
 
         for i in range(len(results[0])):
@@ -65,12 +66,12 @@ def continuous_growth_r(stand: ForestStand, step: int = 5) -> ForestStand:
                 tree.breast_height_diameter = results[2][i]
                 tree.stems_per_ha = results[3][i]
                 tree.biological_age = results[11][i]
-                #defaulting to Näslund height while predheight is not useable
+                # defaulting to Näslund height while predheight is not useable
                 tree.height = naslund_height(tree.breast_height_diameter, tree.species)
                 tree.breast_height_age = results[11][i] if tree.sapling and tree.height is not None and tree.height >= 1.3 else tree.breast_height_age
                 tree.sapling = True if tree.height is None or tree.height < 1.3 else False
             else:
-                new_number = last_tree_num + (i+1-existing_count)
+                new_number = last_tree_num + (i + 1 - existing_count)
                 stand.reference_trees.append(ReferenceTree(
                     identifier=f"{stand.identifier}-{new_number}-tree",
                     species={value: key for key, value in species_map.items()}[results[1][i]],

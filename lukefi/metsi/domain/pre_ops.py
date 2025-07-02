@@ -30,9 +30,9 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
     """
     _ = operation_params
     # import constrained to here as pymotti is an optional dependency
-    from pymotti.lasum import ilmanor # type: ignore # pylint: disable=import-error,import-outside-toplevel
-    from pymotti.coord import etrs_tm35_to_ykj as conv # type: ignore # pylint: disable=import-error,import-outside-toplevel
-    from pymotti.kor import xkor # type: ignore # pylint: disable=import-error,import-outside-toplevel
+    from pymotti.lasum import ilmanor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
+    from pymotti.coord import etrs_tm35_to_ykj as conv  # type: ignore # pylint: disable=import-error,import-outside-toplevel
+    from pymotti.kor import xkor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
 
     for stand in stands:
         if stand.geo_location is not None and stand.geo_location[0] is not None and stand.geo_location[1] is not None:
