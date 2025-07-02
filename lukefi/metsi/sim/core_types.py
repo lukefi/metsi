@@ -6,6 +6,7 @@ from typing import NamedTuple, Optional, Any, TypeVar, Generic
 import weakref
 
 from lukefi.metsi.data.layered_model import LayeredObject
+from lukefi.metsi.sim.state_tree import StateTree
 
 
 def identity(x):
@@ -68,18 +69,18 @@ class SimConfiguration(SimpleNamespace):
         self.time_points = sorted(time_points)
 
 
-class EventTree:
+class EventTree[T]:
     """
     Event represents a computational operation in a tree of following event paths.
     """
 
-    __slots__ = ('operation', 'branches', '_previous_ref', '__weakref__')
+    __slots__ = ('wrapped_operation', 'branches', '_previous_ref', '__weakref__')
 
     def __init__(self,
-                 operation: Optional[Callable[[Optional[Any]], Optional[Any]]] = None,
+                 operation: Optional[Callable[["OperationPayload[T]"], "OperationPayload[T]"]] = None,
                  previous: Optional['EventTree'] = None):
 
-        self.operation = operation if operation is not None else identity
+        self.wrapped_operation = operation if operation is not None else identity
         self._previous_ref = weakref.ref(previous) if previous else None
         self.branches: list[EventTree] = []
 
@@ -105,16 +106,16 @@ class EventTree:
         """
         if len(self.branches) == 0:
             # Yes. A leaf node returns a single chain with a single operation.
-            return [[self.operation]]
+            return [[self.wrapped_operation]]
         else:
             result = []
             for branch in self.branches:
                 chains = branch.operation_chains()
                 for chain in chains:
-                    result.append([self.operation] + chain)
+                    result.append([self.wrapped_operation] + chain)
             return result
 
-    def evaluate(self, payload) -> list:
+    def evaluate(self, payload: 'OperationPayload[T]', state_tree: Optional[StateTree] = None) -> list:
         """
         Recursive pre-order walkthrough of this event tree to evaluate its operations with the given payload,
         copying it for branching.
@@ -122,15 +123,31 @@ class EventTree:
         :param payload: the simulation data payload (we don't care what it is here)
         :return: list of result payloads from this EventTree or as concatenated from its branches
         """
-        current = self.operation(payload)
+        current = self.wrapped_operation(payload)
+        branching_state: StateTree | None = None
+        if state_tree is not None:
+            state_tree.state = deepcopy(current.computational_unit)
+            state_tree.done_operation = current.operation_history[-1][1] if len(current.operation_history) > 0 else None
+            state_tree.time_point = current.operation_history[-1][0] if len(current.operation_history) > 0 else None
+            state_tree.operation_params = current.operation_history[-1][2] if len(
+                current.operation_history) > 0 else None
+
         if len(self.branches) == 0:
             return [current]
         if len(self.branches) == 1:
-            return self.branches[0].evaluate(current)
+            if state_tree is not None:
+                branching_state = StateTree()
+                state_tree.add_branch(branching_state)
+            return self.branches[0].evaluate(current, branching_state)
         results = []
         for branch in self.branches:
             try:
-                results.extend(branch.evaluate(copy(current)))
+                if state_tree is not None:
+                    branching_state = StateTree()
+                evaluated_branch = branch.evaluate(copy(current), branching_state)
+                results.extend(evaluated_branch)
+                if state_tree is not None and branching_state is not None:
+                    state_tree.add_branch(branching_state)
             except UserWarning:
                 ...
         if len(results) == 0:
