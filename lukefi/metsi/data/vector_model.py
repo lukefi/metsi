@@ -102,6 +102,33 @@ class VectorData():
             return retval
         return value
 
+    def create(self, new: dict[str, Any], index: int | None = None):
+        for key, dtype in self.dtypes.items():
+            value = self.to_default(new.get(key), dtype)
+            vector: npt.NDArray = getattr(self, key)
+            if index is not None:
+                setattr(self, key, np.insert(vector, index, value))  # insert always creates a copy
+            else:
+                setattr(self, key, np.append(vector, value))  # append always creates a copy
+
+    def read(self, index: int) -> dict[str, Any]:
+        return {key: getattr(self, key)[index] for key in self.dtypes}
+
+    def update(self, new: dict[str, Any], index: int):
+        for key, value in new.items():
+            if key in self.dtypes:
+                vector: npt.NDArray = getattr(self, key)
+                if not vector.flags.writeable:
+                    # Vector is read-only, must copy first.
+                    setattr(self, key, vector.copy())
+                    vector.flags.writeable = True
+                vector[index] = value
+
+    def delete(self, index: int):
+        for key in self.dtypes:
+            vector: npt.NDArray = getattr(self, key)
+            setattr(self, key, np.delete(vector, index))  # delete always creates a copy
+
 
 class ReferenceTrees(VectorData):
     size: int
