@@ -141,6 +141,7 @@ _tree_storey_map = {
     VmiTreeStorey.OVER_SPARE_2: Storey.SPARE
 }
 
+
 def is_empty_vmi_str(candidate: str) -> bool:
     return candidate in ('', ' ', '.')
 
@@ -167,33 +168,33 @@ def convert_soil_peatland_category(code: str) -> Optional[SoilPeatlandCategory]:
 
 
 def convert_land_use_category(lu_code: str) -> LandUseCategory:
-    """sanitization of lu_code is the responsibility of the caller, 
+    """sanitization of lu_code is the responsibility of the caller,
     meaning that this conversion will fail e.g. if the parameter is a lower-case letter."""
     vmi_category = VmiLandUseCategory(lu_code)
-    return _land_use_map.get(vmi_category)
+    return _land_use_map[vmi_category]
 
 
 def convert_species(species_code: str) -> TreeSpecies:
     """Converts VMI species code to internal TreeSpecies code"""
     value = species_code.strip()
     vmi_species = VmiSpecies(value)
-    return _species_map.get(vmi_species)
+    return _species_map[vmi_species]
 
 
 def convert_owner(owner_code: str) -> OwnerCategory:
     vmi_owner = VmiOwnerCategory(owner_code)
-    return _owner_map.get(vmi_owner)
+    return _owner_map[vmi_owner]
 
 
-def convert_stratum_rank(rank_code: str) -> Storey:
+def convert_stratum_rank(rank_code: str) -> Optional[Storey]:
     if is_empty_vmi_str(rank_code):
         return None
     vmi_rank = VmiStratumRank(rank_code)
-    return _stratum_rank_map.get(vmi_rank)
+    return _stratum_rank_map[vmi_rank]
 
 
-def convert_tree_storey(storey_code: str) -> Storey:
+def convert_tree_storey(storey_code: str) -> Optional[Storey]:
     if is_empty_vmi_str(storey_code):
         return None
     vmi_storey = VmiTreeStorey(storey_code)
-    return _tree_storey_map.get(vmi_storey)
+    return _tree_storey_map[vmi_storey]

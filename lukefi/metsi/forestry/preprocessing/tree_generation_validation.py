@@ -1,4 +1,4 @@
-from lukefi.metsi.data.model import TreeStratum, ReferenceTree, ForestStand
+from lukefi.metsi.data.model import TreeStratum, ReferenceTree
 from lukefi.metsi.forestry.forestry_utils import calculate_basal_area
 
 
@@ -18,15 +18,22 @@ def round_each_numeric_value_in_list(values: list, decimals: int) -> list:
     return [round(value, decimals) if isinstance(value, (int, float)) else value for value in values]
 
 
-def create_stratum_tree_comparison_set(stratum: TreeStratum, reference_trees: list[ReferenceTree]) -> dict[str, tuple[float, float]]:
-    return {
-        'basal_area': (stratum.basal_area, sum([calculate_basal_area(tree) for tree in reference_trees])),
-        'stems_per_ha': (stratum.stems_per_ha, sum([tree.stems_per_ha for tree in reference_trees if not tree.sapling])),
-        'sapling_stems_per_ha': (stratum.sapling_stems_per_ha, sum([tree.stems_per_ha for tree in reference_trees if tree.sapling])),
-        'mean_diameter': (stratum.mean_diameter, weighted_mean([tree.breast_height_diameter for tree in reference_trees], [calculate_basal_area(tree) for tree in reference_trees])),
-        'mean_height': (stratum.mean_height, weighted_mean([tree.height for tree in reference_trees], [calculate_basal_area(tree) for tree in reference_trees])),
-        'mean_age': (stratum.biological_age, mean([tree.biological_age or 0 for tree in reference_trees]))
-    }
+def create_stratum_tree_comparison_set(
+        stratum: TreeStratum, reference_trees: list[ReferenceTree]) -> dict[str, tuple[float, float]]:
+    return {'basal_area': (stratum.basal_area,
+                           sum([calculate_basal_area(tree) for tree in reference_trees])),
+            'stems_per_ha': (stratum.stems_per_ha,
+                             sum([tree.stems_per_ha for tree in reference_trees if not tree.sapling])),
+            'sapling_stems_per_ha': (stratum.sapling_stems_per_ha,
+                                     sum([tree.stems_per_ha for tree in reference_trees if tree.sapling])),
+            'mean_diameter': (stratum.mean_diameter,
+                              weighted_mean([tree.breast_height_diameter for tree in reference_trees],
+                                            [calculate_basal_area(tree) for tree in reference_trees])),
+            'mean_height': (stratum.mean_height,
+                            weighted_mean([tree.height for tree in reference_trees],
+                                          [calculate_basal_area(tree) for tree in reference_trees])),
+            'mean_age': (stratum.biological_age,
+                         mean([tree.biological_age or 0 for tree in reference_trees]))}
 
 
 def debug_output_row_from_comparison_set(stratum: TreeStratum, comparison_set: dict[str, tuple[float, float]]) -> list:

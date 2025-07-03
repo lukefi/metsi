@@ -85,6 +85,6 @@ def cross_cut_fhk(pcls, ptop, plen, pval, m, div, nas) -> CrossCutFn:
         vol, val = [], []
         for i in range(0, len(retnames), 2):
             vol.append(getattr(r, retnames[i]))
-            val.append(getattr(r, retnames[i+1]))
-        return nas, vol, val # type: ignore
+            val.append(getattr(r, retnames[i + 1]))
+        return nas, vol, val  # type: ignore
     return cc

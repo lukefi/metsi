@@ -6,20 +6,20 @@ class IntConfigEnum(IntEnum):
     """Base class for integer-based configuration enums."""
 
     @classmethod
-    def from_str(cls, name: str):
+    def from_str[T: IntConfigEnum](cls: type[T], name: str) -> T:
         """Convert a string to an enum value."""
         try:
             return cls[name.upper()]
-        except KeyError:
-            raise ValueError(f"Invalid config value: {name}")
+        except KeyError as e:
+            raise ValueError(f"Invalid config value: {name}") from e
 
     @classmethod
     def from_value(cls, value: int):
         """Convert an integer to an enum value."""
         try:
             return cls(value)
-        except ValueError:
-            raise ValueError(f"Invalid config value: {value}")
+        except ValueError as e:
+            raise ValueError(f"Invalid config value: {value}") from e
 
     def __str__(self):
         return self.name
@@ -46,8 +46,8 @@ class StringConfigEnum(Enum):
             return None
         try:
             return cls[name.upper()]
-        except KeyError:
-            raise ValueError(f"Invalid config value: {name}")
+        except KeyError as e:
+            raise ValueError(f"Invalid config value: {name}") from e
 
     def __str__(self):
         return self.name

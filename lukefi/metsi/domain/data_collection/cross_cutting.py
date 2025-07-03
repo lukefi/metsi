@@ -8,18 +8,18 @@ from lukefi.metsi.data.enums.internal import TreeSpecies
 
 
 def cross_cuttable_trees_from_stand(stand: ForestStand, time_point: int) -> list[CrossCuttableTree]:
-     return [
-            CrossCuttableTree(
-                tree.stems_per_ha,
-                tree.species,
-                tree.breast_height_diameter,
-                tree.height,
-                'standing',
-                '',
-                time_point
-                )
-                for tree in stand.reference_trees
-            ]
+    return [
+        CrossCuttableTree(
+            tree.stems_per_ha,
+            tree.species,
+            tree.breast_height_diameter,
+            tree.height,
+            'standing',
+            '',
+            time_point
+        )
+        for tree in stand.reference_trees
+    ]
 
 
 def _create_cross_cut_results(
@@ -32,21 +32,21 @@ def _create_cross_cut_results(
     tree_source: str,
     operation: str,
     time_point: int
-    ) -> list[CrossCutResult]:
+) -> list[CrossCutResult]:
     results = []
     for grade, volume, value in zip(unique_timber_grades, volumes, values):
         results.append(
-                CrossCutResult(
-                    species=species,
-                    timber_grade=int(grade),
-                    volume_per_ha=volume*stems_removed_per_ha,
-                    value_per_ha=value*stems_removed_per_ha,
-                    stand_area=stand_area,
-                    source=tree_source,
-                    operation=operation,
-                    time_point=time_point
-                )
+            CrossCutResult(
+                species=species,
+                timber_grade=int(grade),
+                volume_per_ha=volume*stems_removed_per_ha,
+                value_per_ha=value*stems_removed_per_ha,
+                stand_area=stand_area,
+                source=tree_source,
+                operation=operation,
+                time_point=time_point
             )
+        )
     return results
 
 
@@ -55,29 +55,33 @@ def cross_cut_tree(
     stand_area: float,
     timber_price_table: np.ndarray,
     mode: str = "py"
-    ) -> list[CrossCutResult]:
+) -> list[CrossCutResult]:
     """
     :param tree: The tree to cross cut
     :param stand_area: Stand area
     :param timber_price_table: Timber price table
     :param mode: implementation to use (py, lua)
-    :returns: A list of CrossCutResult objects, whose length is given by the number of unique timber grades in the `timber_price_table`. In other words, the returned list contains the resulting quantities of each unique timber grade.
+    :returns: A list of CrossCutResult objects, whose length is given by the number of unique timber 
+              grades in the `timber_price_table`. In other words, the returned list contains the resulting 
+              quantities of each unique timber grade.
     """
-    cross_cut_fn = lambda: cross_cut(tree.species, tree.breast_height_diameter, tree.height, timber_price_table, 10, mode)
+    def cross_cut_fn():
+        return cross_cut(tree.species, tree.breast_height_diameter,
+                         tree.height, timber_price_table, 10, mode)
 
     unique_timber_grades, volumes, values = cross_cut_fn()
 
     res = _create_cross_cut_results(
-                        stand_area,
-                        tree.species,
-                        tree.stems_per_ha,
-                        unique_timber_grades,
-                        volumes,
-                        values,
-                        tree.source,
-                        tree.operation,
-                        tree.time_point
-                        )
+        stand_area,
+        tree.species,
+        tree.stems_per_ha,
+        unique_timber_grades,
+        volumes,
+        values,
+        tree.source,
+        tree.operation,
+        tree.time_point
+    )
     return res
 
 
@@ -91,7 +95,6 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], /, **operation_paramet
     impl = operation_parameters.get('implementation', 'py')
 
     results = []
-
 
     previous_cross_cutting_results = collected_data.get_list_result("cross_cutting")
     previous_cross_cutting_results = filter(lambda r: r.source == "harvested", previous_cross_cutting_results)
@@ -112,8 +115,8 @@ def cross_cut_felled_trees(payload: OpTuple[ForestStand], /, **operation_paramet
 
 def cross_cut_standing_trees(payload: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
-    Cross cuts the `payload`'s stand at its current state. Does not modify the state, only calculates and stores the result of cross cutting.
-    The results are stored in collected_data.
+    Cross cuts the `payload`'s stand at its current state. Does not modify the state, only calculates and 
+    stores the result of cross cutting. The results are stored in collected_data.
     """
     stand, collected_data = payload
     timber_price_table = get_timber_price_table(operation_parameters['timber_price_table'])
@@ -128,4 +131,3 @@ def cross_cut_standing_trees(payload: OpTuple[ForestStand], /, **operation_param
     collected_data.extend_list_result("cross_cutting", results)
 
     return payload
-

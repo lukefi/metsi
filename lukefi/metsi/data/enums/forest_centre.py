@@ -54,12 +54,14 @@ class ForestCentreLandUseCategory(Enum):
     OTHER_LAND = '7'
     WATER_BODY = '8'
 
+
 class ForestCentreSoilPeatlandCategory(Enum):
     MINERAL_SOIL = '1'
     SPRUCE_MIRE = '2'
     PINE_MIRE = '3'
     BARREN_TREELESS_MIRE = '4'
     RICH_TREELESS_MIRE = '5'
+
 
 class ForestCentreSiteType(Enum):
     LEHTO = '1'
@@ -70,6 +72,7 @@ class ForestCentreSiteType(Enum):
     KARUKKOKANGAS = '6'
     KALLIOMAA_TAI_HIETIKKO = '7'
     LAKIMETSA_TAI_TUNTURI = '8'
+
 
 class ForestCentreDrainageCategory(Enum):
     OJITTAMATON_KANGAS = "1"

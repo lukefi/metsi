@@ -3,6 +3,7 @@ from collections.abc import Callable
 from lukefi.metsi.sim.core_types import EventTree, SimConfiguration, DeclaredEvents, OperationPayload, GeneratorFn
 from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
 from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_params
+from lukefi.metsi.app.utils import MetsiException
 
 
 class NestableGenerator:
@@ -14,12 +15,12 @@ class NestableGenerator:
     prepared_generator: Optional[GeneratorFn] = None
     time_point: int = 0
     nested_generators: list['NestableGenerator']
-    free_operations: list[dict | str]
+    free_operations: list[Callable]
     config: SimConfiguration
 
     def __init__(self,
                  config: SimConfiguration,
-                 generator_declaration: dict,
+                 generator_declaration: dict[Callable, list[Callable]],
                  time_point: int):
         """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
         time point."""
@@ -33,7 +34,7 @@ class NestableGenerator:
         for child in children_tags:
             self.wrap_generator_candidate(child)
 
-        if len(self.free_operations):
+        if self.free_operations:
             if len(self.nested_generators) == 0:
                 # leaf node, prepare the actual GeneratorFn
                 prepared_operations = []
@@ -58,20 +59,20 @@ class NestableGenerator:
             self.check_operation_sanity(candidate)
             self.free_operations.append(candidate)
 
-    def check_operation_sanity(self, candidate: str):
+    def check_operation_sanity(self, candidate: Callable):
         """Raise an Exception if operation candidate is not usable in current NestableGenerator context"""
         parameter_set_choices = self.config.operation_params.get(candidate, [{}])
-        if len(parameter_set_choices) > 1 and self.generator_type == sequence:
+        if len(parameter_set_choices) > 1 and self.generator_type == sequence:  # pylint: disable=comparison-with-callable
             # TODO: for the time being, multiple parameter sets for sequence operations don't make sense
             # needs to be addressed during in-line parameters work in #211
-            raise Exception("Alternatives by operation parameters not supported in sequences. Use "
-                            "alternatives clause for operation {} in time point {} or reduce operation parameter "
-                            "set size to 0 or 1.".format(candidate, self.time_point))
+            raise MetsiException("Alternatives by operation parameters not supported in sequences. Use "
+                                 f"alternatives clause for operation {candidate.__name__} in time point "
+                                 f"{self.time_point} or reduce operation parameter set size to 0 or 1.")
 
     def wrap_free_operations(self):
         """Create NestableGenerators for individual operations collected into self state. Clear the list of operations
         afterwards."""
-        if len(self.free_operations):
+        if self.free_operations:
             decl = {self.generator_type: self.free_operations}
             self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
             self.free_operations = []
@@ -99,12 +100,12 @@ class NestableGenerator:
         if self.prepared_generator is not None:
             return self.prepared_generator(previous)
         else:
-            if self.generator_type == sequence:
+            if self.generator_type == sequence:  # pylint: disable=comparison-with-callable
                 current = previous
                 for child in self.nested_generators:
                     current = child.unwrap(current)
                 return current
-            elif self.generator_type == alternatives:
+            elif self.generator_type == alternatives:  # pylint: disable=comparison-with-callable
                 current = []
                 for child in self.nested_generators:
                     current.extend(child.unwrap(previous))
@@ -112,7 +113,7 @@ class NestableGenerator:
             return previous
 
 
-def sequence(parents: Optional[list[EventTree]] = None, *operations: Callable) -> list[EventTree]:
+def sequence(parents: Optional[list[EventTree]] = None, /, *operations: Callable) -> list[EventTree]:
     """
     Generate a linear sequence of EventTree nodes, optionally extending each node in the given list of nodes with it.
     :param parents: optional
@@ -132,7 +133,7 @@ def sequence(parents: Optional[list[EventTree]] = None, *operations: Callable) -
     return result
 
 
-def alternatives(parents: Optional[list[EventTree]] = None, *operations: Callable) -> list[EventTree]:
+def alternatives(parents: Optional[list[EventTree]] = None, /, *operations: Callable) -> list[EventTree]:
     """
     Generate branches for an optional list of EventTree nodes, out of an *args list of given operations
     :param parents:
@@ -169,13 +170,15 @@ def simple_processable_chain(operation_tags: list[Callable], operation_params: d
     for tag in operation_tags if operation_tags is not None else []:
         params = operation_params.get(tag, [{}])
         if len(params) > 1:
-            raise Exception(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
-                            "Defining multiple parameter sets is only supported for alternative clause generators.")
+            raise MetsiException(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
+                                 "Defining multiple parameter sets is only supported for alternative clause "
+                                 "generators.")
         result.append(prepared_operation(tag, **params[0]))
     return result
 
 
-def generator_declarations_for_time_point(events: list[DeclaredEvents], time: int) -> list[dict]:
+def generator_declarations_for_time_point(events: list[DeclaredEvents],
+                                          time: int) -> list[dict[Callable, list[Callable]]]:
     """
     From events declarations, find the EventTree generators declared for the given time point.
 
@@ -197,7 +200,7 @@ def generator_function(key, *fns: Callable) -> GeneratorFn:
 
 
 def prepare_parametrized_operations(config: SimConfiguration,
-                                    operation_tag: str,
+                                    operation_tag: Callable,
                                     time_point: int) -> list[Callable[[Any], OperationPayload]]:
     parameter_set_choices = config.operation_params.get(operation_tag, [{}])
     operation_run_constraints = config.run_constraints.get(operation_tag)
@@ -223,7 +226,7 @@ def full_tree_generators(config: SimConfiguration) -> NestableGenerator:
     wrapper = NestableGenerator(config, {sequence: []}, 0)
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
-        time_point_wrapper_declaration = {sequence: generator_declarations}
+        time_point_wrapper_declaration: dict = {sequence: generator_declarations}
         wrapper.nested_generators.append(NestableGenerator(config, time_point_wrapper_declaration, time_point))
     return wrapper
 
@@ -241,7 +244,7 @@ def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int,
 
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
-        sequence_wrapper_declaration = {
+        sequence_wrapper_declaration: dict = {
             sequence: generator_declarations
         }
         wrapper_generator = NestableGenerator(config, sequence_wrapper_declaration, time_point)

@@ -3,12 +3,13 @@ from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import ForestOpPayload
-from lukefi.metsi.app.enum import FormationStrategy, EvaluationStrategy
+from lukefi.metsi.app.metsi_enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, depth_first_evaluator, \
     chain_evaluator
 from lukefi.metsi.sim.core_types import CollectedData, Runner, SimConfiguration, Evaluator
+from lukefi.metsi.app.utils import MetsiException
 
 
 def run_stands(
@@ -36,28 +37,26 @@ def run_stands(
     return retval
 
 
-def resolve_formation_strategy(source: str) -> Runner[ForestOpPayload]:
+def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestOpPayload]:
     formation_strategy_map = {
         FormationStrategy.FULL: run_full_tree_strategy,
         FormationStrategy.PARTIAL: run_partial_tree_strategy
     }
 
-    try:
+    if source in formation_strategy_map:
         return formation_strategy_map[source]
-    except Exception:
-        raise Exception("Unable to resolve event tree formation strategy '{}'".format(source))
+    raise MetsiException(f"Unable to resolve event tree formation strategy '{source}'")
 
 
-def resolve_evaluation_strategy(source: str) -> Evaluator[ForestOpPayload]:
+def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestOpPayload]:
     evaluation_strategy_map = {
         EvaluationStrategy.DEPTH: depth_first_evaluator,
         EvaluationStrategy.CHAINS: chain_evaluator
     }
 
-    try:
+    if source in evaluation_strategy_map:
         return evaluation_strategy_map[source]
-    except Exception:
-        raise Exception("Unable to resolve event tree evaluation strategy '{}'".format(source))
+    raise MetsiException(f"Unable to resolve event tree evaluation strategy '{source}'")
 
 
 def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList):

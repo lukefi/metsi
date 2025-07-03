@@ -110,5 +110,9 @@ class IoUtilsTest(ConverterTestSuite):
             stands_expected['tree_strata'] = None
             stands_actual['reference_trees'] = None
             stands_actual['tree_strata'] = None
+            stands_expected['reference_trees_soa'] = None
+            stands_expected['tree_strata_soa'] = None
+            stands_actual['reference_trees_soa'] = None
+            stands_actual['tree_strata_soa'] = None
             self.assertTrue(stands_expected == stands_actual)
 

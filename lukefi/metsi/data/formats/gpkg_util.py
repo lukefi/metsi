@@ -1,15 +1,13 @@
+from typing import Any, NamedTuple, TypedDict
 import sqlite3
 import pandas as pd
 import geopandas
 from shapely.geometry.polygon import Polygon
 import numpy as np
-from typing import Any
-
-import time
 
 
 def _read_stand_geometry(path: str) -> geopandas.GeoDataFrame:
-    ''' 
+    '''
     NOTE: Stand geometry is read with geopandas. This could be done purely with SQLite using spatialite library
     but as installation of spatialite would assume manual it was desided to be done with geopandas. Problems with
     using geopandas to read geometry information is that it is 100-times slower than pure SQL request.
@@ -29,14 +27,17 @@ def _replace_nan(df: pd.DataFrame, value: Any = None) -> pd.DataFrame:
     return df.replace(np.nan, value)
 
 
-def _extract_centroid(geometry: Polygon) -> tuple[float, float]:
+class Centroid(TypedDict):
+    centroid: tuple[float, float]
+    crs: str
+
+
+def _extract_centroid(geometry: Polygon) -> Centroid:
     """ Extracts centroid information from polygon coordinates """
     cid = geometry.centroid
     latitude = round(float(cid.y), 2)
     longitude = round(float(cid.x), 2)
-    return dict(
-        centroid=(longitude, latitude),
-        crs=cid.crs.srs.upper())
+    return {"centroid": (longitude, latitude), "crs": cid.crs.srs.upper()}
 
 
 def _attach_location(df: pd.DataFrame, gdf: geopandas.GeoDataFrame) -> pd.DataFrame:
@@ -48,7 +49,7 @@ def _attach_location(df: pd.DataFrame, gdf: geopandas.GeoDataFrame) -> pd.DataFr
         centroids.append(cid)
     df.insert(0, 'centroid', centroids)
     return df
-    
+
 
 def read_geopackage(path: str, type_value: int = 1) -> tuple[pd.DataFrame, pd.DataFrame]:
     """ Reads stands and strata from Forest Centre (FC) gpkg format.
@@ -57,7 +58,7 @@ def read_geopackage(path: str, type_value: int = 1) -> tuple[pd.DataFrame, pd.Da
     :returns: Stand and stratum tuple of pandas Dataframe.
     """
     RESTRICTION_TYPE_CUTTINGS = 1
-    stands_query = '''
+    stands_query = f'''
         SELECT DISTINCT s.standid,
             s.maingroup,
             s.subgroup,
@@ -71,10 +72,10 @@ def read_geopackage(path: str, type_value: int = 1) -> tuple[pd.DataFrame, pd.Da
             r.restrictiontype,
             r.restrictioncode
         FROM stand as s
-        JOIN treestand AS sd ON s.standid=sd.standid AND sd.type={0}
-        LEFT JOIN restriction AS r ON s.standid=r.standid AND r.restrictiontype={1}
-    '''.format(type_value, RESTRICTION_TYPE_CUTTINGS)
-    strata_query = '''
+        JOIN treestand AS sd ON s.standid=sd.standid AND sd.type={type_value}
+        LEFT JOIN restriction AS r ON s.standid=r.standid AND r.restrictiontype={RESTRICTION_TYPE_CUTTINGS}
+    '''
+    strata_query = f'''
         SELECT s.standid,
             ts.treestratumid,
             ts.stratumnumber,
@@ -86,9 +87,9 @@ def read_geopackage(path: str, type_value: int = 1) -> tuple[pd.DataFrame, pd.Da
             ts.meandiameter,
             ts.meanheight
         FROM treestratum as ts
-        JOIN treestand AS sd ON ts.treestandid=sd.treestandid AND sd.type={0}
+        JOIN treestand AS sd ON ts.treestandid=sd.treestandid AND sd.type={type_value}
         JOIN stand AS s ON sd.standid=s.standid
-    '''.format(type_value)
+    '''
     conn = sqlite3.connect(path)
     stands = _read_from_gpkg(stands_query, conn)
     strata = _read_from_gpkg(strata_query, conn)

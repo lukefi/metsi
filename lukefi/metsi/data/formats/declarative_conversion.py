@@ -1,5 +1,6 @@
 from typing import Any, Tuple, Callable, List
 
+
 class Conversion():
 
     def __init__(self, conf_f: Callable, indices: Tuple = (), object_type: Any = None):
@@ -8,38 +9,38 @@ class Conversion():
         self.object_type = object_type
 
     def extract_index(self, data: List):
-        return ( data[i] for i in self.indices )
+        return (data[i] for i in self.indices)
 
     def __call__(self, data: List, obj: Any):
         datavars = self.extract_index(data)
         obj = () if self.object_type is None else (obj,)
-        input = [*datavars, *obj]
-        return self.conf_f(*input)
+        input_ = [*datavars, *obj]
+        return self.conf_f(*input_)
 
 
 class ConversionMapper():
 
     def __init__(self, conversion_declaration: dict[str, Conversion]):
-          self.declaration = conversion_declaration
-    
+        self.declaration = conversion_declaration
+
     def _filter_declaration_by_instance(self, obj: Any) -> dict[str, Conversion]:
         subset = {}
         for k, dconv in self.declaration.items():
             if not dconv.object_type or (dconv.object_type and isinstance(obj, dconv.object_type)):
-                subset.update( { k : dconv } )
+                subset.update({k: dconv})
         return subset
 
-    def apply_conversions(self, obj: Any, source: list[Any]) -> dict[str: Any]:
+    def apply_conversions[T](self, obj: T, source: list[Any]) -> T:
         """ Applies declared conversions with source data and
             adds the mapping result to the given object.
-            
+
             return: Given object updated with the conversion results
             """
         subset = self._filter_declaration_by_instance(obj)
         for k, dconv in subset.items():
             conv_result = dconv(source, obj)
-            setattr(obj, k, conv_result) 
+            setattr(obj, k, conv_result)
         return obj
-    
+
 
 __all__ = ['ConversionMapper', 'Conversion']

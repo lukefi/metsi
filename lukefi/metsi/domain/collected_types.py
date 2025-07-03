@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.app.utils import MetsiException
 
 
 @dataclass
 class BiomassData:
-    time_point: int = None
+    time_point: int | None = None
     stem_wood: float = 0.0
     stem_bark: float = 0.0
     stem_waste: float = 0.0
@@ -29,7 +30,7 @@ class BiomassData:
     def __add__(self, other):
         return self.__radd__(other)
 
-    def __radd__(self, other: 'BiomassData' or float or int):
+    def __radd__(self, other: 'BiomassData | float | int'):
         if isinstance(other, (float, int)):
             return BiomassData(
                 stem_wood=self.stem_wood + other,
@@ -41,7 +42,7 @@ class BiomassData:
                 stumps=self.stumps + other,
                 roots=self.roots + other
             )
-        elif type(other) == BiomassData:
+        elif isinstance(other, BiomassData):
             return BiomassData(
                 stem_wood=self.stem_wood + other.stem_wood,
                 stem_bark=self.stem_bark + other.stem_bark,
@@ -53,7 +54,7 @@ class BiomassData:
                 roots=self.roots + other.roots
             )
         else:
-            raise Exception("Can only do addition between numbers and BiomassData, not {}".format(type(other)))
+            raise MetsiException(f"Can only do addition between numbers and BiomassData, not {type(other)}")
 
     def __sub__(self, other):
         return self + (other * - 1)
@@ -63,7 +64,7 @@ class BiomassData:
 
     def __rmul__(self, factor):
         if not isinstance(factor, (int, float)):
-            raise Exception("Can multiply BiomassData only with float or int, not {}".format(type(factor)))
+            raise MetsiException(f"Can multiply BiomassData only with float or int, not {type(factor)}")
         return BiomassData(
             stem_wood=self.stem_wood * factor,
             stem_bark=self.stem_bark * factor,
@@ -87,12 +88,12 @@ class CrossCutResult:
     operation: str
     time_point: int
 
-    #what's the right word here? "real", "absolute", something else?
+    # what's the right word here? "real", "absolute", something else?
     def get_real_volume(self) -> float:
-        return self.volume_per_ha*self.stand_area
+        return self.volume_per_ha * self.stand_area
 
     def get_real_value(self) -> float:
-        return self.value_per_ha*self.stand_area
+        return self.value_per_ha * self.stand_area
 
 
 @dataclass
@@ -115,9 +116,9 @@ class NPVResult:
 
 @dataclass
 class PriceableOperationInfo:
-     operation: str
-     units: float
-     time_point: int
+    operation: str
+    units: float
+    time_point: int
 
-     def get_real_cost(self, unit_cost: float) -> float:
-         return self.units * unit_cost
+    def get_real_cost(self, unit_cost: float) -> float:
+        return self.units * unit_cost

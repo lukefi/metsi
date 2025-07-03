@@ -1,10 +1,7 @@
-from typing import TypeVar, Generic
+from typing import Any
 
 
-T = TypeVar("T")
-
-
-class LayeredObject(Generic[T]):
+class LayeredObject[T]:
     def __init__(self, base: T):
         self._previous = base
 
@@ -13,14 +10,16 @@ class LayeredObject(Generic[T]):
         builtins = ('__dict__', '__getattribute__', 'new_layer', 'fixate')
         if key in local_keys or key in builtins:
             return object.__getattribute__(self, key)
-        else:
-            return object.__getattribute__(self, '_previous').__getattribute__(key)
+        return object.__getattribute__(self, '_previous').__getattribute__(key)
 
-    def new_layer(self):
+    def __setattr__(self, name: str, value: Any) -> None:
+        object.__setattr__(self, name, value)
+
+    def new_layer(self) -> "LayeredObject[LayeredObject[T]]":
         return LayeredObject(self)
 
-    def fixate(self) -> T:
-        if self._previous.__dict__.get('_previous'):
+    def fixate(self) -> "LayeredObject[T] | T":
+        if isinstance(self._previous, LayeredObject):
             root = self._previous.fixate()
         else:
             root = self._previous

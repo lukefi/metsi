@@ -18,7 +18,8 @@ CrossCutFn = Callable[..., tuple[Sequence[int], Sequence[float], Sequence[float]
 
 
 @njit
-def apteeraus_Nasberg(T: np.ndarray, P: np.ndarray, m: int, n: int, div: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def apteeraus_Nasberg(T: np.ndarray, P: np.ndarray, m: int, n: int,
+                      div: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     This function has been ported from, and should be updated according to, the R implementation.
     """
@@ -35,19 +36,20 @@ def apteeraus_Nasberg(T: np.ndarray, P: np.ndarray, m: int, n: int, div: int) ->
     v_tot = 0.0
     c_tot = 0.0
 
-    for i in range(n): #iterate over div-length segmnents of the tree trunk
-        for j in range(m): #iterate over the number of timber assortment price classes (row count in puutavaralajimaarittelyt.txt)
+    for i in range(n):  # iterate over div-length segmnents of the tree trunk
+        for j in range(
+                m):  # iterate over the number of timber assortment price classes (row count in puutavaralajimaarittelyt.txt)
             # numpy array indexing: 1st row 2nd element: arr[0, 1]
             # in R it's the same order: arr[2, 3] --> the item on 2nd row and 3rd column
             # but whereas R-indexing is one-based, Python's is zero-based --> indexing has been offset by one
-            offset = P[j,2] / div
+            offset = P[j, 2] / div
             t = int(i + offset)
             if t < n:
-                d_top = T[t,0]
+                d_top = T[t, 0]
                 d_min = P[j, 1]
 
                 if d_top >= d_min:
-                    v = T[t,2] - T[i,2]
+                    v = T[t, 2] - T[i, 2]
                     c = v * P[j, 3]
                     v_tot = v + V[i]
                     c_tot = c + C[i]
@@ -68,22 +70,26 @@ def apteeraus_Nasberg(T: np.ndarray, P: np.ndarray, m: int, n: int, div: int) ->
     a = l = 1
 
     while maxi > 0:
-        a = int(A[maxi])-1 # a is used as an index for volumes and values. Here in Python, it must be subtracted by one to work with zero-based indexing.
+        # a is used as an index for volumes and values. Here in Python, it must be
+        # subtracted by one to work with zero-based indexing.
+        a = int(A[maxi]) - 1
         l = int(L[maxi])
         volumes[a] = volumes[a] + V[maxi] - V[l]
         values[a] = values[a] + C[maxi] - C[l]
 
         maxi = l
 
-    return (nas, volumes, values) #deviating from the R implementation a little bit by also returning `nas`, the list of unique timber grades.
+    # deviating from the R implementation a little bit by also returning `nas`, the list of unique timber grades.
+    return (nas, volumes, values)
 
 
-def cross_cut_py(timber_price_table, div = 10) -> CrossCutFn:
+def cross_cut_py(timber_price_table, div=10) -> CrossCutFn:
     def cc(species: TreeSpecies, breast_height_diameter, height):
-        species_string = _cross_cut_species_mapper.get(species, "birch") #birch is used as the default species in cross cutting
-        #the original cross-cut scripts rely on the height being an integer, thus rounding.
+        # birch is used as the default species in cross cutting
+        species_string = _cross_cut_species_mapper.get(species, "birch")
+        # the original cross-cut scripts rely on the height being an integer, thus rounding.
         height = round(height)
-        n = int((height*100)/div-1)
+        n = int((height * 100) / div - 1)
         T = stem_profile.create_tree_stem_profile(species_string, breast_height_diameter, height, n)
         P = timber_price_table
         m = P.shape[0]
@@ -99,7 +105,7 @@ def cross_cut(
         P: np.ndarray,
         div=10,
         impl: str = "py"
-        ) -> tuple[Sequence[int], Sequence[float], Sequence[float]]:
+) -> tuple[Sequence[int], Sequence[float], Sequence[float]]:
     """
     Returns a tuple containing unique timber grades and their respective volumes and values.
     If :breast_height_diameter: is 0 or none, the Nasberg cross-cutting algorithm can't be applied.
@@ -110,7 +116,8 @@ def cross_cut(
     if breast_height_diameter in (None, 0):
         return ZERO_DIAMETER_DEFAULTS
     elif impl == "lupa":
-        cc = cross_cut_lupa(tuple(P[:, 0]), tuple(P[:, 1]), tuple(P[:, 2]), tuple(P[:, 3]), P.shape[0], div, tuple(np.unique(P[:, 0])))
+        cc = cross_cut_lupa(tuple(P[:, 0]), tuple(P[:, 1]), tuple(P[:, 2]),
+                            tuple(P[:, 3]), P.shape[0], div, tuple(np.unique(P[:, 0])))
     else:
         cc = cross_cut_py(P, div)
     return cc(species, breast_height_diameter, height)

@@ -3,17 +3,19 @@ from typing import Any, Optional
 from collections.abc import Callable
 
 from lukefi.metsi.app.app_types import ExportableContainer
-from lukefi.metsi.data.formats.util import parse_float, get_or_default
+from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.formats.rst_const import MSBInitialDataRecordConst as msb_meta
 from lukefi.metsi.domain.forestry_types import StandList
 
 
 def rst_float(source: str | int | float | None) -> str:
-    try:
-        return f'{round(float(source), 6):.6f}'
-    except:
-        return f'{0:.6f}'
+    if source is not None:
+        try:
+            return f'{round(float(source), 6):.6f}'
+        except ValueError:
+            return f'{0:.6f}'
+    return f'{0:.6f}'
 
 
 def msb_metadata(stand: ForestStand) -> tuple[list[str], list[str], list[str]]:
@@ -54,22 +56,21 @@ def msb_metadata(stand: ForestStand) -> tuple[list[str], list[str], list[str]]:
     return physical_record_metadata, logical_record_metadata, logical_subrecord_metadata
 
 
-def c_var_metadata(uid: float, cvars_len: int) -> list[str]:
-    FIXED_TWO = 2
-    total_length = FIXED_TWO + cvars_len
-    cvars_meta = map(rst_float, [uid, total_length, FIXED_TWO, cvars_len])
+def c_var_metadata(uid: float | None, cvars_len: int) -> list[str]:
+    total_length = 2 + cvars_len
+    cvars_meta = map(rst_float, [uid, total_length, 2, cvars_len])
     return list(cvars_meta)
+
 
 def c_var_rst_row(stand: ForestStand, cvar_decl: list[str]) -> str:
     """ Content structure generation for a C-variable row """
-    cvars_meta = c_var_metadata(
-        parse_float(stand.identifier) or stand.stand_id,
-        len(cvar_decl))
+    cvars_meta = c_var_metadata(parse_float(stand.identifier) or stand.stand_id, len(cvar_decl))
     cvars_row = " ".join(chain(
         cvars_meta,
         map(rst_float, stand.get_value_list(cvar_decl)
-    )))    
+            )))
     return cvars_row
+
 
 def rst_forest_stand_rows(stand: ForestStand, additional_vars: list[str]) -> list[str]:
     """Generate RST data file rows (with MSB metadata) for a single ForestStand"""
@@ -95,7 +96,7 @@ def rsts_forest_stand_rows(stand: ForestStand) -> list[str]:
     """Generate RSTS data file rows for a single ForestStand """
     result = []
     result.append(" ".join(chain(
-        [ str(parse_float(stand.identifier) or stand.stand_id) ],
+        [str(parse_float(stand.identifier) or stand.stand_id)],
         map(rst_float, stand.as_rst_row())
     )))
     for stratum in stand.tree_strata:
@@ -109,15 +110,16 @@ def csv_value(source: Any) -> str:
     else:
         return str(source)
 
+
 def stand_to_csv_rows(stand: ForestStand, delimeter: str, additional_vars: Optional[list[str]]) -> list[str]:
     """converts the :stand:, its reference trees and tree strata to csv rows."""
     result = []
-    result.append(delimeter.join(map(lambda x: csv_value(x), stand.as_internal_csv_row(additional_vars))))
+    result.append(delimeter.join(map(csv_value, stand.as_internal_csv_row(additional_vars))))
     result.extend(
         map(
             lambda tree: delimeter.join(
                 map(
-                    lambda x: csv_value(x),
+                    csv_value,
                     tree.as_internal_csv_row())),
             stand.reference_trees)
     )
@@ -125,7 +127,7 @@ def stand_to_csv_rows(stand: ForestStand, delimeter: str, additional_vars: Optio
         map(
             lambda stratum: delimeter.join(
                 map(
-                    lambda x: csv_value(x),
+                    csv_value,
                     stratum.as_internal_csv_row())),
             stand.tree_strata)
     )
@@ -160,24 +162,28 @@ def csv_content_to_stands(csv_content: list[list[str]]) -> StandList:
     return stands
 
 
-def outputtable_rows(container: ExportableContainer[ForestStand], formatter: Callable[[ForestStand, list[str]], list[str]]) -> list[str]:
+def outputtable_rows(container: ExportableContainer[ForestStand], formatter: Callable[[ForestStand, list[str]],
+                                                                                      list[str]]) -> list[str]:
     stands = container.export_objects
-    additional_vars = container.additional_vars
+    additional_vars = container.additional_vars or []
     result = []
     for stand in stands:
         result.extend(formatter(stand, additional_vars))
     return result
 
+
 def stands_to_rst_content(container: ExportableContainer[ForestStand]) -> list[str]:
     """Generate RST file contents for the given list of ForestStand"""
-    return outputtable_rows(container, lambda stand, additional_vars: rst_forest_stand_rows(stand, additional_vars))
+    return outputtable_rows(container, rst_forest_stand_rows)
+
 
 def stands_to_rsts_content(container: ExportableContainer[ForestStand]) -> list[str]:
     """Generate RSTS file contents for the given list of ForestStand"""
     return outputtable_rows(container, lambda stand, additional_vars: rsts_forest_stand_rows(stand))
 
+
 def mela_par_file_content(cvar_names: list[str]) -> list[str]:
     """ Par file content generalizes over all stands. Only single stand is needed """
-    content = [ '#{0}'.format(vname.upper()) for vname in cvar_names ]
+    content = [f'#{vname.upper()}' for vname in cvar_names]
     content.insert(0, 'C_VARIABLES')
     return content

@@ -1,27 +1,34 @@
-from enum import EnumMeta
-from typing import Optional, Any
+from enum import IntEnum
+from typing import Optional, Any, Union
+from lukefi.metsi.data.enums.internal import (
+    DrainageCategory, LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory)
 
 
-def parse_type(source, *ts: type) -> type:
+def parse_type[T:Union[int, float, str]](source, *ts: type[T]):
     ''' Generic version of  parse_int and parse_float utilities'''
-    ts = list(ts)
+    ts_ = list(ts)
     try:
-        t0 = ts.pop(0)
+        t0 = ts_.pop(0)
         r = t0(source)
-        for t in ts:
+        for t in ts_:
             r = t(r)
         return r
     except (ValueError, TypeError, IndexError):
         return None
 
-def parse_int(source: str) -> Optional[int]:
+
+def parse_int(source: str | None) -> Optional[int]:
+    if source is None:
+        return None
     try:
         return int(source)
     except (ValueError, TypeError):
         return None
 
 
-def parse_float(source: str) -> Optional[float]:
+def parse_float(source: str | None) -> Optional[float]:
+    if source is None:
+        return None
     try:
         return float(source)
     except (ValueError, TypeError):
@@ -32,34 +39,10 @@ def get_or_default(maybe: Optional[Any], default: Any = None) -> Any:
     return default if maybe is None else maybe
 
 
-def convert_str_to_type(_class: type, value: str, property_name: str):
-    """convert value to the type given by its type hint in self.__annotations__"""
+def convert_str_to_type[T:(int, float, str, OwnerCategory, LandUseCategory, SoilPeatlandCategory, SiteType,
+                           DrainageCategory)](value: str, ret_type: type[T]) -> Optional[T]:
     if value == "None":
         return None
-    property_type = _class.__annotations__[property_name]
-    if property_type in (bool, Optional[bool]):
-        return value == "True"
-    if property_type in (int, Optional[int]):
-        return int(value)
-    if property_type in (float, Optional[float]):
-        return float(value)
-    if property_type in (str, Optional[str]):
-        return str(value)
-    if isinstance(property_type.__args__[0], EnumMeta):
-        return property_type.__args__[0](int(value))
-
-    if type(value) == tuple:
-        #stand.area_weight_factors
-        if property_type == tuple[float, float]:
-            return tuple(parse_float(v) for v in value)
-        #stand.geo_location
-        if property_type == Optional[tuple[float, float, float, str]]:
-            return tuple(parse_float(v) for v in value[0:3]) + (str(value[3]) if value[3] != "None" else None,)
-        #stand.monthly rainfall and stand.monthly_temperatures
-        if property_type == Optional[list[float]]:
-            return [parse_float(v) for v in value]
-        #stratum.stand_origin_relative_position
-        if property_type == tuple[float,float,float]:
-            return tuple(parse_float(v) for v in value) 
-    else:
-        raise Exception(f"could not convert {value} to {property_name}.")
+    if issubclass(ret_type, IntEnum):
+        return ret_type(int(value))
+    return ret_type(value)

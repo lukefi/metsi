@@ -1,5 +1,4 @@
 """ Module contains forestry domain spesific model functions """
-import math
 from typing import Optional
 from lukefi.metsi.data.enums.internal import TreeSpecies
 
@@ -20,16 +19,17 @@ NASLUND_PINE_OR_OTHER_CONIFEROUS = [
     TreeSpecies.THUJA,
     TreeSpecies.UNKNOWN_CONIFEROUS,
     TreeSpecies.YEW,
-    ]
+]
 
-def naslund_height(diameter: float, species: TreeSpecies) -> Optional[float]:
+
+def naslund_height(diameter: float | None, species: TreeSpecies | None) -> Optional[float]:
     """
     Näslund height model, with parameters from one Siipilehto. As extracted from LueVMI12.py.
     :param diameter: diameter of the tree at 1.3m height
     :param species: species code of the tree in internal TreeSpecies terms
     :return estimated height of the tree in meters or None
     """
-    if diameter > 0:
+    if diameter is not None and diameter > 0:
         # scots pine or other coniferous
         if species in NASLUND_PINE_OR_OTHER_CONIFEROUS:
             height = ((diameter ** 2) / (0.894 + 0.185 * diameter) ** 2) + 1.3
@@ -51,9 +51,9 @@ def naslund_correction(species: TreeSpecies, diameter: float, height: float) -> 
     ''' Height correction coefficient by Naslund height model
 
         :spe: tree stratum species
-        :diameter: tree stratum diameter 
+        :diameter: tree stratum diameter
         :height: tree stratum height
         :return: height correction coefficient
     '''
     h_computed = naslund_height(diameter, species)
-    return height/h_computed
+    return height / h_computed

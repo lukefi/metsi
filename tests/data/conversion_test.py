@@ -484,7 +484,7 @@ class TestConversion(test_util.ConverterTestSuite):
         # test_area_number is 01
         # stand_number is 1
         stand = 'K0001012 01 11    66569963102608    1010   0041721         000059500417      1   0         40020618 B0          0   0 0   0              0  0                   6654199.85 C 102600.11 66569963102608                                                                                          0      0'
-        stand_id = vmi_util.generate_stand_identifier(stand, VMI12StandIndices)
+        stand_id = vmi_util.generate_stand_identifier(stand, VMI12_STAND_INDICES)
         self.assertEqual('0-001-012-01-1', stand_id)
 
     def test_generating_vmi12_stratum_identifier(self):
@@ -493,7 +493,7 @@ class TestConversion(test_util.ConverterTestSuite):
         # test_area_number is 02
         # stand_number is 1
         stratum = 'K0002023 02 12 01  1 11             24 190  04606N17 1  84A1 0'
-        stratum_id = vmi_util.generate_stratum_identifier(stratum, VMI12StratumIndices)
+        stratum_id = vmi_util.generate_stratum_identifier(stratum, VMI12_STRATUM_INDICES)
         self.assertEqual('0-002-023-02-1-01-stratum', stratum_id)
 
     def test_generating_vmi12_tree_identifier(self):
@@ -502,7 +502,7 @@ class TestConversion(test_util.ConverterTestSuite):
         # test_area_number is 02
         # stand_number is 1
         tree = 'K0002023 02 13001 1207217 2  01 15521741  020081711 00                                                              7725 3999  342                                                                                                                                           259959  134571   11515 39185 101864  4303 11769  8489 24696 4196'
-        tree_id = vmi_util.generate_tree_identifier(tree, VMI12TreeIndices)
+        tree_id = vmi_util.generate_tree_identifier(tree, VMI12_TREE_INDICES)
         self.assertEqual('0-002-023-02-1-001-tree', tree_id)
 
     def test_generating_vmi13_stand_identifier(self):
@@ -511,7 +511,7 @@ class TestConversion(test_util.ConverterTestSuite):
         # test_area_number is 10
         # stand_number is 1
         vmi13_row = '1 U 1  58  75 10 1   . 0 20200522 2020 258 3 1 10 10  . 12 10 176 176 893    1    5 4 S 7025056.83 589991.91 7025054.56 589991.44  179.70 1019    . T  1 3   33 220  0   . 0  . 1 0  0  . . 0 1  0  . . 0 0 2 3 0  . 2 3 1 35 2 3 2 0 4  75 0 0 3 1 5  2 .  . .  . 15 4 10 0 15 2 10 8 15 6 26 .  .  .    . 22 187  63 19 . U     . E 1 . . 0 A . . . . 0 . 0 .  . 0 . 7 3 . . 4 1 . 2 2 2   0 . . 0 . .   1  0 0 .   . 0 0 . . .         . 1 7025054.56 589991.44 .    .'
-        vmi13_id = vmi_util.generate_stand_identifier(vmi13_row.split(), VMI13StandIndices)
+        vmi13_id = vmi_util.generate_stand_identifier(vmi13_row.split(), VMI13_STAND_INDICES)
         self.assertEqual('1-58-75-10-1', vmi13_id)
 
     def test_generating_vmi13_stratum_identifier(self):
@@ -520,7 +520,7 @@ class TestConversion(test_util.ConverterTestSuite):
         # test_area_number is 2
         # stand_number is 1
         stratum = '2 U 1  59  68  2 1   1 0 20200503 258 1  2 3 1350  1400  4  38 E   7  8 F  2 .  0 .  .  . .  . .    .'
-        stratum_id = vmi_util.generate_stratum_identifier(stratum.split(), VMI13StratumIndices)
+        stratum_id = vmi_util.generate_stratum_identifier(stratum.split(), VMI13_STRATUM_INDICES)
         self.assertEqual('1-59-68-2-1-1-stratum', stratum_id)
 
     def test_generating_vmi13_tree_identifier(self):
@@ -529,5 +529,5 @@ class TestConversion(test_util.ConverterTestSuite):
         # test_area_number is 10
         # stand_number is 1
         tree = '3 U 1  58  75 10 1  10 0 20200522 258  11 V  1  250 7 2    .    . 306  863 1  0 0 .   .   .   .   .  . . .  .  .  .  . .  . .  . . . . . .   .   . .  .   .   .   .   . .   . . .   . . .   . . .   . . .   . . .   . . .   . . .   . . . .  . .  . .  . .  . .  . .  . .  . .  .     .     .     .     .     .     .     .     .     .        .        .        .     .       .      .      .      .      .     . .    .'
-        tree_id = vmi_util.generate_tree_identifier(tree.split(), VMI13TreeIndices)
+        tree_id = vmi_util.generate_tree_identifier(tree.split(), VMI13_TREE_INDICES)
         self.assertEqual('1-58-75-10-1-10-tree', tree_id)

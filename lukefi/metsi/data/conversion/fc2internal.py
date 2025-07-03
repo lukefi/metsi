@@ -115,42 +115,43 @@ _storey_map = {
     ForestCentreStratumStorey.REMOVAL: Storey.REMOVAL
 }
 
+
 def convert_drainage_category(code: str) -> DrainageCategory:
     value = ForestCentreDrainageCategory(code)
-    return _drainage_category_map.get(value)
+    return _drainage_category_map[value]
 
 
-def convert_site_type_category(code: str) -> SiteType:
+def convert_site_type_category(code: str | None) -> SiteType:
     value = ForestCentreSiteType(code)
-    return _site_type_map.get(value)
+    return _site_type_map[value]
 
 
-def convert_soil_peatland_category(sp_code: str) -> SoilPeatlandCategory:
+def convert_soil_peatland_category(sp_code: str | None) -> SoilPeatlandCategory:
     value = ForestCentreSoilPeatlandCategory(sp_code)
-    return _soil_peatland_map.get(value)
+    return _soil_peatland_map[value]
 
 
-def convert_land_use_category(lu_code: str) -> LandUseCategory:
+def convert_land_use_category(lu_code: str | None) -> LandUseCategory:
     fc_category = ForestCentreLandUseCategory(lu_code)
-    return _land_use_map.get(fc_category)
+    return _land_use_map[fc_category]
 
 
-def convert_species(species_code: str) -> TreeSpecies:
+def convert_species(species_code) -> TreeSpecies:
     """Converts FC species code to internal TreeSpecies code"""
     fc_species = ForestCentreSpecies(species_code)
-    return _species_map.get(fc_species)
+    return _species_map[fc_species]
 
 
 def convert_owner(owner_code: str) -> OwnerCategory:
     fc_owner = ForestCentreOwnerCategory(owner_code)
-    return _owner_map.get(fc_owner)
+    return _owner_map[fc_owner]
 
 
 def convert_storey(storey_code: str) -> Storey:
     fc_storey = ForestCentreStratumStorey(storey_code)
-    return _storey_map.get(fc_storey)
+    return _storey_map[fc_storey]
 
 
-def convert_to_internal(code: str, category: Callable) -> Optional[IntEnum]:
+def convert_to_internal[T: IntEnum](code, category: Callable[[str], T]) -> Optional[T]:
     ''' Converts forest centre code into fdm internal value '''
     return None if code is None else category(code)

@@ -3,7 +3,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from lukefi.metsi.app import file_io
-from lukefi.metsi.data.formats.ForestBuilder import VMIBuilder, VMI13Builder, VMI12Builder
+from lukefi.metsi.data.formats.forest_builder import VMIBuilder, VMI13Builder, VMI12Builder
 
 
 class ConverterTestSuite(unittest.TestCase):

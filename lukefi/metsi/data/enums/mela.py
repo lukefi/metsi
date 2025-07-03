@@ -121,12 +121,3 @@ class MelaTreeOrigin(Enum):
     SEEDED = 1
     PLANTED = 2
     SUPPLEMENTARY_PLANTED = 3
-
-
-class MelaDrainageCategory(Enum):
-    UNDRAINED_MINERAL_SOIL = 0
-    DITCHED_MINERAL_SOIL = 1
-    UNDRAINED_MIRE = 2
-    DITCHED_MIRE = 3
-    TRANSFORMING_MIRE = 4
-    TRANSFORMED_MIRE = 5

@@ -10,7 +10,7 @@ from collections.abc import Callable, Iterable
 def compounded_growth_factor(growth_percent: float, years: int) -> float:
     try:
         return math.pow(1.0 + (growth_percent / 100.0), years)
-    except:
+    except BaseException:
         return 0.0
 
 
@@ -22,7 +22,7 @@ def solve_dominant_height_c_largest(stand, c: int = 100):
         d = rt.breast_height_diameter
         w = rt.stems_per_ha
         if n + w >= c:
-            wn = (c - n) # notice only portion of stems as last weight
+            wn = (c - n)  # notice only portion of stems as last weight
             dw_sum += d * wn
             n = c
             break
@@ -79,7 +79,7 @@ def calculate_attribute_sum(reference_trees: list[ReferenceTree], f: Callable) -
 
 
 def calculate_basal_area_weighted_attribute_sum(reference_trees: list[ReferenceTree],
-                                                      f: Callable[[ReferenceTree], float]) -> float:
+                                                f: Callable[[ReferenceTree], float]) -> float:
     """ Calcualtes basal area weighted sum for reference trees attribute predefined in function f
 
     predefined function f contains the logic of calculating reference tree attribute (eg. tree height).
@@ -90,11 +90,12 @@ def calculate_basal_area_weighted_attribute_sum(reference_trees: list[ReferenceT
     attribute_total = calculate_attribute_sum(reference_trees, f)
     return attribute_total / basal_area_total
 
+
 def mean_age_stand(stand: ForestStand) -> float:
     stems = overall_stems_per_ha(stand.reference_trees)
     if stems > 0:
         agesum = sum(rt.stems_per_ha * rt.biological_age for rt in stand.reference_trees)
-        mean_age = agesum/stems
+        mean_age = agesum / stems
     else:
         mean_age = 0
     return mean_age
@@ -128,7 +129,9 @@ def override_from_diameter(initial_stratum: TreeStratum, candidate_stratum: Tree
     return initial_stratum
 
 
-def find_matching_stratum_by_diameter(reference_tree: ReferenceTree, strata: list[TreeStratum]) -> Optional[TreeStratum]:
+def find_matching_stratum_by_diameter(
+        reference_tree: ReferenceTree,
+        strata: list[TreeStratum]) -> Optional[TreeStratum]:
     """ Solves from which stratum the supplementing of reference tree should happen.
 
     Return a stratum that has the closest diameter to the reference tree diameter.
@@ -150,7 +153,10 @@ def find_matching_stratum_by_diameter(reference_tree: ReferenceTree, strata: lis
     return associated_stratum
 
 
-def find_matching_stratum_by_diameter_lm(reference_tree: ReferenceTree, strata: Iterable[TreeStratum], threshold=2.5) -> Optional[TreeStratum]:
+def find_matching_stratum_by_diameter_lm(
+        reference_tree: ReferenceTree,
+        strata: Iterable[TreeStratum],
+        threshold=2.5) -> Optional[TreeStratum]:
     """
     Find the stratum that has the closest diameter to the reference tree diameter by factor of difference, where the
     reference tree diameter is between the stratum mean diameter divided by threshold and multiplied by threshold.
@@ -217,7 +223,10 @@ def find_strata_by_similar_species(species: TreeSpecies, strata: list[TreeStratu
     return candidates
 
 
-def find_matching_storey_stratum_for_tree(tree: ReferenceTree, strata: list[TreeStratum], diameter_threshold=2.5) -> Optional[TreeStratum]:
+def find_matching_storey_stratum_for_tree(
+        tree: ReferenceTree,
+        strata: list[TreeStratum],
+        diameter_threshold=2.5) -> Optional[TreeStratum]:
     same_storey_strata = [stratum for stratum in strata if stratum.storey == tree.storey]
     same_species_strata, other_species_strata = split_list_by_predicate(
         same_storey_strata,
