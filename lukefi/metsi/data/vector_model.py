@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Optional, overload
 import numpy as np
 import numpy.typing as npt
 
@@ -101,6 +101,51 @@ class VectorData():
                 retval = object_default
             return retval
         return value
+
+    @overload
+    def create(self, new: dict[str, Any], index: int | None = None):
+        ...
+
+    @overload
+    def create(self, new: list[dict[str, Any]], index: list[int] | None = None):
+        ...
+
+    def create(self, new: dict[str, Any] | list[dict[str, Any]], index: int | list[int] | None = None):
+        if isinstance(new, list):
+            for key, dtype in self.dtypes.items():
+                values = [self.to_default(new_item.get(key), dtype) for new_item in new]
+                vector: npt.NDArray = getattr(self, key)
+                if index is not None:
+                    setattr(self, key, np.insert(vector, index, values))  # insert always creates a copy
+                else:
+                    setattr(self, key, np.append(vector, values))  # append always creates a copy
+        else:
+            for key, dtype in self.dtypes.items():
+                value = self.to_default(new.get(key), dtype)
+                vector = getattr(self, key)
+                if index is not None:
+                    setattr(self, key, np.insert(vector, index, value))  # insert always creates a copy
+                else:
+                    setattr(self, key, np.append(vector, value))  # append always creates a copy
+
+    def read(self, index: int) -> dict[str, Any]:
+        return {key: getattr(self, key)[index] for key in self.dtypes}
+
+    def update(self, new: dict[str, Any], index: int):
+        for key, value in new.items():
+            if key in self.dtypes:
+                vector: npt.NDArray = getattr(self, key)
+                if not vector.flags.writeable:
+                    # Vector is read-only, must copy first.
+                    vector = vector.copy()
+                    setattr(self, key, vector)
+                    vector.flags.writeable = True
+                vector[index] = value
+
+    def delete(self, index: int | list[int]):
+        for key in self.dtypes:
+            vector: npt.NDArray = getattr(self, key)
+            setattr(self, key, np.delete(vector, index))  # delete always creates a copy
 
 
 class ReferenceTrees(VectorData):
