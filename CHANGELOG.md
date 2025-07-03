@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.1.2] - 2025-07-03
+
+### Fixed
+
+- Several typing related fixes and general cleanup
+
+### Changed
+
+- Vector data model moved into its own module
+- Vectorized data no longer automatically overwrites previous data
+
 ## [2.1.1] - 2025-06-27
 
 ### Fixed
