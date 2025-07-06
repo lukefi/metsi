@@ -1,3 +1,4 @@
+from copy import copy
 from typing import Any, Optional, overload
 import numpy as np
 import numpy.typing as npt
@@ -146,6 +147,13 @@ class VectorData():
         for key in self.dtypes:
             vector: npt.NDArray = getattr(self, key)
             setattr(self, key, np.delete(vector, index))  # delete always creates a copy
+
+    def finalize(self):
+        for key in self.dtypes:
+            attr: npt.NDArray
+            attr = getattr(self, key)
+            attr.flags.writeable = False
+        return copy(self)
 
 
 class ReferenceTrees(VectorData):

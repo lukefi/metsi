@@ -153,3 +153,92 @@ class VectorModelTest(unittest.TestCase):
         self.assertEqual(self.vector_data.x[1], 4)
         self.assertEqual(self.vector_data.y[1], 5)
         self.assertEqual(self.vector_data.z[1], 6.0)
+
+    def test_finalize_and_update(self):
+        self.vector_data.create([{"x": 1, "y": 2, "z": 3.0}, {"x": 4, "y": 5, "z": 6.0}, {"x": 7, "y": 8, "z": 9.0}])
+
+        vector_data_copy = self.vector_data.finalize()
+
+        self.assertEqual(len(self.vector_data.x), 3)
+        self.assertEqual(len(self.vector_data.y), 3)
+        self.assertEqual(len(self.vector_data.z), 3)
+
+        self.assertEqual(vector_data_copy.x[0], 1)
+        self.assertEqual(vector_data_copy.y[0], 2)
+        self.assertEqual(vector_data_copy.z[0], 3.0)
+
+        self.assertEqual(vector_data_copy.x[1], 4)
+        self.assertEqual(vector_data_copy.y[1], 5)
+        self.assertEqual(vector_data_copy.z[1], 6.0)
+
+        self.assertEqual(vector_data_copy.x[2], 7)
+        self.assertEqual(vector_data_copy.y[2], 8)
+        self.assertEqual(vector_data_copy.z[2], 9.0)
+
+        vector_data_copy.update({"x": 10}, 0)
+        vector_data_copy.update({"z": 11.5}, 1)
+
+        self.assertEqual(vector_data_copy.x[0], 10)
+        self.assertEqual(vector_data_copy.y[0], 2)
+        self.assertEqual(vector_data_copy.z[0], 3.0)
+
+        self.assertEqual(vector_data_copy.x[1], 4)
+        self.assertEqual(vector_data_copy.y[1], 5)
+        self.assertEqual(vector_data_copy.z[1], 11.5)
+
+        self.assertEqual(vector_data_copy.x[2], 7)
+        self.assertEqual(vector_data_copy.y[2], 8)
+        self.assertEqual(vector_data_copy.z[2], 9.0)
+
+        self.assertEqual(self.vector_data.x[0], 1)
+        self.assertEqual(self.vector_data.y[0], 2)
+        self.assertEqual(self.vector_data.z[0], 3.0)
+
+        self.assertEqual(self.vector_data.x[1], 4)
+        self.assertEqual(self.vector_data.y[1], 5)
+        self.assertEqual(self.vector_data.z[1], 6.0)
+
+        self.assertEqual(self.vector_data.x[2], 7)
+        self.assertEqual(self.vector_data.y[2], 8)
+        self.assertEqual(self.vector_data.z[2], 9.0)
+
+    def test_finalize_and_create(self):
+        self.vector_data.create([{"x": 1, "y": 2, "z": 3.0}, {"x": 4, "y": 5, "z": 6.0}, {"x": 7, "y": 8, "z": 9.0}])
+        vector_data_copy = self.vector_data.finalize()
+        vector_data_copy.create({"x": 12, "y": 13, "z": 14.0})
+
+        self.assertEqual(len(self.vector_data.x), 3)
+        self.assertEqual(len(self.vector_data.y), 3)
+        self.assertEqual(len(self.vector_data.z), 3)
+
+        self.assertEqual(len(vector_data_copy.x), 4)
+        self.assertEqual(len(vector_data_copy.y), 4)
+        self.assertEqual(len(vector_data_copy.z), 4)
+
+        self.assertEqual(vector_data_copy.x[0], 1)
+        self.assertEqual(vector_data_copy.y[0], 2)
+        self.assertEqual(vector_data_copy.z[0], 3.0)
+
+        self.assertEqual(vector_data_copy.x[1], 4)
+        self.assertEqual(vector_data_copy.y[1], 5)
+        self.assertEqual(vector_data_copy.z[1], 6.0)
+
+        self.assertEqual(vector_data_copy.x[2], 7)
+        self.assertEqual(vector_data_copy.y[2], 8)
+        self.assertEqual(vector_data_copy.z[2], 9.0)
+
+        self.assertEqual(vector_data_copy.x[3], 12)
+        self.assertEqual(vector_data_copy.y[3], 13)
+        self.assertEqual(vector_data_copy.z[3], 14.0)
+
+        self.assertEqual(self.vector_data.x[0], 1)
+        self.assertEqual(self.vector_data.y[0], 2)
+        self.assertEqual(self.vector_data.z[0], 3.0)
+
+        self.assertEqual(self.vector_data.x[1], 4)
+        self.assertEqual(self.vector_data.y[1], 5)
+        self.assertEqual(self.vector_data.z[1], 6.0)
+
+        self.assertEqual(self.vector_data.x[2], 7)
+        self.assertEqual(self.vector_data.y[2], 8)
+        self.assertEqual(self.vector_data.z[2], 9.0)
