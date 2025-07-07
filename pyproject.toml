@@ -37,7 +37,8 @@ tests = [
     "mypy==1.16.1",
     "types-lupa",
     "pandas-stubs",
-    "types-shapely"
+    "types-shapely",
+    "types-geopandas"
 ]
 
 [project.scripts]
