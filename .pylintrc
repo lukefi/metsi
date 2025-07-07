@@ -69,6 +69,7 @@ disable=
         missing-module-docstring,
         missing-class-docstring,
         missing-function-docstring,
+        duplicate-code,
         too-few-public-methods,
         too-many-arguments,
         too-many-branches,
