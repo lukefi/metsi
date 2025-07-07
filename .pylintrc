@@ -27,7 +27,7 @@ ignore-patterns=
 
 # Use multiple processes to speed up Pylint. Specifying 0 will auto-detect the
 # number of processors available to use.
-jobs=1
+jobs=0
 
 # Control the amount of potential inferred values when inferring a single
 # object. This can help the performance when dealing with large functions or
@@ -66,23 +66,26 @@ confidence=
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
 disable=
-        raw-checker-failed,
-        bad-inline-option,
-        locally-disabled,
-        file-ignored,
-        suppressed-message,
-        useless-suppression,
-        deprecated-pragma,
-        use-symbolic-message-instead,
         missing-module-docstring,
         missing-class-docstring,
         missing-function-docstring,
+        too-few-public-methods,
+        too-many-arguments,
+        too-many-branches,
+        too-many-instance-attributes,
+        too-many-locals,
+        too-many-public-methods,
+        too-many-positional-arguments,
+        too-many-return-statements,
+        too-many-statements
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once). See also the "--disable" option for examples.
-enable=c-extension-no-member
+enable=
+      c-extension-no-member,
+      useless-suppression
 
 
 [REPORTS]
