@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+from lukefi.metsi.app.utils import MetsiException
 from lukefi.metsi.forestry.cross_cutting.taper_curves import TAPER_CURVES
 
 
@@ -47,6 +48,9 @@ def _taper_curve_correction(d: float, h: int, sp: int) -> np.ndarray:
             0.00106612 * d2 + 1.87966 / h + 1.85706 / dh - 0.467842 / dh2
         y4 = -1.24788 - 0.0218693 * dh2 + 0.496483 * dl - 0.291413 * hl + 1.92579 / h + 0.863274 / dh - 0.183220 / dh2
         y7 = -0.478730 - 0.104679 * dh + 0.151028 * dl + 0.882010 / h + 0.178386 / dh
+
+    else:
+        raise MetsiException(f"Unsupported species code '{sp}'")
 
     # Clamp and preserve sign
     def clamp(y):

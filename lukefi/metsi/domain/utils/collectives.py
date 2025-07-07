@@ -1,6 +1,7 @@
 import builtins
 from enum import Enum
 from functools import lru_cache, cache
+from operator import call
 from typing import Any, Optional
 from collections.abc import Iterator, Callable
 import numpy as np
@@ -77,7 +78,7 @@ def getvarfn(*xs: Any, **named: Any) -> GetVarFn:
         for x in xs:
             try:
                 if callable(x):
-                    return x(name)
+                    return call(x, name)
                 elif hasattr(x, "__getitem__"):
                     return x[name]
                 else:

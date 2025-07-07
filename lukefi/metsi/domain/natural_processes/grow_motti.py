@@ -1,9 +1,9 @@
+import pymotti  # type: ignore # pylint: disable=import-error
+from functools import cached_property
 from lukefi.metsi.data.conversion import internal2mela
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
-from functools import cached_property
-import pymotti
 
 
 def spe2motti(spe: int) -> pymotti.Species:

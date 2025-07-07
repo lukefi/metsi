@@ -2,7 +2,8 @@ import ctypes as cts
 import sys
 from pathlib import Path
 from enum import Enum
-from lukefi.metsi.data.model import ForestStand
+from typing import Optional
+from lukefi.metsi.app.utils import MetsiException
 
 
 def load_library(path):
@@ -54,10 +55,7 @@ def _erts_tm35_to_ykj(u: float, v: float) -> tuple[float, float]:
 
     # Error handeling
     if _is_error(response):
-        print("Error in call function {f} located in {dll}".format(
-            f=f.__name__,
-            dll=str(DLL_PATH))
-        )
+        print(f"Error in call function {f.__name__} located in {str(DLL_PATH)}")
 
     # Return actual values of the pointers
     return (x_ptr.value, y_ptr.value)
@@ -68,35 +66,34 @@ class CRS(Enum):
     EPSG_2393 = ('EPSG:2393', 'YKJ')
 
     @property
-    def name(self):
-        return ':'.join(self._name_.split('_'))
+    def name(self):  # pylint: disable=function-redefined, invalid-overridden-method
+        return ':'.join(self._name_.split('_'))  # pylint: disable=no-member
 
 
-def _is_ykj(crs: str) -> bool:
+def _is_ykj(crs: Optional[str]) -> bool:
     return True if crs in CRS.EPSG_2393.value else False
 
 
-def _is_erts(crs: str) -> bool:
+def _is_erts(crs: Optional[str]) -> bool:
     return True if crs in CRS.EPSG_3067.value else False
 
 
-def convert_location_to_ykj(stand: ForestStand) -> tuple[float, float, float, str]:
+def convert_location_to_ykj(latitude: float, longitude: float, heigh_above_sea_level: Optional[float],
+                            crs: Optional[str]) -> tuple[float, float, Optional[float], Optional[str]]:
     """ Converts current coordinate system of the stand to match the YKJ (EPSG:2393) coordinate system """
-    (latitude, longitude, heigh_above_sea_level, crs) = stand.geo_location
+
     if _is_ykj(crs):
         # Already in EPSG:2393. No need to convert.
-        return stand.geo_location
+        return (latitude, longitude, heigh_above_sea_level, crs)
     elif _is_erts(crs):
         crs = CRS.EPSG_2393.name
         (x, y) = _erts_tm35_to_ykj(latitude, longitude)
         new_geo_location = (x, y, heigh_above_sea_level, crs)
         return new_geo_location
     else:
-        Exception(
-            "Error while converting from {current_crs} to {target_crs}. Check the source crs.\n"
-            "We only support {current_crs} as source crs at the moment.".format(
-                current_crs=CRS.EPSG_3067.name,
-                target_crs=CRS.EPSG_2393.name))
+        raise MetsiException(f"Error while converting from {CRS.EPSG_3067.name} to {CRS.EPSG_2393.name}. "
+                             f"Check the source crs.\n We only support {CRS.EPSG_3067.name} "
+                             "as source crs at the moment.")
 
 
 __all__ = ['convert_location_to_ykj', 'CRS']
