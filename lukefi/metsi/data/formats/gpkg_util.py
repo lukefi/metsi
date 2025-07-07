@@ -51,13 +51,15 @@ def _attach_location(df: pd.DataFrame, gdf: geopandas.GeoDataFrame) -> pd.DataFr
     return df
 
 
+RESTRICTION_TYPE_CUTTINGS = 1
+
+
 def read_geopackage(path: str, type_value: int = 1) -> tuple[pd.DataFrame, pd.DataFrame]:
     """ Reads stands and strata from Forest Centre (FC) gpkg format.
     path: string path to SQLite .gpkg format
     type_value: FC strata origin type value 1(=invented), 2(=calculated) or 3(=forecasted).
     :returns: Stand and stratum tuple of pandas Dataframe.
     """
-    RESTRICTION_TYPE_CUTTINGS = 1
     stands_query = f'''
         SELECT DISTINCT s.standid,
             s.maingroup,

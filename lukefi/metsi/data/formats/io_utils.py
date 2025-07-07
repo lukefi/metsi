@@ -107,8 +107,7 @@ def rsts_forest_stand_rows(stand: ForestStand) -> list[str]:
 def csv_value(source: Any) -> str:
     if source is None:
         return "None"
-    else:
-        return str(source)
+    return str(source)
 
 
 def stand_to_csv_rows(stand: ForestStand, delimeter: str, additional_vars: Optional[list[str]]) -> list[str]:

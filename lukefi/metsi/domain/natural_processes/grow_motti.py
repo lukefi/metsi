@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name
+
 from functools import cached_property
 import pymotti  # type: ignore # pylint: disable=import-error
 from lukefi.metsi.data.conversion import internal2mela

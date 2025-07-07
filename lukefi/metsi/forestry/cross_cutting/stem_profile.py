@@ -180,7 +180,7 @@ def _volume(hkanto: float, height: int, coeff: np.ndarray):
     v_piece = np.zeros(len(h) - 1)
     d_piece = _dhat(h[1:], height, coeff)  # make sure _dhat_fast is @njit
 
-    for j in range(len(v_piece)):
+    for j, _ in enumerate(v_piece):
         x0 = h[j]
         x1 = h[j + 1]
         y0 = _ghat(x0, height, coeff)
@@ -228,7 +228,7 @@ def create_tree_stem_profile(species_string: str, dbh: float, height: int, n: in
 
     v_cum, d_piece, h_piece = _volume(hkanto, height, coefnew)
 
-    T = np.empty((n, 3))
+    T = np.empty((n, 3))  # pylint: disable=invalid-name
     T[:, 0] = d_piece * 10
     T[:, 1] = h_piece
     T[:, 2] = v_cum

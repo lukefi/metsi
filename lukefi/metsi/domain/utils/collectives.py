@@ -30,7 +30,7 @@ class Globals(dict):
     This way we don't need to populate the global variable dict ahead of time, and instead
     we can just dynamically populate the few variables that the expression references."""
 
-    __slots__ = "delegate",
+    __slots__ = ("delegate",)
 
     def __init__(self):
         self.delegate: Optional[GetVarFn] = None
@@ -82,10 +82,9 @@ def getvarfn(*xs: Any, **named: Any) -> GetVarFn:
             try:
                 if callable(x):
                     return call(x, name)
-                elif hasattr(x, "__getitem__"):
+                if hasattr(x, "__getitem__"):
                     return x[name]
-                else:
-                    return getattr(x, name)
+                return getattr(x, name)
             except (KeyError, AttributeError):
                 continue
         raise NameError(f"Undefined variable '{name}'")
@@ -147,7 +146,7 @@ def property_collector(objects: list[object], properties: list[str]) -> list[lis
         for p in properties:
             if not hasattr(o, p):
                 raise MetsiException(f"Unknown property {p} in {o.__class__}")
-            val = o.__getattribute__(p) or 0.0
+            val = getattr(o, p) or 0.0
             if isinstance(val, Enum):
                 val = val.value
             row.append(val)

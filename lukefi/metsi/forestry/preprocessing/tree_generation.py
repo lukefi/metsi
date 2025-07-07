@@ -79,19 +79,16 @@ def solve_tree_generation_strategy(stratum: TreeStratum, method='weibull') -> st
         # big trees
         if stratum.has_diameter() and stratum.has_height() and stratum.has_basal_area() and method == 'weibull':
             return TreeStrategy.WEIBULL_DISTRIBUTION
-        elif not stratum.sapling_stratum and stratum.has_diameter() \
+        if not stratum.sapling_stratum and stratum.has_diameter() \
                 and (stratum.has_basal_area() or stratum.has_stems_per_ha()) and method == 'lm':
             return TreeStrategy.LM_TREES
-        elif stratum.has_diameter() and stratum.has_height() and stratum.has_stems_per_ha():
+        if stratum.has_diameter() and stratum.has_height() and stratum.has_stems_per_ha():
             return TreeStrategy.HEIGHT_DISTRIBUTION
-        else:
-            return TreeStrategy.SKIP
-    else:
-        # small trees
-        if stratum.has_height() and stratum.sapling_stratum:
-            return TreeStrategy.HEIGHT_DISTRIBUTION
-        else:
-            return TreeStrategy.SKIP
+        return TreeStrategy.SKIP
+    # small trees
+    if stratum.has_height() and stratum.sapling_stratum:
+        return TreeStrategy.HEIGHT_DISTRIBUTION
+    return TreeStrategy.SKIP
 
 
 def reference_trees_from_tree_stratum(stratum: TreeStratum, **params) -> list[ReferenceTree]:
@@ -120,7 +117,7 @@ def reference_trees_from_tree_stratum(stratum: TreeStratum, **params) -> list[Re
         print(f"\nStratum {stratum.identifier} has no height or diameter usable for generating trees")
         return []
     else:
-        raise UserWarning("Unable to generate reference trees from stratum {}".format(stratum.identifier))
+        raise UserWarning(f"Unable to generate reference trees from stratum {stratum.identifier}")
 
     result = [rt for rt in result if round(rt.stems_per_ha, 2) > 0.0]
 

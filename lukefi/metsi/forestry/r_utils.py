@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Any
 
-import rpy2.robjects as robjects
+from rpy2 import robjects
+
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand
 
 
-initialised = False
+initialised = False  # pylint: disable=invalid-name # Pylint thinks all module scope variables are constants
 
 
 def get_r_with_sourced_scripts() -> robjects.R:

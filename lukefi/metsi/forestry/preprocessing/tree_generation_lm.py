@@ -1,19 +1,20 @@
 from pathlib import Path
 
+from rpy2 import robjects
+
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import TreeStratum, ReferenceTree
-from rpy2 import robjects as robjects
 
-lm_tree_generation_loaded = False
+lm_tree_generation_loaded = False  # pylint: disable=invalid-name
+# Pylint thinks all module scope variables are constants
 
 
 def determine_hmalli_value(species: TreeSpecies):
     if species in (TreeSpecies.PINE, TreeSpecies.OTHER_PINE, TreeSpecies.SHORE_PINE):
         return 1
-    elif species.is_coniferous():
+    if species.is_coniferous():
         return 2
-    else:
-        return 3
+    return 3
 
 
 def tree_generation_lm(

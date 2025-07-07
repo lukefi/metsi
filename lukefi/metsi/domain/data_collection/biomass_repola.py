@@ -324,7 +324,7 @@ def tree_biomass(tree: ReferenceTree, models) -> BiomassData:
             stumps=stump_biomass_1(tree),
             roots=roots_biomass_1(tree)
         )
-    elif models == 2:
+    if models == 2:
         return BiomassData(
             stem_wood=stem_wood_biomass_2(tree),
             stem_bark=stem_bark_biomass_2(tree),
@@ -334,8 +334,7 @@ def tree_biomass(tree: ReferenceTree, models) -> BiomassData:
             stumps=stump_biomass_1(tree),
             roots=roots_biomass_1(tree)
         )
-    else:
-        raise MetsiException(f"Incorrect model set definition in control file value '{models}' is unknown")
+    raise MetsiException(f"Incorrect model set definition in control file value '{models}' is unknown")
 
 
 def small_tree_biomass(tree: ReferenceTree, models) -> BiomassData:

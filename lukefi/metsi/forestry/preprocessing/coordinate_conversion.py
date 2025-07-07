@@ -10,22 +10,21 @@ def load_library(path):
     """ Load a shared library from the given path, handling compatibility for Python < 3.12. """
     if sys.version_info >= (3, 12):
         return cts.CDLL(path)
-    else:
-        return cts.CDLL(str(path))
+    return cts.CDLL(str(path))
 
 
 # Defining and initialize the external library
-lib_name = 'ykjtm35.dll' if sys.platform == "win32" else 'ykjtm35.so'
-DLL_PATH = Path('lukefi', 'metsi', 'forestry', 'c', 'lib', lib_name)
+LIB_NAME = 'ykjtm35.dll' if sys.platform == "win32" else 'ykjtm35.so'
+DLL_PATH = Path('lukefi', 'metsi', 'forestry', 'c', 'lib', LIB_NAME)
 
 try:
     DLL = load_library(DLL_PATH)
 except OSError as e:
-    print(f"Failed to load {lib_name}: {e}")
+    print(f"Failed to load {LIB_NAME}: {e}")
 
 
 def _is_error(flag: int) -> bool:
-    return True if flag == 0 else False
+    return flag == 0
 
 
 def _erts_tm35_to_ykj(u: float, v: float) -> tuple[float, float]:
@@ -71,11 +70,11 @@ class CRS(Enum):
 
 
 def _is_ykj(crs: Optional[str]) -> bool:
-    return True if crs in CRS.EPSG_2393.value else False
+    return crs in CRS.EPSG_2393.value
 
 
 def _is_erts(crs: Optional[str]) -> bool:
-    return True if crs in CRS.EPSG_3067.value else False
+    return crs in CRS.EPSG_3067.value
 
 
 def convert_location_to_ykj(latitude: float, longitude: float, heigh_above_sea_level: Optional[float],
@@ -85,15 +84,14 @@ def convert_location_to_ykj(latitude: float, longitude: float, heigh_above_sea_l
     if _is_ykj(crs):
         # Already in EPSG:2393. No need to convert.
         return (latitude, longitude, heigh_above_sea_level, crs)
-    elif _is_erts(crs):
+    if _is_erts(crs):
         crs = CRS.EPSG_2393.name
         (x, y) = _erts_tm35_to_ykj(latitude, longitude)
         new_geo_location = (x, y, heigh_above_sea_level, crs)
         return new_geo_location
-    else:
-        raise MetsiException(f"Error while converting from {CRS.EPSG_3067.name} to {CRS.EPSG_2393.name}. "
-                             f"Check the source crs.\n We only support {CRS.EPSG_3067.name} "
-                             "as source crs at the moment.")
+    raise MetsiException(f"Error while converting from {CRS.EPSG_3067.name} to {CRS.EPSG_2393.name}. "
+                         f"Check the source crs.\n We only support {CRS.EPSG_3067.name} "
+                         "as source crs at the moment.")
 
 
 __all__ = ['convert_location_to_ykj', 'CRS']

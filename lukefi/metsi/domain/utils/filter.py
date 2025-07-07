@@ -44,7 +44,7 @@ def applyfilter(
     verb, object_ = parsecommand(command)
     if verb == "remove":
         p = predicate
-        predicate = lambda f: not p(f)
+        predicate = lambda f: not p(f)  # pylint: disable=unnecessary-lambda-assignment
     if object_ == "stands":
         stands = [
             s

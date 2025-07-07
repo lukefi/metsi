@@ -41,39 +41,38 @@ def create_planting_instructions_table(file_path: str) -> list:
     table = [row.split() for row in table]
 
     if len(table) != 4 or len(table[0]) != 3:
-        raise MetsiException('Planting instructions file has unexpected structure. Expected 4 rows and 5 columns, got {} rows and {} columns'.format(
-            len(table), len(table[0])))
-    else:
-        return table
+        raise MetsiException("Planting instructions file has unexpected structure. Expected 4 rows and 5 columns, "
+                             f"got {len(table)} rows and {len(table[0])} columns")
+    return table
 
 
 def get_planting_instructions_from_parameter_file_contents(
     file_path: str,
 ) -> dict:
-    instructions = create_planting_instructions_table(file_path)
-    INSTRUCTIONS = {
+    instructions_table = create_planting_instructions_table(file_path)
+    instructions = {
         SiteTypeKey.OMT: {
-            'species': int(instructions[0][0]),
-            'stems/ha': int(instructions[0][1]),
-            'soil preparation': int(instructions[0][2])
+            'species': int(instructions_table[0][0]),
+            'stems/ha': int(instructions_table[0][1]),
+            'soil preparation': int(instructions_table[0][2])
         },
         SiteTypeKey.MT: {
-            'species': int(instructions[1][0]),
-            'stems/ha': int(instructions[1][1]),
-            'soil preparation': int(instructions[1][2])
+            'species': int(instructions_table[1][0]),
+            'stems/ha': int(instructions_table[1][1]),
+            'soil preparation': int(instructions_table[1][2])
         },
         SiteTypeKey.VT: {
-            'species': int(instructions[2][0]),
-            'stems/ha': int(instructions[2][1]),
-            'soil preparation': int(instructions[2][2])
+            'species': int(instructions_table[2][0]),
+            'stems/ha': int(instructions_table[2][1]),
+            'soil preparation': int(instructions_table[2][2])
         },
         SiteTypeKey.CT: {
-            'species': int(instructions[3][0]),
-            'stems/ha': int(instructions[3][1]),
-            'soil preparation': int(instructions[3][2])
+            'species': int(instructions_table[3][0]),
+            'stems/ha': int(instructions_table[3][1]),
+            'soil preparation': int(instructions_table[3][2])
         }
     }
-    return INSTRUCTIONS
+    return instructions
 
 
 def get_planting_instructions(site_type_category: int, file_path_instructions: str = None) -> dict:

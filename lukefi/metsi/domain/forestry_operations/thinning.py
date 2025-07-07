@@ -27,7 +27,7 @@ def iterative_thinning_with_output(
 
     thinning_output = [
         CrossCuttableTree(
-            f-t.stems_per_ha,
+            f - t.stems_per_ha,
             t.species,
             t.breast_height_diameter,
             t.height,
@@ -71,11 +71,10 @@ def first_thinning(input_: OpTuple[ForestStand], /, **operation_parameters) -> O
             collected_data=collected_data,
             thinning_factor=operation_parameters['thinning_factor'],
             thin_predicate=lambda s: (residue_stems + epsilon) <= futil.overall_stems_per_ha(s.reference_trees),
-            extra_factor_solver=lambda i, n, c: (1.0-c) * i/n,
+            extra_factor_solver=lambda i, n, c: (1.0 - c) * i / n,
             tag='first_thinning',
         )
-    else:
-        raise UserWarning("Unable to perform first thinning")
+    raise UserWarning("Unable to perform first thinning")
 
 
 def thinning_from_above(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
@@ -88,7 +87,10 @@ def thinning_from_above(input_: OpTuple[ForestStand], /, **operation_parameters)
     stand.reference_trees.sort(key=lambda rt: rt.breast_height_diameter, reverse=True)
 
     (lower_limit, upper_limit) = resolve_thinning_bounds(stand, thinning_limits)
-    def upper_limit_reached(): return upper_limit < futil.overall_basal_area(stand.reference_trees)
+
+    def upper_limit_reached():
+        return upper_limit < futil.overall_basal_area(stand.reference_trees)
+
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
@@ -97,11 +99,10 @@ def thinning_from_above(input_: OpTuple[ForestStand], /, **operation_parameters)
             collected_data=collected_data,
             thinning_factor=operation_parameters['thinning_factor'],
             thin_predicate=lambda s: (lower_limit + epsilon) <= futil.overall_basal_area(s.reference_trees),
-            extra_factor_solver=lambda i, n, c: (1.0-c) * i/n,
+            extra_factor_solver=lambda i, n, c: (1.0 - c) * i / n,
             tag='thinning_from_above',
         )
-    else:
-        raise UserWarning("Unable to perform thinning from above")
+    raise UserWarning("Unable to perform thinning from above")
 
 
 def thinning_from_below(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
@@ -126,11 +127,10 @@ def thinning_from_below(input_: OpTuple[ForestStand], /, **operation_parameters)
             collected_data=collected_data,
             thinning_factor=operation_parameters['thinning_factor'],
             thin_predicate=lambda s: (lower_limit + epsilon) <= futil.overall_basal_area(s.reference_trees),
-            extra_factor_solver=lambda i, n, c: (1.0-c) * i/n,
+            extra_factor_solver=lambda i, n, c: (1.0 - c) * i / n,
             tag='thinning_from_below',
         )
-    else:
-        raise UserWarning("Unable to perform thinning from below")
+    raise UserWarning("Unable to perform thinning from below")
 
 
 def even_thinning(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
@@ -144,7 +144,7 @@ def even_thinning(input_: OpTuple[ForestStand], /, **operation_parameters) -> Op
 
     def upper_limit_reached():
         return upper_limit < futil.overall_basal_area(stand.reference_trees)
-    
+
     predicates = [upper_limit_reached]
 
     if evaluate_thinning_conditions(predicates):
@@ -156,8 +156,7 @@ def even_thinning(input_: OpTuple[ForestStand], /, **operation_parameters) -> Op
             extra_factor_solver=lambda i, n, c: 0,
             tag='even_thinning',
         )
-    else:
-        raise UserWarning("Unable to perform even thinning")
+    raise UserWarning("Unable to perform even thinning")
 
 
 def report_overall_removal(payload: OpTuple, **operation_parameters) -> OpTuple:

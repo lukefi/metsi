@@ -99,18 +99,17 @@ class NestableGenerator:
         """
         if self.prepared_generator is not None:
             return self.prepared_generator(previous)
-        else:
-            if self.generator_type == sequence:  # pylint: disable=comparison-with-callable
-                current = previous
-                for child in self.nested_generators:
-                    current = child.unwrap(current)
-                return current
-            elif self.generator_type == alternatives:  # pylint: disable=comparison-with-callable
-                current = []
-                for child in self.nested_generators:
-                    current.extend(child.unwrap(previous))
-                return current
-            return previous
+        if self.generator_type == sequence:  # pylint: disable=comparison-with-callable
+            current = previous
+            for child in self.nested_generators:
+                current = child.unwrap(current)
+            return current
+        if self.generator_type == alternatives:  # pylint: disable=comparison-with-callable
+            current = []
+            for child in self.nested_generators:
+                current.extend(child.unwrap(previous))
+            return current
+        return previous
 
 
 def sequence(parents: Optional[list[EventTree]] = None, /, *operations: Callable) -> list[EventTree]:

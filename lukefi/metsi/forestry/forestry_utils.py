@@ -178,8 +178,7 @@ def find_matching_stratum_by_diameter_lm(
     upper = candidate.mean_diameter * threshold
     if lower < reference_tree.breast_height_diameter < upper:
         return candidate
-    else:
-        return None
+    return None
 
 
 def split_list_by_predicate(items: list, predicate: Callable) -> tuple[list, list]:

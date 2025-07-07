@@ -77,7 +77,7 @@ def grow_diameter_and_height(
         if bigh:
             hdom = median(bigh)
             gs = [t.stems_per_ha * math.pi * (0.01 * 0.5 * d)**2 for t, d in zip(trees, ds)]
-            G = sum(gs)
+            G = sum(gs)  # pylint: disable=invalid-name
             for spe, idx in group.items():
                 gg = sum(gs[i] for i in idx)
                 ag = sum((trees[i].biological_age + s) * gs[i] for i in idx) / gg

@@ -56,7 +56,7 @@ class SimConfiguration(SimpleNamespace):
 
     def _populate_simulation_events(self, events: list):
         time_points = set()
-        self.events = list()
+        self.events = []
         for event_set in events:
             source_time_points = event_set.get('time_points', [])
             new_event = DeclaredEvents(
@@ -106,13 +106,12 @@ class EventTree:
         if len(self.branches) == 0:
             # Yes. A leaf node returns a single chain with a single operation.
             return [[self.operation]]
-        else:
-            result = []
-            for branch in self.branches:
-                chains = branch.operation_chains()
-                for chain in chains:
-                    result.append([self.operation] + chain)
-            return result
+        result = []
+        for branch in self.branches:
+            chains = branch.operation_chains()
+            for chain in chains:
+                result.append([self.operation] + chain)
+        return result
 
     def evaluate(self, payload) -> list:
         """

@@ -1,9 +1,9 @@
 from pathlib import Path
 
+from rpy2 import robjects
+
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
-from rpy2 import robjects as robjects
-
 from lukefi.metsi.forestry.preprocessing.naslund import naslund_height
 
 species_map: dict[TreeSpecies, int] = {
@@ -20,7 +20,7 @@ sitetype_map = {
 
 }
 
-pukkala_loaded = False
+pukkala_loaded = False  # pylint: disable=invalid-name # Pylint thinks all module scope variables are constants
 
 
 def continuous_growth_r(stand: ForestStand, step: int = 5) -> ForestStand:
@@ -70,7 +70,7 @@ def continuous_growth_r(stand: ForestStand, step: int = 5) -> ForestStand:
                 tree.height = naslund_height(tree.breast_height_diameter, tree.species)
                 tree.breast_height_age = results[11][i] if tree.sapling and tree.height is not None and \
                     tree.height >= 1.3 else tree.breast_height_age
-                tree.sapling = True if tree.height is None or tree.height < 1.3 else False
+                tree.sapling = (tree.height is None) or (tree.height < 1.3)
             else:
                 new_number = last_tree_num + (i + 1 - existing_count)
                 stand.reference_trees.append(ReferenceTree(

@@ -32,8 +32,7 @@ class CollectiveSeries(Generic[T]):
                 it = iter(idx)
             except TypeError:
                 return self.data[self.idx.index(idx)]
-            else:
-                indices = [self.idx.index(i) for i in it]
+            indices = [self.idx.index(i) for i in it]
         return CollectiveSeries(
             data=[self.data[i] for i in indices],
             index=[self.idx[i] for i in indices]
