@@ -1,16 +1,16 @@
 import math
 import statistics
-from enum import Enum
-from lukefi.metsi.data.enums.internal import TreeSpecies, DECIDUOUS_SPECIES, CONIFEROUS_SPECIES
-from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
-from typing import Optional
 from collections.abc import Callable, Iterable
+from enum import Enum
+from typing import Optional
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ReferenceTree, ForestStand, TreeStratum
 
 
 def compounded_growth_factor(growth_percent: float, years: int) -> float:
     try:
         return math.pow(1.0 + (growth_percent / 100.0), years)
-    except BaseException:
+    except ValueError:
         return 0.0
 
 
@@ -22,7 +22,7 @@ def solve_dominant_height_c_largest(stand, c: int = 100):
         d = rt.breast_height_diameter
         w = rt.stems_per_ha
         if n + w >= c:
-            wn = (c - n)  # notice only portion of stems as last weight
+            wn = c - n  # notice only portion of stems as last weight
             dw_sum += d * wn
             n = c
             break

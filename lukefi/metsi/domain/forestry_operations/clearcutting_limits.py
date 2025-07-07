@@ -74,7 +74,7 @@ RENEWAL_AGES = {
 
 def create_clearcutting_limits_table(file_path: str) -> list:
     contents = None
-    with open(file_path, "r") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         contents = f.read()
     table = contents.split('\n')
     table = [row.split() for row in table]
@@ -93,7 +93,7 @@ def get_clearcutting_agelimits_from_parameter_file_contents(
     Creates a table from :clearcutting_agelimits
     """
     ages = create_clearcutting_limits_table(file_path)
-    RENEWAL_AGES = {
+    renewal_ages = {
         SiteTypeKey.OMT: {
             SpeciesKey.PINE: int(ages[0][0]),
             SpeciesKey.SPRUCE: int(ages[0][1]),
@@ -119,7 +119,7 @@ def get_clearcutting_agelimits_from_parameter_file_contents(
             SpeciesKey.DOWNY_BIRCH: int(ages[3][3])
         }
     }
-    return RENEWAL_AGES
+    return renewal_ages
 
 
 def get_clearcutting_diameterlimits_from_parameter_file_contents(
@@ -129,7 +129,7 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
     Creates a table from :clearcutting_diamterlimits
     """
     diameters = create_clearcutting_limits_table(file_path)
-    RENEWAL_DIAMETERS = {
+    renewal_diameters = {
         SiteTypeKey.OMT: {
             SpeciesKey.PINE: float(diameters[0][0]),
             SpeciesKey.SPRUCE: float(diameters[0][1]),
@@ -155,7 +155,7 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
             SpeciesKey.DOWNY_BIRCH: float(diameters[3][3])
         }
     }
-    return RENEWAL_DIAMETERS
+    return renewal_diameters
 
 
 def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None,

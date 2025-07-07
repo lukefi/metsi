@@ -1,4 +1,4 @@
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.utils.collectives import GetVarFn, compile_collector, getvarfn
 
@@ -31,27 +31,30 @@ def applyfilter(
     stands: list[ForestStand],
     command: str,
     expr: str,
-    named: dict[str, str] = {}
+    named: Optional[dict[str, str]] = None
 ) -> list[ForestStand]:
+    if named is None:
+        named = {}
+
     predicate = compile_collector(expr)
-    verb, object = parsecommand(command)
+    verb, object_ = parsecommand(command)
     if verb == "remove":
         p = predicate
         predicate = lambda f: not p(f)
-    if object == "stands":
+    if object_ == "stands":
         stands = [
             s
             for s in stands
             if predicate(makegetvarfn(named, s))
         ]
-    elif object == "trees":
+    elif object_ == "trees":
         for s in stands:
             s.reference_trees = [
                 t
                 for t in s.reference_trees
                 if predicate(makegetvarfn(named, t, stand=s))
             ]
-    elif object == "strata":
+    elif object_ == "strata":
         for s in stands:
             s.tree_strata = [
                 t

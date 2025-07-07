@@ -14,7 +14,7 @@ def cross_cut_lupa(_pcls, _ptop, _plen, _pval, m, div, nas):
     """Produce a cross-cut wrapper function intialized with the crosscut.lua script using the Lupa bindings."""
     path = Path(__file__).parent.parent.resolve() / "lua" / "crosscut.lua"
 
-    with open(path, "r") as file:
+    with open(path, "r", encoding="utf-8") as file:
         script = file.read()
 
     lua = lupa.LuaRuntime(unpack_returned_tuples=True)

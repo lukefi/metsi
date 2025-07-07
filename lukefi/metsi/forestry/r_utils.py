@@ -1,10 +1,10 @@
 from pathlib import Path
 from typing import Any
 
+import rpy2.robjects as robjects
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand
 
-import rpy2.robjects as robjects
 
 initialised = False
 
@@ -16,8 +16,8 @@ def get_r_with_sourced_scripts() -> robjects.R:
     r = robjects.r
 
     if not initialised:
-        dir = Path(__file__).parent.resolve() / "r" / "lmfor_volume.R"
-        r.source(str(dir))
+        dir_ = Path(__file__).parent.resolve() / "r" / "lmfor_volume.R"
+        r.source(str(dir_))
         initialised = True
 
     return r

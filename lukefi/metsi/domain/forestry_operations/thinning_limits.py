@@ -487,7 +487,7 @@ LIMITS_SLICE_LOOKUP = {
 @cache
 def create_thinning_limits_table(file_path: str) -> list:
     contents = None
-    with open(file_path, "r") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         contents = f.read()
     # read thinning_limits into a list of lists
     table = contents.split('\n')
@@ -550,7 +550,7 @@ def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None
     site_type_key = site_type_to_key(stand.site_type_category)
     sdom = futil.solve_dominant_species(stand.reference_trees)
     if sdom is None:
-        raise UserWarning(f"Unable to resolve thinning bounds with no dominant species found.")
+        raise UserWarning("Unable to resolve thinning bounds with no dominant species found.")
     species_key = species_to_key(sdom)
     hdom = futil.solve_dominant_height_c_largest(stand)
 
@@ -602,7 +602,7 @@ def resolve_first_thinning_residue(stand: ForestStand) -> float:
     """ Resolves stem count residue for first thinning operation. Values are stems per hectare. """
     sdom = futil.solve_dominant_species(stand.reference_trees)
     if sdom is None:
-        raise UserWarning(f"Unable to resolve first thinning residue with no dominant species found.")
+        raise UserWarning("Unable to resolve first thinning residue with no dominant species found.")
     st_key = site_type_to_key(stand.site_type_category)
     spe_key = species_to_key(sdom)
     lower_limit = FIRST_THINNING_RESIDUE_STEMS[st_key][spe_key]

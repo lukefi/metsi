@@ -7,7 +7,10 @@ from lukefi.metsi.domain.natural_processes.util import update_stand_growth
 def split_sapling_trees(trees: list[ReferenceTree]) -> tuple[list[ReferenceTree], list[ReferenceTree]]:
     saplings, matures = [], []
     for tree in trees:
-        saplings.append(tree) if tree.sapling is True else matures.append(tree)
+        if tree.sapling:
+            saplings.append(tree)
+        else:
+            matures.append(tree)
     return saplings, matures
 
 

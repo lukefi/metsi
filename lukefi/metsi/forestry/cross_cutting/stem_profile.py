@@ -169,7 +169,7 @@ def _ghat(h: float, height: int, coef: np.ndarray) -> float:
 
 
 @njit
-def _volume(hkanto: float, dbh: float, height: int, coeff: np.ndarray):
+def _volume(hkanto: float, height: int, coeff: np.ndarray):
     step = 0.1
     n_steps = int((height - hkanto) / step)
     h = np.linspace(hkanto, hkanto + n_steps * step, n_steps + 1)
@@ -202,7 +202,7 @@ SPECIES_FOR_STEM_PROFILE = {
 
 
 def create_tree_stem_profile(species_string: str, dbh: float, height: int, n: int,
-                             hkanto: float = 0.1, div: int = 10) -> np.ndarray:
+                             hkanto: float = 0.1) -> np.ndarray:
     """
     This function has been ported from, and should be updated according to, the R implementation.
     """
@@ -226,7 +226,7 @@ def create_tree_stem_profile(species_string: str, dbh: float, height: int, n: in
 
     coefnew = coefnew * d20
 
-    v_cum, d_piece, h_piece = _volume(hkanto, dbh, height, coefnew)
+    v_cum, d_piece, h_piece = _volume(hkanto, height, coefnew)
 
     T = np.empty((n, 3))
     T[:, 0] = d_piece * 10

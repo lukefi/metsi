@@ -13,7 +13,8 @@ GetVarFn = Callable[[str], Any]
 CollectFn = Callable[[GetVarFn], Any]
 """A function that returns the value of a collective expression given the values of global variables."""
 
-#---- collector functions ----------------------------------------
+# ---- collector functions ----------------------------------------
+
 
 class Globals(dict):
     """Global namespace for collective functions.
@@ -35,7 +36,7 @@ class Globals(dict):
         self.delegate: Optional[GetVarFn] = None
 
     def __missing__(self, name: str) -> Any:
-        return self.delegate(name) # type: ignore -- this shouldn't be called before delegate is set
+        return self.delegate(name)  # type: ignore # this shouldn't be called before delegate is set
 
 
 @lru_cache
@@ -44,10 +45,11 @@ def compile_collector(expr: str) -> CollectFn:
 
     :param expr: A python expression that evaluates to the value of the collected variable.
     :return: A collector function for the expression."""
-    globals = Globals()
-    e = eval(f"lambda: {expr}", globals)
+    globals_ = Globals()
+    e = eval(f"lambda: {expr}", globals_)  # pylint: disable=eval-used
+
     def fn(getvar: GetVarFn) -> Any:
-        globals.delegate = getvar
+        globals_.delegate = getvar
         ret = e()
         if hasattr(ret, "__collect__"):
             ret = ret.__collect__()
@@ -61,7 +63,7 @@ def collect_all(collectives: dict[str, str], getvar: GetVarFn) -> dict[str, Any]
     :param collective: Collective expressions keyed by name.
     :param getvar: Values of global variables.
     :return: Values of the collective variables keyed by name."""
-    return {k: compile_collector(v)(getvar) for k,v in collectives.items()}
+    return {k: compile_collector(v)(getvar) for k, v in collectives.items()}
 
 
 def getvarfn(*xs: Any, **named: Any) -> GetVarFn:
@@ -72,8 +74,9 @@ def getvarfn(*xs: Any, **named: Any) -> GetVarFn:
     - first parameter goes first and so on.
     - any `KeyError` or `AttributeError` moves to the next object."""
     if named:
-        xs = [named, *xs] # type: ignore
-    xs = [*xs, builtins] # type: ignore
+        xs = [named, *xs]  # type: ignore
+    xs = [*xs, builtins]  # type: ignore
+
     def getvar(name: str) -> Any:
         for x in xs:
             try:
@@ -88,7 +91,8 @@ def getvarfn(*xs: Any, **named: Any) -> GetVarFn:
         raise NameError(f"Undefined variable '{name}'")
     return getvar
 
-#---- collection objects ----------------------------------------
+# ---- collection objects ----------------------------------------
+
 
 class CollectibleNDArray(np.ndarray):
     """Numpy array but it collects as sum(x).
@@ -97,6 +101,7 @@ class CollectibleNDArray(np.ndarray):
 
     def __collect__(self) -> float:
         return sum(self)
+
 
 class LazyListDataFrame:
     """Helper class to turn a list[T] info a dataframe-like object where columns are T's fields."""

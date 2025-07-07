@@ -1,5 +1,5 @@
-import pymotti  # type: ignore # pylint: disable=import-error
 from functools import cached_property
+import pymotti  # type: ignore # pylint: disable=import-error
 from lukefi.metsi.data.conversion import internal2mela
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand
@@ -157,9 +157,9 @@ class MottiGrowthPredictor(pymotti.Predict):
     # TODO: we don't have these yet.
 
 
-def grow_motti(input: tuple[ForestStand, None], **operation_parameters) -> tuple[ForestStand, None]:
+def grow_motti(input_: tuple[ForestStand, None], **operation_parameters) -> tuple[ForestStand, None]:
     step = operation_parameters.get('step', 5)
-    stand, _ = input
+    stand, _ = input_
     growth = MottiGrowthPredictor(stand).evolve()
     # Motti returns deltas.
     diameters = list(map(lambda x: x[0].breast_height_diameter + x[1], zip(stand.reference_trees, growth.trees_id)))

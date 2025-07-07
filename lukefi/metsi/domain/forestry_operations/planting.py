@@ -1,6 +1,6 @@
 from functools import cache
 from lukefi.metsi.sim.core_types import CollectedData, OpTuple
-from lukefi.metsi.data.model import ForestStand, ReferenceTree, create_layered_tree
+from lukefi.metsi.data.model import ForestStand, create_layered_tree
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.domain.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
 from lukefi.metsi.domain.utils.conversion import site_type_to_key
@@ -35,7 +35,7 @@ DEFAULT_INSTRUCTIONS = {
 @cache
 def create_planting_instructions_table(file_path: str) -> list:
     contents = None
-    with open(file_path, "r") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         contents = f.read()
     table = contents.split('\n')
     table = [row.split() for row in table]

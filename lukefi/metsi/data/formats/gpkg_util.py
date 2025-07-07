@@ -1,4 +1,4 @@
-from typing import Any, NamedTuple, TypedDict
+from typing import Any, TypedDict
 import sqlite3
 import pandas as pd
 import geopandas

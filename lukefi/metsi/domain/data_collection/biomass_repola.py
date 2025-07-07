@@ -1,5 +1,4 @@
 import math
-from itertools import repeat
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.domain.collected_types import BiomassData
@@ -56,7 +55,6 @@ def stem_wood_biomass_2(tree: ReferenceTree) -> float:
     Repola J. (2009) Silva Fennica 43(4) Biomass equations for Scots pine and Norway spruce in Finland p. 641-645
     Repola J. (2008) Silva Fennica 42(4) Biomass equations for birch in Finland p. 621-623
     """
-    cl = tree.height - tree.lowest_living_branch_height
     if tree.species == TreeSpecies.PINE:  # Scots Pine
         lnbm = -4.018 + 8.358 * (stump_diameter(tree) / (stump_diameter(tree) + 14)) + 4.646 * (
                     tree.height / (tree.height + 10)) + 0.041 * math.log(tree.breast_height_age) + (0.001 + 0.008) / 2
@@ -309,7 +307,7 @@ def roots_biomass_1(tree: ReferenceTree) -> float:
     return bm
 
 
-def tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> BiomassData:
+def tree_biomass(tree: ReferenceTree, models) -> BiomassData:
     """
     list of tree biomass weights in tons by biomass component
     Models:
@@ -340,7 +338,7 @@ def tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, m
         raise MetsiException(f"Incorrect model set definition in control file value '{models}' is unknown")
 
 
-def small_tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewaste, models) -> BiomassData:
+def small_tree_biomass(tree: ReferenceTree, models) -> BiomassData:
     """
     list of tree biomass weights in tons by biomass component
     Models:
@@ -352,13 +350,13 @@ def small_tree_biomass(tree: ReferenceTree, stand: ForestStand, volume, volumewa
         breast_height_diameter=tree.breast_height_diameter if tree.breast_height_diameter > 0 else 0.1,
         height=1.3
     )
-    minimum_model_tree_biomass = tree_biomass(minimum_model_tree, stand, volume, volumewaste, models)
+    minimum_model_tree_biomass = tree_biomass(minimum_model_tree, models)
     coef = tree.height / minimum_model_tree.height
     small_tree_bm = minimum_model_tree_biomass * coef
     return small_tree_bm
 
 
-def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, models) -> BiomassData:
+def biomasses_by_component_stand(stand: ForestStand, models) -> BiomassData:
     """
     Compute total biomass tonnages for the given ForestStand.
 
@@ -369,9 +367,9 @@ def biomasses_by_component_stand(stand: ForestStand, treevolumes, wastevolumes, 
     :return: a BiomassData object for biomass tonnages
     """
     biomasses = [BiomassData()]
-    for i, tree in enumerate(stand.reference_trees):
+    for _, tree in enumerate(stand.reference_trees):
         fn = tree_biomass if tree.height >= 1.3 else small_tree_biomass
-        biomasses.append(fn(tree, stand, treevolumes[i], wastevolumes[i], models) * tree.stems_per_ha)
+        biomasses.append(fn(tree, models) * tree.stems_per_ha)
     return sum(biomasses)
 
 def calculate_biomass(input_: OpTuple[ForestStand], /, **operation_params) -> OpTuple[ForestStand]:
@@ -381,11 +379,11 @@ def calculate_biomass(input_: OpTuple[ForestStand], /, **operation_params) -> Op
     models = operation_params.get('model_set', 1)
 
     # TODO: need proper functionality to find tree volumes, model_set 2
-    volumes = list(repeat(100.0, len(stand.reference_trees)))
+    # volumes = list(repeat(100.0, len(stand.reference_trees)))
     # TODO: need proper functionality to find waste volumes, model_set 2
-    wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
+    # wastevolumes = list(repeat(100.0, len(stand.reference_trees)))
 
-    biomass_data = biomasses_by_component_stand(stand, volumes, wastevolumes, models)
+    biomass_data = biomasses_by_component_stand(stand, models)
     biomass_data.time_point = collected_data.current_time_point
     collected_data.extend_list_result('calculate_biomass', [biomass_data])
 

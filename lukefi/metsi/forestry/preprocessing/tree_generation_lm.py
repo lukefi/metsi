@@ -22,8 +22,8 @@ def tree_generation_lm(
         stand_basal_area: float,
         **params) -> list[ReferenceTree]:
     global lm_tree_generation_loaded
-    dir = Path(__file__).parent.parent.resolve() / "r"
-    growth_script_file = dir / "lm_tree_generation.R"
+    dir_ = Path(__file__).parent.parent.resolve() / "r"
+    growth_script_file = dir_ / "lm_tree_generation.R"
     if not lm_tree_generation_loaded:
         robjects.r.source(str(growth_script_file))
         lm_tree_generation_loaded = True
@@ -51,7 +51,7 @@ def tree_generation_lm(
     result_df = robjects.r['generoi.kuvauspuut'](
         df,
         df2,
-        path=str(dir) + '/',
+        path=str(dir_) + '/',
         tapa=params.get('lm_mode', 'dcons'),
         n=params.get('n_trees', 10),
         hmalli=determine_hmalli_value(stratum.species),
