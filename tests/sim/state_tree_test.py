@@ -1,5 +1,8 @@
+import os
+from pathlib import Path
 import unittest
 
+from lukefi.metsi.app import file_io
 from lukefi.metsi.sim.state_tree import StateTree
 
 
@@ -48,3 +51,45 @@ class StateTreeTest(unittest.TestCase):
         self.assertEqual(state_tree.branches[0].time_point, 2)
         self.assertDictEqual(state_tree.branches[0].operation_params, parameters2)
         self.assertEqual(len(state_tree.branches[0].branches), 0)
+
+    def test_write_to_file(self):
+        output_file = Path(file_io.prepare_target_directory(
+            "tests/resources/state_tree_test"), "state_tree_test.pickle")
+
+        state1 = [0, 0, 0]
+        parameters1 = {"increment": 2, "mult": 2}
+        state2 = [1, 1, 1]
+        parameters2 = {"increment": 1, "mult": 1}
+
+        state_tree = StateTree()
+        state_tree.state = state1
+        state_tree.operation_params = parameters1
+        state_tree.done_operation = dummy_operation
+
+        branch = StateTree()
+        branch.state = state2
+        branch.operation_params = parameters2
+        branch.done_operation = dummy_operation
+
+        state_tree.add_branch(branch)
+
+        state_tree.save_to_file(output_file)
+
+        del state_tree
+        del state1
+        del state2
+        del parameters1
+        del parameters2
+
+        read_tree = StateTree.read_from_file(output_file)
+
+        self.assertListEqual(read_tree.state, [0, 0, 0])
+        self.assertEqual(read_tree.done_operation, dummy_operation)
+        self.assertDictEqual(read_tree.operation_params, {"increment": 2, "mult": 2})
+
+        self.assertEqual(len(read_tree.branches), 1)
+        self.assertListEqual(read_tree.branches[0].state, [1, 1, 1])
+        self.assertEqual(read_tree.branches[0].done_operation, dummy_operation)
+        self.assertDictEqual(read_tree.branches[0].operation_params, {"increment": 1, "mult": 1})
+
+        os.remove(output_file)
