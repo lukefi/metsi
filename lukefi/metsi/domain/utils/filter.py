@@ -3,7 +3,9 @@ from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.utils.collectives import GetVarFn, compile_collector, getvarfn
 
 Verb = Literal["select", "remove"]
+VERBS: set[Verb] = {"select", "remove"}
 Object = Literal["stands", "trees", "strata"]
+OBJECTS: set[Object] = {"stands", "trees", "strata"}
 
 
 def parsecommand(command: str) -> tuple[Verb, Object]:
@@ -14,15 +16,17 @@ def parsecommand(command: str) -> tuple[Verb, Object]:
         v, o = parts[0], "stands"
     else:
         v, o = parts
-    if v not in Verb.__args__:
+    if v not in VERBS:
         raise ValueError(f"invalid filter verb: {v} (in filter {command})")
-    if o not in Object.__args__:
+    if o not in OBJECTS:
         raise ValueError(f"invalid filter object: {o} (in filter {command})")
     return v, o # type: ignore
 
 
 def makegetvarfn(named: dict[str, str], *args: Any, **kwargs: Any) -> GetVarFn:
-    getnamed = lambda name: compile_collector(named[name])(getvar)
+    getvar: GetVarFn
+    def getnamed(name):
+        return compile_collector(named[name])(getvar)
     getvar = getvarfn(*args, getnamed, **kwargs)
     return getvar
 

@@ -1,9 +1,9 @@
 from collections.abc import Callable, Sequence
 import numpy as np
+from numba import njit
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.forestry.cross_cutting import stem_profile
 from lukefi.metsi.forestry.cross_cutting.cross_cutting_lupa import cross_cut_lupa
-from numba import njit
 
 _cross_cut_species_mapper = {
     TreeSpecies.PINE: "pine",

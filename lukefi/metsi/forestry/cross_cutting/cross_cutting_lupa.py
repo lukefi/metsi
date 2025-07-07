@@ -1,10 +1,11 @@
-from functools import cache
 from collections.abc import Callable, Sequence
+from functools import cache
+from pathlib import Path
 
 import lupa
+
 from lukefi.metsi.data.enums.internal import TreeSpecies
 
-from pathlib import Path
 
 CrossCutFn = Callable[..., tuple[Sequence[int], Sequence[float], Sequence[float]]]
 

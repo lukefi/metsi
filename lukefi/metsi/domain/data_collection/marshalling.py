@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from lukefi.metsi.data.model import ForestStand
 
 from lukefi.metsi.domain.utils.collectives import property_collector, autocollective, _collector_wrapper
@@ -38,10 +39,10 @@ def collect_properties(input_: OpTuple[ForestStand], **operation_parameters) -> 
     stand, collected_data = input_
     output_name = operation_parameters.get('output_name', 'collect_properties')
     result_rows = []
-    if not len(operation_parameters):
+    if not operation_parameters:
         return input_
     for key, properties in operation_parameters.items():
-        objects: list[object]
+        objects: Sequence[object]
         if isinstance(properties, str):
             properties = [properties]
         elif not isinstance(properties, list):
