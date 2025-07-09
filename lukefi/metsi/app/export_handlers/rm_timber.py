@@ -6,8 +6,8 @@ from lukefi.metsi.domain.collected_types import CrossCutResult
 from lukefi.metsi.sim.core_types import CollectedData
 
 
-def scan_operation_type_for_event(year: int, cross_cut: list[CrossCutResult]) -> str:
-    val = next(filter(lambda r: r.time_point == year and r.source == "harvested", cross_cut)).operation
+def scan_operation_type_for_event(year: int, cross_cut: dict[tuple[int, str], list[CrossCutResult]]) -> str:
+    val = next(filter(lambda r: r.time_point == year and r.source == "harvested", *cross_cut.values())).operation
     return val
 
 
@@ -102,7 +102,7 @@ def prepare_schedules_file_content(data: SimResults, data_source: str) -> list[s
     years within.
 
     :param data: SimResults package
-    :param data_source: "trees" for standing/harvested tree variables content, 
+    :param data_source: "trees" for standing/harvested tree variables content,
                         "timber" for standing/harvested timber volume content
     :return: list of strings representing file rows
     """

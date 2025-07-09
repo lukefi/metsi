@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 from lukefi.metsi.app.app_types import ExportableContainer
 from lukefi.metsi.data.formats.util import parse_float
+from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.formats.rst_const import MSBInitialDataRecordConst as msb_meta
 from lukefi.metsi.domain.forestry_types import StandList
@@ -18,7 +19,7 @@ def rst_float(source: str | int | float | None) -> str:
     return f'{0:.6f}'
 
 
-def msb_metadata(stand: ForestStand) -> tuple[list[str], list[str], list[str]]:
+def msb_metadata(stand: PossiblyLayered[ForestStand]) -> tuple[list[str], list[str], list[str]]:
     """
     Generate a triple with:
         MSB physical record metadata
@@ -62,7 +63,7 @@ def c_var_metadata(uid: float | None, cvars_len: int) -> list[str]:
     return list(cvars_meta)
 
 
-def c_var_rst_row(stand: ForestStand, cvar_decl: list[str]) -> str:
+def c_var_rst_row(stand: PossiblyLayered[ForestStand], cvar_decl: list[str]) -> str:
     """ Content structure generation for a C-variable row """
     cvars_meta = c_var_metadata(parse_float(stand.identifier) or stand.stand_id, len(cvar_decl))
     cvars_row = " ".join(chain(
@@ -72,7 +73,7 @@ def c_var_rst_row(stand: ForestStand, cvar_decl: list[str]) -> str:
     return cvars_row
 
 
-def rst_forest_stand_rows(stand: ForestStand, additional_vars: list[str]) -> list[str]:
+def rst_forest_stand_rows(stand: PossiblyLayered[ForestStand], additional_vars: list[str]) -> list[str]:
     """Generate RST data file rows (with MSB metadata) for a single ForestStand"""
     result = []
     # Additional variables (C-variables) row
@@ -92,7 +93,7 @@ def rst_forest_stand_rows(stand: ForestStand, additional_vars: list[str]) -> lis
     return result
 
 
-def rsts_forest_stand_rows(stand: ForestStand) -> list[str]:
+def rsts_forest_stand_rows(stand: PossiblyLayered[ForestStand]) -> list[str]:
     """Generate RSTS data file rows for a single ForestStand """
     result = []
     result.append(" ".join(chain(
@@ -110,7 +111,8 @@ def csv_value(source: Any) -> str:
     return str(source)
 
 
-def stand_to_csv_rows(stand: ForestStand, delimeter: str, additional_vars: Optional[list[str]]) -> list[str]:
+def stand_to_csv_rows(stand: PossiblyLayered[ForestStand], delimeter: str,
+                      additional_vars: Optional[list[str]]) -> list[str]:
     """converts the :stand:, its reference trees and tree strata to csv rows."""
     result = []
     result.append(delimeter.join(map(csv_value, stand.as_internal_csv_row(additional_vars))))
@@ -133,7 +135,7 @@ def stand_to_csv_rows(stand: ForestStand, delimeter: str, additional_vars: Optio
     return result
 
 
-def stands_to_csv_content(container: ExportableContainer[ForestStand], delimeter: str) -> list[str]:
+def stands_to_csv_content(container: ExportableContainer[PossiblyLayered[ForestStand]], delimeter: str) -> list[str]:
     stands = container.export_objects
     additional_vars = container.additional_vars
     result = []
@@ -161,8 +163,8 @@ def csv_content_to_stands(csv_content: list[list[str]]) -> StandList:
     return stands
 
 
-def outputtable_rows(container: ExportableContainer[ForestStand], formatter: Callable[[ForestStand, list[str]],
-                                                                                      list[str]]) -> list[str]:
+def outputtable_rows(container: ExportableContainer[PossiblyLayered[ForestStand]], formatter: Callable[[
+                     PossiblyLayered[ForestStand], list[str]], list[str]]) -> list[str]:
     stands = container.export_objects
     additional_vars = container.additional_vars or []
     result = []
@@ -171,12 +173,12 @@ def outputtable_rows(container: ExportableContainer[ForestStand], formatter: Cal
     return result
 
 
-def stands_to_rst_content(container: ExportableContainer[ForestStand]) -> list[str]:
+def stands_to_rst_content(container: ExportableContainer[PossiblyLayered[ForestStand]]) -> list[str]:
     """Generate RST file contents for the given list of ForestStand"""
     return outputtable_rows(container, rst_forest_stand_rows)
 
 
-def stands_to_rsts_content(container: ExportableContainer[ForestStand]) -> list[str]:
+def stands_to_rsts_content(container: ExportableContainer[PossiblyLayered[ForestStand]]) -> list[str]:
     """Generate RSTS file contents for the given list of ForestStand"""
     return outputtable_rows(container, lambda stand, additional_vars: rsts_forest_stand_rows(stand))
 
