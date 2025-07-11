@@ -12,7 +12,7 @@ ${INPUT_JSON}       ${CURDIR}/input/VMI13_source_mini.dat
 ${OUTPUT_DIR}       ${CURDIR}/output/test
 ${CONTROL_SCRIPT}   ${CURDIR}/input/control.py
 ${REFERENCE_DIR}    ${CURDIR}/output/ref
-${TOLERANCE}        0.01  # Set your desired tolerance here
+${TOLERANCE}        0.0000001  # Set your desired tolerance here
 
 *** Test Cases ***
 Run Simulation And Compare Output Files
