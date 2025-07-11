@@ -804,6 +804,8 @@
         "number_of_generated_trees": 10
       }
     ],
+    "reference_trees_soa": null,
+    "tree_strata_soa": null,
     "identifier": "0-2-23-2-1",
     "management_unit_id": 2,
     "stand_id": 2,
@@ -1304,6 +1306,8 @@
         "number_of_generated_trees": 10
       }
     ],
+    "reference_trees_soa": null,
+    "tree_strata_soa": null,
     "identifier": "0-2-23-3-2",
     "management_unit_id": 3,
     "stand_id": 3,
@@ -1371,6 +1375,8 @@
     "py/object": "lukefi.metsi.data.model.ForestStand",
     "reference_trees": [],
     "tree_strata": [],
+    "reference_trees_soa": null,
+    "tree_strata_soa": null,
     "identifier": "0-3-23-4-1",
     "management_unit_id": 4,
     "stand_id": 4,
