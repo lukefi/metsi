@@ -13,7 +13,7 @@ ${OUTPUT_DIR}       ${CURDIR}/output/test
 ${CONTROL_SCRIPT}   ${CURDIR}/input/control_robot3.py
 ${REFERENCE_DIR}    ${CURDIR}/output/ref
 ${TOLERANCE}        1.00  # Set your desired tolerance here
-
+${REL_TOL}        1e-4
 *** Test Cases ***
 Run Simulation And Compare Output Files
     [Tags]    simulation
@@ -49,5 +49,6 @@ Run Simulation And Compare Output Files
         # MODIFIED: Replace the slow keyword with a single call to our fast one.
         # Robot Framework automatically converts the Python function name
         # 'compare_numeric_files_with_tolerance' into this keyword name.
-        Compare Numeric Files With Tolerance    ${test_file}    ${ref_file}    ${TOLERANCE}
+        # Compare Numeric Files With Tolerance    ${test_file}    ${ref_file}    ${TOLERANCE}
+        Compare Files With Numeric In Text    ${test_file}    ${ref_file}    ${TOLERANCE}    ${REL_TOL}
     END
