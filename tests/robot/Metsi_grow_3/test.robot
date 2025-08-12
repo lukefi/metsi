@@ -8,7 +8,7 @@ Library           ${CURDIR}/../CustomCompareLibrary.py
 *** Variables ***
 ${SCRIPT}           -m
 ${MODULE}           lukefi.metsi.app.metsi
-${INPUT_JSON}       ${CURDIR}/input/Hanhijarvi.xml
+${INPUT_JSON}       ${CURDIR}/input/data.xml
 ${OUTPUT_DIR}       ${CURDIR}/output/test
 ${CONTROL_SCRIPT}   ${CURDIR}/input/control_robot3.py
 ${REFERENCE_DIR}    ${CURDIR}/output/ref
