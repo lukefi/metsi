@@ -1,0 +1,3 @@
+[submodule "lukefi/metsi/forestry/naturalprocess/MetsiGrow"]
+	path = lukefi/metsi/forestry/naturalprocess/MetsiGrow
+	url = https://github.com/lukefi/MetsiGrow.git
