@@ -1,14 +1,14 @@
 """
 Clearcuttings are simulated if the treestock's mean age
 or mean diameter at breast height exceeds the renewal limit
-given in separate files (renewal_ages_southernFI.txt, 
+given in separate files (renewal_ages_southernFI.txt,
 renewal_diameters_southernFI.txt ...).
 Values in files are based on Tapio's Best practices for sustainable
-forest management in Finland: https://metsanhoidonsuositukset.fi/en. 
+forest management in Finland: https://metsanhoidonsuositukset.fi/en.
 There are separate files for different regions(Southern, Central, Northern),
-regional tables have columns by dominant species (Scots Pine, 
-Norway Spruce, Silver Birch, Downy Birch) and rows by site type 
-(OMT, MT, VT, CT). 
+regional tables have columns by dominant species (Scots Pine,
+Norway Spruce, Silver Birch, Downy Birch) and rows by site type
+(OMT, MT, VT, CT).
 """
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.enums.internal import TreeSpecies
@@ -160,8 +160,8 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
 def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None,
                             file_path_diameters: str = None) -> tuple[int, float]:
     """ Finds minimum age and and minimum mean diameter for clearcutting
-    a stand from parameter files defined in control.py. It is user's responsibility to provide it in correct format. 
-    Parsing failure will raise an exception. 
+    a stand from parameter files defined in control.py. It is user's responsibility to provide it in correct format.
+    Parsing failure will raise an exception.
     If file not provided in control.py, the hardcoded structures will be used."""
     site_type_key = site_type_to_key(stand.site_type_category)
     species_key = species_to_key_clearcut(stand)
@@ -190,15 +190,15 @@ def species_to_key_clearcut(stand: ForestStand) -> str:
     if value in (TreeSpecies.DOWNY_BIRCH,):
         return SpeciesKey.DOWNY_BIRCH
     if value in (TreeSpecies.ASPEN, TreeSpecies.GREY_ALDER,
-                   TreeSpecies.OTHER_CONIFEROUS, TreeSpecies.DOUGLAS_FIR, TreeSpecies.JUNIPER,
-                   TreeSpecies.OTHER_DECIDUOUS, TreeSpecies.SHORE_PINE, TreeSpecies.EUROPEAN_WHITE_ELM,
-                   TreeSpecies.LARCH, TreeSpecies.SMALL_LEAVED_LIME, TreeSpecies.BLACK_SPRUCE,
-                   TreeSpecies.WILLOW, TreeSpecies.MOUNTAIN_ASH, TreeSpecies.ABIES,
-                   TreeSpecies.GOAT_WILLOW, TreeSpecies.COMMON_ASH, TreeSpecies.KEDAR,
-                   TreeSpecies.SERBIAN_SPRUCE, TreeSpecies.OAK, TreeSpecies.BIRD_CHERRY,
-                   TreeSpecies.MAPLE, TreeSpecies.CURLY_BIRCH, TreeSpecies.WYCH_ELM,
-                   TreeSpecies.THUJA, TreeSpecies.YEW, TreeSpecies.BAY_WILLOW, TreeSpecies.POPLAR, TreeSpecies.HAZEL,
-                   TreeSpecies.OTHER_PINE, TreeSpecies.OTHER_SPRUCE,
-                   TreeSpecies.UNKNOWN_CONIFEROUS, TreeSpecies.UNKNOWN_DECIDUOUS, TreeSpecies.UNKNOWN):
+                 TreeSpecies.OTHER_CONIFEROUS, TreeSpecies.DOUGLAS_FIR, TreeSpecies.JUNIPER,
+                 TreeSpecies.OTHER_DECIDUOUS, TreeSpecies.SHORE_PINE, TreeSpecies.EUROPEAN_WHITE_ELM,
+                 TreeSpecies.LARCH, TreeSpecies.SMALL_LEAVED_LIME, TreeSpecies.BLACK_SPRUCE,
+                 TreeSpecies.WILLOW, TreeSpecies.MOUNTAIN_ASH, TreeSpecies.ABIES,
+                 TreeSpecies.GOAT_WILLOW, TreeSpecies.COMMON_ASH, TreeSpecies.KEDAR,
+                 TreeSpecies.SERBIAN_SPRUCE, TreeSpecies.OAK, TreeSpecies.BIRD_CHERRY,
+                 TreeSpecies.MAPLE, TreeSpecies.CURLY_BIRCH, TreeSpecies.WYCH_ELM,
+                 TreeSpecies.THUJA, TreeSpecies.YEW, TreeSpecies.BAY_WILLOW, TreeSpecies.POPLAR, TreeSpecies.HAZEL,
+                 TreeSpecies.OTHER_PINE, TreeSpecies.OTHER_SPRUCE,
+                 TreeSpecies.UNKNOWN_CONIFEROUS, TreeSpecies.UNKNOWN_DECIDUOUS, TreeSpecies.UNKNOWN):
         return SpeciesKey.DOWNY_BIRCH
     raise UserWarning(f"Unable to spesify tree species value {value} as key for the thinning limits lookup table")

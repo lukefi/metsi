@@ -1,5 +1,5 @@
 from typing import Any, Literal, Optional
-from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.domain.utils.collectives import GetVarFn, compile_collector, getvarfn
 
 Verb = Literal["select", "remove"]
@@ -32,11 +32,11 @@ def makegetvarfn(named: dict[str, str], *args: Any, **kwargs: Any) -> GetVarFn:
 
 
 def applyfilter(
-    stands: list[ForestStand],
+    stands: StandList,
     command: str,
     expr: str,
     named: Optional[dict[str, str]] = None
-) -> list[ForestStand]:
+) -> StandList:
     if named is None:
         named = {}
 

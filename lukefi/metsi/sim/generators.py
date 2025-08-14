@@ -1,26 +1,33 @@
 from typing import Any, Optional
 from collections.abc import Callable
-from lukefi.metsi.sim.core_types import EventTree, SimConfiguration, DeclaredEvents, OperationPayload, GeneratorFn
+from lukefi.metsi.sim.core_types import (
+    EventTree,
+    Operation,
+    ProcessedOperation,
+    SimConfiguration,
+    DeclaredEvents,
+    OperationPayload,
+    GeneratorFn)
 from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
 from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_params
 from lukefi.metsi.app.utils import MetsiException
 
 
-class NestableGenerator:
+class NestableGenerator[T]:
     """
     NestableGenerator represents a tree for nested event generators in the simulation tree. Construction of this class
     creates a tree structure where leaf nodes represent actual GeneratorFn instances to populate an Event tree. The
     tree organization represents the nested sequences and alternatives structure in simulation events declaration.
     """
-    prepared_generator: Optional[GeneratorFn] = None
+    prepared_generator: Optional[GeneratorFn[OperationPayload[T]]] = None
     time_point: int = 0
-    nested_generators: list['NestableGenerator']
-    free_operations: list[Callable]
+    nested_generators: list['NestableGenerator[T]']
+    free_operations: list[Operation[T]]
     config: SimConfiguration
 
     def __init__(self,
                  config: SimConfiguration,
-                 generator_declaration: dict[Callable, list[Callable]],
+                 generator_declaration: dict[GeneratorFn[OperationPayload[T]], list[Operation[T]]],
                  time_point: int):
         """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
         time point."""
@@ -37,9 +44,10 @@ class NestableGenerator:
         if self.free_operations:
             if len(self.nested_generators) == 0:
                 # leaf node, prepare the actual GeneratorFn
-                prepared_operations = []
+                prepared_operations: list[ProcessedOperation[T]] = []
                 for op in self.free_operations:
-                    ops = prepare_parametrized_operations(config, op, time_point)
+                    ops: list[ProcessedOperation[T]] = \
+                        prepare_parametrized_operations(config, op, time_point)
                     prepared_operations.extend(ops)
                 self.prepared_generator = generator_function(self.generator_type, *prepared_operations)
             else:
@@ -77,7 +85,7 @@ class NestableGenerator:
             self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
             self.free_operations = []
 
-    def unwrap(self, previous: list[EventTree]) -> list[EventTree]:
+    def unwrap(self, previous: list[EventTree[OperationPayload[T]]]) -> list[EventTree[OperationPayload[T]]]:
         """
         Recursive depth-first walkthrough of NestableGenerator tree starting from self to generate a list of EventTrees.
         These denote the leaves of the given EventTrees as expanded by self.
@@ -100,7 +108,7 @@ class NestableGenerator:
         if self.prepared_generator is not None:
             return self.prepared_generator(previous)
         if self.generator_type == sequence:  # pylint: disable=comparison-with-callable
-            current = previous
+            current: list[EventTree[OperationPayload[T]]] = previous
             for child in self.nested_generators:
                 current = child.unwrap(current)
             return current
@@ -112,14 +120,14 @@ class NestableGenerator:
         return previous
 
 
-def sequence(parents: Optional[list[EventTree]] = None, /, *operations: Callable) -> list[EventTree]:
+def sequence[T](parents: Optional[list[EventTree[T]]] = None, /, *operations: Callable[[T], T]) -> list[EventTree[T]]:
     """
     Generate a linear sequence of EventTree nodes, optionally extending each node in the given list of nodes with it.
     :param parents: optional
     :param operations:
     :return:
     """
-    result = []
+    result: list[EventTree[T]] = []
     if parents is None or len(parents) == 0:
         parents = [EventTree()]
     for root_event in parents:
@@ -132,14 +140,15 @@ def sequence(parents: Optional[list[EventTree]] = None, /, *operations: Callable
     return result
 
 
-def alternatives(parents: Optional[list[EventTree]] = None, /, *operations: Callable) -> list[EventTree]:
+def alternatives[T](parents: Optional[list[EventTree[T]]] = None, /,
+                    *operations: Callable[[T], T]) -> list[EventTree[T]]:
     """
     Generate branches for an optional list of EventTree nodes, out of an *args list of given operations
     :param parents:
     :param operations:
     :return: a list of leaf nodes now under the given parent node
     """
-    result = []
+    result: list[EventTree[T]] = []
     if parents is None or len(parents) == 0:
         parents = [EventTree()]
     for parent_node in parents:
@@ -150,22 +159,23 @@ def alternatives(parents: Optional[list[EventTree]] = None, /, *operations: Call
     return result
 
 
-def compose_nested(nestable_generator: NestableGenerator) -> EventTree:
+def compose_nested[T](nestable_generator: NestableGenerator[T]) -> EventTree[OperationPayload[T]]:
     """
     Generate a simulation EventTree using the given NestableGenerator.
 
     :param nestable_generator: NestableGenerator tree for generating a EventTree.
     :return: The root node of the generated EventTree
     """
-    root = EventTree()
+    root: EventTree[OperationPayload[T]] = EventTree()
     nestable_generator.unwrap([root])
     return root
 
 
-def simple_processable_chain(operation_tags: list[Callable], operation_params: dict) -> list[Callable]:
+def simple_processable_chain[T](operation_tags: list[Callable[[T], T]],
+                                operation_params: dict[Callable[[T], T], Any]) -> list[Callable[[T], T]]:
     """Prepare a list of partially applied (parametrized) operation functions based on given declaration of operation
     tags and operation parameters"""
-    result = []
+    result: list[Callable[[T], T]] = []
     for tag in operation_tags if operation_tags is not None else []:
         params = operation_params.get(tag, [{}])
         if len(params) > 1:
@@ -192,19 +202,20 @@ def generator_declarations_for_time_point(events: list[DeclaredEvents],
     return generator_declarations
 
 
-def generator_function(key, *fns: Callable) -> GeneratorFn:
+def generator_function[T](key: GeneratorFn[OperationPayload[T]],
+                          *fns: ProcessedOperation[T]) -> GeneratorFn[OperationPayload[T]]:
     """Crate a generator function wrapper for function by the key. Binds the
     argument list of functions with the generator."""
     return lambda parent_nodes: key(parent_nodes, *fns)
 
 
-def prepare_parametrized_operations(config: SimConfiguration,
-                                    operation_tag: Callable,
-                                    time_point: int) -> list[Callable[[Any], OperationPayload]]:
+def prepare_parametrized_operations[T](config: SimConfiguration,
+                                       operation_tag: Operation[T],
+                                       time_point: int) -> list[ProcessedOperation[T]]:
     parameter_set_choices = config.operation_params.get(operation_tag, [{}])
     operation_run_constraints = config.run_constraints.get(operation_tag)
     this_operation_file_params = get_operation_file_params(operation_tag, config.operation_file_params)
-    results = []
+    results: list[ProcessedOperation[T]] = []
     for parameter_set in parameter_set_choices:
         combined_params = merge_operation_params(parameter_set, this_operation_file_params)
         results.append(prepared_processor(
@@ -222,7 +233,7 @@ def full_tree_generators(config: SimConfiguration) -> NestableGenerator:
     :param config: a prepared SimConfiguration object
     :return: a list of prepared generator functions
     """
-    wrapper = NestableGenerator(config, {sequence: []}, 0)
+    wrapper: NestableGenerator = NestableGenerator(config, {sequence: []}, 0)
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
         time_point_wrapper_declaration: dict = {sequence: generator_declarations}
@@ -246,7 +257,7 @@ def partial_tree_generators_by_time_point(config: SimConfiguration) -> dict[int,
         sequence_wrapper_declaration: dict = {
             sequence: generator_declarations
         }
-        wrapper_generator = NestableGenerator(config, sequence_wrapper_declaration, time_point)
+        wrapper_generator: NestableGenerator = NestableGenerator(config, sequence_wrapper_declaration, time_point)
         generators_by_time_point[time_point] = wrapper_generator
     return generators_by_time_point
 

@@ -1,8 +1,7 @@
 import copy
 from pathlib import Path
 from functools import partial
-from typing import Callable
-
+from typing import Any, Callable, Optional
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults, ExportableContainer
@@ -37,21 +36,18 @@ def export_files(config: MetsiConfiguration, decl: list[dict], data: SimResults)
         handler()
 
 
-def export_preprocessed(target_directory: str, decl: dict, stands: StandList) -> None:
+def export_preprocessed(target_directory: str, decl: dict[str, Any], stands: StandList) -> None:
     output_formats = list(decl.keys())
     print_logline(f"Writing all preprocessed data to directory '{target_directory}'")
     for output_format in output_formats:
-        operations = decl[output_format].get('operations', None)
-        operation_params = decl[output_format].get('operation_params', None)
-        additional_varnames = decl[output_format].get('additional_variables', None)
+        operations: Optional[list[Callable[[StandList], StandList]]] = decl[output_format].get('operations', None)
+        operation_params: Optional[dict[Callable, Any]] = decl[output_format].get('operation_params', None)
+        additional_varnames: Optional[list[str]] = decl[output_format].get('additional_variables', None)
         file_name = f"preprocessing_result.{output_format}"
         filepaths = determine_file_path(target_directory, file_name)
         if operations is not None:
-            operation_chain = simple_processable_chain(operations,
-                                                       operation_params)
-            modified_stands = evaluate_sequence(
-                copy.deepcopy(stands),
-                *operation_chain)
+            operation_chain = simple_processable_chain(operations, operation_params or {})
+            modified_stands = evaluate_sequence(copy.deepcopy(stands), *operation_chain)
             result = ExportableContainer(modified_stands, additional_varnames)
         else:
             result = ExportableContainer(stands, additional_varnames)

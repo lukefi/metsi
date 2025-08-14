@@ -1,13 +1,12 @@
-from typing import Optional, TypeVar
-from collections.abc import Callable
-from lukefi.metsi.sim.core_types import OpTuple, OperationPayload
+from typing import Callable, Optional, TypeVar
+from lukefi.metsi.sim.core_types import Operation, OperationPayload, ProcessedOperation
 
 
 T = TypeVar("T")
 
 
-def _get_operation_last_run(operation_history: list[tuple[int, Callable, dict[str, dict]]],
-                            operation_tag: Callable) -> Optional[int]:
+def _get_operation_last_run(operation_history: list[tuple[int, Operation[T], dict[str, dict]]],
+                            operation_tag: Operation[T]) -> Optional[int]:
     return next((t for t, o, _ in reversed(operation_history) if o == operation_tag), None)
 
 
@@ -16,20 +15,20 @@ def do_nothing(data: T, **kwargs) -> T:
     return data
 
 
-def prepared_operation(operation_entrypoint: Callable, **operation_parameters):
+def prepared_operation(operation_entrypoint: Callable[[T], T], **operation_parameters) -> Callable[[T], T]:
     """prepares an opertion entrypoint function with configuration parameters"""
     return lambda state: operation_entrypoint(state, **operation_parameters)
 
 
-def prepared_processor(operation_tag, time_point: int, operation_run_constraints: Optional[dict],
-                       **operation_parameters: dict[str, dict]):
+def prepared_processor(operation_tag: Operation[T], time_point: int, operation_run_constraints: Optional[dict],
+                       **operation_parameters: dict[str, dict]) -> ProcessedOperation[T]:
     """prepares a processor function with an operation entrypoint"""
-    operation = prepared_operation(operation_tag, **operation_parameters)
+    operation: Operation[T] = prepared_operation(operation_tag, **operation_parameters)
     return lambda payload: processor(payload, operation, operation_tag, time_point,
                                      operation_run_constraints, **operation_parameters)
 
 
-def processor(payload: OperationPayload[T], operation: Callable[[OpTuple], OpTuple], operation_tag: Callable,
+def processor(payload: OperationPayload[T], operation: Operation[T], operation_tag: Operation[T],
               time_point: int, operation_run_constraints: Optional[dict],
               **operation_parameters: dict[str, dict]) -> OperationPayload[T]:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""

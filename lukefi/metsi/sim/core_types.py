@@ -2,19 +2,19 @@ from collections import OrderedDict
 from collections.abc import Callable
 from copy import deepcopy, copy
 from types import SimpleNamespace
-from typing import NamedTuple, Optional, Any, TypeVar, Generic
+from typing import NamedTuple, Optional, Any, TypeVar
 import weakref
 
-from lukefi.metsi.data.layered_model import LayeredObject
+from lukefi.metsi.data.layered_model import LayeredObject, PossiblyLayered
 
 
 def identity(x):
     return x
 
 
-class DeclaredEvents(NamedTuple):
+class DeclaredEvents[T](NamedTuple):
     time_points: list[int] = []
-    generators: list[dict[Callable, list[Callable]]] = [{}]
+    generators: list[dict["GeneratorFn[T]", list[Callable[[T], T]]]] = [{}]
 
 
 class SimConfiguration(SimpleNamespace):
@@ -68,37 +68,41 @@ class SimConfiguration(SimpleNamespace):
         self.time_points = sorted(time_points)
 
 
-class EventTree:
+class EventTree[T]:
     """
     Event represents a computational operation in a tree of following event paths.
     """
 
     __slots__ = ('operation', 'branches', '_previous_ref', '__weakref__')
 
-    def __init__(self,
-                 operation: Optional[Callable[[Optional[Any]], Optional[Any]]] = None,
-                 previous: Optional['EventTree'] = None):
+    operation: Callable[[T], T]
+    branches: list["EventTree[T]"]
+    _previous_ref: Optional[weakref.ReferenceType["EventTree[T]"]]
 
-        self.operation = operation if operation is not None else identity
+    def __init__(self,
+                 operation: Optional[Callable[[T], T]] = None,
+                 previous: Optional['EventTree[T]'] = None):
+
+        self.operation = operation or identity
         self._previous_ref = weakref.ref(previous) if previous else None
-        self.branches: list[EventTree] = []
+        self.branches = []
 
     @property
     def previous(self):
         return self._previous_ref() if self._previous_ref else None
 
     @previous.setter
-    def previous(self, prev: Optional['EventTree']):
+    def previous(self, prev: Optional['EventTree[T]']):
         self._previous_ref = weakref.ref(prev) if prev else None
 
-    def find_root(self: 'EventTree'):
+    def find_root(self):
         return self if self.previous is None else self.previous.find_root()
 
-    def attach(self, previous: 'EventTree'):
+    def attach(self, previous: 'EventTree[T]'):
         self.previous = previous
         previous.add_branch(self)
 
-    def operation_chains(self):
+    def operation_chains(self) -> list[list[Callable[[T], T]]]:
         """
         Recursively produce a list of lists of possible operation chains represented by this event tree in post-order
         traversal.
@@ -106,14 +110,14 @@ class EventTree:
         if len(self.branches) == 0:
             # Yes. A leaf node returns a single chain with a single operation.
             return [[self.operation]]
-        result = []
+        result: list[list[Callable[[T], T]]] = []
         for branch in self.branches:
             chains = branch.operation_chains()
             for chain in chains:
                 result.append([self.operation] + chain)
         return result
 
-    def evaluate(self, payload) -> list:
+    def evaluate(self, payload: T) -> list[T]:
         """
         Recursive pre-order walkthrough of this event tree to evaluate its operations with the given payload,
         copying it for branching.
@@ -126,7 +130,7 @@ class EventTree:
             return [current]
         if len(self.branches) == 1:
             return self.branches[0].evaluate(current)
-        results = []
+        results: list[T] = []
         for branch in self.branches:
             try:
                 results.extend(branch.evaluate(copy(current)))
@@ -136,11 +140,11 @@ class EventTree:
             raise UserWarning("Branch aborted with all children failing")
         return results
 
-    def add_branch(self, et: 'EventTree'):
+    def add_branch(self, et: 'EventTree[T]'):
         et.previous = self
         self.branches.append(et)
 
-    def add_branch_from_operation(self, operation: Callable):
+    def add_branch_from_operation(self, operation: Callable[[T], T]):
         self.add_branch(EventTree(operation, self))
 
 
@@ -234,18 +238,15 @@ class CollectedData:
         _upsert(self.get(keys[0]), value, *keys[1:])
 
 
-T = TypeVar("T")
-
-
-class OperationPayload(SimpleNamespace, Generic[T]):
+class OperationPayload[T](SimpleNamespace):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
-    computational_unit: T
+    computational_unit: PossiblyLayered[T]
     collected_data: CollectedData
-    operation_history: list[tuple[int, Callable, dict[str, dict]]]
+    operation_history: list[tuple[int, "Operation[T]", dict[str, dict]]]
 
     def __copy__(self) -> "OperationPayload[T]":
-        copy_like: LayeredObject | T
+        copy_like: PossiblyLayered[T]
         if isinstance(self.computational_unit, LayeredObject):
             copy_like = self.computational_unit.new_layer()
             copy_like.reference_trees = [tree.new_layer() for tree in copy_like.reference_trees]
@@ -260,8 +261,10 @@ class OperationPayload(SimpleNamespace, Generic[T]):
         )
 
 
+T = TypeVar("T")
 OpTuple = tuple[T, CollectedData]
-SourceData = list[T]
-Evaluator = Callable[[OperationPayload[T], EventTree], list[OperationPayload[T]]]
+Evaluator = Callable[[T, EventTree[T]], list[T]]
 Runner = Callable[[T, SimConfiguration, Evaluator[T]], list[T]]
-GeneratorFn = Callable[[Optional[list[EventTree]]], list[EventTree]]
+GeneratorFn = Callable[[Optional[list[EventTree[T]]]], list[EventTree[T]]]
+Operation = Callable[[OpTuple[PossiblyLayered[T]]], OpTuple[PossiblyLayered[T]]]
+ProcessedOperation = Callable[[OperationPayload[T]], OperationPayload[T]]

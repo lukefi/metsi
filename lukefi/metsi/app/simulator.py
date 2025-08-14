@@ -6,21 +6,23 @@ from lukefi.metsi.app.app_types import ForestOpPayload
 from lukefi.metsi.app.metsi_enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
-from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, depth_first_evaluator, \
-    chain_evaluator
+from lukefi.metsi.sim.runners import (
+    run_full_tree_strategy,
+    run_partial_tree_strategy,
+    depth_first_evaluator,
+    chain_evaluator)
 from lukefi.metsi.sim.core_types import CollectedData, Runner, SimConfiguration, Evaluator
 from lukefi.metsi.app.utils import MetsiException
 
 
-def run_stands(
-        stands: StandList, config: SimConfiguration,
-        runner: Runner[ForestOpPayload],
-        evaluator: Evaluator[ForestOpPayload]
-) -> dict[str, list[ForestOpPayload]]:
+def run_stands(stands: StandList,
+               config: SimConfiguration,
+               runner: Runner[ForestOpPayload],
+               evaluator: Evaluator[ForestOpPayload]) -> dict[str, list[ForestOpPayload]]:
     """Run the simulation for all given stands, from the given declaration, using the given runner. Return the
     results organized into a dict keyed with stand identifiers."""
 
-    retval = {}
+    retval: dict[str, list[ForestOpPayload]] = {}
     for stand in stands:
         overlaid_stand = LayeredObject[ForestStand](stand)
         overlaid_stand.reference_trees = [LayeredObject[ReferenceTree](tree) for tree in overlaid_stand.reference_trees]
@@ -38,7 +40,7 @@ def run_stands(
 
 
 def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestOpPayload]:
-    formation_strategy_map = {
+    formation_strategy_map: dict[FormationStrategy, Runner[ForestOpPayload]] = {
         FormationStrategy.FULL: run_full_tree_strategy,
         FormationStrategy.PARTIAL: run_partial_tree_strategy
     }
@@ -49,7 +51,7 @@ def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestOpPayl
 
 
 def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestOpPayload]:
-    evaluation_strategy_map = {
+    evaluation_strategy_map: dict[EvaluationStrategy, Evaluator[ForestOpPayload]] = {
         EvaluationStrategy.DEPTH: depth_first_evaluator,
         EvaluationStrategy.CHAINS: chain_evaluator
     }

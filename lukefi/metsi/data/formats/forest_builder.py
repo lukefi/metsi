@@ -18,13 +18,14 @@ from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.conversion import vmi2internal, fc2internal
 from lukefi.metsi.data.formats import smk_util, util, vmi_util, gpkg_util
 from lukefi.metsi.data.formats.declarative_conversion import ConversionMapper
+from lukefi.metsi.domain.forestry_types import StandList
 
 
 class ForestBuilder(ABC):
     """Abstract base class of forest builders"""
 
     @abstractmethod
-    def build(self) -> list[ForestStand]:
+    def build(self) -> StandList:
         ...
 
 
@@ -170,7 +171,7 @@ class VMIBuilder(ForestBuilder):
         result = self.conversion_reader.apply_conversions(result, data_row)
         return result
 
-    def remove_strata(self, stands: list[ForestStand]):
+    def remove_strata(self, stands: StandList):
         """Empties the stands' `tree_strata` lists."""
         for stand in stands:
             stand.tree_strata.clear()
@@ -180,7 +181,7 @@ class VMIBuilder(ForestBuilder):
         ...
 
     @abstractmethod
-    def build(self) -> list[ForestStand]:
+    def build(self) -> StandList:
         ...
 
 
@@ -259,12 +260,12 @@ class VMI12Builder(VMIBuilder):
         """Return VMI12 data type of the row"""
         return int(row[13])
 
-    def build(self) -> list[ForestStand]:
+    def build(self) -> StandList:
         """Populate a list of ForestStand with associated ReferenceTree and TreeStratum entries.
         Using constructor initialized instance variables as source.
 
         Returns:
-        list[ForestStand]:populated and parsed VMI12 forest stands with reference trees and tree strata
+        StandList:populated and parsed VMI12 forest stands with reference trees and tree strata
         """
         result: dict[str, ForestStand] = {}
         for i, row in enumerate(self.forest_stands):
@@ -366,12 +367,12 @@ class VMI13Builder(VMIBuilder):
         result = self.conversion_reader.apply_conversions(result, data_row)
         return result
 
-    def build(self) -> list[ForestStand]:
+    def build(self) -> StandList:
         """Populate a list of ForestStand with associated ReferenceTree and TreeStratum entries.
         Using constructor initialized instance variables as source.
 
         Returns:
-        list[ForestStand]:populated and parsed VMI13 forest stands with reference trees and tree strata
+        StandList:populated and parsed VMI13 forest stands with reference trees and tree strata
         """
         result: dict[str, ForestStand] = {}
         for i, row in enumerate(self.forest_stands):
@@ -401,7 +402,7 @@ class ForestCentreBuilder(ForestBuilder):
     ''' Base class for building a forest data model from Forest Centre (Suomen Metsakeskus) source '''
 
     @abstractmethod
-    def build(self) -> list[ForestStand]:
+    def build(self) -> StandList:
         ...
 
     @abstractmethod
@@ -520,7 +521,7 @@ class XMLBuilder(ForestCentreBuilder):
         stratum.storey = fc2internal.convert_storey(stratum_data.Storey)
         return stratum
 
-    def build(self) -> list[ForestStand]:
+    def build(self) -> StandList:
         stands = []
         estands = self.root.findall(self.xpath_stand, smk_util.NS)
         for estand in estands:
@@ -609,7 +610,7 @@ class GeoPackageBuilder(ForestCentreBuilder):
         stratum.storey = entry.storey
         return stratum
 
-    def build(self) -> list[ForestStand]:
+    def build(self) -> StandList:
         """ Converts geopackage into list of ForestStand objects.
         :return: List of ForestStand objects
         """

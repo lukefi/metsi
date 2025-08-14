@@ -1,7 +1,7 @@
 from typing import Any
-from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.vector_model import ReferenceTrees, Strata
 from lukefi.metsi.app.utils import MetsiException
+from lukefi.metsi.domain.forestry_types import StandList
 
 
 CONTAINERS = {
@@ -10,7 +10,7 @@ CONTAINERS = {
 }
 
 
-def vectorize(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def vectorize(stands: StandList, **operation_params) -> StandList:
     """
     Modifies a list of ForestStand objects' reference_trees and tree_strata into a struct-of-arrays style.
     The lists of ReferenceTree and TreeStratum are converted into ReferenceTrees and Strata with numpy arrays for
@@ -20,10 +20,10 @@ def vectorize(stands: list[ForestStand], **operation_params) -> list[ForestStand
     should no longer be necessary.
 
     Args:
-        stands (list[ForestStand]): List of ForestStand objects in standard AoS format
+        stands (StandList): List of ForestStand objects in standard AoS format
 
     Returns:
-        list[ForestStand]: A reference to the same list is returned after the objects are modified in-place
+        StandList: A reference to the same list is returned after the objects are modified in-place
     """
 
     target = operation_params.get('target', None)
