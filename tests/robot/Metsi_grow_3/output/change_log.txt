@@ -1,0 +1,9 @@
+Tests grow_metsi growth model with operations.
+
+When reference files are updated, mark it here with ticket number.
+
+__________________________________________________________________________________________
+
+
+08.08.2025		Test and initial references created. /Ari-Antti Tervonen
+		

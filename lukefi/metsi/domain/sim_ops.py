@@ -10,6 +10,7 @@ from lukefi.metsi.domain.data_collection.marshalling import (
     report_period
 )
 from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
+from lukefi.metsi.domain.natural_processes.grow_metsi import grow_metsi
 from lukefi.metsi.domain.forestry_operations.thinning import (
     first_thinning,
     thinning_from_above,
@@ -21,7 +22,8 @@ from lukefi.metsi.domain.forestry_operations.clearcut import clearcutting
 from lukefi.metsi.domain.forestry_operations.planting import planting
 from lukefi.metsi.sim.operations import do_nothing
 
-__all__ = ['grow_acta',
+__all__ = ['grow_metsi',
+           'grow_acta',
            'thinning_from_below',
            'thinning_from_above',
            'first_thinning',

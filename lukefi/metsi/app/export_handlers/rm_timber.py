@@ -88,7 +88,9 @@ def collect_timber_data_for_year(
     retval.append({'year': year, 'event_type': stock_year_type,
                   'total': total_stock, 'values': stock, 'source': 'Stock'})
     if total_timber > 0:
-        operation = scan_operation_type_for_event(year, cross_cut_results)
+        #operation = scan_operation_type_for_event(year, cross_cut_results)
+        harvested = cross_cut_results.get((year, "harvested"), [])
+        operation = scan_operation_type_for_event(year, harvested)
         retval.append({'year': year, 'event_type': 'Event', 'total': total_timber,
                       'values': timber, 'source': operation})
     return retval
