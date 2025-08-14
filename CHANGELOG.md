@@ -15,6 +15,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Several typing improvements
 
+## [2.2.2] - 2025-08-14
+
+### Changed
+
+- Several typing improvements
+
 ## [2.2.1] - 2025-08-14
 
 ### Changed
