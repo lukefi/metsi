@@ -6,12 +6,9 @@ from lukefi.metsi.domain.collected_types import CrossCutResult
 from lukefi.metsi.sim.core_types import CollectedData
 
 
-def scan_operation_type_for_event(year: int, cross_cut: dict[tuple[int, str], list[CrossCutResult]]) -> str:
-    val = cross_cut.get((year, "harvested"), None)
-    if val is not None:
-        first = next(iter(val), None)
-        return first.operation if first is not None else "unknown_operation"
-    return "unknown_operation"
+def scan_operation_type_for_event(year: int, cross_cut: list[CrossCutResult]) -> str:
+    val = next(filter(lambda r: r.time_point == year and r.source == "harvested", cross_cut)).operation
+    return val
 
 
 def group_crosscut_by_year_and_source(results: list[CrossCutResult]) -> dict[tuple[int, str], list[CrossCutResult]]:
