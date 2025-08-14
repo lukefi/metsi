@@ -1,4 +1,3 @@
-from examples.declarations.export_prepro import csv_and_json
 from lukefi.metsi.domain.pre_ops import *
 from lukefi.metsi.domain.sim_ops import *
 from lukefi.metsi.sim.generators import *
@@ -239,8 +238,5 @@ control_structure = {
 
 }
 
-# The preprocessing export format is added as an external module
-#control_structure['export_prepro'] = {}
-#control_structure['export_prepro'].update(csv_and_json)
 
 __all__ =['control_structure']
