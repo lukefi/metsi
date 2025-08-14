@@ -21,31 +21,27 @@ def determine_artificial_regeneration_year(regeneration: str, regeneration_year:
     if regeneration in ('1', '2', '3', '4'):
         if regeneration_year == '0':
             return year
-        elif regeneration_year == '1':
+        if regeneration_year == '1':
             return year - 1
-        elif regeneration_year == '2':
+        if regeneration_year == '2':
             return year - 3
-        elif regeneration_year == '3':
+        if regeneration_year == '3':
             return year - 8
-        elif regeneration_year in ('a', 'A'):
+        if regeneration_year in ('a', 'A'):
             return year - 20
-        elif regeneration_year in ('b', 'B'):
+        if regeneration_year in ('b', 'B'):
             return year - 35
     return None
 
 
 def determine_development_class(dev_class_source: str) -> int:
-    if dev_class_source in ('1', '2', '3', '4', '5', '6', '7', '8', '9'):
+    if dev_class_source in {'1', '2', '3', '4', '5', '6', '7', '8', '9'}:
         return int(dev_class_source)
-    else:
-        return 0
+    return 0
 
 
 def determine_natural_renewal(natural_renewal: str) -> bool:
-    if natural_renewal.strip() in ('8', '9'):
-        return True
-    else:
-        return False
+    return natural_renewal.strip() in {'8', '9'}
 
 
 def determine_clearing_of_reform_sector_year(other_method: str, year_adjustment_class: str, year: int) -> Optional[int]:
@@ -53,11 +49,11 @@ def determine_clearing_of_reform_sector_year(other_method: str, year_adjustment_
     if other_method == '4':
         if year_adjustment_class == "0":
             return year
-        elif year_adjustment_class == "1":
+        if year_adjustment_class == "1":
             return year - 1
-        elif year_adjustment_class == "2":
+        if year_adjustment_class == "2":
             return year - 3
-        elif year_adjustment_class == "3":
+        if year_adjustment_class == "3":
             return year - 8
     return None
 
@@ -67,11 +63,11 @@ def determine_pruning_year(other_method: str, year_adjustment_class: str, year: 
     if other_method == '3':
         if year_adjustment_class == "0":
             return year
-        elif year_adjustment_class == "1":
+        if year_adjustment_class == "1":
             return year - 1
-        elif year_adjustment_class == "2":
+        if year_adjustment_class == "2":
             return year - 3
-        elif year_adjustment_class == "3":
+        if year_adjustment_class == "3":
             return year - 7
     return None
 
@@ -85,17 +81,14 @@ def determine_drainage_year(sourcevalue: str, year: int) -> Optional[int]:
 
 
 def determine_drainage_feasibility(ojitus_tarve: str) -> bool:
-    if ojitus_tarve in ('1', '2', '3'):
-        return True
-    else:
-        return False
+    return ojitus_tarve in ('1', '2', '3')
 
 
 def determine_vmi12_area_ha(lohkomuoto: int, county: int) -> float:
     area_ha = 0.0
     if county < 1 or county >= len(vmi12_county_areas):
         raise IndexError
-    elif county < 17:
+    if county < 17:
         area_ha = vmi12_county_areas[(county - 1)]
     elif county == 17 and lohkomuoto == 3:
         area_ha = vmi12_county_areas[(county - 1)]
@@ -115,51 +108,51 @@ def determine_vmi12_area_ha(lohkomuoto: int, county: int) -> float:
 def _solve_vmi13_county_areas(county: int, lohkomuoto: int, lohkotarkenne: int) -> float:
     if county == 1 and lohkomuoto == 2 and lohkotarkenne == 0:
         return 345.73918
-    elif county == 2 and lohkomuoto == 2 and lohkotarkenne == 0:
+    if county == 2 and lohkomuoto == 2 and lohkotarkenne == 0:
         return 338.0386443
-    elif county == 4 and lohkomuoto == 2 and lohkotarkenne == 0:
+    if county == 4 and lohkomuoto == 2 and lohkotarkenne == 0:
         return 342.975010960105
-    elif county == 5 and lohkomuoto == 2 and lohkotarkenne == 0:
+    if county == 5 and lohkomuoto == 2 and lohkotarkenne == 0:
         return 342.747528
-    elif county == 6 and lohkotarkenne == 0:
+    if county == 6 and lohkotarkenne == 0:
         if lohkomuoto == 1:
             return 413.08125
         if lohkomuoto == 2:
             return 347.828958275767
-    elif county == 7 and lohkomuoto == 2 and lohkotarkenne == 0:
+    if county == 7 and lohkomuoto == 2 and lohkotarkenne == 0:
         return 342.438585979628
-    elif county == 8 and lohkomuoto == 2 and lohkotarkenne == 0:
+    if county == 8 and lohkomuoto == 2 and lohkotarkenne == 0:
         return 349.917881811205
-    elif county == 9 and lohkomuoto == 2 and lohkotarkenne == 0:
+    if county == 9 and lohkomuoto == 2 and lohkotarkenne == 0:
         return 350.8972332
-    elif county == 10 and lohkomuoto == 2 and lohkotarkenne == 0:
+    if county == 10 and lohkomuoto == 2 and lohkotarkenne == 0:
         return 340.4779333
-    elif county == 11:
+    if county == 11:
         if lohkomuoto == 1:
             return 436.521343
         if lohkomuoto == 2:
             return 330.3735632
-    elif county == 12 and lohkotarkenne == 0:
+    if county == 12 and lohkotarkenne == 0:
         if lohkomuoto == 1:
             return 433.4836506
         if lohkomuoto == 2:
             return 351.5358362
-    elif county == 13 and lohkomuoto == 1 and lohkotarkenne == 0:
+    if county == 13 and lohkomuoto == 1 and lohkotarkenne == 0:
         return 435.9383152
-    elif county == 14 and lohkomuoto == 1 and lohkotarkenne == 0:
+    if county == 14 and lohkomuoto == 1 and lohkotarkenne == 0:
         return 429.5909091
-    elif county == 15 and lohkomuoto == 1 and lohkotarkenne == 0:
+    if county == 15 and lohkomuoto == 1 and lohkotarkenne == 0:
         return 434.9541716
-    elif county == 16 and lohkomuoto == 1 and lohkotarkenne == 0:
+    if county == 16 and lohkomuoto == 1 and lohkotarkenne == 0:
         return 435.0433276
-    elif county == 17 and lohkotarkenne == 0:
+    if county == 17 and lohkotarkenne == 0:
         if lohkomuoto == 3:
             return 457.7258227
         if lohkomuoto == 4:
             return 747.6246246
-    elif county == 18 and lohkomuoto == 3 and lohkotarkenne == 0:
+    if county == 18 and lohkomuoto == 3 and lohkotarkenne == 0:
         return 455.8440533
-    elif county == 19:
+    if county == 19:
         if lohkomuoto == 4:
             if lohkotarkenne == 0:
                 return 786.978534
@@ -174,7 +167,7 @@ def _solve_vmi13_county_areas(county: int, lohkomuoto: int, lohkotarkenne: int) 
                 return 1999.800742
             if lohkotarkenne == 4:
                 return 10756.11645
-    elif county == 21 and lohkomuoto == 0 and lohkotarkenne == 0:
+    if county == 21 and lohkomuoto == 0 and lohkotarkenne == 0:
         return 164.2650475
 
     raise MetsiException(f"Unable to solve vmi13 country area weight for values: \
@@ -191,16 +184,15 @@ def determine_soil_surface_preparation_year(sourcevalue: str, year: int) -> Opti
     """Determine the year of soil surface preparation from given VMI source classes and the year of data set."""
     if sourcevalue == '0':
         return year
-    elif sourcevalue == '1':
+    if sourcevalue == '1':
         return year - 1
-    elif sourcevalue == '2':
+    if sourcevalue == '2':
         return year - 3
-    elif sourcevalue == '3':
+    if sourcevalue == '3':
         return year - 8
-    elif sourcevalue == 'A' or sourcevalue == 'a':
+    if sourcevalue in {'A', 'a'}:
         return year - 20
-    else:
-        return None
+    return None
 
 
 def determine_forest_maintenance_details(cutting_type_class: str, sourcevalue: str, year: int):
@@ -214,27 +206,25 @@ def determine_forest_maintenance_details(cutting_type_class: str, sourcevalue: s
 
     if cutting_type_class in ('1', '2'):
         return operation_year, None, None
-    elif method == 0:
+    if method == 0:
         # This case is necessary. Operations over 10 years old are listed as type 0, or no operation in VMI data.
         # The actual year is still recorded, but we don't seem to want it in RST target. This is based on original
         # implementation of this application.
         return None, None, None
-    else:
-        return None, operation_year, method
+    return None, operation_year, method
 
 
 def determine_forest_maintenance_year(sourcevalue: str, year: int) -> Optional[int]:
     """Determine the year of last operation from given VMI source classes and the year of data set."""
     if sourcevalue in ('0', '1', '2', '3', '4', '5'):
         return year - int(sourcevalue)
-    elif sourcevalue == '6':
+    if sourcevalue == '6':
         return year - 7
-    elif sourcevalue == 'A' or sourcevalue == 'a':
+    if sourcevalue in {'A', 'a'}:
         return year - 20
-    elif sourcevalue == 'B' or sourcevalue == 'b':
+    if sourcevalue in {'B', 'b'}:
         return year - 40
-    else:
-        return None
+    return None
 
 
 def determine_forest_maintenance_method(sourcevalue: str, cutting_year: Optional[int]) -> int:
@@ -242,17 +232,17 @@ def determine_forest_maintenance_method(sourcevalue: str, cutting_year: Optional
     if cutting_year is not None and cutting_year > 0:
         if sourcevalue == '0':
             return 0
-        elif sourcevalue == '4':
+        if sourcevalue == '4':
             return 1
-        elif sourcevalue == '7':
+        if sourcevalue == '7':
             return 2
-        elif sourcevalue == '3':
+        if sourcevalue == '3':
             return 3
-        elif sourcevalue == '6':
+        if sourcevalue == '6':
             return 4
-        elif sourcevalue == '8':
+        if sourcevalue == '8':
             return 5
-        elif sourcevalue == '9':
+        if sourcevalue == '9':
             return 6
     return 0
 
@@ -339,23 +329,23 @@ def determine_tax_class_reduction(sourcevalue: str) -> int:
     """
     if sourcevalue == '0':
         return 0
-    elif sourcevalue == '1':
+    if sourcevalue == '1':
         return 1
-    elif sourcevalue == '2':
+    if sourcevalue == '2':
         return 2
-    elif sourcevalue == '3':
+    if sourcevalue == '3':
         return 3
-    elif sourcevalue == '4':
+    if sourcevalue == '4':
         return 4
-    else:
-        return 0
+    return 0
 
 
 def determine_tax_class(sourcevalue: str) -> int:
     """
     Map and return number valued source string as int for values [0,4] => [1,5]. Otherwise 0.
     """
-    # TODO: string - int type ambiguity in maaluokka. Could not have matched int. Arto Haara comment please, is it needed?
+    # TODO: string - int type ambiguity in maaluokka. Could not have matched int.
+    # Arto Haara comment please, is it needed?
     # if (maaluokka == 2):
     #     veroluokka = 6.0
     # elif (maaluokka == 3):
@@ -363,16 +353,15 @@ def determine_tax_class(sourcevalue: str) -> int:
 
     if sourcevalue == '0':
         return 1
-    elif sourcevalue == '1':
+    if sourcevalue == '1':
         return 2
-    elif sourcevalue == '2':
+    if sourcevalue == '2':
         return 3
-    elif sourcevalue == '3':
+    if sourcevalue == '3':
         return 4
-    elif sourcevalue == '4':
+    if sourcevalue == '4':
         return 5
-    else:
-        return 0
+    return 0
 
 
 # TODO: default case undefined. Problem? Original implementation raises NameError from undefined in else case
@@ -380,16 +369,15 @@ def determine_owner_group(sourcevalue: str) -> int:
     """Map and transform integer valued source string as integer or raise on unknown values"""
     if sourcevalue in ['0', '1']:
         return 0
-    elif sourcevalue in ['2', '3']:
+    if sourcevalue in ['2', '3']:
         return 1
-    elif sourcevalue in ['4', '5']:
+    if sourcevalue in ['4', '5']:
         return 2
-    elif sourcevalue in ['7', '8']:
+    if sourcevalue in ['7', '8']:
         return 3
-    elif sourcevalue in ['6', '9']:
+    if sourcevalue in ['6', '9']:
         return 4
-    else:
-        raise MetsiException('Unknown source value for owner_group')
+    raise MetsiException('Unknown source value for owner_group')
 
 
 def parse_forestry_centre(forestry_centre: str) -> int:
@@ -429,9 +417,9 @@ def determine_forest_management_category(land_category: int, forestry_centre: in
 def determine_fmc_by_land_category(default: int, land_category: int) -> int:
     if land_category == 1:
         return 1
-    elif land_category == 2:
+    if land_category == 2:
         return 3
-    elif land_category == 3:
+    if land_category == 3:
         return 6
     return default
 
@@ -441,50 +429,49 @@ def determine_fmc_by_production_limitations(default: int, other_values: str, own
                                             protection_forest_code: str) -> int:
     if production_limitation == '0':
         return 1
-    elif production_limitation in \
+    if production_limitation in \
             ('101', '102', '103', '104', '105', '108'):
         return 7
-    elif production_limitation in ('201', '205', '206', '207') and \
+    if production_limitation in ('201', '205', '206', '207') and \
             production_limitation_detail in ('1', '2'):
         return 7
-    elif production_limitation == '301':
+    if production_limitation == '301':
         return 7
-    elif production_limitation in ('302', '303', '304', '305', '306', '307', '308', '309', '310') and \
+    if production_limitation in ('302', '303', '304', '305', '306', '307', '308', '309', '310') and \
             production_limitation_detail in ('1', '2'):
         return 7
-    elif production_limitation in ('401', '402', '403', '404', '408', '409'):
+    if production_limitation in ('401', '402', '403', '404', '408', '409'):
         return 7
-    elif production_limitation in ('405', '406', '407') and \
+    if production_limitation in ('405', '406', '407') and \
             production_limitation_detail in ('1', '2'):
         return 7
-    elif production_limitation in ('501', '502', '503', '504') and \
+    if production_limitation in ('501', '502', '503', '504') and \
             production_limitation_detail in ('1', '2'):
         return 7
-    elif production_limitation in ('107', '109') and \
+    if production_limitation in ('107', '109') and \
             production_limitation_detail in ('3', '4'):
         return 2
-    elif production_limitation in ('201', '205', '206', '207') and \
+    if production_limitation in ('201', '205', '206', '207') and \
             production_limitation_detail in ('3', '4'):
         return 2
-    elif production_limitation in ('202', '203') and \
+    if production_limitation in ('202', '203') and \
             production_limitation_detail in ('1', '2', '3', '4'):
         return 2
-    elif production_limitation in ('302', '303', '304', '305', '306', '307', '308', '309', '310') and \
+    if production_limitation in ('302', '303', '304', '305', '306', '307', '308', '309', '310') and \
             production_limitation_detail in ('3', '4'):
         return 2
-    elif production_limitation in ('405', '406', '407') and \
+    if production_limitation in ('405', '406', '407') and \
             production_limitation_detail in ('3', '4'):
         return 2
-    elif production_limitation in ('501', '502', '503', '504') and \
+    if production_limitation in ('501', '502', '503', '504') and \
             production_limitation_detail in ('3', '4'):
         return 2
-    elif other_values in ('1', '2', '3', '4', '5', '6'):
+    if other_values in ('1', '2', '3', '4', '5', '6'):
         return 2
     # Lisäksi suojametsät metsähallituksen mailla;
-    elif protection_forest_code == '1' and owner_group == 4:
+    if protection_forest_code == '1' and owner_group == 4:
         return 2
-    else:
-        return default
+    return default
 
 
 def determine_fmc_by_natura_area(default: int, natura_area_code: str) -> int:
@@ -492,8 +479,7 @@ def determine_fmc_by_natura_area(default: int, natura_area_code: str) -> int:
     # Tarkista onko minaan vuonna voimassa
     if natura_area_code in ('2', '3'):
         return 1  # * lintu-kohde=1;
-    else:
-        return default
+    return default
 
 
 def determine_fmc_by_aland_centre(default: int, aland_area_code: str, forestry_centre: int,
@@ -501,8 +487,7 @@ def determine_fmc_by_aland_centre(default: int, aland_area_code: str, forestry_c
     # * Ahvenanmaa;
     if forestry_centre == 21 and (aland_area_code != '1' or other_values == '2'):
         return 7
-    else:
-        return default
+    return default
 
 
 def determine_fmc_by_test_area_handling_class(test_area_handling_class: str) -> int:
@@ -581,12 +566,11 @@ def determine_stems_per_ha(diameter: float | None, is_vmi12: bool) -> float:
     medium_diameter_vmi_constant = 5.64 if is_vmi12 else 4.0
     if 0.0 < diameter < 4.5:
         return round(1.5 / (3.141592653589793 * ((diameter / 2) / 100.0) ** 2), 0)
-    elif 4.5 <= diameter < 9.5:
+    if 4.5 <= diameter < 9.5:
         return round(10000.0 / (3.141592653589793 * (medium_diameter_vmi_constant ** 2)), 3)
-    elif diameter >= 9.5:
+    if diameter >= 9.5:
         return round(10000.0 / (3.141592653589793 * (9.0 ** 2)), 3)
-    else:
-        return 1.0
+    return 1.0
 
 
 def generate_stand_identifier(row: Sequence, indices: dict) -> str:
@@ -621,8 +605,7 @@ def determine_stratum_tree_height(source_height: str) -> Optional[float]:
     maybe_height = parse_float(source_height)
     if maybe_height is not None and maybe_height > 0:
         return round(maybe_height / 10, 2)
-    else:
-        return None
+    return None
 
 
 def determine_stratum_origin(source_origin: str) -> int:
@@ -632,10 +615,9 @@ def determine_stratum_origin(source_origin: str) -> int:
     # 2 is planted
     if source_origin == "3":
         return 2
-    elif source_origin == "4":
+    if source_origin == "4":
         return 1
-    else:
-        return 0
+    return 0
 
 
 def determine_stratum_age_values(biological_age_source: str,
@@ -684,14 +666,13 @@ def determine_storey_for_stratum(source: str) -> Optional[Storey]:
     parsed = parse_int(source)
     if parsed in [0, 1]:
         return Storey.DOMINANT
-    elif parsed in [2, 3, 4]:
+    if parsed in [2, 3, 4]:
         return Storey.OVER
-    elif parsed in [5, 6, 7, 9]:
+    if parsed in [5, 6, 7, 9]:
         return Storey.UNDER
-    elif parsed in [8]:
+    if parsed in [8]:
         return Storey.INDETERMINATE
-    else:
-        return None
+    return None
 
 
 def determine_storey_for_tree(source: str) -> Optional[Storey]:
@@ -699,16 +680,14 @@ def determine_storey_for_tree(source: str) -> Optional[Storey]:
     parsed = parse_int(source)
     if parsed in [2, 3, 4]:
         return Storey.DOMINANT
-    elif parsed in [5]:
+    if parsed in [5]:
         return Storey.UNDER
-    elif parsed in [6, 7]:
+    if parsed in [6, 7]:
         return Storey.OVER
-    else:
-        return None
+    return None
 
 
 def determine_tree_type(source: str) -> Optional[str]:
     if source in (' ', '.', ''):
         return None
-    else:
-        return source
+    return source

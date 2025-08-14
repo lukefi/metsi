@@ -36,15 +36,13 @@ def naslund_height(diameter: float | None, species: TreeSpecies | None) -> Optio
             return round(height, 2)
 
         # norway spruce
-        elif species == TreeSpecies.SPRUCE:
+        if species == TreeSpecies.SPRUCE:
             height = ((diameter ** 3) / (1.811 + 0.308 * diameter) ** 3) + 1.3
             return round(height, 2)
 
-        else:
-            height = ((diameter ** 2) / (0.898 + 0.242 * diameter) ** 2) + 1.3
-            return round(height, 2)
-    else:
-        return None
+        height = ((diameter ** 2) / (0.898 + 0.242 * diameter) ** 2) + 1.3
+        return round(height, 2)
+    return None
 
 
 def naslund_correction(species: TreeSpecies, diameter: float, height: float) -> float:

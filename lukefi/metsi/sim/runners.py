@@ -88,8 +88,8 @@ def run_partial_tree_strategy[T](payload: OperationPayload[T], config: SimConfig
     for time_point in config.time_points:
         root_node = root_nodes[time_point]
         time_point_results: list[OperationPayload] = []
-        for payload in results:
-            payload_results = evaluator(payload, root_node)
+        for payload_ in results:
+            payload_results = evaluator(payload_, root_node)
             time_point_results.extend(payload_results)
         results = time_point_results
     return results

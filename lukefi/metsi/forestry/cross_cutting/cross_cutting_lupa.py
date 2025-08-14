@@ -1,10 +1,11 @@
-from functools import cache
 from collections.abc import Callable, Sequence
+from functools import cache
+from pathlib import Path
 
 import lupa
+
 from lukefi.metsi.data.enums.internal import TreeSpecies
 
-from pathlib import Path
 
 CrossCutFn = Callable[..., tuple[Sequence[int], Sequence[float], Sequence[float]]]
 
@@ -14,7 +15,7 @@ def cross_cut_lupa(_pcls, _ptop, _plen, _pval, m, div, nas):
     """Produce a cross-cut wrapper function intialized with the crosscut.lua script using the Lupa bindings."""
     path = Path(__file__).parent.parent.resolve() / "lua" / "crosscut.lua"
 
-    with open(path, "r") as file:
+    with open(path, "r", encoding="utf-8") as file:
         script = file.read()
 
     lua = lupa.LuaRuntime(unpack_returned_tuples=True)

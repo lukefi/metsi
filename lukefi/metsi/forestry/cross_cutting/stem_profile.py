@@ -1,5 +1,6 @@
 import numpy as np
 from numba import njit
+from lukefi.metsi.app.utils import MetsiException
 from lukefi.metsi.forestry.cross_cutting.taper_curves import TAPER_CURVES
 
 
@@ -47,6 +48,9 @@ def _taper_curve_correction(d: float, h: int, sp: int) -> np.ndarray:
             0.00106612 * d2 + 1.87966 / h + 1.85706 / dh - 0.467842 / dh2
         y4 = -1.24788 - 0.0218693 * dh2 + 0.496483 * dl - 0.291413 * hl + 1.92579 / h + 0.863274 / dh - 0.183220 / dh2
         y7 = -0.478730 - 0.104679 * dh + 0.151028 * dl + 0.882010 / h + 0.178386 / dh
+
+    else:
+        raise MetsiException(f"Unsupported species code '{sp}'")
 
     # Clamp and preserve sign
     def clamp(y):
@@ -165,7 +169,7 @@ def _ghat(h: float, height: int, coef: np.ndarray) -> float:
 
 
 @njit
-def _volume(hkanto: float, dbh: float, height: int, coeff: np.ndarray):
+def _volume(hkanto: float, height: int, coeff: np.ndarray):
     step = 0.1
     n_steps = int((height - hkanto) / step)
     h = np.linspace(hkanto, hkanto + n_steps * step, n_steps + 1)
@@ -176,7 +180,7 @@ def _volume(hkanto: float, dbh: float, height: int, coeff: np.ndarray):
     v_piece = np.zeros(len(h) - 1)
     d_piece = _dhat(h[1:], height, coeff)  # make sure _dhat_fast is @njit
 
-    for j in range(len(v_piece)):
+    for j, _ in enumerate(v_piece):
         x0 = h[j]
         x1 = h[j + 1]
         y0 = _ghat(x0, height, coeff)
@@ -198,7 +202,7 @@ SPECIES_FOR_STEM_PROFILE = {
 
 
 def create_tree_stem_profile(species_string: str, dbh: float, height: int, n: int,
-                             hkanto: float = 0.1, div: int = 10) -> np.ndarray:
+                             hkanto: float = 0.1) -> np.ndarray:
     """
     This function has been ported from, and should be updated according to, the R implementation.
     """
@@ -222,9 +226,9 @@ def create_tree_stem_profile(species_string: str, dbh: float, height: int, n: in
 
     coefnew = coefnew * d20
 
-    v_cum, d_piece, h_piece = _volume(hkanto, dbh, height, coefnew)
+    v_cum, d_piece, h_piece = _volume(hkanto, height, coefnew)
 
-    T = np.empty((n, 3))
+    T = np.empty((n, 3))  # pylint: disable=invalid-name
     T[:, 0] = d_piece * 10
     T[:, 1] = h_piece
     T[:, 2] = v_cum

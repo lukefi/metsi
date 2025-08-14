@@ -7,7 +7,7 @@ def weighted_mean(values: list[float], weights: list[float]) -> float:
         return 0.0
 
     divisor = sum(weights) if sum(weights) > 0 else len(weights)
-    return sum([value * weight for value, weight in zip(values, weights)]) / divisor
+    return sum(value * weight for value, weight in zip(values, weights)) / divisor
 
 
 def mean(values):
@@ -21,11 +21,11 @@ def round_each_numeric_value_in_list(values: list, decimals: int) -> list:
 def create_stratum_tree_comparison_set(
         stratum: TreeStratum, reference_trees: list[ReferenceTree]) -> dict[str, tuple[float, float]]:
     return {'basal_area': (stratum.basal_area,
-                           sum([calculate_basal_area(tree) for tree in reference_trees])),
+                           sum(calculate_basal_area(tree) for tree in reference_trees)),
             'stems_per_ha': (stratum.stems_per_ha,
-                             sum([tree.stems_per_ha for tree in reference_trees if not tree.sapling])),
+                             sum(tree.stems_per_ha for tree in reference_trees if not tree.sapling)),
             'sapling_stems_per_ha': (stratum.sapling_stems_per_ha,
-                                     sum([tree.stems_per_ha for tree in reference_trees if tree.sapling])),
+                                     sum(tree.stems_per_ha for tree in reference_trees if tree.sapling)),
             'mean_diameter': (stratum.mean_diameter,
                               weighted_mean([tree.breast_height_diameter for tree in reference_trees],
                                             [calculate_basal_area(tree) for tree in reference_trees])),

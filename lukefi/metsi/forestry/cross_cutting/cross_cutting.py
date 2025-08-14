@@ -1,9 +1,11 @@
+# pylint: disable=invalid-name
+
 from collections.abc import Callable, Sequence
 import numpy as np
+from numba import njit
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.forestry.cross_cutting import stem_profile
 from lukefi.metsi.forestry.cross_cutting.cross_cutting_lupa import cross_cut_lupa
-from numba import njit
 
 _cross_cut_species_mapper = {
     TreeSpecies.PINE: "pine",
@@ -37,8 +39,8 @@ def apteeraus_Nasberg(T: np.ndarray, P: np.ndarray, m: int, n: int,
     c_tot = 0.0
 
     for i in range(n):  # iterate over div-length segmnents of the tree trunk
-        for j in range(
-                m):  # iterate over the number of timber assortment price classes (row count in puutavaralajimaarittelyt.txt)
+        for j in range(m):  # iterate over the number of timber assortment price classes
+            # (row count in puutavaralajimaarittelyt.txt)
             # numpy array indexing: 1st row 2nd element: arr[0, 1]
             # in R it's the same order: arr[2, 3] --> the item on 2nd row and 3rd column
             # but whereas R-indexing is one-based, Python's is zero-based --> indexing has been offset by one
@@ -115,7 +117,7 @@ def cross_cut(
         raise ValueError("breast_height_diameter must be a non-negative number")
     if breast_height_diameter in (None, 0):
         return ZERO_DIAMETER_DEFAULTS
-    elif impl == "lupa":
+    if impl == "lupa":
         cc = cross_cut_lupa(tuple(P[:, 0]), tuple(P[:, 1]), tuple(P[:, 2]),
                             tuple(P[:, 3]), P.shape[0], div, tuple(np.unique(P[:, 0])))
     else:

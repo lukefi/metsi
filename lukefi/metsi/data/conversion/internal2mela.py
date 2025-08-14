@@ -254,7 +254,7 @@ def mela_stand(stand: ForestStand) -> ForestStand:
     # strata level
     for s in result.tree_strata:
         s.species = 0 if s.species is None else s.species.value
-        s.storey = 0 if s.storey is None else s.storey.value,
+        s.storey = 0 if s.storey is None else s.storey.value
         # all None values to -1
         rsts_default = -1
         for k, v in s.__dict__.items():

@@ -275,10 +275,8 @@ def read_control_module(control_path: str, control: str = "control_structure") -
 
         if hasattr(module, control):  # Check if variable exists
             return getattr(module, control)
-        else:
-            raise AttributeError(f"Variable '{control}' not found in {config_path}")
-    else:
-        raise ImportError(f"Could not load control module from {config_path}")
+        raise AttributeError(f"Variable '{control}' not found in {config_path}")
+    raise ImportError(f"Could not load control module from {config_path}")
 
 
 ##### FileWriters start #####
