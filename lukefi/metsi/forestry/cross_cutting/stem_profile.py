@@ -167,6 +167,82 @@ def _ghat(h: float, height: int, coef: np.ndarray) -> float:
     d = d / 100.0
     return (d * d) * np.pi / 4.0
 
+@njit(fastmath=True)
+def _V(h_: float, height: int, coef: np.ndarray) -> float:
+    x = (height - h_) / height
+    # h = -(x * height - height) = height - x * height
+    # dh / dx = -height
+    x2 = x * x
+    x3 = x * x2
+    x4 = x2 * x2
+    x5 = x2 * x3
+    x6 = x3 * x3
+    x7 = x3 * x4
+    x8 = x4 * x4
+    x9 = x4 * x5
+    x10 = x5 * x5
+    x11 = x5 * x6
+    x12 = x6 * x6
+    x14 = x7 * x7
+    x15 = x7 * x8
+    x16 = x8 * x8
+    x17 = x8 * x9
+    x19 = x9 * x10
+    x22 = x11 * x11
+    x23 = x11 * x12
+    x24 = x12 * x12
+    x25 = x14 * x11
+    x27 = x11 * x16
+    x30 = x15 * x15
+    x35 = x23 * x12
+    x36 = x17 * x19
+    x37 = x15 * x22
+    x38 = x19 * x19
+    x40 = x17 * x23
+    x43 = x19 * x24
+    x48 = x24 * x24
+    x56 = x37 * x19
+    x69 = x23 * x23 * x23
+
+    a = coef[0]
+    b = coef[1]
+    c = coef[2]
+    d = coef[3]
+    e = coef[4]
+    f = coef[5]
+    g = coef[6]
+    h = coef[7]
+
+    return -height * np.pi / 40000 * ((a * a) / 3 * x3 +
+                                      (a * b) / 2 * x4 +
+                                      (2 * a * c + b * b) / 5 * x5 +
+                                      (b * c) / 3 * x6 +
+                                      (2 * a * d + c * c) / 7 * x7 +
+                                      (b * d) / 4 * x8 +
+                                      (c * d) * 2 / 9 * x9 +
+                                      (a * e) / 5 * x10 +
+                                      (2 * b * e + d * d) / 11 * x11 +
+                                      (c * e) / 6 * x12 +
+                                      (d * e) / 7 * x14 +
+                                      (a * f) * 2 / 15 * x15 +
+                                      (b * f) / 8 * x16 +
+                                      (2 * c * f + e * e) / 17 * x17 +
+                                      (d * f) * 2 / 19 * x19 +
+                                      (e * f) / 11 * x22 +
+                                      (a * g) * 2 / 23 * x23 +
+                                      (b * g) / 12 * x24 +
+                                      (c * g) * 2 / 25 * x25 +
+                                      (2 * d * g + f * f) / 27 * x27 +
+                                      (e * g) / 15 * x30 +
+                                      (f * g) * 2 / 35 * x35 +
+                                      (a * h) / 18 * x36 +
+                                      (b * h) * 2 / 37 * x37 +
+                                      (c * h) / 19 * x38 +
+                                      (d * h) / 20 * x40 +
+                                      (2 * e * h + g * g) / 43 * x43 +
+                                      (f * h) / 24 * x48 +
+                                      (g * h) / 28 * x56 +
+                                      (h * h) / 69 * x69)
 
 @njit
 def _volume(hkanto: float, height: int, coeff: np.ndarray):
@@ -182,10 +258,9 @@ def _volume(hkanto: float, height: int, coeff: np.ndarray):
 
     for j, _ in enumerate(v_piece):
         x0 = h[j]
-        x1 = h[j + 1]
-        y0 = _ghat(x0, height, coeff)
-        y1 = _ghat(x1, height, coeff)
-        v_piece[j] = (y0 + y1) * (x1 - x0) / 2
+        x1 = h[j+1]
+
+        v_piece[j] = _V(x1, height, coeff) - _V(x0, height, coeff)
 
     h_piece = h[1:]
     v_cum = np.cumsum(v_piece)
