@@ -1,4 +1,5 @@
-from typing import Any, Optional
+from copy import copy
+from typing import Any, Optional, overload
 import numpy as np
 import numpy.typing as npt
 
@@ -54,6 +55,10 @@ DTYPES_STRATA: dict[str, npt.DTypeLike] = {
 
 
 class VectorData():
+    """
+    Base class for generic SoA data.
+    """
+
     def __init__(self, dtypes: dict[str, npt.DTypeLike]):
         self.dtypes = dtypes
 
@@ -101,6 +106,98 @@ class VectorData():
                 retval = object_default
             return retval
         return value
+
+    @overload
+    def create(self, new: dict[str, Any], index: int | None = None):
+        ...
+
+    @overload
+    def create(self, new: list[dict[str, Any]], index: list[int] | None = None):
+        ...
+
+    def create(self, new: dict[str, Any] | list[dict[str, Any]], index: int | list[int] | None = None):
+        """
+        Creates a new row of data for all arrays contained in the data type. Default values are used for unspecified
+        columns.
+
+        Args:
+            new (dict[str, Any] | list[dict[str, Any]]): A dictionary, or list of dictionaries, mapping attribute names
+                                                         to new values.
+            index (int | list[int] | None, optional): Index or list of indices where to insert the new rows.
+                                                      If not given, values are appended to the ends of the arrays.
+                                                      Defaults to None.
+        """
+        if isinstance(new, list):
+            for key, dtype in self.dtypes.items():
+                values = [self.to_default(new_item.get(key), dtype) for new_item in new]
+                vector: npt.NDArray = getattr(self, key)
+                if index is not None:
+                    setattr(self, key, np.insert(vector, index, values))  # insert always creates a copy
+                else:
+                    setattr(self, key, np.append(vector, values))  # append always creates a copy
+        else:
+            for key, dtype in self.dtypes.items():
+                value = self.to_default(new.get(key), dtype)
+                vector = getattr(self, key)
+                if index is not None:
+                    setattr(self, key, np.insert(vector, index, value))  # insert always creates a copy
+                else:
+                    setattr(self, key, np.append(vector, value))  # append always creates a copy
+
+    def read(self, index: int) -> dict[str, Any]:
+        """
+        Reads all contained data at given index.
+
+        Args:
+            index (int): Index at which to read all data
+
+        Returns:
+            dict[str, Any]: Dictionary with attribute names as keys and vector elements at given index as values
+        """
+        return {key: getattr(self, key)[index] for key in self.dtypes}
+
+    def update(self, new: dict[str, Any], index: int):
+        """
+        Updates data at given index. If any to-be-modified vector is read-only (after finalize), a new copy is created
+        first. The original vector is not modified.
+
+        Args:
+            new (dict[str, Any]): Dictionary containing attribute names as keys, and their new values
+            index (int): Index of row to modify
+        """
+        for key, value in new.items():
+            if key in self.dtypes:
+                vector: npt.NDArray = getattr(self, key)
+                if not vector.flags.writeable:
+                    # Vector is read-only, must copy first.
+                    vector = vector.copy()
+                    setattr(self, key, vector)
+                    vector.flags.writeable = True
+                vector[index] = value
+
+    def delete(self, index: int | list[int]):
+        """
+        Removes data at given index.
+
+        Args:
+            index (int | list[int]): Index of row to remove
+        """
+        for key in self.dtypes:
+            vector: npt.NDArray = getattr(self, key)
+            setattr(self, key, np.delete(vector, index))  # delete always creates a copy
+
+    def finalize(self):
+        """
+        Sets all arrays to read-only and returns a shallow copy of self.
+
+        Returns:
+            VectorData: Shallow copy of self
+        """
+        for key in self.dtypes:
+            attr: npt.NDArray
+            attr = getattr(self, key)
+            attr.flags.writeable = False
+        return copy(self)
 
 
 class ReferenceTrees(VectorData):
