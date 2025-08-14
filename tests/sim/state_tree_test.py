@@ -23,7 +23,7 @@ class StateTreeTest(unittest.TestCase):
     def test_add_branch(self):
         state = [0, 0, 0]
         parameters = {"increment": 2, "mult": 2}
-        state, _ = dummy_operation((state, [0, 0, 0]), increment=2, mult=2)
+        state, _ = dummy_operation((state, [0, 0, 0]), **parameters)
         state_tree: StateTree[list[int]] = StateTree()
         state_tree.state = state
         state_tree.operation_params = parameters
