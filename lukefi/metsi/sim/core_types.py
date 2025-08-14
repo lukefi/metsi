@@ -76,12 +76,12 @@ class EventTree[T]:
 
     __slots__ = ('wrapped_operation', 'branches', '_previous_ref', '__weakref__')
 
-    wrapped_operation: Callable[[T], T]
+    wrapped_operation: "ProcessedOperation[T]"
     branches: list["EventTree[T]"]
     _previous_ref: Optional[weakref.ReferenceType["EventTree[T]"]]
 
     def __init__(self,
-                 operation: Optional[Callable[[T], T]] = None,
+                 operation: Optional["ProcessedOperation[T]"] = None,
                  previous: Optional['EventTree[T]'] = None):
 
         self.wrapped_operation = operation or identity
@@ -103,7 +103,7 @@ class EventTree[T]:
         self.previous = previous
         previous.add_branch(self)
 
-    def operation_chains(self) -> list[list[Callable[[T], T]]]:
+    def operation_chains(self) -> list[list["ProcessedOperation[T]"]]:
         """
         Recursively produce a list of lists of possible operation chains represented by this event tree in post-order
         traversal.
@@ -111,14 +111,16 @@ class EventTree[T]:
         if len(self.branches) == 0:
             # Yes. A leaf node returns a single chain with a single operation.
             return [[self.wrapped_operation]]
-        result: list[list[Callable[[T], T]]] = []
+        result: list[list["ProcessedOperation[T]"]] = []
         for branch in self.branches:
             chains = branch.operation_chains()
             for chain in chains:
                 result.append([self.wrapped_operation] + chain)
         return result
 
-    def evaluate(self, payload: T, state_tree: Optional[StateTree[T]] = None) -> list[T]:
+    def evaluate(self,
+                 payload: "OperationPayload[T]",
+                 state_tree: Optional[StateTree[PossiblyLayered[T]]] = None) -> list["OperationPayload[T]"]:
         """
         Recursive pre-order walkthrough of this event tree to evaluate its operations with the given payload,
         copying it for branching.
@@ -142,7 +144,7 @@ class EventTree[T]:
                 branching_state = StateTree()
                 state_tree.add_branch(branching_state)
             return self.branches[0].evaluate(current, branching_state)
-        results: list[T] = []
+        results: list["OperationPayload[T]"] = []
         for branch in self.branches:
             try:
                 if state_tree is not None:
@@ -161,7 +163,7 @@ class EventTree[T]:
         et.previous = self
         self.branches.append(et)
 
-    def add_branch_from_operation(self, operation: Callable[[T], T]):
+    def add_branch_from_operation(self, operation: "ProcessedOperation[T]"):
         self.add_branch(EventTree(operation, self))
 
 
@@ -280,8 +282,8 @@ class OperationPayload[T](SimpleNamespace):
 
 T = TypeVar("T")
 OpTuple = tuple[T, CollectedData]
-Evaluator = Callable[[T, EventTree[T]], list[T]]
-Runner = Callable[[T, SimConfiguration, Evaluator[T]], list[T]]
+Evaluator = Callable[[OperationPayload[T], EventTree[T]], list[OperationPayload[T]]]
+Runner = Callable[[OperationPayload[T], SimConfiguration, Evaluator[T]], list[OperationPayload[T]]]
 GeneratorFn = Callable[[Optional[list[EventTree[T]]]], list[EventTree[T]]]
 Operation = Callable[[OpTuple[PossiblyLayered[T]]], OpTuple[PossiblyLayered[T]]]
 ProcessedOperation = Callable[[OperationPayload[T]], OperationPayload[T]]

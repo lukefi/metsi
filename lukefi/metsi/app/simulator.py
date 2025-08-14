@@ -17,8 +17,8 @@ from lukefi.metsi.app.utils import MetsiException
 
 def run_stands(stands: StandList,
                config: SimConfiguration,
-               runner: Runner[ForestOpPayload],
-               evaluator: Evaluator[ForestOpPayload]) -> dict[str, list[ForestOpPayload]]:
+               runner: Runner[ForestStand],
+               evaluator: Evaluator[ForestStand]) -> dict[str, list[ForestOpPayload]]:
     """Run the simulation for all given stands, from the given declaration, using the given runner. Return the
     results organized into a dict keyed with stand identifiers."""
 
@@ -39,8 +39,8 @@ def run_stands(stands: StandList,
     return retval
 
 
-def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestOpPayload]:
-    formation_strategy_map: dict[FormationStrategy, Runner[ForestOpPayload]] = {
+def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestStand]:
+    formation_strategy_map: dict[FormationStrategy, Runner[ForestStand]] = {
         FormationStrategy.FULL: run_full_tree_strategy,
         FormationStrategy.PARTIAL: run_partial_tree_strategy
     }
@@ -50,8 +50,8 @@ def resolve_formation_strategy(source: FormationStrategy) -> Runner[ForestOpPayl
     raise MetsiException(f"Unable to resolve event tree formation strategy '{source}'")
 
 
-def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestOpPayload]:
-    evaluation_strategy_map: dict[EvaluationStrategy, Evaluator[ForestOpPayload]] = {
+def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestStand]:
+    evaluation_strategy_map: dict[EvaluationStrategy, Evaluator[ForestStand]] = {
         EvaluationStrategy.DEPTH: depth_first_evaluator,
         EvaluationStrategy.CHAINS: chain_evaluator
     }

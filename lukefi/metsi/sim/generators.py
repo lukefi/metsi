@@ -6,7 +6,6 @@ from lukefi.metsi.sim.core_types import (
     ProcessedOperation,
     SimConfiguration,
     DeclaredEvents,
-    OperationPayload,
     GeneratorFn)
 from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
 from lukefi.metsi.sim.util import get_operation_file_params, merge_operation_params
@@ -19,7 +18,7 @@ class NestableGenerator[T]:
     creates a tree structure where leaf nodes represent actual GeneratorFn instances to populate an Event tree. The
     tree organization represents the nested sequences and alternatives structure in simulation events declaration.
     """
-    prepared_generator: Optional[GeneratorFn[OperationPayload[T]]] = None
+    prepared_generator: Optional[GeneratorFn[T]] = None
     time_point: int = 0
     nested_generators: list['NestableGenerator[T]']
     free_operations: list[Operation[T]]
@@ -27,7 +26,7 @@ class NestableGenerator[T]:
 
     def __init__(self,
                  config: SimConfiguration,
-                 generator_declaration: dict[GeneratorFn[OperationPayload[T]], list[Operation[T]]],
+                 generator_declaration: dict[GeneratorFn[T], list[Operation[T]]],
                  time_point: int):
         """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
         time point."""
@@ -85,7 +84,7 @@ class NestableGenerator[T]:
             self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
             self.free_operations = []
 
-    def unwrap(self, previous: list[EventTree[OperationPayload[T]]]) -> list[EventTree[OperationPayload[T]]]:
+    def unwrap(self, previous: list[EventTree[T]]) -> list[EventTree[T]]:
         """
         Recursive depth-first walkthrough of NestableGenerator tree starting from self to generate a list of EventTrees.
         These denote the leaves of the given EventTrees as expanded by self.
@@ -108,7 +107,7 @@ class NestableGenerator[T]:
         if self.prepared_generator is not None:
             return self.prepared_generator(previous)
         if self.generator_type == sequence:  # pylint: disable=comparison-with-callable
-            current: list[EventTree[OperationPayload[T]]] = previous
+            current: list[EventTree[T]] = previous
             for child in self.nested_generators:
                 current = child.unwrap(current)
             return current
@@ -120,7 +119,7 @@ class NestableGenerator[T]:
         return previous
 
 
-def sequence[T](parents: Optional[list[EventTree[T]]] = None, /, *operations: Callable[[T], T]) -> list[EventTree[T]]:
+def sequence[T](parents: Optional[list[EventTree[T]]] = None, /, *operations: ProcessedOperation) -> list[EventTree[T]]:
     """
     Generate a linear sequence of EventTree nodes, optionally extending each node in the given list of nodes with it.
     :param parents: optional
@@ -141,7 +140,7 @@ def sequence[T](parents: Optional[list[EventTree[T]]] = None, /, *operations: Ca
 
 
 def alternatives[T](parents: Optional[list[EventTree[T]]] = None, /,
-                    *operations: Callable[[T], T]) -> list[EventTree[T]]:
+                    *operations: ProcessedOperation[T]) -> list[EventTree[T]]:
     """
     Generate branches for an optional list of EventTree nodes, out of an *args list of given operations
     :param parents:
@@ -159,14 +158,14 @@ def alternatives[T](parents: Optional[list[EventTree[T]]] = None, /,
     return result
 
 
-def compose_nested[T](nestable_generator: NestableGenerator[T]) -> EventTree[OperationPayload[T]]:
+def compose_nested[T](nestable_generator: NestableGenerator[T]) -> EventTree[T]:
     """
     Generate a simulation EventTree using the given NestableGenerator.
 
     :param nestable_generator: NestableGenerator tree for generating a EventTree.
     :return: The root node of the generated EventTree
     """
-    root: EventTree[OperationPayload[T]] = EventTree()
+    root: EventTree[T] = EventTree()
     nestable_generator.unwrap([root])
     return root
 
@@ -202,8 +201,8 @@ def generator_declarations_for_time_point(events: list[DeclaredEvents],
     return generator_declarations
 
 
-def generator_function[T](key: GeneratorFn[OperationPayload[T]],
-                          *fns: ProcessedOperation[T]) -> GeneratorFn[OperationPayload[T]]:
+def generator_function[T](key: GeneratorFn[T],
+                          *fns: ProcessedOperation[T]) -> GeneratorFn[T]:
     """Crate a generator function wrapper for function by the key. Binds the
     argument list of functions with the generator."""
     return lambda parent_nodes: key(parent_nodes, *fns)
