@@ -66,13 +66,13 @@ class ForestryOperationsTest(unittest.TestCase):
     def test_tree_biomass_models1(self):
         tree = ReferenceTree(breast_height_diameter=29.4, breast_height_age=31, height=18.1, species=TreeSpecies.SPRUCE)
         volume = 0.54
-        self.assertAlmostEqual(round(biomass.tree_biomass(tree, None, volume, 0, 1).total(), 3), 0.409)
+        self.assertAlmostEqual(round(biomass.tree_biomass(tree, 1).total(), 3), 0.409)
 
     def test_tree_biomass_models2(self):
         tree = ReferenceTree(breast_height_diameter=29.4, breast_height_age=31, height=18.1, species=TreeSpecies.SPRUCE,
                              lowest_living_branch_height=2.715)
         volume = 0.54
-        self.assertAlmostEqual(round(biomass.tree_biomass(tree, None, volume, 0, 2).total(), 3), 0.380)
+        self.assertAlmostEqual(round(biomass.tree_biomass(tree, 2).total(), 3), 0.380)
 
     def test_biomasses_by_stand_model_set_1(self):
         stand = ForestStand(
@@ -97,7 +97,7 @@ class ForestryOperationsTest(unittest.TestCase):
         treevolumes = [100.0, 10.0]
         wastevolumes = [10.0, 1.0]
 
-        result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 1)
+        result = biomass.biomasses_by_component_stand(stand, 1)
         self.assertEqual(lukefi.metsi.domain.collected_types.BiomassData(
             stem_wood=2.901904782670537,
             stem_bark=0.2621029279780194,
@@ -127,7 +127,7 @@ class ForestryOperationsTest(unittest.TestCase):
         treevolumes = [100.0, 10.0]
         wastevolumes = [10.0, 1.0]
 
-        result = biomass.biomasses_by_component_stand(stand, treevolumes, wastevolumes, 2)
+        result = biomass.biomasses_by_component_stand(stand, 2)
         self.assertEqual(lukefi.metsi.domain.collected_types.BiomassData(
             stem_wood=2.6943581559391907,
             stem_bark=0.26525277171872336,
@@ -140,5 +140,5 @@ class ForestryOperationsTest(unittest.TestCase):
             result)
 
     def test_calculate_biomass_no_trees(self):
-        result = biomass.biomasses_by_component_stand(ForestStand(), None, None, None)
+        result = biomass.biomasses_by_component_stand(ForestStand(), None)
         self.assertEqual(biomass.BiomassData(), result)

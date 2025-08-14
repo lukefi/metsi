@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Any
 
+from rpy2 import robjects
+
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand
 
-import rpy2.robjects as robjects
 
-initialised = False
+initialised = False  # pylint: disable=invalid-name # Pylint thinks all module scope variables are constants
 
 
 def get_r_with_sourced_scripts() -> robjects.R:
@@ -16,8 +17,8 @@ def get_r_with_sourced_scripts() -> robjects.R:
     r = robjects.r
 
     if not initialised:
-        dir = Path(__file__).parent.resolve() / "r" / "lmfor_volume.R"
-        r.source(str(dir))
+        dir_ = Path(__file__).parent.resolve() / "r" / "lmfor_volume.R"
+        r.source(str(dir_))
         initialised = True
 
     return r

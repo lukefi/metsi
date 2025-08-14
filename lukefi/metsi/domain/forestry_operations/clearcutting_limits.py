@@ -74,7 +74,7 @@ RENEWAL_AGES = {
 
 def create_clearcutting_limits_table(file_path: str) -> list:
     contents = None
-    with open(file_path, "r") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         contents = f.read()
     table = contents.split('\n')
     table = [row.split() for row in table]
@@ -82,8 +82,7 @@ def create_clearcutting_limits_table(file_path: str) -> list:
     if len(table) != 4 or len(table[0]) != 5:
         raise MetsiException('Clearcutting limits file has unexpected structure. '
                              f'Expected 4 rows and 5 columns, got {len(table)} rows and {len(table[0])} columns')
-    else:
-        return table
+    return table
 
 
 def get_clearcutting_agelimits_from_parameter_file_contents(
@@ -93,7 +92,7 @@ def get_clearcutting_agelimits_from_parameter_file_contents(
     Creates a table from :clearcutting_agelimits
     """
     ages = create_clearcutting_limits_table(file_path)
-    RENEWAL_AGES = {
+    renewal_ages = {
         SiteTypeKey.OMT: {
             SpeciesKey.PINE: int(ages[0][0]),
             SpeciesKey.SPRUCE: int(ages[0][1]),
@@ -119,7 +118,7 @@ def get_clearcutting_agelimits_from_parameter_file_contents(
             SpeciesKey.DOWNY_BIRCH: int(ages[3][3])
         }
     }
-    return RENEWAL_AGES
+    return renewal_ages
 
 
 def get_clearcutting_diameterlimits_from_parameter_file_contents(
@@ -129,7 +128,7 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
     Creates a table from :clearcutting_diamterlimits
     """
     diameters = create_clearcutting_limits_table(file_path)
-    RENEWAL_DIAMETERS = {
+    renewal_diameters = {
         SiteTypeKey.OMT: {
             SpeciesKey.PINE: float(diameters[0][0]),
             SpeciesKey.SPRUCE: float(diameters[0][1]),
@@ -155,7 +154,7 @@ def get_clearcutting_diameterlimits_from_parameter_file_contents(
             SpeciesKey.DOWNY_BIRCH: float(diameters[3][3])
         }
     }
-    return RENEWAL_DIAMETERS
+    return renewal_diameters
 
 
 def get_clearcutting_limits(stand: ForestStand, file_path_ages: str = None,
@@ -184,13 +183,13 @@ def species_to_key_clearcut(stand: ForestStand) -> str:
     value = futil.solve_dominant_species(stand.reference_trees)
     if value in (TreeSpecies.PINE,):
         return SpeciesKey.PINE
-    elif value in (TreeSpecies.SPRUCE,):
+    if value in (TreeSpecies.SPRUCE,):
         return SpeciesKey.SPRUCE
-    elif value in (TreeSpecies.SILVER_BIRCH,):
+    if value in (TreeSpecies.SILVER_BIRCH,):
         return SpeciesKey.SILVER_BIRCH
-    elif value in (TreeSpecies.DOWNY_BIRCH,):
+    if value in (TreeSpecies.DOWNY_BIRCH,):
         return SpeciesKey.DOWNY_BIRCH
-    elif value in (TreeSpecies.ASPEN, TreeSpecies.GREY_ALDER,
+    if value in (TreeSpecies.ASPEN, TreeSpecies.GREY_ALDER,
                    TreeSpecies.OTHER_CONIFEROUS, TreeSpecies.DOUGLAS_FIR, TreeSpecies.JUNIPER,
                    TreeSpecies.OTHER_DECIDUOUS, TreeSpecies.SHORE_PINE, TreeSpecies.EUROPEAN_WHITE_ELM,
                    TreeSpecies.LARCH, TreeSpecies.SMALL_LEAVED_LIME, TreeSpecies.BLACK_SPRUCE,
@@ -202,5 +201,4 @@ def species_to_key_clearcut(stand: ForestStand) -> str:
                    TreeSpecies.OTHER_PINE, TreeSpecies.OTHER_SPRUCE,
                    TreeSpecies.UNKNOWN_CONIFEROUS, TreeSpecies.UNKNOWN_DECIDUOUS, TreeSpecies.UNKNOWN):
         return SpeciesKey.DOWNY_BIRCH
-    else:
-        raise UserWarning(f"Unable to spesify tree species value {value} as key for the thinning limits lookup table")
+    raise UserWarning(f"Unable to spesify tree species value {value} as key for the thinning limits lookup table")

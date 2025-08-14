@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lukefi.metsi"
 description = "Metsi forestry simulator."
-version = "2.2.0"
+version = "2.2.1"
 readme = "README.md"
 requires-python = ">=3.10"
 authors = [
@@ -37,7 +37,8 @@ tests = [
     "mypy==1.16.1",
     "types-lupa",
     "pandas-stubs",
-    "types-shapely"
+    "types-shapely",
+    "types-geopandas"
 ]
 
 [project.scripts]

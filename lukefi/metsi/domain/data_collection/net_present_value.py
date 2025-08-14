@@ -64,11 +64,10 @@ def _calculate_npv_for_rate(
     if len(stand.reference_trees) > 0 and len(standing_cc_results) == 0:
         raise UserWarning("NPV calculation did not find cross cut results for standing trees. Did you forget "
                           "to declare the 'cross_cut_standing_trees' operation before 'calculate_npv'?")
-    else:
-        y: CrossCutResult
-        for y in standing_cc_results:
-            discounted_revenue = y.get_real_value() / _discount_factor(r, current_time_point, initial_time_point)
-            npv += discounted_revenue
+    y: CrossCutResult
+    for y in standing_cc_results:
+        discounted_revenue = y.get_real_value() / _discount_factor(r, current_time_point, initial_time_point)
+        npv += discounted_revenue
 
     # 3. subtract costs
     z: PriceableOperationInfo

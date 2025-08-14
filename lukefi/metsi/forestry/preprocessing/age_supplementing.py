@@ -117,7 +117,7 @@ def supplement_age_for_reference_trees(reference_trees: list[ReferenceTree],
     Based on a priority a strategy to supplement is selected and supplementing is performed.
     """
     no_age_trees = list(filter(lambda t: t.breast_height_age is None and t.has_height_over_130_cm(), reference_trees))
-    age_trees = list(filter(lambda t: t.breast_height_age or 0 > 0.0, reference_trees))
+    age_trees = list(filter(lambda t: (t.breast_height_age or 0) > 0.0, reference_trees))
     age_stratums = list(filter(lambda s: s.breast_height_age > 0.0, stratums))
     trees_and_strategies = solve_supplement_strategy(no_age_trees, age_trees, age_stratums)
     return perform_supplementing(trees_and_strategies, age_trees, age_stratums)

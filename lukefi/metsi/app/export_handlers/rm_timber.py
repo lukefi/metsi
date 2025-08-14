@@ -69,9 +69,9 @@ def find_volumes_for_source(grouped: dict[tuple[int, str], list[CrossCutResult]]
         volume_sum(lambda s: s == 2, 1),
         volume_sum(lambda s: s == 2, 2),
         volume_sum(lambda s: s == 2, 3),
-        volume_sum(lambda s: s != 1 and s != 2, 1),
-        volume_sum(lambda s: s != 1 and s != 2, 2),
-        volume_sum(lambda s: s != 1 and s != 2, 3),
+        volume_sum(lambda s: s not in {1, 2}, 1),
+        volume_sum(lambda s: s not in {1, 2}, 2),
+        volume_sum(lambda s: s not in {1, 2}, 3),
     ]
 
 

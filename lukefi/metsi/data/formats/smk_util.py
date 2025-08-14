@@ -34,9 +34,9 @@ def generate_stand_identifier(xml_stand: Element) -> str | None:
     stand_number_extension = xml_stand.findtext('./st:StandBasicData/st:StandNumberExtension', None, NS)
     if stand_number and stand_number_extension:
         return f"{stand_number}.{stand_number_extension}"
-    elif stand_number:
+    if stand_number:
         return stand_number
-    elif stand_identifier:
+    if stand_identifier:
         return stand_identifier
     return None
 
@@ -105,21 +105,18 @@ def parse_future_operations(eoperations: list[Element]) -> dict[int, tuple[int, 
 
 def parse_stand_operations(estand: Element, target_operations=None) -> dict[int, tuple[int, int]]:
     eoperations = estand.findall('./op:Operations/op:Operation', NS)
-    past_eoperatios = list(filter(lambda eoper: False if eoper.find(
-        './op:CompletionData', NS) is None else True, eoperations))
-    future_eoperations = list(filter(lambda eoper: False if eoper.find(
-        './op:ProposalData', NS) is None else True, eoperations))
+    past_eoperatios = list(filter(lambda eoper: eoper.find('./op:CompletionData', NS) is not None, eoperations))
+    future_eoperations = list(filter(lambda eoper: eoper.find('./op:ProposalData', NS) is not None, eoperations))
     past_operations = parse_past_operations(past_eoperatios)
     future_operations = parse_future_operations(future_eoperations)
     if target_operations == 'past':
         return past_operations
-    elif target_operations == 'future':
+    if target_operations == 'future':
         return future_operations
-    else:
-        all_operations = {}
-        all_operations.update(past_operations)
-        all_operations.update(future_operations)
-        return all_operations
+    all_operations = {}
+    all_operations.update(past_operations)
+    all_operations.update(future_operations)
+    return all_operations
 
 
 def parse_year(source: str) -> int | None:
@@ -135,18 +132,17 @@ def parse_land_use_category(source: str) -> int | None:
 def parse_drainage_category(source: str) -> int | None:
     if source in ('1', '2'):
         return 0
-    elif source in ('3'):
+    if source in ('3'):
         return 1
-    elif source in ('6'):
+    if source in ('6'):
         return 2
-    elif source in ('7'):
+    if source in ('7'):
         return 3
-    elif source in ('8'):
+    if source in ('8'):
         return 4
-    elif source in ('9'):
+    if source in ('9'):
         return 5
-    else:
-        return util.parse_int(source)
+    return util.parse_int(source)
 
 
 def parse_development_class(source) -> int:
@@ -167,27 +163,26 @@ def parse_forest_management_category(source: str | None) -> int | float | None:
     if source in ('1'):
         # No hold-over (ylispuu)
         return 2.1
-    elif source in ('2', '3'):
+    if source in ('2', '3'):
         # No first thinnings or other thinnings
         return 2.2
-    elif source in ('4'):
+    if source in ('4'):
         # No intermediate felling (kasvatushakkuu)
         return 2.3
-    elif source in ('6', '7'):
+    if source in ('6', '7'):
         # No seeding felling or shelterwood felling (suojuspuuhakkuu)
         return 2.4
-    elif source in ('5'):
+    if source in ('5'):
         # No clear cut
         return 2.5
-    elif source in ('8'):
+    if source in ('8'):
         # No regeneration felling (uudistushakkuu)
         return 2.6
-    elif source in ('9'):
+    if source in ('9'):
         # No fellings (ei hakkuita)
         return 7
-    else:
-        # No restrictions
-        return 1
+    # No restrictions
+    return 1
 
 
 def point_series(value: str) -> list[tuple[float, float]]:

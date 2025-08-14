@@ -84,9 +84,9 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
             if stratum is None:
                 continue
             if stratum.__dict__.get('_trees') is not None:
-                stratum._trees.append(tree)
+                getattr(stratum, "_trees").append(tree)
             else:
-                stratum._trees = [tree]
+                setattr(stratum, "_trees", [tree])
             if debug:
                 debug_tree_rows.append([
                     stratum.identifier,
@@ -100,7 +100,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
             stratum_trees: list[ReferenceTree] = []
             try:
                 stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, **operation_params)
-            except Exception as e:  # pylint: disable=broad-exception-caught
+            except Exception as e:
                 print(
                     f"\nError generating trees for stratum {stratum.identifier} with diameter {stratum.mean_diameter}, "
                     f"height {stratum.mean_height}, basal_area {stratum.basal_area}")
@@ -213,7 +213,10 @@ def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str,
     target_system = operation_params.get('target_system', defaults[0])
     if target_system in defaults:
         for s in stands:
-            s.geo_location = convert_location_to_ykj(s)
+            if s.geo_location is not None:
+                latitude, longitude, height, crs = s.geo_location
+                if latitude is not None and longitude is not None:
+                    s.geo_location = convert_location_to_ykj(latitude, longitude, height, crs)
     else:
         raise MetsiException("Check definition of operation params.\n"
                              f"{defaults[0]}\' conversion supported.")

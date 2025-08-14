@@ -1,11 +1,12 @@
 from lukefi.metsi.data.model import ForestStand
 
+
 def update_stand_growth(
-    stand: ForestStand, 
-    diameters: list[float], 
-    heights: list[float], 
-    stems: list[float], 
-    step: int):
+        stand: ForestStand,
+        diameters: list[float],
+        heights: list[float],
+        stems: list[float],
+        step: int):
     """In-place update stand's reference trees with given diameters, heights and stem count.
     Increase ages for trees and stand. Remove sapling flag from trees that have grown beyond 1.3m. """
     for i, t in enumerate(stand.reference_trees):

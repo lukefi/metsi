@@ -1,3 +1,5 @@
+# pylint: disable=invalid-name
+
 """ Module contains distribution based model functions
     - weibull distribution
     - simple height distribution
@@ -26,8 +28,7 @@ def weibull_coeffs(diameter: float, basal_area: float, min_diameter: Optional[fl
                                  math.log(diameter)) + (math.pow(0.33956, 2) / 2.0)))
     w3 = math.exp(0.64788 - (0.005558 * basal_area) + (0.025530 * diameter) + (math.pow(0.35365, 2) / 2.0))
     w2 = (diameter - w1) / (pow((-math.log(0.5)), (1.0 / w3)))
-    if w2 < 0.0:
-        w2 = 0.0
+    w2 = max(w2, 0.0)
     return w1, w2, w3
 
 
@@ -239,7 +240,8 @@ def weibull_sapling(height: float, stem_count: float, dominant_height: float, n_
 
 
 def sapling_height_distribution(stratum: TreeStratum, dominant_height: float, n_trees: int) -> list[ReferenceTree]:
-    """Formulates height distribution of sapling stratum and predicts the diameters and the number of stems of the simulation trees
+    """Formulates height distribution of sapling stratum and predicts the diameters and the number of stems of the
+    simulation trees
     References: Siipilehto, J. 2009, Modelling stand structure in young Scots pine dominated stands.
                 Forest Ecology and management 257: 223–232. (GLM model)
 
@@ -252,18 +254,17 @@ def sapling_height_distribution(stratum: TreeStratum, dominant_height: float, n_
         reference_tree.height = stratum.mean_height
         reference_tree.stems_per_ha = stratum.stems_per_ha
         return [reference_tree]
-    else:
-        # more than one trees
-        result = weibull_sapling(
-            stratum.mean_height,
-            stratum.stems_per_ha,
-            dominant_height,
-            n_trees
-        )
-        dominant_height = 1.05 * stratum.mean_height
-        return predict_sapling_diameters(
-            result,
-            stratum.mean_height,
-            stratum.mean_diameter,
-            dominant_height
-        )
+    # more than one trees
+    result = weibull_sapling(
+        stratum.mean_height,
+        stratum.stems_per_ha,
+        dominant_height,
+        n_trees
+    )
+    dominant_height = 1.05 * stratum.mean_height
+    return predict_sapling_diameters(
+        result,
+        stratum.mean_height,
+        stratum.mean_diameter,
+        dominant_height
+    )

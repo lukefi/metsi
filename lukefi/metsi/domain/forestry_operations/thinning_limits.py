@@ -15,13 +15,16 @@ from lukefi.metsi.domain.utils.enums import SiteTypeKey
 from lukefi.metsi.domain.utils.conversion import site_type_to_key
 from lukefi.metsi.app.utils import MetsiException
 
+
 class CountyKey(Enum):
     EASTERN_FINLAND = 'eastern_finland'
     SOUTHERN_FINLAND = 'southern_finland'
 
+
 class SoilPeatlandKey(Enum):
     MINERAL_SOIL = 'mineral_soil'
     PEATLAND = 'peatland'
+
 
 class SpeciesKey(Enum):
     PINE = 'pine'
@@ -31,10 +34,10 @@ class SpeciesKey(Enum):
 
 
 THINNING_LIMITS = {
-    CountyKey.EASTERN_FINLAND :{
+    CountyKey.EASTERN_FINLAND: {
         SoilPeatlandKey.MINERAL_SOIL: {
             SiteTypeKey.OMT: {
-                SpeciesKey.PINE:  {
+                SpeciesKey.PINE: {
                     # dominant_height: (basal_area_0=y0, basal_area_1=y1)
                     10: (15.3, 24.0),
                     12: (15.3, 24.0),
@@ -46,7 +49,7 @@ THINNING_LIMITS = {
                     24: (19.9, 28.0),
                     26: (19.9, 28.0)
                 },
-                SpeciesKey.SPRUCE:  {
+                SpeciesKey.SPRUCE: {
                     10: (15.2, 24.0),
                     12: (15.2, 24.0),
                     14: (18.4, 27.0),
@@ -68,7 +71,7 @@ THINNING_LIMITS = {
                     24: (15.0, 20.7),
                     26: (15.0, 20.7)
                 },
-                SpeciesKey.DOWNY_BIRCH:   {
+                SpeciesKey.DOWNY_BIRCH: {
                     10: (10.4, 14.0),
                     12: (10.4, 14.0),
                     14: (11.7, 16.0),
@@ -81,7 +84,7 @@ THINNING_LIMITS = {
                 }
             },
             SiteTypeKey.MT: {
-                SpeciesKey.PINE:  {
+                SpeciesKey.PINE: {
                     10: (15.3, 24.0),
                     12: (15.3, 24.0),
                     14: (17.6, 24.0),
@@ -92,7 +95,7 @@ THINNING_LIMITS = {
                     24: (19.9, 28.0),
                     26: (19.9, 28.0)
                 },
-                SpeciesKey.SPRUCE:  {
+                SpeciesKey.SPRUCE: {
                     10: (15.3, 24.0),
                     12: (15.3, 24.0),
                     14: (17.6, 24.0),
@@ -114,7 +117,7 @@ THINNING_LIMITS = {
                     24: (15.0, 20.7),
                     26: (15.0, 20.7)
                 },
-                SpeciesKey.DOWNY_BIRCH:   {
+                SpeciesKey.DOWNY_BIRCH: {
                     10: (10.4, 14.0),
                     12: (10.4, 14.0),
                     14: (11.7, 16.0),
@@ -127,7 +130,7 @@ THINNING_LIMITS = {
                 }
             },
             SiteTypeKey.VT: {
-                SpeciesKey.PINE:  {
+                SpeciesKey.PINE: {
                     10: (14.2, 20.0),
                     12: (14.2, 20.0),
                     14: (15.9, 21.9),
@@ -138,7 +141,7 @@ THINNING_LIMITS = {
                     24: (18.1, 25.7),
                     26: (18.1, 25.7)
                 },
-                SpeciesKey.SPRUCE:  {
+                SpeciesKey.SPRUCE: {
                     10: (15.3, 24.0),
                     12: (15.3, 24.0),
                     14: (17.6, 24.0),
@@ -160,7 +163,7 @@ THINNING_LIMITS = {
                     24: (13.4, 18.9),
                     26: (13.4, 18.9)
                 },
-                SpeciesKey.DOWNY_BIRCH:   {
+                SpeciesKey.DOWNY_BIRCH: {
                     10: (10.4, 14.0),
                     12: (10.4, 14.0),
                     14: (11.7, 16.0),
@@ -173,7 +176,7 @@ THINNING_LIMITS = {
                 }
             },
             SiteTypeKey.CT: {
-                SpeciesKey.PINE:  {
+                SpeciesKey.PINE: {
                     10: (12.0, 18.0),
                     12: (12.0, 18.0),
                     14: (14.1, 18.9),
@@ -184,7 +187,7 @@ THINNING_LIMITS = {
                     24: (16.1, 22.7),
                     26: (16.1, 22.7)
                 },
-                SpeciesKey.SPRUCE:  {
+                SpeciesKey.SPRUCE: {
                     10: (12.0, 18.0),
                     12: (12.0, 18.0),
                     14: (14.1, 18.9),
@@ -206,7 +209,7 @@ THINNING_LIMITS = {
                     24: (13.4, 18.9),
                     26: (13.4, 18.9)
                 },
-                SpeciesKey.DOWNY_BIRCH:   {
+                SpeciesKey.DOWNY_BIRCH: {
                     10: (10.4, 14.0),
                     12: (10.4, 14.0),
                     14: (11.7, 16.0),
@@ -267,7 +270,7 @@ THINNING_LIMITS = {
                 }
             },
             SiteTypeKey.MT: {
-                SpeciesKey.PINE:  {
+                SpeciesKey.PINE: {
                     10: (15.3, 21.0),
                     12: (15.3, 21.0),
                     14: (17.6, 24.5),
@@ -278,7 +281,7 @@ THINNING_LIMITS = {
                     24: (19.9, 28.4),
                     26: (19.9, 28.4)
                 },
-                SpeciesKey.SPRUCE:  {
+                SpeciesKey.SPRUCE: {
                     10: (15.3, 24.0),
                     12: (15.3, 24.0),
                     14: (17.6, 24.0),
@@ -300,7 +303,7 @@ THINNING_LIMITS = {
                     24: (15.0, 20.7),
                     26: (15.0, 20.7)
                 },
-                SpeciesKey.DOWNY_BIRCH:   {
+                SpeciesKey.DOWNY_BIRCH: {
                     10: (10.4, 14.0),
                     12: (10.4, 14.0),
                     14: (11.7, 16.0),
@@ -313,7 +316,7 @@ THINNING_LIMITS = {
                 }
             },
             SiteTypeKey.VT: {
-                SpeciesKey.PINE:  {
+                SpeciesKey.PINE: {
                     10: (13.2, 19.5),
                     12: (13.2, 19.5),
                     14: (16.3, 23.2),
@@ -324,7 +327,7 @@ THINNING_LIMITS = {
                     24: (18.0, 26.4),
                     26: (18.0, 26.4)
                 },
-                SpeciesKey.SPRUCE:  {
+                SpeciesKey.SPRUCE: {
                     10: (15.3, 24.0),
                     12: (15.3, 24.0),
                     14: (17.6, 24.0),
@@ -346,7 +349,7 @@ THINNING_LIMITS = {
                     24: (13.4, 18.9),
                     26: (13.4, 18.9)
                 },
-                SpeciesKey.DOWNY_BIRCH:   {
+                SpeciesKey.DOWNY_BIRCH: {
                     10: (10.4, 14.0),
                     12: (10.4, 14.0),
                     14: (11.7, 16.0),
@@ -359,7 +362,7 @@ THINNING_LIMITS = {
                 }
             },
             SiteTypeKey.CT: {
-                SpeciesKey.PINE:  {
+                SpeciesKey.PINE: {
                     10: (12.8, 17.5),
                     12: (12.8, 17.5),
                     14: (15.3, 21.2),
@@ -370,7 +373,7 @@ THINNING_LIMITS = {
                     24: (16.5, 23.8),
                     26: (16.5, 23.8)
                 },
-                SpeciesKey.SPRUCE:  {
+                SpeciesKey.SPRUCE: {
                     10: (12.8, 17.5),
                     12: (12.8, 17.5),
                     14: (15.3, 21.2),
@@ -392,7 +395,7 @@ THINNING_LIMITS = {
                     24: (13.4, 18.9),
                     26: (13.4, 18.9)
                 },
-                SpeciesKey.DOWNY_BIRCH:   {
+                SpeciesKey.DOWNY_BIRCH: {
                     10: (10.4, 14.0),
                     12: (10.4, 14.0),
                     14: (11.7, 16.0),
@@ -413,81 +416,80 @@ def soil_peatland_category_to_key(value: int) -> str:
     """ converts soil and peatland category of stand into a key for thinning limist lookup table """
     if value in (1,):
         return SoilPeatlandKey.MINERAL_SOIL
-    elif value in (2, 3, 4, 5):
+    if value in (2, 3, 4, 5):
         return SoilPeatlandKey.PEATLAND
-    else:
-        raise UserWarning('Unable to spesify soil and peatland value {} as key for the thinning limits lookup table'.format(value))
+    raise UserWarning(f'Unable to spesify soil and peatland value {value} as key for the thinning limits lookup table')
 
 
 def species_to_key(value: int) -> str:
     """ converts tree species to into a key for thinning limits lookup table """
     if value in (TreeSpecies.PINE,):
-        return  SpeciesKey.PINE
-    elif value in (TreeSpecies.SPRUCE,):
+        return SpeciesKey.PINE
+    if value in (TreeSpecies.SPRUCE,):
         return SpeciesKey.SPRUCE
-    elif value in (TreeSpecies.SILVER_BIRCH, TreeSpecies.ASPEN, TreeSpecies.GREY_ALDER,
-        TreeSpecies.OTHER_CONIFEROUS, TreeSpecies.DOUGLAS_FIR, TreeSpecies.JUNIPER,
-        TreeSpecies.OTHER_DECIDUOUS, TreeSpecies.SHORE_PINE, TreeSpecies.EUROPEAN_WHITE_ELM,
-        TreeSpecies.LARCH, TreeSpecies.SMALL_LEAVED_LIME, TreeSpecies.BLACK_SPRUCE,
-        TreeSpecies.WILLOW, TreeSpecies.MOUNTAIN_ASH, TreeSpecies.ABIES,
-        TreeSpecies.GOAT_WILLOW, TreeSpecies.COMMON_ASH, TreeSpecies.KEDAR,
-        TreeSpecies.SERBIAN_SPRUCE, TreeSpecies.OAK, TreeSpecies.BIRD_CHERRY,
-        TreeSpecies.MAPLE, TreeSpecies.CURLY_BIRCH, TreeSpecies.WYCH_ELM,
-        TreeSpecies.THUJA, TreeSpecies.YEW, TreeSpecies.BAY_WILLOW, TreeSpecies.POPLAR, TreeSpecies.HAZEL,
-        TreeSpecies.OTHER_PINE, TreeSpecies.OTHER_SPRUCE,
-        TreeSpecies.UNKNOWN_CONIFEROUS, TreeSpecies.UNKNOWN_DECIDUOUS, TreeSpecies.UNKNOWN):
+    if value in (TreeSpecies.SILVER_BIRCH, TreeSpecies.ASPEN, TreeSpecies.GREY_ALDER,
+                   TreeSpecies.OTHER_CONIFEROUS, TreeSpecies.DOUGLAS_FIR, TreeSpecies.JUNIPER,
+                   TreeSpecies.OTHER_DECIDUOUS, TreeSpecies.SHORE_PINE, TreeSpecies.EUROPEAN_WHITE_ELM,
+                   TreeSpecies.LARCH, TreeSpecies.SMALL_LEAVED_LIME, TreeSpecies.BLACK_SPRUCE,
+                   TreeSpecies.WILLOW, TreeSpecies.MOUNTAIN_ASH, TreeSpecies.ABIES,
+                   TreeSpecies.GOAT_WILLOW, TreeSpecies.COMMON_ASH, TreeSpecies.KEDAR,
+                   TreeSpecies.SERBIAN_SPRUCE, TreeSpecies.OAK, TreeSpecies.BIRD_CHERRY,
+                   TreeSpecies.MAPLE, TreeSpecies.CURLY_BIRCH, TreeSpecies.WYCH_ELM,
+                   TreeSpecies.THUJA, TreeSpecies.YEW, TreeSpecies.BAY_WILLOW, TreeSpecies.POPLAR, TreeSpecies.HAZEL,
+                   TreeSpecies.OTHER_PINE, TreeSpecies.OTHER_SPRUCE,
+                   TreeSpecies.UNKNOWN_CONIFEROUS, TreeSpecies.UNKNOWN_DECIDUOUS, TreeSpecies.UNKNOWN):
         return SpeciesKey.SILVER_BIRCH
-    elif value in (TreeSpecies.DOWNY_BIRCH,):
+    if value in (TreeSpecies.DOWNY_BIRCH,):
         return SpeciesKey.DOWNY_BIRCH
-    else:
-        raise UserWarning("Unable to spesify tree species value {} as key for the thinning limits lookup table".format(value))
+    raise UserWarning(f"Unable to spesify tree species value {value} as key for the thinning limits lookup table")
 
 
 def solve_hdom_key(hdom_x: int, hdoms: KeysView[int]) -> int:
     """ solves dominant height key for stand dominant height for thinning limit lookup table """
     hdoms = list(hdoms)
     i = bisect(hdoms, hdom_x)
-    key_idx = min(i, len(hdoms)-1)
+    key_idx = min(i, len(hdoms) - 1)
     return hdoms[key_idx]
 
 
 LIMITS_SLICE_LOOKUP = {
-    CountyKey.EASTERN_FINLAND :{
-        "before_thinning":{
+    CountyKey.EASTERN_FINLAND: {
+        "before_thinning": {
             SoilPeatlandKey.MINERAL_SOIL: {
-                SiteTypeKey.OMT: slice(0,4),
-                SiteTypeKey.MT: slice(4,8),
-                SiteTypeKey.VT: slice(8,12),
-                SiteTypeKey.CT: slice(12,16),
+                SiteTypeKey.OMT: slice(0, 4),
+                SiteTypeKey.MT: slice(4, 8),
+                SiteTypeKey.VT: slice(8, 12),
+                SiteTypeKey.CT: slice(12, 16),
             },
             SoilPeatlandKey.PEATLAND: {
-                SiteTypeKey.OMT: slice(16,20),
-                SiteTypeKey.MT: slice(20,24),
-                SiteTypeKey.VT: slice(24,28),
-                SiteTypeKey.CT: slice(28,32)
+                SiteTypeKey.OMT: slice(16, 20),
+                SiteTypeKey.MT: slice(20, 24),
+                SiteTypeKey.VT: slice(24, 28),
+                SiteTypeKey.CT: slice(28, 32)
             }
         },
-        "after_thinning":{
-                SoilPeatlandKey.MINERAL_SOIL: {
-                    SiteTypeKey.OMT: slice(32,36),
-                    SiteTypeKey.MT: slice(36,40),
-                    SiteTypeKey.VT: slice(40,44),
-                    SiteTypeKey.CT: slice(44,48),
+        "after_thinning": {
+            SoilPeatlandKey.MINERAL_SOIL: {
+                SiteTypeKey.OMT: slice(32, 36),
+                SiteTypeKey.MT: slice(36, 40),
+                SiteTypeKey.VT: slice(40, 44),
+                SiteTypeKey.CT: slice(44, 48),
             },
-                SoilPeatlandKey.PEATLAND: {
-                    SiteTypeKey.OMT: slice(48,52),
-                    SiteTypeKey.MT: slice(52,56),
-                    SiteTypeKey.VT: slice(56,60),
-                    SiteTypeKey.CT: slice(60,64)
+            SoilPeatlandKey.PEATLAND: {
+                SiteTypeKey.OMT: slice(48, 52),
+                SiteTypeKey.MT: slice(52, 56),
+                SiteTypeKey.VT: slice(56, 60),
+                SiteTypeKey.CT: slice(60, 64)
             }
         }
     }
 }
 
+
 @cache
 def create_thinning_limits_table(file_path: str) -> list:
     contents = None
-    with open(file_path, "r") as f:
+    with open(file_path, "r", encoding="utf-8") as f:
         contents = f.read()
     # read thinning_limits into a list of lists
     table = contents.split('\n')
@@ -496,21 +498,22 @@ def create_thinning_limits_table(file_path: str) -> list:
     # this function is based on the structure in data/parameter_files/Thin.txt.
     # for now, to catch a file with a differing structure, raise an error if the row and column numbers do not match.
     if len(table) != 64 or len(table[0]) != 9:
-        raise MetsiException('Thinning limits file has unexpected structure. Expected 64 rows and 9 columns, got {} rows and {} columns'.format(len(table), len(table[0])))
-    else:
-        return table
+        raise MetsiException('Thinning limits file has unexpected structure. Expected 64 rows and 9 columns, '
+                             f'got {len(table)} rows and {len(table[0])} columns')
+    return table
+
 
 @lru_cache
 def get_thinning_limits_from_parameter_file_contents(
-    thinning_limits_file: str, 
-    county: CountyKey, 
-    sp_category: SoilPeatlandKey, 
-    site_type: SiteTypeKey, 
+    thinning_limits_file: str,
+    county: CountyKey,
+    sp_category: SoilPeatlandKey,
+    site_type: SiteTypeKey,
     species: SpeciesKey
-    ) -> dict[int, tuple]:
+) -> dict[int, tuple]:
     """
-    Creates a table from :thinning_limits: and uses it to return a dict that contains tuples of lower and upper limits for each height bracket 
-    for the given stand parameters (:county:, :sp_category:, :site_type:, :species:).
+    Creates a table from :thinning_limits: and uses it to return a dict that contains tuples of lower and upper limits
+    for each height bracket for the given stand parameters (:county:, :sp_category:, :site_type:, :species:).
     """
     limits_table = create_thinning_limits_table(thinning_limits_file)
     upper_limits_slice = LIMITS_SLICE_LOOKUP[county]["before_thinning"][sp_category][site_type]
@@ -533,24 +536,30 @@ def get_thinning_limits_from_parameter_file_contents(
     elif species == SpeciesKey.DOWNY_BIRCH:
         upper_limits_for_species = upper_limits[3]
         lower_limits_for_species = lower_limits[3]
-    
+
     limit_brackets = [10, 12, 14, 16, 18, 20, 22, 24, 26]
-    limits_for_species = {limit_brackets[i]: (float(lower_limits_for_species[i]), float(upper_limits_for_species[i])) for i in range(len(limit_brackets))}
+    limits_for_species = {
+        limit_brackets[i]: (
+            float(
+                lower_limits_for_species[i]), float(
+                upper_limits_for_species[i])) for i in range(
+                    len(limit_brackets))}
 
     return limits_for_species
 
 
 def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None) -> tuple[float, float]:
     """ Resolves lower and upper bound for thinning. Values are in meters (m).
-    :thinning_limits: thinning limits from a file parameter defined in control.py It is user's responsibility to provide it in correct format. 
-    Parsing failure will raise an exception. 
+    :thinning_limits: thinning limits from a file parameter defined in control.py 
+    It is user's responsibility to provide it in correct format.
+    Parsing failure will raise an exception.
     If file not provided in control.py, the hardcoded THINNING_LIMITS structure will be used."""
     county_key = CountyKey.EASTERN_FINLAND
     sp_category_key = soil_peatland_category_to_key(stand.soil_peatland_category)
     site_type_key = site_type_to_key(stand.site_type_category)
     sdom = futil.solve_dominant_species(stand.reference_trees)
     if sdom is None:
-        raise UserWarning(f"Unable to resolve thinning bounds with no dominant species found.")
+        raise UserWarning("Unable to resolve thinning bounds with no dominant species found.")
     species_key = species_to_key(sdom)
     hdom = futil.solve_dominant_height_c_largest(stand)
 
@@ -569,6 +578,7 @@ def resolve_thinning_bounds(stand: ForestStand, thinning_limits_file: str = None
     return spe_limits[hdom_key]
 
 # ---- first thinning stem count residue and util functions----
+
 
 FIRST_THINNING_RESIDUE_STEMS = {
     SiteTypeKey.OMT: {
@@ -602,7 +612,7 @@ def resolve_first_thinning_residue(stand: ForestStand) -> float:
     """ Resolves stem count residue for first thinning operation. Values are stems per hectare. """
     sdom = futil.solve_dominant_species(stand.reference_trees)
     if sdom is None:
-        raise UserWarning(f"Unable to resolve first thinning residue with no dominant species found.")
+        raise UserWarning("Unable to resolve first thinning residue with no dominant species found.")
     st_key = site_type_to_key(stand.site_type_category)
     spe_key = species_to_key(sdom)
     lower_limit = FIRST_THINNING_RESIDUE_STEMS[st_key][spe_key]

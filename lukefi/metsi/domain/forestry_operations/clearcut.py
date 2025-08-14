@@ -1,4 +1,5 @@
-from lukefi.metsi.domain.forestry_operations.clearcutting_limits import *
+from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.domain.forestry_operations.clearcutting_limits import get_clearcutting_limits
 from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.domain.collected_types import CrossCuttableTree
 from lukefi.metsi.sim.core_types import CollectedData, OpTuple
@@ -49,7 +50,5 @@ def clearcutting(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpT
         if age_limit_reached or diameter_limit_reached:
             stand, collected_data = _clearcut_with_output(stand, collected_data, 'clearcutting')
             return (stand, collected_data)
-        else:
-            raise UserWarning("Unable to perform clearcutting")
-    else:
         raise UserWarning("Unable to perform clearcutting")
+    raise UserWarning("Unable to perform clearcutting")

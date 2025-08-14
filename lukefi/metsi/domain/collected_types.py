@@ -42,7 +42,7 @@ class BiomassData:
                 stumps=self.stumps + other,
                 roots=self.roots + other
             )
-        elif isinstance(other, BiomassData):
+        if isinstance(other, BiomassData):
             return BiomassData(
                 stem_wood=self.stem_wood + other.stem_wood,
                 stem_bark=self.stem_bark + other.stem_bark,
@@ -53,8 +53,7 @@ class BiomassData:
                 stumps=self.stumps + other.stumps,
                 roots=self.roots + other.roots
             )
-        else:
-            raise MetsiException(f"Can only do addition between numbers and BiomassData, not {type(other)}")
+        raise MetsiException(f"Can only do addition between numbers and BiomassData, not {type(other)}")
 
     def __sub__(self, other):
         return self + (other * - 1)
