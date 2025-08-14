@@ -13,6 +13,9 @@ from lukefi.metsi.forestry.preprocessing.tree_generation_validation import creat
     debug_output_row_from_comparison_set, debug_output_header_row
 from lukefi.metsi.data.vectorize import vectorize
 from lukefi.metsi.app.utils import MetsiException
+from lukefi.metsi.forestry.naturalprocess.metsi_grow.lasum import ilmanor
+from lukefi.metsi.forestry.naturalprocess.metsi_grow.coord import etrs_tm35_to_ykj as conv
+from lukefi.metsi.forestry.naturalprocess.metsi_grow.kor import xkor
 
 
 def preproc_filter(stands: StandList, **operation_params) -> StandList:
@@ -30,10 +33,6 @@ def compute_location_metadata(stands: StandList, **operation_params) -> StandLis
     monthly rainfall
     """
     _ = operation_params
-    # import constrained to here as pymotti is an optional dependency
-    from lukefi.metsi.forestry.naturalprocess.metsi_grow.lasum import ilmanor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
-    from lukefi.metsi.forestry.naturalprocess.metsi_grow.coord import etrs_tm35_to_ykj as conv  # type: ignore # pylint: disable=import-error,import-outside-toplevel
-    from lukefi.metsi.forestry.naturalprocess.metsi_grow.kor import xkor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
 
     for stand in stands:
         if stand.geo_location is not None and stand.geo_location[0] is not None and stand.geo_location[1] is not None:
