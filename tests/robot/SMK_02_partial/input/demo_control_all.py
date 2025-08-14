@@ -129,7 +129,6 @@ control_structure = {
             "time_points": years_np,
             "generators": [
                 {sequence: [grow_acta]}
-                # "grow_motti"
             ]
         }
     ],

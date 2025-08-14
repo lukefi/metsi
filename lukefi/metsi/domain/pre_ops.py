@@ -29,7 +29,6 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
     monthly rainfall
     """
     _ = operation_params
-    # import constrained to here as pymotti is an optional dependency
     from lukefi.metsi.forestry.naturalprocess.metsi_grow.lasum import ilmanor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
     from lukefi.metsi.forestry.naturalprocess.metsi_grow.coord import etrs_tm35_to_ykj as conv  # type: ignore # pylint: disable=import-error,import-outside-toplevel
     from lukefi.metsi.forestry.naturalprocess.metsi_grow.kor import xkor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
