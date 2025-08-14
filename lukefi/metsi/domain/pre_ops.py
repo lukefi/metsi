@@ -1,7 +1,8 @@
 import traceback
 from typing import Any
-from lukefi.metsi.data.model import ForestStand, ReferenceTree
+from lukefi.metsi.data.model import ReferenceTree
 from lukefi.metsi.data.enums.internal import LandUseCategory
+from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.domain.utils.filter import applyfilter
 from lukefi.metsi.forestry.forestry_utils import find_matching_storey_stratum_for_tree
 from lukefi.metsi.forestry.preprocessing import tree_generation, pre_util
@@ -12,9 +13,12 @@ from lukefi.metsi.forestry.preprocessing.tree_generation_validation import creat
     debug_output_row_from_comparison_set, debug_output_header_row
 from lukefi.metsi.data.vectorize import vectorize
 from lukefi.metsi.app.utils import MetsiException
+from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.lasum import ilmanor
+from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.coord import etrs_tm35_to_ykj as conv
+from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.kor import xkor
 
 
-def preproc_filter(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def preproc_filter(stands: StandList, **operation_params) -> StandList:
     named = operation_params.get("named", {})
     for k, v in operation_params.items():
         if k != "named":
@@ -22,17 +26,13 @@ def preproc_filter(stands: list[ForestStand], **operation_params) -> list[Forest
     return stands
 
 
-def compute_location_metadata(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def compute_location_metadata(stands: StandList, **operation_params) -> StandList:
     """
     This operation sets in-place the location based metadata properties for each given ForestStand, where missing.
     These properties are: height above sea level, temperature sum, sea effect, lake effect, monthly temperature and
     monthly rainfall
     """
     _ = operation_params
-    # import constrained to here as pymotti is an optional dependency
-    from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.lasum import ilmanor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
-    from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.coord import etrs_tm35_to_ykj as conv  # type: ignore # pylint: disable=import-error,import-outside-toplevel
-    from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.kor import xkor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
 
     for stand in stands:
         if stand.geo_location is not None and stand.geo_location[0] is not None and stand.geo_location[1] is not None:
@@ -67,7 +67,7 @@ def compute_location_metadata(stands: list[ForestStand], **operation_params) -> 
     return stands
 
 
-def generate_reference_trees(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def generate_reference_trees(stands: StandList, **operation_params) -> StandList:
     """ Operation function that generates (N * stratum) reference trees for each stand """
     debug = operation_params.get('debug', False)
     debug_output_rows = []
@@ -147,7 +147,7 @@ def generate_reference_trees(stands: list[ForestStand], **operation_params) -> l
     return stands
 
 
-def supplement_missing_tree_heights(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def supplement_missing_tree_heights(stands: StandList, **operation_params) -> StandList:
     """ Fill in missing (None or nonpositive) tree heights from Näslund height curve """
     _ = operation_params
     for stand in stands:
@@ -157,7 +157,7 @@ def supplement_missing_tree_heights(stands: list[ForestStand], **operation_param
     return stands
 
 
-def supplement_missing_tree_ages(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def supplement_missing_tree_ages(stands: StandList, **operation_params) -> StandList:
     """ Attempt to fill in missing (None or nonpositive) tree ages using strata ages or other reference tree ages"""
     _ = operation_params
     for stand in stands:
@@ -165,7 +165,7 @@ def supplement_missing_tree_ages(stands: list[ForestStand], **operation_params) 
     return stands
 
 
-def supplement_missing_stratum_diameters(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def supplement_missing_stratum_diameters(stands: StandList, **operation_params) -> StandList:
     """ Attempt to fill in missing (None) stratum mean diameters using mean height """
     _ = operation_params
     for stand in stands:
@@ -178,7 +178,7 @@ def supplement_missing_stratum_diameters(stands: list[ForestStand], **operation_
     return stands
 
 
-def generate_sapling_trees_from_sapling_strata(stands: list[ForestStand], **operation_params) -> list[ForestStand]:
+def generate_sapling_trees_from_sapling_strata(stands: StandList, **operation_params) -> StandList:
     """ Create sapling reference trees from sapling strata """
     _ = operation_params
     for stand in stands:
@@ -192,7 +192,7 @@ def generate_sapling_trees_from_sapling_strata(stands: list[ForestStand], **oper
     return stands
 
 
-def scale_area_weight(stands: list[ForestStand], **operation_params):
+def scale_area_weight(stands: StandList, **operation_params):
     """ Scales area weight of a stand.
 
         Especially necessary for VMI tree generation cases.
@@ -204,7 +204,7 @@ def scale_area_weight(stands: list[ForestStand], **operation_params):
     return stands
 
 
-def convert_coordinates(stands: list[ForestStand], **operation_params: dict[str, Any]) -> list[ForestStand]:
+def convert_coordinates(stands: StandList, **operation_params: dict[str, Any]) -> StandList:
     """ Preprocessing operation for converting the current coordinate system to target system
 
     :target_system (optional): Spesified target system. Default is EPSG:2393

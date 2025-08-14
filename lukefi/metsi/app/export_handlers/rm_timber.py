@@ -102,7 +102,7 @@ def prepare_schedules_file_content(data: SimResults, data_source: str) -> list[s
     years within.
 
     :param data: SimResults package
-    :param data_source: "trees" for standing/harvested tree variables content, 
+    :param data_source: "trees" for standing/harvested tree variables content,
                         "timber" for standing/harvested timber volume content
     :return: list of strings representing file rows
     """

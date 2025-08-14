@@ -1,8 +1,10 @@
-from typing import Any
+from typing import Any, TypeVar, Union
 
 
 class LayeredObject[T]:
-    def __init__(self, base: T):
+    _previous: "PossiblyLayered[T]"
+
+    def __init__(self, base: "PossiblyLayered[T]"):
         self._previous = base
 
     def __getattribute__(self, key):
@@ -15,13 +17,18 @@ class LayeredObject[T]:
     def __setattr__(self, name: str, value: Any) -> None:
         object.__setattr__(self, name, value)
 
-    def new_layer(self) -> "LayeredObject[LayeredObject[T]]":
+    def new_layer(self) -> "LayeredObject[T]":
         return LayeredObject(self)
 
-    def fixate(self) -> "LayeredObject[T] | T":
+    def fixate(self) -> "PossiblyLayered[T]":
+        root: PossiblyLayered[T]
         if isinstance(self._previous, LayeredObject):
             root = self._previous.fixate()
         else:
             root = self._previous
         root.__dict__.update(self.__dict__)
         return root
+
+
+T = TypeVar("T")
+PossiblyLayered = Union[T, LayeredObject[T]]
