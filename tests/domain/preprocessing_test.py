@@ -4,6 +4,7 @@ import lukefi.metsi.domain.pre_ops as preprocessing
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.forestry.preprocessing.coordinate_conversion import CRS
+from lukefi.metsi.app.utils import MetsiException
 
 
 def generate_stand_with_saplings(sapling_tree_count, reference_tree_count):
@@ -102,3 +103,48 @@ class PreprocessingTest(unittest.TestCase):
         invalid_assertion = {"target_system": "ASD"}
         self.assertRaises(Exception,
                           preprocessing.convert_coordinates, ForestStand(), **invalid_assertion)
+        
+    def test_compute_location_metadata(self):
+
+        # generate testing data
+        LAT = 6643400.000631507
+        LON = 3268000.003019635
+        sea_level_heights =  [25.0, 25.0, None]
+        valid_crs = ['EPSG:3067', 'EPSG:2393', 'EPSG:2393']
+        valid_fixtures = [ ForestStand(geo_location=(LAT, LON, sl_height, crs)) for crs, sl_height in zip(valid_crs, sea_level_heights) ]
+
+        assertions = [
+            (sea_level_heights[0], valid_crs[0], 1674, 0.0, -26.58841390118755, -25.583422976421808, 52.32, 40.22),
+            (sea_level_heights[1], valid_crs[1], 1674, 0.0, -4.41760238263144, -4.988233118838529, 52.287995264010235, 36.23342105952951),
+            (1.6666666666666667, valid_crs[2], 1674, 0.0, -4.319369049298107, -4.8948997855051966 , 52.287995264010235, 36.23342105952951),
+        ]
+        
+        results = preprocessing.compute_location_metadata(valid_fixtures)
+
+        for result, asse in zip(results, assertions):
+            # None assertions
+            geo = result.geo_location
+            assert geo is not None
+            assert geo[2] is not None
+            temperatures = result.monthly_temperatures
+            assert temperatures is not None
+            rainfall = result.monthly_rainfall
+            assert rainfall is not None
+            # actual test validation
+            self.assertEqual(geo[0], LAT)
+            self.assertEqual(geo[1], LON)
+            self.assertEqual(float(geo[2]), asse[0])
+            self.assertEqual(geo[3], asse[1])
+            self.assertEqual(results[0].degree_days, asse[2])
+            self.assertEqual(results[0].sea_effect, asse[3])
+            self.assertEqual(float(temperatures[0]), asse[4])
+            self.assertEqual(float(temperatures[1]), asse[5])
+            self.assertEqual(float(rainfall[0]), asse[6])
+            self.assertEqual(float(rainfall[1]), asse[7])
+
+        invaldi_fixtures = [[ForestStand(geo_location=(None, None, None, None))],
+                             [ForestStand(geo_location=(1, None, None, None))],
+                             [ForestStand(geo_location=(None, 1, None, None))],
+                             [ForestStand(geo_location=(1, 1, 1, 'DUMMY_CRS'))]]
+        for invalid in invaldi_fixtures:
+            self.assertRaises(MetsiException, preprocessing.compute_location_metadata, invalid)
