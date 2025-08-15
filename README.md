@@ -54,17 +54,6 @@ To be able to use forestry operations depending on C sources
   * c sources located in `c/source`
   * Running the `Makefile` generates a `c/lib` folder which includes the `.dll` files used by the operations
 
-### Motti (optional)
-
-Access to this module is restricted to Natural Resources Institute Finland by special admission. Installing this will
-not work without access to the related GitHub repositories.
-
-```
-pip install -r requirements-motti.txt
-```
-
-The corresponding growth operation is `grow_motti`.
-
 
 **NOTE**: For either model, the input data must contain precomputed weather data (temperature sums, sea/lake indices).
 In practice this means that you must enable the `compute_location_metadata` preprocessing operation **even if you're
@@ -173,7 +162,6 @@ See table below for a quick reference of forestry operations usable in control.p
 |-------------------------------------------------------|--------------------------------------------------------------------------------------------------|-----------------------------|----------------|
 | do_nothing                                            | This operation is no-op utility operation to simulate rest                                       |                             | native         |
 | grow_acta                                             | A simple ReferenceTree diameter and height growth operation                                      | Acta Forestalia Fennica 163 | metsi-forestry |
-| grow_motti                                            | A ReferenceTree growth operation with death and birth models. Requires `pymotti`.                | Luke Motti group            | pymotti        |
 | first_thinning                                        | An operation reducing the stem count of ReferenceTrees as a first thinning for a forest          | Reijo Mykkänen              | metsi-forestry |
 | thinning_from_below                                   | An operation reducing the stem count of ReferenceTrees weighing small trees before large trees   | Reijo Mykkänen              | metsi-forestry |
 | thinning_from_above                                   | An operation reducing the stem count of ReferenceTrees weighing large trees before small trees   | Reijo Mykkänen              | metsi-forestry |

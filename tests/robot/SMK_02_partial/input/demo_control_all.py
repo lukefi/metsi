@@ -4,19 +4,14 @@ from lukefi.metsi.domain.sim_ops import *
 from lukefi.metsi.sim.generators import *
 
 
-year_start = 2025
-step = 5
-period = 10
-# nperiods = 5
-nperiods = 1
-# year_final = 2075
-year_final = year_start + nperiods*period
-# years_np = [2025, 2030, 2035, 2040, 2045, 2050, 2055, 2065, 2070]
-years_np = [year_start + i*step for i in range(0, 2*nperiods)]
-# years_events = [2030, 2040, 2050, 2060, 2070]
-years_events = [year_start + step + i*period for i in range(0, nperiods)]
-# years_report = [2025, 2035, 2045, 2055, 2065, 2075]
-years_report = [year_start + i*period for i in range(0, nperiods+1)]
+YEAR_STAR = 2025
+STEP = 5
+PERIOD = 10
+NPERIODS = 1
+YEAR_FINAL = YEAR_STAR + NPERIODS*PERIOD
+years_np = [YEAR_STAR + i*STEP for i in range(0, 2*NPERIODS)]
+years_events = [YEAR_STAR + STEP + i*PERIOD for i in range(0, NPERIODS)]
+years_report = [YEAR_STAR + i*PERIOD for i in range(0, NPERIODS+1)]
 
 operations_report = {sequence: [
     cross_cut_standing_trees,
@@ -86,7 +81,7 @@ control_structure = {
     # Simulation control declaration
     "simulation_events": [
         {
-            "time_points": [year_start],
+            "time_points": [YEAR_STAR],
             "generators": [
                 {sequence: [planting]}
             ]
@@ -120,7 +115,7 @@ control_structure = {
             ]
         },
         {
-            "time_points": [year_final],
+            "time_points": [YEAR_FINAL],
             "generators": [
                 {sequence: [report_collectives]}
             ]
@@ -129,7 +124,6 @@ control_structure = {
             "time_points": years_np,
             "generators": [
                 {sequence: [grow_acta]}
-                # "grow_motti"
             ]
         }
     ],
