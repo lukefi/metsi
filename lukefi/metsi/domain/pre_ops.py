@@ -33,9 +33,6 @@ def compute_location_metadata(stands: StandList, **operation_params) -> StandLis
     monthly rainfall
     """
     _ = operation_params
-    from lukefi.metsi.forestry.naturalprocess.metsi_grow.lasum import ilmanor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
-    from lukefi.metsi.forestry.naturalprocess.metsi_grow.coord import etrs_tm35_to_ykj as conv  # type: ignore # pylint: disable=import-error,import-outside-toplevel
-    from lukefi.metsi.forestry.naturalprocess.metsi_grow.kor import xkor  # type: ignore # pylint: disable=import-error,import-outside-toplevel
 
     for stand in stands:
         if stand.geo_location is not None and stand.geo_location[0] is not None and stand.geo_location[1] is not None:
