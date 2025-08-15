@@ -25,6 +25,7 @@ dependencies = [
     "rpy2==3.6.1",
     "numba==0.61.2",
     "scipy==1.14",
+    "cffi==1.17.1",
 ]
 
 [project.optional-dependencies]
