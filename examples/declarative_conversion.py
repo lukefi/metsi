@@ -1,10 +1,9 @@
 """ An control file example to demonstrate to usage on declarative variables and exportin of the suchs variables """
 
-from lukefi.metsi.data.formats.declarative_conversion import Conversion
-from lukefi.metsi.data.model import ForestStand, TreeStratum
-from math import pow
 from random import random
 from examples.declarations.export_prepro import mela
+from lukefi.metsi.data.formats.declarative_conversion import Conversion
+from lukefi.metsi.data.model import ForestStand, TreeStratum
 
 
 def sum3(x, y, z) -> float:
@@ -21,9 +20,9 @@ control_structure = {
         'vmi13': {
             # common conversions
             'VAR0': Conversion(lambda: 123456789),
-            'VAR1': Conversion(lambda x: int(x)*2, indices=(0,)),
+            'VAR1': Conversion(lambda x: int(x) * 2, indices=(0,)),
             'VAR2': Conversion(lambda x: x, indices=(1,)),
-            'VAR3': Conversion(lambda x,y,z: sum3(x,y,z), indices=(2, 3, 4)),
+            'VAR3': Conversion(sum3, indices=(2, 3, 4)),
             'VAR4': Conversion(lambda x, y: pow(int(x), int(y)), indices=(2, 5)),
             'VAR5': Conversion(lambda x, y: pow(float(x), float(y)), indices=(3, 5)),
             'VAR_RANDOM': Conversion(random),
@@ -38,7 +37,6 @@ control_structure = {
 }
 
 # The preprocessing export format is added as an external module
-control_structure['export_prepro'] = {}
-control_structure['export_prepro'].update(mela) # includes declared variables + mela format spesific operands
+control_structure['export_prepro'] = mela
 
 __all__ = ['control_structure']
