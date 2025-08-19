@@ -124,12 +124,12 @@ class PreprocessingTest(unittest.TestCase):
         for result, asse in zip(results, assertions):
             # None assertions
             geo = result.geo_location
-            assert geo is not None
-            assert geo[2] is not None
+            self.assertIsNotNone(geo)
+            self.assertIsNotNone(geo[2])
             temperatures = result.monthly_temperatures
-            assert temperatures is not None
+            self.assertIsNotNone(temperatures)
             rainfall = result.monthly_rainfall
-            assert rainfall is not None
+            self.assertIsNotNone(rainfall)
             # actual test validation
             self.assertEqual(geo[0], LAT)
             self.assertEqual(geo[1], LON)
@@ -147,4 +147,5 @@ class PreprocessingTest(unittest.TestCase):
                              [ForestStand(geo_location=(None, 1, None, None))],
                              [ForestStand(geo_location=(1, 1, 1, 'DUMMY_CRS'))]]
         for invalid in invalid_fixtures:
+            # Exception testing
             self.assertRaises(MetsiException, preprocessing.compute_location_metadata, invalid)
