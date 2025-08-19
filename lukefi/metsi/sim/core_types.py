@@ -123,9 +123,11 @@ class EventTree[T]:
                  state_tree: Optional[StateTree[PossiblyLayered[T]]] = None) -> list["OperationPayload[T]"]:
         """
         Recursive pre-order walkthrough of this event tree to evaluate its operations with the given payload,
-        copying it for branching.
-
+        copying it for branching. If given a root node, a StateTree is also constructed, containing all complete
+        intermediate states in the simulation.
+        
         :param payload: the simulation data payload (we don't care what it is here)
+        :param state_tree: optional state tree node
         :return: list of result payloads from this EventTree or as concatenated from its branches
         """
         current = self.wrapped_operation(payload)
