@@ -1,7 +1,11 @@
 from collections import defaultdict
 import math
 from statistics import median
+import numpy as np
+import numpy.typing as npt
+
 from lukefi.metsi.data.model import ReferenceTree, TreeSpecies
+from lukefi.metsi.data.vector_model import ReferenceTrees
 
 
 def yearly_diameter_growth_by_species(
@@ -94,4 +98,58 @@ def grow_diameter_and_height(
                 hs[i] += 0.3
                 if hs[i] >= 1.3 and not ds[i]:
                     ds[i] = 1.0
+    return ds, hs
+
+yearly_diameter_growth_by_species_vectorized = np.vectorize(yearly_diameter_growth_by_species)
+yearly_height_growth_by_species_vectorized = np.vectorize(yearly_height_growth_by_species)
+
+def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
+                                        step: int = 5) -> tuple[npt.NDArray[np.float64],
+                                                                npt.NDArray[np.float64]]:
+    """
+    Diameter and height growth for trees with height > 1.3 meters. Based on Acta Forestalia Fennica 163.
+    Vector data implementation.
+    """
+    if trees.size == 0:
+        return np.array([]), np.array([])
+    ds = trees.breast_height_diameter
+    hs = trees.height
+    for s in range(step):
+        bigh = np.extract(hs >= 1.3, hs)
+        if bigh.size > 0:
+            hdom = np.median(bigh)
+            gs = trees.stems_per_ha * np.pi * (0.01 * 0.5 * ds)**2
+            G = np.sum(gs)
+            species = np.unique(trees.species)
+            for spe in species:
+                gg = np.sum(gs, where=trees.species == spe)
+                ag = np.sum((trees.biological_age + s) * gs, where=trees.species == spe) / gg
+                dg = np.sum(ds * gs, where=trees.species == spe) / gg
+                hg = np.sum(hs * gs, where=trees.species == spe) / gg
+
+                pd = np.where(
+                    trees.species == spe,
+                    yearly_diameter_growth_by_species_vectorized(
+                        spe,
+                        ds,
+                        hs,
+                        ag,
+                        dg,
+                        hg,
+                        hdom,
+                        G) / 100,
+                    0)
+                ph = np.where(
+                    trees.species == spe,
+                    yearly_height_growth_by_species_vectorized(
+                        spe,
+                        ds,
+                        hs,
+                        ag,
+                        dg,
+                        hg,
+                        G) / 100,
+                    0)
+                ds *= 1 + pd
+                hs *= 1 + ph
     return ds, hs

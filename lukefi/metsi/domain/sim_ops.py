@@ -9,7 +9,7 @@ from lukefi.metsi.domain.data_collection.marshalling import (
     collect_felled_tree_properties,
     report_period
 )
-from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
+from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta, grow_acta_vectorized
 from lukefi.metsi.domain.natural_processes.grow_metsi import grow_metsi
 from lukefi.metsi.domain.forestry_operations.thinning import (
     first_thinning,
@@ -24,6 +24,7 @@ from lukefi.metsi.sim.operations import do_nothing
 
 __all__ = ['grow_metsi',
            'grow_acta',
+           'grow_acta_vectorized',
            'thinning_from_below',
            'thinning_from_above',
            'first_thinning',
