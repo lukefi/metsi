@@ -142,9 +142,9 @@ class PreprocessingTest(unittest.TestCase):
             self.assertEqual(float(rainfall[0]), asse[6])
             self.assertEqual(float(rainfall[1]), asse[7])
 
-        invaldi_fixtures = [[ForestStand(geo_location=(None, None, None, None))],
+        invalid_fixtures = [[ForestStand(geo_location=(None, None, None, None))],
                              [ForestStand(geo_location=(1, None, None, None))],
                              [ForestStand(geo_location=(None, 1, None, None))],
                              [ForestStand(geo_location=(1, 1, 1, 'DUMMY_CRS'))]]
-        for invalid in invaldi_fixtures:
+        for invalid in invalid_fixtures:
             self.assertRaises(MetsiException, preprocessing.compute_location_metadata, invalid)
