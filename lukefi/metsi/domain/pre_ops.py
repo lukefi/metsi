@@ -35,24 +35,31 @@ def compute_location_metadata(stands: StandList, **operation_params) -> StandLis
     _ = operation_params
 
     for stand in stands:
-        if stand.geo_location is not None and stand.geo_location[0] is not None and stand.geo_location[1] is not None:
-            if stand.geo_location[3] == 'EPSG:3067':
-                lat, lon = conv(stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
-            elif stand.geo_location[3] == 'EPSG:2393':
-                lat, lon = (stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
-            else:
-                raise MetsiException(f"Unsupported CRS {stand.geo_location[3]} for stand {stand.identifier}")
+
+        if stand.geo_location is None:
+            raise MetsiException(f"Stand {stand.identifier} has no geolocation data")
         else:
-            raise MetsiException("No geolocation data")
+            if stand.geo_location[0] is None or stand.geo_location[1] is None:
+                raise MetsiException(f"Stand {stand.identifier} has incomplete geolocation data: {stand.geo_location}")
+
+        if stand.geo_location[3] == 'EPSG:3067':
+            lat, lon = conv(stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
+        elif stand.geo_location[3] == 'EPSG:2393':
+            lat, lon = (stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
+        else:
+            raise MetsiException(f"Unsupported CRS {stand.geo_location[3]} for stand {stand.identifier}")
 
         if stand.geo_location[2] is None:
+            xkor_value = xkor(lat, lon)
             stand.geo_location = (
                 stand.geo_location[0],
                 stand.geo_location[1],
-                xkor(lat, lon),
-                stand.geo_location[3]
-            )
-        wi = ilmanor(lon, lat, stand.geo_location[2])
+                xkor_value,
+                stand.geo_location[3])
+        else:
+            xkor_value = stand.geo_location[2]
+            
+        wi = ilmanor(lon, lat, xkor_value)
 
         if stand.degree_days is None:
             stand.degree_days = wi.dd
@@ -64,6 +71,7 @@ def compute_location_metadata(stands: StandList, **operation_params) -> StandLis
             stand.monthly_temperatures = wi.temp
         if stand.monthly_rainfall is None:
             stand.monthly_rainfall = wi.rain
+
     return stands
 
 
