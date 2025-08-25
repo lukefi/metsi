@@ -292,7 +292,7 @@ class Motti4DLL:
         yp = ffi.new("Motti4Trees *")
         numtrees = 0
         for i, t in enumerate(trees_py):
-            yp[0][i].id = float(t.get("id", i + 1))
+            yp[0][i].id = int(t.get("id", i + 1))
             yp[0][i].f = float(t.get("f", 0.0))
             yp[0][i].d13 = float(t.get("d13", 0.0))
             yp[0][i].h = float(t.get("h", 0.0))
@@ -344,11 +344,11 @@ class Motti4DLL:
         if rv[0] != 0:
             raise RuntimeError(f"Motti4UpdateAfterImport failed (rv={rv[0]})")
 
-        # Accumulators across partial steps
-        acc_id = [0.0] * ntrees_p[0]
-        acc_ih = [0.0] * ntrees_p[0]
-        acc_if = [0.0] * ntrees_p[0]
-        prev_f = [float(yp[0][i].f) for i in range(ntrees_p[0])]
+        # Accumulators keyed by tree id (order can change between sub-steps)
+        acc_id: Dict[int, float] = {}
+        acc_ih: Dict[int, float] = {}
+        acc_if: Dict[int, float] = {}
+        prev_f: Dict[int, float] = {int(yp[0][i].id): float(yp[0][i].f) for i in range(ntrees_p[0])}
 
         remaining = int(step)
         while remaining > 0:
@@ -368,16 +368,22 @@ class Motti4DLL:
                 raise RuntimeError(f"Motti4Growth failed (rv={rv[0]})")
 
             for i in range(ntrees_p[0]):
-                acc_id[i] += float(yp[0][i].xd)
-                acc_ih[i] += float(yp[0][i].xh)
+                tid = int(yp[0][i].id)
+                acc_id[tid] = acc_id.get(tid, 0.0) + float(yp[0][i].xd)
+                acc_ih[tid] = acc_ih.get(tid, 0.0) + float(yp[0][i].xh)
                 nf = float(yp[0][i].f)
-                acc_if[i] += (nf - prev_f[i])
-                prev_f[i] = nf
+                pf = prev_f.get(tid, nf)  # if first time we see tid, Δf=0
+                acc_if[tid] = acc_if.get(tid, 0.0) + (nf - pf)
+                prev_f[tid] = nf
 
             done = int(step_p[0])
             if done <= 0:
                 break
             remaining -= done
 
-        ids_now = [float(yp[0][i].id) for i in range(ntrees_p[0])]
-        return GrowthDeltas(tree_ids=ids_now, trees_id=acc_id, trees_ih=acc_ih, trees_if=acc_if)
+        ids_now = [int(yp[0][i].id) for i in range(ntrees_p[0])]
+        out_id = [acc_id.get(tid, 0.0) for tid in ids_now]
+        out_ih = [acc_ih.get(tid, 0.0) for tid in ids_now]
+        out_if = [acc_if.get(tid, 0.0) for tid in ids_now]
+        
+        return GrowthDeltas(tree_ids=ids_now, trees_id=out_id, trees_ih=out_ih, trees_if=out_if)
