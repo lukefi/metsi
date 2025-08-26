@@ -155,33 +155,9 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
     pred = MottiDLLPredictor(stand, dll_path=dll_path, data_dir=data_dir)
     growth = pred.evolve(step=step)
 
-    '''
-    # DEBUG: check that ids and deltas align & are integers
-    sample = list(zip(growth.ids[:10], growth.trees_id[:10], growth.trees_ih[:10], growth.trees_if[:10]))
-    print("[grow_motti_dll] first10 ids+Δ:", sample)
-    non_int_ids = [i for i in growth.ids if int(i) != i]
-    if non_int_ids:
-        print("[grow_motti_dll] non-integer DLL ids example:", non_int_ids[:10])
-        
-    neg = [(int(i), d, h, df) for i, d, h, df in zip(growth.ids, growth.trees_id, growth.trees_ih, growth.trees_if)
-        if d < -0.05 or h < -0.05]
-    if neg:
-        print("[grow_motti_dll] negative Δ for", len(neg), "trees; sample:", neg[:10])
-    '''
-
-
     id_to_delta_d  = {int(i): d for i, d in zip(growth.ids, growth.trees_id)}
     id_to_delta_h  = {int(i): h for i, h in zip(growth.ids, growth.trees_ih)}
     id_to_delta_f  = {int(i): f for i, f in zip(growth.ids, growth.trees_if)}
-
-    '''
-    # DEBUG: find trees we’re about to treat as dead because of ID mismatch
-    dll_ids = set(map(int, growth.ids))
-    missing = [int(getattr(t, "id", 0)) for t in stand.reference_trees if int(getattr(t, "id", 0)) not in dll_ids]
-    if missing:
-        print("[grow_motti_dll] ids missing from DLL output (treated dead):", missing[:20])
-    '''
-
 
     diameters, heights, stems = [], [], []
     for t in stand.reference_trees:
