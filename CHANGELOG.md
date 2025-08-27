@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.3] - 2025-08-27
+
+### Added
+
+- Added grow_acta_vectorized - a version of grow_acta that operates on SoA data
+
 ## [2.3.2] - 2025-08-26
 
 ### Fixed
