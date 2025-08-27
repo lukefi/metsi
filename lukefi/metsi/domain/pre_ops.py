@@ -38,9 +38,8 @@ def compute_location_metadata(stands: StandList, **operation_params) -> StandLis
 
         if stand.geo_location is None:
             raise MetsiException(f"Stand {stand.identifier} has no geolocation data")
-        else:
-            if stand.geo_location[0] is None or stand.geo_location[1] is None:
-                raise MetsiException(f"Stand {stand.identifier} has incomplete geolocation data: {stand.geo_location}")
+        if stand.geo_location[0] is None or stand.geo_location[1] is None:
+            raise MetsiException(f"Stand {stand.identifier} has incomplete geolocation data: {stand.geo_location}")
 
         if stand.geo_location[3] == 'EPSG:3067':
             lat, lon = conv(stand.geo_location[0] / 1000, stand.geo_location[1] / 1000)
@@ -58,7 +57,7 @@ def compute_location_metadata(stands: StandList, **operation_params) -> StandLis
                 stand.geo_location[3])
         else:
             xkor_value = stand.geo_location[2]
-            
+
         wi = ilmanor(lon, lat, xkor_value)
 
         if stand.degree_days is None:
