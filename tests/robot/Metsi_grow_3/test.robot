@@ -12,7 +12,7 @@ ${INPUT_JSON}       ${CURDIR}/input/data.xml
 ${OUTPUT_DIR}       ${CURDIR}/output/test
 ${CONTROL_SCRIPT}   ${CURDIR}/input/control_robot3.py
 ${REFERENCE_DIR}    ${CURDIR}/output/ref
-${TOLERANCE}        1.00  # Set your desired tolerance here
+${TOLERANCE}        0.01  # Set your desired tolerance here
 ${REL_TOL}        1e-4
 *** Test Cases ***
 Run Simulation And Compare Output Files

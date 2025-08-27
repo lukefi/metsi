@@ -4,6 +4,8 @@ When reference files are updated, mark it here with ticket number.
 
 __________________________________________________________________________________________
 
+27.08.2025	v1.01	Removed one stand from input data which caused bigger tolerances. 
+			Original data is in Metsi_grow_3\output\backups\version 1.0\data08272025.xml
 
-08.08.2025		Test and initial references created. /Ari-Antti Tervonen
+08.08.2025	v1.0	Test and initial references created. /Ari-Antti Tervonen
 		
