@@ -78,7 +78,7 @@ git submodules init
 git submodules update
 ```
 
-⚠️ Note that MetsiGrow functionality is distributed under a separate Non-Commercial license.
+⚠️ By initializing or using the submodule, you agree to the terms of the NC license. See `MetsiGrow/LICENSE` for the full license text.
 
 
 
