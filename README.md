@@ -26,7 +26,7 @@ To use features that rely on MetsiGrow, you must comply with MetsiGrows’s lice
 
 To get started:
 
-* Install Python >= 3.10  for your platform.
+* Install Python >= 3.12  for your platform.
 * Install git for your platform.
 * Ensure that the commands `python`, `pip` and `git` are available in your command line interface (CLI). We assume a
   UNIX-like shell CLI such as Git Bash for Windows users.
