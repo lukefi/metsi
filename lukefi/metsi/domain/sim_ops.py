@@ -11,6 +11,7 @@ from lukefi.metsi.domain.data_collection.marshalling import (
 )
 from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
 from lukefi.metsi.domain.natural_processes.grow_metsi import grow_metsi
+from lukefi.metsi.domain.natural_processes.grow_motti_dll import grow_motti_dll
 from lukefi.metsi.domain.forestry_operations.thinning import (
     first_thinning,
     thinning_from_above,
@@ -24,6 +25,7 @@ from lukefi.metsi.sim.operations import do_nothing
 
 __all__ = ['grow_metsi',
            'grow_acta',
+           'grow_motti_dll',
            'thinning_from_below',
            'thinning_from_above',
            'first_thinning',
