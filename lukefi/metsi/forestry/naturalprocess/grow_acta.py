@@ -81,7 +81,7 @@ def grow_diameter_and_height(
         if bigh:
             hdom = median(bigh)
             gs = [t.stems_per_ha * math.pi * (0.01 * 0.5 * d)**2 for t, d in zip(trees, ds)]
-            G = sum(gs)  # pylint: disable=invalid-name
+            g = sum(gs)
             for spe, idx in group.items():
                 gg = sum(gs[i] for i in idx)
                 ag = sum((trees[i].biological_age + s) * gs[i] for i in idx) / gg
@@ -89,8 +89,8 @@ def grow_diameter_and_height(
                 hg = sum(hs[i] * gs[i] for i in idx) / gg
                 for i in idx:
                     if hs[i] >= 1.3:
-                        pd = yearly_diameter_growth_by_species(spe, ds[i], hs[i], ag, dg, hg, hdom, G) / 100
-                        ph = yearly_height_growth_by_species(spe, ds[i], hs[i], ag, dg, hg, G) / 100
+                        pd = yearly_diameter_growth_by_species(spe, ds[i], hs[i], ag, dg, hg, hdom, g) / 100
+                        ph = yearly_height_growth_by_species(spe, ds[i], hs[i], ag, dg, hg, g) / 100
                         ds[i] *= 1 + pd
                         hs[i] *= 1 + ph
         for i, h in enumerate(hs):
@@ -119,7 +119,7 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
         if bigh.size > 0:
             hdom = np.median(bigh)
             gs = trees.stems_per_ha * np.pi * (0.01 * 0.5 * ds)**2
-            G = np.sum(gs)
+            g = np.sum(gs)
             species = np.unique(trees.species)
             for spe in species:
                 gg = np.sum(gs, where=trees.species == spe)
@@ -137,7 +137,7 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
                         dg,
                         hg,
                         hdom,
-                        G) / 100,
+                        g) / 100,
                     0)
                 ph = np.where(
                     trees.species == spe,
@@ -148,7 +148,7 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
                         ag,
                         dg,
                         hg,
-                        G) / 100,
+                        g) / 100,
                     0)
                 ds *= 1 + pd
                 hs *= 1 + ph
