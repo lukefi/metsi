@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Support for python version >=3.12
 
+## [2.3.5] - 2025-08-28
+
+### Changed
+
+- Old data is now deleted after vectorization
+
 ## [2.3.4] - 2025-08-27
 
 ### Fixed
