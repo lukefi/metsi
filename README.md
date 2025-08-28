@@ -68,10 +68,6 @@ To be able to use forestry operations depending on C sources
   * Running the `Makefile` generates a `c/lib` folder which includes the `.dll` files used by the operations
 
 
-**NOTE**: For either model, the input data must contain precomputed weather data (temperature sums, sea/lake indices).
-In practice this means that you must enable the `compute_location_metadata` preprocessing operation **even if you're
-using the Lua models**.
-
 ## Project layout
 
 This code project is divided into following python packages in the lukefi.metsi namespace.
