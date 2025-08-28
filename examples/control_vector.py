@@ -1,10 +1,13 @@
 from lukefi.metsi.domain.pre_ops import (generate_reference_trees, preproc_filter, vectorize)
+from lukefi.metsi.domain.sim_ops import *
+from lukefi.metsi.sim.generators import *
+
 
 control_structure = {
     "app_configuration": {
         "state_format": "vmi13",  # options: fdm, vmi12, vmi13, xml, gpkg
         "strata_origin": 2,
-        "run_modes": ["preprocess", "export_prepro"]
+        "run_modes": ["preprocess", "export_prepro", "simulate"]
     },
     "preprocessing_operations": [
         generate_reference_trees,  # reference trees from strata, replaces existing reference trees
@@ -26,6 +29,14 @@ control_structure = {
             }
         ]
     },
+    "simulation_events": [
+        {
+            "time_points": [2020],
+            "generators": [
+                {sequence: [grow_acta_vectorized]}
+            ]
+        },
+    ],
     'export_prepro': {
         # "csv": {},  # default csv export
         # "rst": {},

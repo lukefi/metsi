@@ -1,15 +1,16 @@
+from lukefi.metsi.domain.exp_ops import *
 
-default = {} # Empty dict declares a default output content
+default = {}  # Empty dict declares a default output content
 
 mela_decl = {
-        'additional_variables': ['VAR0', 'VAR1', 'VAR2', 'VAR_RANDOM'],
-        'operations': ['prepare_rst_output', 'classify_values_to'],
-        'operation_params': {
-            'classify_values_to': [
-                { 'format': 'rst' }
-            ]
-        }
+    'additional_variables': ['VAR0', 'VAR1', 'VAR2', 'VAR_RANDOM'],
+    'operations': [prepare_rst_output, classify_values_to],
+    'operation_params': {
+        classify_values_to: [
+            {'format': 'rst'}
+        ]
     }
+}
 
 
 mela = {
@@ -20,7 +21,7 @@ mela = {
 mela_and_default_csv = {
     'rst': mela_decl,
     'rsts': mela_decl,
-    'csv': default, 
+    'csv': default,
 }
 
 default_csv = {

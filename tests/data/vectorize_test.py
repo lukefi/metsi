@@ -36,6 +36,10 @@ class TestVectorize(unittest.TestCase):
         self.assertIsNotNone(self.after[1].tree_strata_soa)
         self.assertIsInstance(self.after[0].reference_trees_soa.species, np.ndarray)
         self.assertIsInstance(self.after[1].tree_strata_soa.species, np.ndarray)
+        self.assertFalse(hasattr(self.after[0], "reference_trees"))
+        self.assertFalse(hasattr(self.after[1], "reference_trees"))
+        self.assertFalse(hasattr(self.after[0], "tree_strata"))
+        self.assertFalse(hasattr(self.after[1], "tree_strata"))
 
     def test_lengths(self):
         self.assertEqual(len(self.after), len(TestVectorize.before))

@@ -168,7 +168,7 @@ def _ghat(h: float, height: int, coef: np.ndarray) -> float:
     return (d * d) * np.pi / 4.0
 
 @njit(fastmath=True)
-def _V(h_: float, height: int, coef: np.ndarray) -> float:
+def _ghat_integrated(h_: float, height: int, coef: np.ndarray) -> float:
     x = (height - h_) / height
     # h = -(x * height - height) = height - x * height
     # dh / dx = -height
@@ -260,7 +260,7 @@ def _volume(hkanto: float, height: int, coeff: np.ndarray):
         x0 = h[j]
         x1 = h[j+1]
 
-        v_piece[j] = _V(x1, height, coeff) - _V(x0, height, coeff)
+        v_piece[j] = _ghat_integrated(x1, height, coeff) - _ghat_integrated(x0, height, coeff)
 
     h_piece = h[1:]
     v_cum = np.cumsum(v_piece)
