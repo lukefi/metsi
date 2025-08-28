@@ -68,6 +68,21 @@ To be able to use forestry operations depending on C sources
   * Running the `Makefile` generates a `c/lib` folder which includes the `.dll` files used by the operations
 
 
+### MetsiGrow (optional + external license)
+
+
+To access the external source code of MetsiGrow use the `git submodules` functionality.
+
+```git
+git submodules init
+git submodules update
+```
+
+⚠️ Note that MetsiGrow functionality is distributed under a separate Non-Commercial license.
+
+
+
+
 ## Project layout
 
 This code project is divided into following python packages in the lukefi.metsi namespace.
