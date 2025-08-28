@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lukefi.metsi"
 description = "Metsi forestry simulator."
-version = "2.3.5"
+version = "2.3.6"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 authors = [
     { name = "Daniel Melander", email = "daniel.melander@luke.fi" },
     { name = "Reetta Lempinen", email = "reetta.lempinen@luke.fi" },
