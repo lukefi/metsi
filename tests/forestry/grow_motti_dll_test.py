@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from pathlib import Path
 from unittest.mock import patch
 
-import lukefi.metsi.domain.natural_processes.pymotti_dll_wrapper as pymd
+import lukefi.metsi.domain.natural_processes.motti_dll_wrapper as pymd
 import lukefi.metsi.domain.natural_processes.grow_motti_dll as gm_dll
 
 
@@ -52,15 +52,17 @@ class TestGrowMottiDLL(unittest.TestCase):
     def test_predictor_uses_dll_species_convert_in_tree_payload(self):
         # Ensure _trees_py uses dll.convert_species_code when enabled
         class FakeDLL:
-            def __init__(self, *a, **k): pass
-            def convert_species_code(self, spe): return int(spe) + 100
+            def __init__(self, *a, **k):
+                pass
+            def convert_species_code(self, spe):
+                return int(spe) + 100
 
         t = make_tree(species_int=3)
         stand = make_stand([t])
 
         with patch.object(gm_dll, "Motti4DLL", FakeDLL):
             pred = gm_dll.MottiDLLPredictor(stand, data_dir="ignored")
-            trees = pred._trees_py
+            trees = pred.trees
             self.assertEqual(trees[0]["spe"], 103)
 
 
@@ -69,25 +71,25 @@ class TestGrowMottiDLL(unittest.TestCase):
 
 class TestMottiDLLHelpers(unittest.TestCase):
     def test_auto_euref_km_validations(self):
-        y, x = pymd.Motti4DLL._auto_euref_km(6900000.0, 3400000.0)
+        y, x = pymd.Motti4DLL.auto_euref_km(6900000.0, 3400000.0)
         self.assertEqual((y, x), (6900.0, 3400.0))
-        y2, x2 = pymd.Motti4DLL._auto_euref_km(6900.0, 3400.0)
+        y2, x2 = pymd.Motti4DLL.auto_euref_km(6900.0, 3400.0)
         self.assertEqual((y2, x2), (6900.0, 3400.0))
         with self.assertRaises(ValueError):
-            pymd.Motti4DLL._auto_euref_km(62.0, 25.0)
+            pymd.Motti4DLL.auto_euref_km(62.0, 25.0)
 
     def test_maybe_chdir_context_manager(self):
         orig = Path.cwd()
         with tempfile.TemporaryDirectory() as td:
             td_path = Path(td)
-            with pymd._maybe_chdir(td_path):
+            with pymd.Motti4DLL.maybe_chdir(td_path):
                 self.assertEqual(Path.cwd(), td_path)
             self.assertEqual(Path.cwd(), orig)
 
     def test_convert_fallbacks_without_real_lib(self):
         dummy = Path("dummy_lib.so").resolve()
         key = str(dummy).lower()
-        pymd.Motti4DLL._LIB_CACHE[key] = (object(), SimpleNamespace())
+        pymd.Motti4DLL.set_lib_cache(key, (object(), SimpleNamespace()))
         dll = pymd.Motti4DLL(dummy)
 
         # species mapping fallback: 7→8, 8→9; else unchanged

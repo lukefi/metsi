@@ -1,29 +1,19 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Optional, Union, Iterable
+from typing import Optional, Union, Iterable,  Tuple, Dict, Mapping
 from dataclasses import dataclass
 from functools import cached_property
-from typing import List, Tuple, Optional, Dict
 from collections import defaultdict
+from types import MappingProxyType
 
 # Adjust import to your project structure if needed
-from lukefi.metsi.domain.natural_processes.pymotti_dll_wrapper import Motti4DLL
+from lukefi.metsi.domain.natural_processes.motti_dll_wrapper import Motti4DLL
 
-from typing import TYPE_CHECKING
+from lukefi.metsi.data.conversion import internal2mela
+from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.domain.natural_processes.util import update_stand_growth
 
-try:
-    from lukefi.metsi.data.conversion import internal2mela
-    from lukefi.metsi.data.enums.internal import TreeSpecies
-    from lukefi.metsi.data.model import ForestStand
-    from lukefi.metsi.domain.natural_processes.util import update_stand_growth  # -> None
-except ImportError:
-    # If importing ForestStand also fails during runtime, you can gate it for type-checkers only:
-    internal2mela = None
-    def update_stand_growth(*args, **kwargs):
-        # no-op; unit tests can patch this with their fake implementation
-        return None
-    if TYPE_CHECKING:
-        from lukefi.metsi.data.model import ForestStand  # for hints only
 
 
 def _mela_species(spe: int) -> int:
@@ -40,12 +30,10 @@ def _dominant_species_codes(stand) -> Dict[str, int]:
     """
     per = defaultdict(float)
     for t in stand.reference_trees:
-        try:
-            s = int(t.species)
-            mela = _mela_species(s)
-            per[mela] += float(t.stems_per_ha or 0.0)
-        except Exception:
-            pass
+        s = int(t.species)
+        mela = _mela_species(s)
+        per[mela] += float(t.stems_per_ha or 0.0)
+
     if not per:
         return {"spedom": 1, "spedom2": 2}
     ordered = sorted(per.items(), key=lambda kv: kv[1], reverse=True)
@@ -116,29 +104,39 @@ class MottiDLLPredictor:
         self.use_dll_site_convert = use_dll_site_convert
 
     @property
-    def year(self) -> Optional[float]: return getattr(self.stand, "year", None) or 2010.0
+    def year(self) -> Optional[float]:
+        return getattr(self.stand, "year", None) or 2010.0
     @property
-    def Y(self) -> float: return self.stand.geo_location[0]
+    def get_y(self) -> float:
+        return self.stand.geo_location[0]
     @property
-    def X(self) -> float: return self.stand.geo_location[1]
+    def get_x(self) -> float:
+        return self.stand.geo_location[1]
     @property
-    def Z(self) -> float:
+    def get_z(self) -> float:
         z = self.stand.geo_location[2]
         return float(z if z not in (None, 0.0) else -1.0)  # let DLL infer if missing
     @property
-    def lake(self) -> float: return getattr(self.stand, "lake_effect", 0.0)
+    def lake(self) -> float:
+        return getattr(self.stand, "lake_effect", 0.0)
     @property
-    def sea(self) -> float: return getattr(self.stand, "sea_effect", 0.0)
+    def sea(self) -> float:
+        return getattr(self.stand, "sea_effect", 0.0)
     @property
-    def mal(self) -> int: return int(self.stand.land_use_category)
+    def mal(self) -> int:
+        return int(self.stand.land_use_category)
     @property
-    def mty(self) -> int: return int(self.stand.site_type_category)
+    def mty(self) -> int:
+        return int(self.stand.site_type_category)
     @property
-    def alr(self) -> int: return int(self.stand.soil_peatland_category)
+    def alr(self) -> int:
+        return int(self.stand.soil_peatland_category)
     @property
-    def verl(self) -> int: return int(self.stand.tax_class)
+    def verl(self) -> int:
+        return int(self.stand.tax_class)
     @property
-    def verlt(self) -> int: return int(self.stand.tax_class_reduction)
+    def verlt(self) -> int:
+        return int(self.stand.tax_class_reduction)
 
     @cached_property
     def _trees_py(self) -> list[dict]:
@@ -160,10 +158,15 @@ class MottiDLLPredictor:
             ))
         return trees
 
+    @property
+    def trees(self) -> Tuple[Mapping, ...]:
+        # read-only snapshot to avoid accidental mutation in callers/tests
+        return tuple(MappingProxyType(d) for d in self._trees_py)
+
     def evolve(self, step: int = 5) -> _PredictLike:
         dom = _dominant_species_codes(self.stand)
         site = self.dll.new_site(
-            Y=self.Y, X=self.X, Z=self.Z,
+            Y=self.get_y, X=self.get_x, Z=self.get_z,
             lake=self.lake, sea=self.sea,
             mal=self.mal,
             mty=self.mty,
@@ -201,7 +204,7 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
 
         # Production path: construct predictor from data_dir. This will still
         # raise if data_dir is invalid/missing libs, preserving the original behavior.
-        pred = MottiDLLPredictor(stand, data_dir=data_dir)  # will internally resolve/load. :contentReference[oaicite:2]{index=2}
+        pred = MottiDLLPredictor(stand, data_dir=data_dir)
     else:
         pred = predictor
 

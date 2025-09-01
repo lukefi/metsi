@@ -1,8 +1,7 @@
 from __future__ import annotations
-from typing import Any, cast
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Tuple, Optional, Dict
+from typing import Iterable, List, Tuple, Optional, Dict, Any, cast
 import os
 from contextlib import contextmanager
 
@@ -58,13 +57,44 @@ class Motti4DLL:
                         ps = str(Path(p).resolve())
                         if ps not in Motti4DLL._DLL_DIR_HANDLES:
                             Motti4DLL._DLL_DIR_HANDLES[ps] = os.add_dll_directory(ps)
-        except Exception:
+        except AttributeError:
             pass
+
         lib: Any = ffi.dlopen(str(lib_path))
         Motti4DLL._LIB_CACHE[key] = (ffi, lib)
         self.ffi, self.lib = ffi, lib
 
     # ---------- helpers ----------
+
+    @classmethod
+    def auto_euref_km(cls, y: float, x: float) -> tuple[float, float]:
+        """Public wrapper for coordinate normalization."""
+        return cls._auto_euref_km(y, x)
+
+    @classmethod
+    def set_lib_cache(cls, key: str, value: tuple[object, object]) -> None:
+        """Expose safe setter for LIB_CACHE (for tests)."""
+        cls._LIB_CACHE[key] = value
+
+    @classmethod
+    def get_lib_cache(cls, key: str) -> tuple[object, object] | None:
+        """Expose safe getter for LIB_CACHE (for tests)."""
+        return cls._LIB_CACHE.get(key)
+
+    @staticmethod
+    def maybe_chdir(tmp_dir: Path | None = None):
+        """Public wrapper around internal contextmanager _maybe_chdir."""
+        return _maybe_chdir(tmp_dir)
+
+
+    @property
+    def param_290(self) -> float:
+        # expose a public name
+        return getattr(self, "_290", 0.0)
+    
+    @param_290.setter
+    def param_290(self, value: float) -> None:
+        self._290 = value
 
     def _has(self, name: str) -> bool:
         try:
@@ -78,7 +108,7 @@ class Motti4DLL:
         if self._has("Convert_Tree_Spec"):
             try:
                 return int(round(float(self.lib.Convert_Tree_Spec(float(spe)))))
-            except Exception:
+            except AttributeError:
                 pass
         s = int(spe)
         if s == 7:  # other conifers
@@ -92,7 +122,7 @@ class Motti4DLL:
         if self._has("Convert_Site"):
             try:
                 return int(round(float(self.lib.Convert_Site(int(mty)))))
-            except Exception:
+            except AttributeError:
                 pass
         return min(int(mty), 6)
 
@@ -109,7 +139,7 @@ class Motti4DLL:
             if k in scalar_ok and hasattr(yy, k):
                 try:
                     setattr(yy, k, float(v))
-                except Exception:
+                except AttributeError:
                     pass
 
     # ---------- FFI ----------
@@ -211,17 +241,17 @@ class Motti4DLL:
     # ---------- site + trees ----------
 
     @staticmethod
-    def _auto_euref_km(Y: float, X: float) -> Tuple[float, float]:
+    def _auto_euref_km(y1: float, x1: float) -> Tuple[float, float]:
         # Helper if you accidentally pass meters or lat/long.
-        absY, absX = abs(Y), abs(X)
-        if absY <= 90.0 and absX <= 180.0:
+        abs_y, abs_x = abs(y1), abs(x1)
+        if abs_y <= 90.0 and abs_x <= 180.0:
             raise ValueError(
-                f"Coordinates look like lat/long (Y={Y}, X={X}). "
+                f"Coordinates look like lat/long (Y={y1}, X={x1}). "
                 "Motti expects EUREF-FIN/TM35 in kilometers (e.g., Y~6900, X~3400)."
             )
-        if absY > 10000.0 or absX > 10000.0:
-            return Y / 1000.0, X / 1000.0
-        return Y, X
+        if abs_y > 10000.0 or abs_x > 10000.0:
+            return y1 / 1000.0, x1 / 1000.0
+        return y1, x1
 
     def new_site(
         self,
@@ -244,26 +274,31 @@ class Motti4DLL:
 
         # 1) SiteInit with only Y,X,Z
         try:
-            Y_km, X_km = (self._auto_euref_km(Y, X) if convert_coords else (Y, X))
+            y_km, x_km = (self._auto_euref_km(Y, X) if convert_coords else (Y, X))
         except ValueError as e:
-            raise RuntimeError(str(e))
+            raise RuntimeError(str(e)) from e
 
         rv = ffi.new("int *")
         with _maybe_chdir(self.data_dir):
             lib.Motti4SiteInit(yy,
-                               ffi.new("float *", float(Y_km)),
-                               ffi.new("float *", float(X_km)),
+                               ffi.new("float *", float(y_km)),
+                               ffi.new("float *", float(x_km)),
                                ffi.new("float *", float(Z)),
                                rv)
         if rv[0] != 0:
             raise RuntimeError(f"Motti4SiteInit failed (rv={rv[0]})")
 
         # 2) Fill the rest (do NOT set yy.dd ourselves)
-        yy.Y = float(Y_km); yy.X = float(X_km); yy.Z = float(Z)
-        yy.lake = float(lake); yy.sea = float(sea)
+        yy.Y = float(y_km)
+        yy.X = float(x_km)
+        yy.Z = float(Z)
+        yy.lake = float(lake)
+        yy.sea = float(sea)
         yy.mal = float(mal)
         yy.mty = float(self.convert_site_index(mty) if convert_mela_site else mty)
-        yy.verl = float(verl); yy.verlt = float(verlt); yy.alr = float(alr)
+        yy.verl = float(verl)
+        yy.verlt = float(verlt)
+        yy.alr = float(alr)
         if year is not None:
             yy.year = float(year)
         yy.step = float(step)
@@ -275,7 +310,8 @@ class Motti4DLL:
         self._apply_overrides(yy, overrides)
 
         # 3) Validate
-        nerr = ffi.new("int *"); err = ffi.new("int *")
+        nerr = ffi.new("int *")
+        err = ffi.new("int *")
         with _maybe_chdir(self.data_dir):
             lib.Motti4CheckYY(yy, nerr, err)
         if nerr[0] != 0:
@@ -299,7 +335,7 @@ class Motti4DLL:
             yp[0][i].spe = float(self.convert_species_code(t.get("spe", 1)))
             yp[0][i].age = float(t.get("age", 0.0))
             yp[0][i].age13 = float(t.get("age13", 0.0))
-            yp[0][i].cr = float(t.get("cr", 0.4)) 
+            yp[0][i].cr = float(t.get("cr", 0.4))
             yp[0][i].snt = float(t.get("snt", 1))
             yp[0][i].crerror = 0.0  # clear before growth
             numtrees += 1
@@ -322,9 +358,12 @@ class Motti4DLL:
         # defaults like the C wrapper
         o.death_tree = 1
         if ctrl:
-            if "death_tree" in ctrl: o.death_tree = int(bool(ctrl["death_tree"]))
-            if "death_forest" in ctrl: o.death_forest = int(bool(ctrl["death_forest"]))
-            if "calibrate" in ctrl: o.calibrate = int(bool(ctrl["calibrate"]))
+            if "death_tree" in ctrl:
+                o.death_tree = int(bool(ctrl["death_tree"]))
+            if "death_forest" in ctrl:
+                o.death_forest = int(bool(ctrl["death_forest"]))
+            if "calibrate" in ctrl:
+                o.calibrate = int(bool(ctrl["calibrate"]))
 
         ntrees_p = ffi.new("int *", numtrees)
         err = ffi.new("int *")
@@ -354,8 +393,8 @@ class Motti4DLL:
         while remaining > 0:
             # reset like C wrapper
             try:
-                yy._290 = 0.0
-            except Exception:
+                yy.param_290 = 0.0
+            except AttributeError:
                 pass
             for i in range(ntrees_p[0]):
                 yp[0][i].crerror = 0.0
@@ -385,5 +424,5 @@ class Motti4DLL:
         out_id = [acc_id.get(tid, 0.0) for tid in ids_now]
         out_ih = [acc_ih.get(tid, 0.0) for tid in ids_now]
         out_if = [acc_if.get(tid, 0.0) for tid in ids_now]
-        
+
         return GrowthDeltas(tree_ids=ids_now, trees_id=out_id, trees_ih=out_ih, trees_if=out_if)
