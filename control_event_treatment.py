@@ -100,8 +100,7 @@ control_structure = {
             time_points=[2035, 2045],
             treatments=[
                 Alternatives([
-                    DoNothing(
-                    ),
+                    DoNothing(),
                     FirstThinning(
                         parameters={
                             "thinning_factor": 0.97,
