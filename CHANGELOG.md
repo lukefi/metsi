@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2.3.7] - 2025-09-03
+
+### Fixed
+
+- Minor typing fixes after mypy config change
+
 ## [2.3.6] - 2025-08-28
 
 ### Changed
