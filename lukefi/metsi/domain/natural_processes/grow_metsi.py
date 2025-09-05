@@ -5,42 +5,203 @@
 # MetsiGrow is NOT licensed under MPL-2.0.
 # MetsiGrow is released under a separate Source Available – Non-Commercial license.
 # See MetsiGrow's LICENSE-NC.md for full details.
+from typing import Optional,TypeVar
+from functools import cached_property
 
-
-from lukefi.metsi.data.conversion import internal2mela
-from lukefi.metsi.data.enums.internal import TreeSpecies
-from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.chain import Predict, predict, Species, LandUseCategoryVMI, SiteTypeVMI, \
-    SoilCategoryVMI, TaxClass, TaxClassReduction, Origin, Storie
+from lukefi.metsi.data.enums.internal import (
+    TreeSpecies,
+    CONIFEROUS_SPECIES,
+    DECIDUOUS_SPECIES,
+)
 from lukefi.metsi.data.model import ForestStand
-
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
-def __getattr__(name: str):
-    if name == "MetsiGrowPredictor":
-        from lukefi.metsi.forestry.naturalprocess.MetsiGrow.grow_metsi import MetsiGrowPredictor
-        return MetsiGrowPredictor
-    raise AttributeError(name)
 
-def spe2metsi(spe: int) -> Species:
-    """Convert RST species code to MetsiGrow compatible Species."""
-    code = internal2mela.species_map[TreeSpecies(spe)].value
-    # adjust for merged alders
-    return Species(code if code <= 6 else code + 1)
+# Lower-level MetsiGrow types (still used; no changes here)
+from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.chain import (
+    Predict,
+    Species,
+    LandUseCategoryVMI,
+    SiteTypeVMI,
+    SoilCategoryVMI,
+    TaxClass,
+    TaxClassReduction,
+    Origin,
+    Storie,
+)
+
+def to_mg_species(code: int) -> Species:
+    """
+    Use internal TreeSpecies as-is for the core 9 codes (1..9).
+    Collapse all other internal species to CONIFEROUS/DECIDUOUS via internal lists.
+    """
+    try:
+        # If it's already one of the canonical nine (now sharing internal values), keep it.
+        return Species(code)
+    except ValueError:
+        t = TreeSpecies(code)
+        if t in CONIFEROUS_SPECIES:
+            return Species.CONIFEROUS
+        if t in DECIDUOUS_SPECIES:
+            return Species.DECIDUOUS
+        # Unknown → treat as deciduous (same default used in your conversion utils).
+        return Species.DECIDUOUS
+
+T = TypeVar("T")
+
+def require(val: Optional[T], name: str) -> T:
+    if val is None:
+        raise ValueError(f"{name} must be set before prediction")
+    return val
+
+
+class MetsiGrowPredictor(Predict):
+    """
+    Extend metsi_grow.Predict to interface ForestStand & ReferenceTree data.
+    """
+
+    def __init__(self, stand: ForestStand, *args, **kwargs):
+        try:
+            super().__init__(*args, **kwargs)  # type: ignore[misc]
+        except TypeError:
+            pass
+        self.stand = stand  # store stand for property access
+
+    # -- site variables --------------------
+
+    @property
+    def year(self) -> int:
+        return require(self.stand.year, "stand.year")
+
+    @property
+    def get_y(self) -> float:
+        if self.stand.geo_location is None or self.stand.geo_location[0] is None:
+            return 0.0
+        return self.stand.geo_location[0]
+
+    @property
+    def get_x(self) -> float:
+        if self.stand.geo_location is None or self.stand.geo_location[1] is None:
+            return 0.0
+        return self.stand.geo_location[1]
+
+    @property
+    def get_z(self) -> float:
+        if self.stand.geo_location is None or self.stand.geo_location[2] is None:
+            return 0.0
+        return self.stand.geo_location[2]
+
+    @property
+    def dd(self) -> float:
+        assert self.stand.degree_days is not None, "stand.geo_location must be set"
+        return self.stand.degree_days
+
+    @property
+    def sea(self) -> float:
+        return require(self.stand.sea_effect, "stand.sea_effect")
+
+    @property
+    def lake(self) -> float:
+        return require(self.stand.lake_effect, "stand.lake_effect")
+
+    @property
+    def mal(self) -> LandUseCategoryVMI:
+        return LandUseCategoryVMI(self.stand.land_use_category)
+
+    @property
+    def mty(self) -> SiteTypeVMI:
+        return SiteTypeVMI(self.stand.site_type_category)
+
+    @property
+    def alr(self) -> SoilCategoryVMI:
+        return SoilCategoryVMI(self.stand.soil_peatland_category)
+
+    @property
+    def verl(self) -> TaxClass:
+        return TaxClass(self.stand.tax_class)
+
+    @property
+    def verlt(self) -> TaxClassReduction:
+        return TaxClassReduction(self.stand.tax_class_reduction)
+
+    # -- management vars (defaults) --------
+
+    @property
+    def spedom(self) -> Species:
+        if self.stand.reference_trees[0].species is None:
+            return Species.PINE
+        return to_mg_species(self.stand.reference_trees[0].species)
+
+    @property
+    def prt(self) -> Origin:
+        return Origin.NATURAL
+
+    # -- tree variables --------------------
+
+    @cached_property
+    def trees_f(self) -> list[float]:
+        if self.stand.reference_trees is None:
+            return [0.0]
+        return [(t.stems_per_ha or 0.0) for t in self.stand.reference_trees]
+
+    @cached_property
+    def trees_d(self) -> list[float]:
+        return [(t.breast_height_diameter or 0.01) for t in self.stand.reference_trees]
+
+    @cached_property
+    def trees_h(self) -> list[float]:
+        return [(t.height or 0.0) for t in self.stand.reference_trees]
+
+    @cached_property
+    def trees_spe(self) -> list[Species]:
+        converted = []
+        for t in self.stand.reference_trees:
+            try:
+                converted.append(to_mg_species(t.species or Species.PINE))
+            except Exception as e:
+                print(f"[SpeciesError] Invalid tree species: {t.species} → {e}")
+                raise
+        return converted
+
+    @cached_property
+    def trees_t0(self) -> list[float]:
+        return [int((self.year or 0) - (t.biological_age or 0.0)) for t in self.stand.reference_trees]
+
+    @cached_property
+    def trees_t13(self) -> list[float]:
+        return [self.year - (t.breast_height_age or 0.0) for t in self.stand.reference_trees]
+
+    @cached_property
+    def trees_storie(self) -> list[Storie]:
+        # TODO: derive or import storie data
+        return [Storie.NONE for _ in self.stand.reference_trees]
+
+    @cached_property
+    def trees_snt(self) -> list[Origin]:
+        return [
+            Origin(t.origin + 1) if t.origin is not None else Origin.NATURAL
+            for t in self.stand.reference_trees
+        ]
+
+# ---------- public API ----------
 
 def grow_metsi(input_: tuple[ForestStand, None], /, **operation_parameters) -> tuple[ForestStand, None]:
     """
     Wrapper for metsi_grow evolve pipeline. Applies growth step to ForestStand.
     """
-    from lukefi.metsi.forestry.naturalprocess.MetsiGrow.grow_metsi import MetsiGrowPredictor
-    step = operation_parameters.get('step', 5)
+    step = operation_parameters.get("step", 5)
     stand, _ = input_
-    # build predictor
+
+    # build predictor (use local class; no import from the old module path)
     pred = MetsiGrowPredictor(stand)
     growth = pred.evolve(step=step)
+
     # apply deltas
     diameters = [t.breast_height_diameter + d for t, d in zip(stand.reference_trees, growth.trees_id)]
-    heights    = [t.height + h for t, h in zip(stand.reference_trees, growth.trees_ih)]
-    stems      = [t.stems_per_ha + df for t, df in zip(stand.reference_trees, growth.trees_if)]
+    heights   = [t.height + h for t, h in zip(stand.reference_trees, growth.trees_ih)]
+    stems     = [(t.stems_per_ha or 0.0) + df for t, df in zip(stand.reference_trees, growth.trees_if)]
+
     update_stand_growth(stand, diameters, heights, stems, step)
+
     # prune dead trees
-    stand.reference_trees = [t for t in stand.reference_trees if t.stems_per_ha >= 1.0]
+    stand.reference_trees = [t for t in stand.reference_trees if (t.stems_per_ha or 0.0) >= 1.0]
     return stand, None

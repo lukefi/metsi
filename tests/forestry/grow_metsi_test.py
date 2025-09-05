@@ -1,7 +1,14 @@
 import unittest
+from typing import cast
 from types import SimpleNamespace
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import lukefi.metsi.domain.natural_processes.grow_metsi as mg
+from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.enums.internal import (LandUseCategory, 
+                                              SiteType, 
+                                              SoilPeatlandCategory
+                                            )
+
 
 def make_tree(
     stems=100.0,
@@ -25,14 +32,14 @@ def make_tree(
 
 def make_stand(trees):
     # Pick valid enum values without knowing the exact names:
-    mal_val  = list(mg.LandUseCategoryVMI)[0].value
-    mty_val  = list(mg.SiteTypeVMI)[0].value
-    alr_val  = list(mg.SoilCategoryVMI)[0].value
+    mal_val  = list(LandUseCategory)[0]
+    mty_val  = list(SiteType)[0]
+    alr_val  = list(SoilPeatlandCategory)[0]
     verl_val = list(mg.TaxClass)[0].value
     verlt_val= list(mg.TaxClassReduction)[0].value
-    return SimpleNamespace(
-        year=2000.0,
-        geo_location=(62.0, 25.0, 150.0),  # (Y, X, Z)
+    return ForestStand(
+        year=2000,
+        geo_location=(62.0, 25.0, 150.0, None),  # (Y, X, Z)
         degree_days=1100.0,
         sea_effect=0.0,
         lake_effect=0.0,
@@ -48,7 +55,7 @@ def make_stand(trees):
 class TestMetsiGrowPredictor(unittest.TestCase):
     def test_spedom_uses_first_tree_and_site_props_convert(self):
         # Patch species conversion to keep the test light-weight.
-        with patch.object(mg, "spe2metsi", side_effect=lambda s: mg.Species.SPRUCE):
+        with patch.object(mg, "to_mg_species", side_effect=lambda s: mg.Species.SPRUCE):
             t1 = make_tree(species_int=123)
             t2 = make_tree(species_int=999)
             stand = make_stand([t1, t2])
@@ -71,7 +78,7 @@ class TestMetsiGrowPredictor(unittest.TestCase):
 
     def test_trees_spe_invalid_raises_and_is_logged(self):
         # Make spe2metsi raise to verify error propagation
-        with patch.object(mg, "spe2metsi", side_effect=ValueError("bad species")):
+        with patch.object(mg, "to_mg_species", side_effect=ValueError("bad species")):
             t_bad = make_tree(species_int=-42)
             stand = make_stand([t_bad])
             p = mg.MetsiGrowPredictor(stand)
@@ -104,7 +111,7 @@ class TestGrowMetsiWrapper(unittest.TestCase):
         with (
             patch.object(mg.MetsiGrowPredictor, "evolve", return_value=growth) as mock_evolve,
             patch.object(mg, "update_stand_growth", side_effect=fake_update_stand_growth) as mock_update,
-            patch.object(mg, "spe2metsi", side_effect=lambda s: mg.Species.PINE),  # keep species simple
+            patch.object(mg, "to_mg_species", side_effect=lambda s: mg.Species.PINE),  # keep species simple
         ):
             out_stand, _ = mg.grow_metsi((stand, None), step=5)
 
@@ -112,10 +119,17 @@ class TestGrowMetsiWrapper(unittest.TestCase):
             mock_evolve.assert_called_once_with(step=5)
             self.assertTrue(mock_update.called)
 
-            # tree 1 should be updated
-            self.assertAlmostEqual(out_stand.reference_trees[0].breast_height_diameter, 10.0 + 0.5, places=6)
-            self.assertAlmostEqual(out_stand.reference_trees[0].height, 12.0 + 1.0, places=6)
-            self.assertAlmostEqual(out_stand.reference_trees[0].stems_per_ha, 120.0 - 5.0, places=6)
+            d = out_stand.reference_trees[0].breast_height_diameter
+            h = out_stand.reference_trees[0].height
+            s = out_stand.reference_trees[0].stems_per_ha
+
+            self.assertIsNotNone(d)
+            self.assertIsNotNone(h)
+            self.assertIsNotNone(s)
+
+            self.assertAlmostEqual(cast(float, d), 10.0 + 0.5, places=6)
+            self.assertAlmostEqual(cast(float, h), 12.0 + 1.0, places=6)
+            self.assertAlmostEqual(cast(float, s), 120.0 - 5.0, places=6)
 
             # tree 2 should be pruned (0.8 - 0.2 = 0.6 < 1.0)
             self.assertEqual(len(out_stand.reference_trees), 1)
