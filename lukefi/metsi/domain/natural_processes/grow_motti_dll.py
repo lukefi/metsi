@@ -6,33 +6,49 @@ from functools import cached_property
 from collections import defaultdict
 from types import MappingProxyType
 
-# Adjust import to your project structure if needed
-from lukefi.metsi.domain.natural_processes.motti_dll_wrapper import Motti4DLL
+from lukefi.metsi.domain.natural_processes.motti_dll_wrapper import (
+    Motti4DLL, 
+    GrowthDeltas
+)
 
-from lukefi.metsi.data.conversion import internal2mela
-from lukefi.metsi.data.enums.internal import TreeSpecies
+from lukefi.metsi.data.enums.internal import (
+    TreeSpecies,
+    CONIFEROUS_SPECIES,
+    DECIDUOUS_SPECIES,
+)
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
 
-
-
-def _mela_species(spe: int) -> int:
-    if internal2mela is None:
-        return int(spe)
-    code = internal2mela.species_map[TreeSpecies(spe)].value
-    return code
-
+def _species_to_motti(spe: int) -> int:
+    """
+    Map internal TreeSpecies -> Motti species codes directly.
+    - Keep main species 1..5 as-is
+    - Collapse both alders (GREY_ALDER, COMMON_ALDER) to 6
+    - If in CONIFEROUS_SPECIES -> 8
+    - If in DECIDUOUS_SPECIES -> 9
+    """
+    ts = TreeSpecies(int(spe))
+    if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
+              TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
+              TreeSpecies.ASPEN):
+        return int(ts)
+    if ts in (TreeSpecies.GREY_ALDER, TreeSpecies.COMMON_ALDER):
+        return int(TreeSpecies.GREY_ALDER)  # Motti uses a single Alder code (6)
+    if ts in CONIFEROUS_SPECIES:
+        return int(TreeSpecies.OTHER_CONIFEROUS)  # 8
+    if ts in DECIDUOUS_SPECIES:
+        return int(TreeSpecies.OTHER_DECIDUOUS)  # 9
+    return int(TreeSpecies.OTHER_DECIDUOUS)  # sensible fallback
 
 def _dominant_species_codes(stand) -> Dict[str, int]:
     """
     Pick dominant and sub-dominant species by stems/ha.
-    Returns dict with 'spedom' and 'spedom2' in *MELA* codes; DLL wrapper converts further.
+    Returns 'spedom' and 'spedom2' as *Motti* species codes (no Mela step).
     """
     per = defaultdict(float)
     for t in stand.reference_trees:
-        s = int(t.species)
-        mela = _mela_species(s)
-        per[mela] += float(t.stems_per_ha or 0.0)
+        s_motti = _species_to_motti(int(t.species))
+        per[s_motti] += float(t.stems_per_ha or 0.0)
 
     if not per:
         return {"spedom": 1, "spedom2": 2}
@@ -69,15 +85,6 @@ def _resolve_shared_object(p: Union[str, Path]) -> Path:
 
     # No match found; return directory so downstream can raise a clear error when loading.
     return p
-
-
-@dataclass
-class _PredictLike:
-    ids: list[int]
-    trees_id: list[float]
-    trees_ih: list[float]
-    trees_if: list[float]
-
 
 class MottiDLLPredictor:
     def __init__(
@@ -142,8 +149,8 @@ class MottiDLLPredictor:
     def _trees_py(self) -> list[dict]:
         trees = []
         for idx, t in enumerate(self.stand.reference_trees):
-            mela_spe = _mela_species(int(t.species))
-            spe = self.dll.convert_species_code(mela_spe) if self.use_dll_species_convert else mela_spe
+
+            spe = _species_to_motti(int(t.species))
             tid = int((getattr(t, "tree_number", None) or (idx + 1)))
             trees.append(dict(
                 id=tid,
@@ -153,7 +160,7 @@ class MottiDLLPredictor:
                 spe=int(spe),
                 age=float(t.biological_age or 0.0),
                 age13=float(t.breast_height_age or 0.0),
-                cr=float(getattr(t, "crown_ratio", 0.4) or 0.4),
+                cr=float(getattr(t, "crown_ratio", 0.0) or 0.0),
                 snt=int((t.origin or 0) + 1),
             ))
         return trees
@@ -163,7 +170,7 @@ class MottiDLLPredictor:
         # read-only snapshot to avoid accidental mutation in callers/tests
         return tuple(MappingProxyType(d) for d in self._trees_py)
 
-    def evolve(self, step: int = 5) -> _PredictLike:
+    def evolve(self, step: int = 5) -> GrowthDeltas:
         dom = _dominant_species_codes(self.stand)
         site = self.dll.new_site(
             Y=self.get_y, X=self.get_x, Z=self.get_z,
@@ -174,15 +181,14 @@ class MottiDLLPredictor:
             year=self.year, step=step,
             convert_coords=True,
             overrides={
-                "spedom": self.dll.convert_species_code(dom["spedom"]),
-                "spedom2": self.dll.convert_species_code(dom["spedom2"]),
+                "spedom": int(dom["spedom"]),
+                "spedom2": int(dom["spedom2"]),
                 "nstorey": 1, "gstorey": 1,
             },
             convert_mela_site=self.use_dll_site_convert,
         )
         trees, n = self.dll.new_trees(self._trees_py)
-        deltas = self.dll.grow(site, trees, n, step=step, ctrl=None, skip_init=True)  # death_tree=1 inside
-        return _PredictLike(deltas.tree_ids, deltas.trees_id, deltas.trees_ih, deltas.trees_if)
+        return self.dll.grow(site, trees, n, step=step, ctrl=None, skip_init=True)
 
 
 def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters) -> Tuple["ForestStand", None]:
@@ -218,9 +224,9 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
 
     growth = pred.evolve(step=step)
 
-    id_to_delta_d  = {int(i): d for i, d in zip(growth.ids, growth.trees_id)}
-    id_to_delta_h  = {int(i): h for i, h in zip(growth.ids, growth.trees_ih)}
-    id_to_delta_f  = {int(i): f for i, f in zip(growth.ids, growth.trees_if)}
+    id_to_delta_d  = {int(i): d for i, d in zip(growth.tree_ids, growth.trees_id)}
+    id_to_delta_h  = {int(i): h for i, h in zip(growth.tree_ids, growth.trees_ih)}
+    id_to_delta_f  = {int(i): f for i, f in zip(growth.tree_ids, growth.trees_if)}
 
     diameters, heights, stems = [], [], []
     for t in stand.reference_trees:
@@ -236,5 +242,5 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
             stems.append(0.0)
 
     update_stand_growth(stand, diameters, heights, stems, step)
-    stand.reference_trees = [t for t in stand.reference_trees if (t.stems_per_ha is not None and t.stems_per_ha >= 1.0)]
+    #stand.reference_trees = [t for t in stand.reference_trees if (t.stems_per_ha is not None and t.stems_per_ha >= 1.0)]
     return stand, None

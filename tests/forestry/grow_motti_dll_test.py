@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from types import SimpleNamespace
 from pathlib import Path
-from unittest.mock import patch
+from typing import cast
 
 import lukefi.metsi.domain.natural_processes.motti_dll_wrapper as pymd
 import lukefi.metsi.domain.natural_processes.grow_motti_dll as gm_dll
@@ -48,22 +48,21 @@ def make_stand(trees):
 # ----------- High-level tests (no real DLL needed) -----------
 
 class TestGrowMottiDLL(unittest.TestCase):
-
-    def test_predictor_uses_dll_species_convert_in_tree_payload(self):
-        # Ensure _trees_py uses dll.convert_species_code when enabled
+    def test_predictor_builds_tree_payload_with_internal_mapping(self):
+        # The predictor now uses its own mapping (no DLL species conversion)
         class FakeDLL:
-            def __init__(self, *a, **k):
-                pass
-            def convert_species_code(self, spe):
-                return int(spe) + 100
+            pass
 
-        t = make_tree(species_int=3)
-        stand = make_stand([t])
+        # species=3 -> 3 (kept as-is); species=7 (Common Alder) -> 6 (collapsed to Alder)
+        t1 = make_tree(species_int=3)
+        t2 = make_tree(species_int=7)
+        stand = make_stand([t1, t2])
 
-        with patch.object(gm_dll, "Motti4DLL", FakeDLL):
-            pred = gm_dll.MottiDLLPredictor(stand, data_dir="ignored")
-            trees = pred.trees
-            self.assertEqual(trees[0]["spe"], 103)
+        dll_stub = cast(pymd.Motti4DLL, FakeDLL())
+        pred = gm_dll.MottiDLLPredictor(stand, dll=dll_stub)
+        trees = pred.trees
+        self.assertEqual(trees[0]["spe"], 3)
+        self.assertEqual(trees[1]["spe"], 6)
 
 
 
