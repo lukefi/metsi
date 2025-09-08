@@ -1,21 +1,21 @@
 import os
-from typing import Callable, Optional, Any
+from typing import Optional, Any
 from lukefi.metsi.app.utils import MetsiException
+from lukefi.metsi.sim.event import Treatment
 
 
 def get_or_default(maybe_value: Optional[Any], default: Any) -> Any:
     return default if maybe_value is None else maybe_value
 
 
-def get_operation_file_params(operation_tag: Callable, operation_file_params: dict) -> dict:
+def get_treatment_file_params(treatment: Treatment) -> dict:
     """
     Checks whether the given parameter file(s) exist and returns the paths as a dict.
     This check ensures that the simulator will not crash later on when it tries to read the files.
     """
     result = {}
-    operation_param_file_paths = operation_file_params.get(operation_tag, {})
 
-    for name, path in operation_param_file_paths.items():
+    for name, path in treatment.file_parameters.items():
         file_exists = os.path.isfile(path)
         if file_exists:
             result[name] = path
