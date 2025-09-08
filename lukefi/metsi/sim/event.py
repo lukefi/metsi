@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, Optional, TypeVar, overload
+from typing import Any, Optional, TypeVar
 from typing import Sequence as Sequence_
 
 from lukefi.metsi.sim.core_types import EventTree, OpTuple, ProcessedOperation
@@ -71,21 +71,6 @@ class Event[T]:
     time_points: list[int]
     conditions: list[Condition[T]]
     treatments: Generator[T]
-
-    @overload
-    def __init__(self, time_points: list[int], treatments: Generator[T],
-                 conditions: Optional[list[Condition[T]]] = None) -> None:
-        pass
-
-    @overload
-    def __init__(self, time_points: list[int], treatments: list[GeneratorBase],
-                 conditions: Optional[list[Condition[T]]] = None) -> None:
-        pass
-
-    @overload
-    def __init__(self, time_points: list[int], treatments: set[GeneratorBase],
-                 conditions: Optional[list[Condition[T]]] = None) -> None:
-        pass
 
     def __init__(self, time_points: list[int], treatments: Generator[T] | list[GeneratorBase] | set[GeneratorBase],
                  conditions: Optional[list[Condition[T]]] = None) -> None:
