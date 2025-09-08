@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - Combined wrapper of GrowMetsi to one file. 
 - Fixed linter warnings related to GrowMetsi wrapper and unit test.
+- spe2metsi changed to_mg_species
 
 ## [2.3.7] - 2025-09-03
 
