@@ -2,7 +2,7 @@ from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.forestry_operations.clearcutting_limits import get_clearcutting_limits
 from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.domain.collected_types import CrossCuttableTree
-from lukefi.metsi.sim.core_types import CollectedData, OpTuple
+from lukefi.metsi.sim.collected_data import CollectedData, OpTuple
 
 
 def _clearcut_with_output(

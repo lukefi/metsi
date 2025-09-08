@@ -13,7 +13,8 @@ from lukefi.metsi.domain.forestry_operations.clearcut import clearcutting
 from lukefi.metsi.domain.forestry_operations.planting import planting
 from lukefi.metsi.domain.forestry_operations.thinning import even_thinning, first_thinning
 from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
-from lukefi.metsi.sim.event import Condition, Treatment
+from lukefi.metsi.sim.event import Condition
+from lukefi.metsi.sim.generators import Treatment
 from lukefi.metsi.sim.operations import do_nothing
 
 

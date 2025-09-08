@@ -1,5 +1,5 @@
 from functools import cache
-from lukefi.metsi.sim.core_types import CollectedData, OpTuple
+from lukefi.metsi.sim.collected_data import CollectedData, OpTuple
 from lukefi.metsi.data.model import ForestStand, create_layered_tree
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.domain.utils.enums import SiteTypeKey, SoilPreparationKey, RegenerationKey
