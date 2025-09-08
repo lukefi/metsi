@@ -7,12 +7,13 @@ from lukefi.metsi.app.app_types import ForestOpPayload
 from lukefi.metsi.app.metsi_enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
+from lukefi.metsi.sim.collected_data import CollectedData
 from lukefi.metsi.sim.runners import (
     run_full_tree_strategy,
     run_partial_tree_strategy,
     depth_first_evaluator,
     chain_evaluator)
-from lukefi.metsi.sim.core_types import CollectedData, Runner, SimConfiguration, Evaluator
+from lukefi.metsi.sim.core_types import Runner, SimConfiguration, Evaluator
 from lukefi.metsi.app.utils import MetsiException
 
 
