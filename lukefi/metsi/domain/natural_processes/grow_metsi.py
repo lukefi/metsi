@@ -84,11 +84,6 @@ class MetsiGrowPredictor(Predict):
             return 0.0
         return self.stand.geo_location[1]
 
-    @property
-    def get_z(self) -> float:
-        if self.stand.geo_location is None or self.stand.geo_location[2] is None:
-            return 0.0
-        return self.stand.geo_location[2]
 
     @property
     def dd(self) -> float:
