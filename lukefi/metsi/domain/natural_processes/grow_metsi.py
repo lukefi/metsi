@@ -49,6 +49,9 @@ def to_mg_species(code: int) -> Species:
 T = TypeVar("T")
 
 def require(val: Optional[T], name: str) -> T:
+    """
+    Ensure a required value is set, else raise a ValueError.
+    """
     if val is None:
         raise ValueError(f"{name} must be set before prediction")
     return val
