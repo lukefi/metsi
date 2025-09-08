@@ -6,6 +6,7 @@ from typing import NamedTuple, Optional, Any, TypeVar
 import weakref
 
 from lukefi.metsi.data.layered_model import LayeredObject, PossiblyLayered
+from lukefi.metsi.sim.event import Event, Generator
 from lukefi.metsi.sim.state_tree import StateTree
 
 
@@ -14,11 +15,12 @@ def identity(x):
 
 
 class DeclaredEvents[T](NamedTuple):
-    time_points: list[int] = []
-    generators: list[dict["GeneratorFn[T]", list[Callable[[T], T]]]] = [{}]
+    time_points: list[int]
+    # generators: list[dict["GeneratorFn[T]", list[Callable[[T], T]]]] = [{}]
+    treatment_generator: Generator[T]
 
 
-class SimConfiguration(SimpleNamespace):
+class SimConfiguration[T](SimpleNamespace):
     """
     A class to manage simulation configuration, including operations, generators,
     events, and time points.
@@ -40,10 +42,10 @@ class SimConfiguration(SimpleNamespace):
             Initializes the SimConfiguration instance with operation and generator
             lookups, and additional keyword arguments.
     """
-    operation_params: dict[Callable, list[dict[str, Any]]] = {}
-    operation_file_params: dict[str, dict[str, str]] = {}
-    events: list[DeclaredEvents] = []
-    run_constraints: dict[Callable, dict] = {}
+    # operation_params: dict[Callable, list[dict[str, Any]]] = {}
+    # operation_file_params: dict[str, dict[str, str]] = {}
+    events: list[DeclaredEvents[T]] = []
+    # run_constraints: dict[Callable, dict] = {}
     time_points: list[int] = []
 
     def __init__(self, **kwargs):
@@ -55,14 +57,16 @@ class SimConfiguration(SimpleNamespace):
         super().__init__(**kwargs)
         self._populate_simulation_events(self.simulation_events)
 
-    def _populate_simulation_events(self, events: list):
+    def _populate_simulation_events(self, events: list[Event[T]]):
         time_points = set()
         self.events = []
         for event_set in events:
-            source_time_points = event_set.get('time_points', [])
+            # source_time_points = event_set.get('time_points', [])
+            source_time_points = event_set.time_points
             new_event = DeclaredEvents(
                 time_points=source_time_points,
-                generators=event_set.get('generators', [])
+                # generators=event_set.get('generators', [])
+                treatment_generator=event_set.treatments
             )
             self.events.append(new_event)
             time_points.update(source_time_points)
@@ -125,7 +129,7 @@ class EventTree[T]:
         Recursive pre-order walkthrough of this event tree to evaluate its operations with the given payload,
         copying it for branching. If given a root node, a StateTree is also constructed, containing all complete
         intermediate states in the simulation.
-        
+
         :param payload: the simulation data payload (we don't care what it is here)
         :param state_tree: optional state tree node
         :return: list of result payloads from this EventTree or as concatenated from its branches
