@@ -62,6 +62,7 @@ def check_operation_is_eligible_to_run(operation_tag, time_point, operation_run_
                                        operation_last_run_time_point):
     minimum_time_interval = operation_run_constraints.get('minimum_time_interval')
     if operation_last_run_time_point is not None and \
+            minimum_time_interval is not None and \
             minimum_time_interval > (time_point - operation_last_run_time_point):
         raise UserWarning(f"{operation_tag} aborted - last run at {operation_last_run_time_point}, time now"
                           f" {time_point}, minimum time interval {minimum_time_interval}")
