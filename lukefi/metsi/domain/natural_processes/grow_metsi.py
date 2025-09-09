@@ -14,6 +14,7 @@ from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.chain import Pred
 from lukefi.metsi.data.model import ForestStand
 
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
+from lukefi.metsi.sim.collected_data import OpTuple
 def __getattr__(name: str):
     if name == "MetsiGrowPredictor":
         from lukefi.metsi.forestry.naturalprocess.MetsiGrow.grow_metsi import MetsiGrowPredictor
@@ -26,13 +27,13 @@ def spe2metsi(spe: int) -> Species:
     # adjust for merged alders
     return Species(code if code <= 6 else code + 1)
 
-def grow_metsi(input_: tuple[ForestStand, None], /, **operation_parameters) -> tuple[ForestStand, None]:
+def grow_metsi(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Wrapper for metsi_grow evolve pipeline. Applies growth step to ForestStand.
     """
     from lukefi.metsi.forestry.naturalprocess.MetsiGrow.grow_metsi import MetsiGrowPredictor
     step = operation_parameters.get('step', 5)
-    stand, _ = input_
+    stand, collected_data = input_
     # build predictor
     pred = MetsiGrowPredictor(stand)
     growth = pred.evolve(step=step)
@@ -43,4 +44,4 @@ def grow_metsi(input_: tuple[ForestStand, None], /, **operation_parameters) -> t
     update_stand_growth(stand, diameters, heights, stems, step)
     # prune dead trees
     stand.reference_trees = [t for t in stand.reference_trees if t.stems_per_ha >= 1.0]
-    return stand, None
+    return stand, collected_data
