@@ -26,6 +26,7 @@ def grow_acta(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTupl
     update_stand_growth(stand, diameters, heights, stems, step)
     return stand, input_[1]
 
+
 def grow_acta_vectorized(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     step = operation_parameters.get('step', 5)
     stand, _ = input_
@@ -37,4 +38,3 @@ def grow_acta_vectorized(input_: OpTuple[ForestStand], /, **operation_parameters
     stems = stand.reference_trees_soa.stems_per_ha
     update_stand_growth_vectorized(stand, diameters, heights, stems, step)
     return stand, input_[1]
-    
