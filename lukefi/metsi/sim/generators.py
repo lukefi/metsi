@@ -100,15 +100,12 @@ class NestableGenerator[T]:
     time_point: int = 0
     nested_generators: list['NestableGenerator[T]']
     free_treatments: list[Treatment[T]]
-    config: SimConfiguration
 
     def __init__(self,
-                 config: SimConfiguration,
                  generator: Generator[T],
                  time_point: int):
         """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
         time point."""
-        self.config = config
         self.generator = generator
         self.time_point = time_point
         self.nested_generators = []
@@ -136,7 +133,7 @@ class NestableGenerator[T]:
         if isinstance(candidate, Generator):
             # Encountered a nested generator.
             self.wrap_free_treatments()
-            self.nested_generators.append(NestableGenerator(self.config, candidate, self.time_point))
+            self.nested_generators.append(NestableGenerator(candidate, self.time_point))
         elif isinstance(candidate, Treatment):
             # Encountered a treatment.
             self.free_treatments.append(candidate)
@@ -148,7 +145,7 @@ class NestableGenerator[T]:
             # decl = {self.generator_type: self.free_treatments}
             decl = copy(self.generator)
             decl.treatments = self.free_treatments
-            self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
+            self.nested_generators.append(NestableGenerator(decl, self.time_point))
             self.free_treatments = []
 
     def unwrap(self, previous: list[EventTree[T]]) -> list[EventTree[T]]:
@@ -289,11 +286,11 @@ def full_tree_generators(config: SimConfiguration[T]) -> NestableGenerator[T]:
     :param config: a prepared SimConfiguration object
     :return: a list of prepared generator functions
     """
-    wrapper: NestableGenerator[T] = NestableGenerator(config, Sequence([]), 0)
+    wrapper: NestableGenerator[T] = NestableGenerator(Sequence([]), 0)
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
         time_point_wrapper_declaration: Sequence[T] = Sequence(generator_declarations)
-        wrapper.nested_generators.append(NestableGenerator(config, time_point_wrapper_declaration, time_point))
+        wrapper.nested_generators.append(NestableGenerator(time_point_wrapper_declaration, time_point))
     return wrapper
 
 
@@ -311,7 +308,7 @@ def partial_tree_generators_by_time_point(config: SimConfiguration[T]) -> dict[i
     for time_point in config.time_points:
         generator_declarations = generator_declarations_for_time_point(config.events, time_point)
         sequence_wrapper_declaration: Sequence[T] = Sequence(generator_declarations)
-        wrapper_generator: NestableGenerator = NestableGenerator(config, sequence_wrapper_declaration, time_point)
+        wrapper_generator: NestableGenerator = NestableGenerator(sequence_wrapper_declaration, time_point)
         generators_by_time_point[time_point] = wrapper_generator
     return generators_by_time_point
 
