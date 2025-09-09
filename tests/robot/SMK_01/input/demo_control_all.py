@@ -124,6 +124,9 @@ control_structure = {
                 Planting(
                     parameters={
                         "tree_count": 10
+                    },
+                    file_parameters={
+                        "planting_instructions": "data/parameter_files/planting_instructions.txt"
                     }
                 )
             ])
