@@ -1,4 +1,5 @@
-from abc import abstractmethod, ABC
+from abc import ABC
+from copy import copy
 import os
 from typing import Any, Optional, TypeVar
 from typing import Sequence as Sequence_
@@ -146,7 +147,8 @@ class NestableGenerator[T]:
         afterwards."""
         if self.free_treatments:
             # decl = {self.generator_type: self.free_treatments}
-            decl = self.generator
+            decl = copy(self.generator)
+            decl.treatments = self.free_treatments
             self.nested_generators.append(NestableGenerator(self.config, decl, self.time_point))
             self.free_treatments = []
 
