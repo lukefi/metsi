@@ -1,10 +1,7 @@
 from collections.abc import Callable
-from typing import Optional, TypeVar, TYPE_CHECKING
+from typing import Optional, TypeVar
 
 from lukefi.metsi.sim.generators import Alternatives, GeneratorBase, Generator, Sequence
-if TYPE_CHECKING:
-    from lukefi.metsi.data.layered_model import PossiblyLayered
-    from lukefi.metsi.sim.core_types import EventTree, ProcessedOperation
 
 T = TypeVar('T')  # T = ForestStand
 
