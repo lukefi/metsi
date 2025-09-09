@@ -7,6 +7,8 @@
 # See MetsiGrow's LICENSE-NC.md for full details.
 from typing import Optional,TypeVar
 from functools import cached_property
+from collections import defaultdict
+from lukefi.metsi.forestry.forestry_utils import calculate_basal_area
 
 from lukefi.metsi.data.enums.internal import (
     TreeSpecies,
@@ -29,26 +31,39 @@ from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.chain import (
     Storie,
 )
 
-def to_mg_species(code: int) -> Species:
+def to_mg_species(code) -> Species:
     """
-    Use internal TreeSpecies as-is for the core 9 codes (1..9).
-    Collapse all other internal species to CONIFEROUS/DECIDUOUS via internal lists.
+    Convert an internal species code to a MetsiGrow Species.
+
+    Rules:
+      - If `code` is already a Species, return it.
+      - Else try to coerce to TreeSpecies; if that fails, raise ValueError.
+      - If canonical (1..9), map directly to Species(code).
+      - Else if belongs to CONIFEROUS_SPECIES or DECIDUOUS_SPECIES, return the bucket.
+      - Otherwise raise ValueError.
     """
+    if isinstance(code, Species):
+        return code
+
+    # Coerce to TreeSpecies or fail
     try:
-        # If it's already one of the canonical nine (now sharing internal values), keep it.
         return Species(code)
-    except ValueError:
-        t = TreeSpecies(code)
-        if t in CONIFEROUS_SPECIES:
+    except ValueError as exc:
+        try:
+            ts = TreeSpecies(code)
+        except ValueError as temp_exc:
+            raise ValueError(f"Unknown tree species code: {code!r}") from temp_exc
+
+        if ts in CONIFEROUS_SPECIES:
             return Species.CONIFEROUS
-        if t in DECIDUOUS_SPECIES:
+        if ts in DECIDUOUS_SPECIES:
             return Species.DECIDUOUS
-        # Unknown → treat as deciduous (same default used in your conversion utils).
-        return Species.DECIDUOUS
+
+        raise ValueError(f"Unsupported tree species code: {code!r}") from exc
 
 T = TypeVar("T")
 
-def require(val: Optional[T], name: str) -> T:
+def _require(val: Optional[T], name: str) -> T:
     """
     Ensure a required value is set, else raise a ValueError.
     """
@@ -73,7 +88,7 @@ class MetsiGrowPredictor(Predict):
 
     @property
     def year(self) -> int:
-        return require(self.stand.year, "stand.year")
+        return _require(self.stand.year, "stand.year")
 
     @property
     def get_y(self) -> float:
@@ -95,11 +110,11 @@ class MetsiGrowPredictor(Predict):
 
     @property
     def sea(self) -> float:
-        return require(self.stand.sea_effect, "stand.sea_effect")
+        return _require(self.stand.sea_effect, "stand.sea_effect")
 
     @property
     def lake(self) -> float:
-        return require(self.stand.lake_effect, "stand.lake_effect")
+        return _require(self.stand.lake_effect, "stand.lake_effect")
 
     @property
     def mal(self) -> LandUseCategoryVMI:
@@ -123,11 +138,38 @@ class MetsiGrowPredictor(Predict):
 
     # -- management vars (defaults) --------
 
+
+
     @property
     def spedom(self) -> Species:
-        if self.stand.reference_trees[0].species is None:
-            return Species.PINE
-        return to_mg_species(self.stand.reference_trees[0].species)
+        """
+        Dominant species (MetsiGrow Species):
+        1) Choose by total basal area per species.
+        2) If all basal areas are zero/unavailable, fall back to stems/ha.
+
+        If to_mg_species fails for any tree, this property raises ValueError (no swallowing).
+        """
+        # 1) Basal area aggregation by Species
+        ba_by_species: dict[Species, float] = defaultdict(float)
+        for t in getattr(self.stand, "reference_trees", []):
+            # If t.species is None, you may keep your default (PINE) or change as needed
+            sp = to_mg_species(t.species if t.species is not None else Species.PINE)
+            ba_by_species[sp] += float(calculate_basal_area(t) or 0.0)
+
+        if any(v > 0.0 for v in ba_by_species.values()):
+            return max(ba_by_species.items(), key=lambda kv: kv[1])[0]
+
+        # 2) Fallback: stems/ha
+        stems_by_species: dict[Species, float] = defaultdict(float)
+        for t in getattr(self.stand, "reference_trees", []):
+            sp = to_mg_species(t.species if t.species is not None else Species.PINE)
+            stems_by_species[sp] += float(getattr(t, "stems_per_ha", 0.0) or 0.0)
+
+        if stems_by_species:
+            return max(stems_by_species.items(), key=lambda kv: kv[1])[0]
+
+        # Sensible fallback if no trees present
+        return Species.DECIDUOUS
 
     @property
     def prt(self) -> Origin:
