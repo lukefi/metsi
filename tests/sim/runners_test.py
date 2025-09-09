@@ -1,6 +1,7 @@
 import unittest
 from pathlib import Path
-from lukefi.metsi.sim.core_types import CollectedData, OperationPayload, SimConfiguration
+from lukefi.metsi.sim.collected_data import CollectedData
+from lukefi.metsi.sim.core_types import OperationPayload, SimConfiguration
 from lukefi.metsi.sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy, \
     chain_evaluator, depth_first_evaluator
 from tests.test_utils import raises, identity, none, collect_results, collecting_increment
