@@ -101,16 +101,13 @@ class NestableGenerator[T]:
     nested_generators: list['NestableGenerator[T]']
     free_treatments: list[Treatment[T]]
 
-    def __init__(self,
-                 generator: Generator[T],
-                 time_point: int):
+    def __init__(self, generator: Generator[T], time_point: int):
         """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
         time point."""
         self.generator = generator
         self.time_point = time_point
         self.nested_generators = []
         self.free_treatments = []
-        # children_tags = generator_declaration[self.generator_type]
         children_tags = generator.treatments
 
         for child in children_tags:
@@ -142,7 +139,6 @@ class NestableGenerator[T]:
         """Create NestableGenerators for individual operations collected into self state. Clear the list of operations
         afterwards."""
         if self.free_treatments:
-            # decl = {self.generator_type: self.free_treatments}
             decl = copy(self.generator)
             decl.treatments = self.free_treatments
             self.nested_generators.append(NestableGenerator(decl, self.time_point))
