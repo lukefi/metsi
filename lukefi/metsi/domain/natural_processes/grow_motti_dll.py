@@ -1,13 +1,18 @@
 from __future__ import annotations
+import math
 from pathlib import Path
 from typing import Optional, Union, Iterable,  Tuple, Dict, Mapping
-from dataclasses import dataclass
 from functools import cached_property
 from collections import defaultdict
 from types import MappingProxyType
 
+from lukefi.metsi.forestry.forestry_utils import (
+    calculate_basal_area,
+    overall_basal_area,
+)
+
 from lukefi.metsi.domain.natural_processes.motti_dll_wrapper import (
-    Motti4DLL, 
+    Motti4DLL,
     GrowthDeltas
 )
 
@@ -42,20 +47,39 @@ def _species_to_motti(spe: int) -> int:
 
 def _dominant_species_codes(stand) -> Dict[str, int]:
     """
-    Pick dominant and sub-dominant species by stems/ha.
-    Returns 'spedom' and 'spedom2' as *Motti* species codes (no Mela step).
+    Pick dominant species.
+    Prefer basal area totals; if BA totals are all zero/missing, fall back to stems/ha.
+    Returns 'spedom' and 'spedom2' as Mottispecies codes.
     """
-    per = defaultdict(float)
-    for t in stand.reference_trees:
-        s_motti = _species_to_motti(int(t.species))
-        per[s_motti] += float(t.stems_per_ha or 0.0)
+    # 1) Try basal area first
+    use_basal = overall_basal_area(stand.reference_trees) > 0.0
+    per: dict[int, float] = defaultdict(float)
 
+    if use_basal:
+        # group BA by Motti species code
+        for t in stand.reference_trees:
+            motti = _species_to_motti(int(t.species))
+            per[motti] += float(calculate_basal_area(t) or 0.0)
+
+        # if everything was zero (e.g., no diameters), fall back to stems
+        if sum(per.values()) == 0.0:
+            use_basal = False
+            per.clear()
+
+    # 2) Fallback: stems/ha
+    if not use_basal:
+        for t in stand.reference_trees:
+            motti = _species_to_motti(int(t.species))
+            per[motti] += float(t.stems_per_ha or 0.0)
+
+    # 3) Choose top-2 (with a sensible default if only one)
     if not per:
         return {"spedom": 1, "spedom2": 2}
     ordered = sorted(per.items(), key=lambda kv: kv[1], reverse=True)
     top1 = ordered[0][0]
     top2 = ordered[1][0] if len(ordered) > 1 else (2 if top1 == 1 else 1)
     return {"spedom": top1, "spedom2": top2}
+
 
 def _resolve_shared_object(p: Union[str, Path]) -> Path:
     """
@@ -204,19 +228,14 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
 
     # If a predictor is supplied (e.g., from tests), use it, regardless of data_dir.
     if predictor is None:
-        # No injected predictor. If DLL path isn't provided, do nothing safely.
+        # No injected predictor. If DLL path isn't provided, raise an error
         if data_dir is None:
-            return stand, None
+            raise ModuleNotFoundError("data_dir must be provided (directory containing the Motti library).")
 
-        # Production path: construct predictor from data_dir. This will still
-        # raise if data_dir is invalid/missing libs, preserving the original behavior.
+        # Production path: construct predictor from data_dir.
         pred = MottiDLLPredictor(stand, data_dir=data_dir)
     else:
         pred = predictor
-
-    # Assign stable integer ids before evolving (unchanged logic)
-    #for idx, t in enumerate(stand.reference_trees, start=1):
-    #    t.id = str(idx)
 
     for idx, t in enumerate(stand.reference_trees, start=1):
         t.tree_number = idx
