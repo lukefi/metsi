@@ -104,17 +104,17 @@ class NestableGenerator[T]:
 
     def __init__(self,
                  config: SimConfiguration,
-                 generator_declaration: Generator[T],
+                 generator: Generator[T],
                  time_point: int):
         """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
         time point."""
         self.config = config
-        self.generator = generator_declaration
+        self.generator = generator
         self.time_point = time_point
         self.nested_generators = []
         self.free_treatments = []
         # children_tags = generator_declaration[self.generator_type]
-        children_tags = generator_declaration.treatments
+        children_tags = generator.treatments
 
         for child in children_tags:
             self.wrap_generator_candidate(child)
