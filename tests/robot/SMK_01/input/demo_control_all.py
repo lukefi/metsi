@@ -1,30 +1,68 @@
-from tests.robot.SMK_01.input.params import params, param_files
-from lukefi.metsi.domain.pre_ops import *
-from lukefi.metsi.domain.sim_ops import *
-from lukefi.metsi.sim.generators import *
+from lukefi.metsi.domain.pre_ops import convert_coordinates, generate_reference_trees, preproc_filter
+from lukefi.metsi.domain.treatments import (
+    CalculateBiomass,
+    CalculateNpv,
+    Clearcutting,
+    CollectFelledTreeProperties,
+    CollectStandingTreeProperties,
+    CrossCutFelledTrees,
+    CrossCutStandingTrees,
+    DoNothing,
+    EvenThinning,
+    FirstThinning,
+    GrowActa,
+    Planting,
+    ReportCollectives,
+    ReportPeriod,
+    ReportState,
+    ThinningFromAbove,
+    ThinningFromBelow)
+from lukefi.metsi.sim.event import Event
+from lukefi.metsi.sim.generators import Alternatives, Sequence
 
 
-year_start = 2025
-step = 5
-period = 10
+YEAR_START = 2025
+STEP = 5
+PERIOD = 10
 # nperiods = 5
-nperiods = 3
+NPERIODS = 3
 # year_final = 2075
-year_final = year_start + nperiods*period
+YEAR_FINAL = YEAR_START + NPERIODS * PERIOD
 # years_np = [2025, 2030, 2035, 2040, 2045, 2050, 2055, 2065, 2070]
-years_np = [year_start + i*step for i in range(0, 2*nperiods)]
+YEARS_NP = [YEAR_START + i * STEP for i in range(0, 2 * NPERIODS)]
 # years_events = [2030, 2040, 2050, 2060, 2070]
-years_events = [year_start + step + i*period for i in range(0, nperiods)]
+YEARS_EVENTS = [YEAR_START + STEP + i * PERIOD for i in range(0, NPERIODS)]
 # years_report = [2025, 2035, 2045, 2055, 2065, 2075]
-years_report = [year_start + i*period for i in range(0, nperiods+1)]
+YEARS_REPORT = [YEAR_START + i * PERIOD for i in range(0, NPERIODS + 1)]
 
-operations_report = {sequence: [
-    cross_cut_standing_trees,
-    collect_standing_tree_properties,
-    calculate_npv,
-    calculate_biomass,
-    report_state
-]}
+operations_report = Sequence([
+    CrossCutStandingTrees(
+        file_parameters={
+            "timber_price_table": "data/parameter_files/timber_price_table.csv"
+        }
+    ),
+    CollectStandingTreeProperties(
+        parameters={
+            "properties": ["stems_per_ha", "species", "breast_height_diameter", "height",
+                           "breast_height_age", "biological_age", "saw_log_volume_reduction_factor"]
+        }
+    ),
+    CalculateNpv(
+        parameters={
+            "interest_rates": [1, 2, 3, 4, 5]
+        },
+        file_parameters={
+            "land_values": "data/parameter_files/land_values_per_site_type_and_interest_rate.json",
+            "renewal_costs": "data/parameter_files/renewal_operation_pricing.csv"
+        },
+    ),
+    CalculateBiomass(
+        parameters={
+            "model_set": 1
+        }
+    ),
+    ReportState()
+])
 
 export_J = {
     "format": "J",
@@ -80,71 +118,141 @@ control_structure = {
 
     # Simulation control declaration
     "simulation_events": [
-        {
-            "time_points": [year_start],
-            "generators": [
-                {sequence: [planting]}
-            ]
-        },
-        {
-            "time_points": years_report,  # data for reporting
-            "generators": [operations_report]
-        },
-        {
-            "time_points": years_events,
-            "generators": [
-                {
-                    alternatives: [
-                        do_nothing,
-                        thinning_from_below,
-                        thinning_from_above,
-                        first_thinning,
-                        even_thinning,
-                        {
-                            sequence: [
-                                clearcutting,
-                                planting
-                            ]
+        Event(
+            time_points=[YEAR_START],
+            treatments=Sequence([
+                Planting(
+                    parameters={
+                        "tree_count": 10
+                    }
+                )
+            ])
+        ),
+        Event(
+            time_points=YEARS_REPORT,
+            treatments=[operations_report]
+        ),
+        Event(
+            time_points=YEARS_EVENTS,
+            treatments=[
+                Alternatives([
+                    DoNothing(),
+                    ThinningFromBelow(
+                        parameters={
+                            "thinning_factor": 0.97,
+                            "e": 0.2
                         }
-                    ]
-                },
-                {
-                    sequence: [
-                        cross_cut_felled_trees,
-                        collect_felled_tree_properties
-                    ]
-                }
+                    ),
+                    ThinningFromAbove(
+                        parameters={
+                            "thinning_factor": 0.98,
+                            "e": 0.2
+                        },
+                        file_parameters={
+                            "thinning_limits": "data/parameter_files/Thin.txt"
+                        }
+                    ),
+                    FirstThinning(
+                        parameters={
+                            "thinning_factor": 0.97,
+                            "e": 0.2,
+                            "dominant_height_lower_bound": 11,
+                            "dominant_height_upper_bound": 16
+                        },
+                        run_constraints={
+                            "minimum_time_interval": 50
+                        }
+                    ),
+                    EvenThinning(
+                        parameters={
+                            "thinning_factor": 0.9,
+                            "e": 0.2
+                        }
+                    ),
+                    Sequence([
+                        Clearcutting(
+                            file_parameters={
+                                "clearcutting_limits_ages": "data/parameter_files/renewal_ages_southernFI.txt",
+                                "clearcutting_limits_diameters": "data/parameter_files/renewal_diameters_southernFI.txt"
+                            },
+                            run_constraints={
+                                "minimum_time_interval": 50
+                            }
+                        ),
+                        Planting(
+                            parameters={
+                                "tree_count": 10
+                            },
+                            file_parameters={
+                                "planting_instructions": "data/parameter_files/planting_instructions.txt"
+                            }
+                        )
+                    ])
+                ]),
+                Sequence([
+                    CrossCutFelledTrees(
+                        file_parameters={
+                            "timber_price_table": "data/parameter_files/timber_price_table.csv"
+                        }
+                    ),
+                    CollectFelledTreeProperties(
+                        parameters={
+                            "properties": ["stems_per_ha", "species", "breast_height_diameter", "height"]
+                        }
+                    )
+                ])
             ]
-        },
-        {
-            "time_points": years_report,
-            "generators": [
-                {sequence: [report_period]}
+        ),
+        Event(
+            time_points=YEARS_REPORT,
+            treatments=[
+                ReportPeriod()
             ]
-        },
-        {
-            "time_points": [year_final],
-            "generators": [
-                {sequence: [report_collectives]}
+        ),
+        Event(
+            time_points=[YEAR_FINAL],
+            treatments=[
+                ReportCollectives(
+                    parameters={
+                        "identifier": "identifier",
+                        "npv_1_percent": "net_present_value.value[(net_present_value.interest_rate==1) & "
+                        "(net_present_value.time_point == 2055)]",
+                        "npv_2_percent": "net_present_value.value[(net_present_value.interest_rate==2) & "
+                        "(net_present_value.time_point == 2055)]",
+                        "npv_3_percent": "net_present_value.value[(net_present_value.interest_rate==3) & "
+                        "(net_present_value.time_point == 2055)]",
+                        "npv_4_percent": "net_present_value.value[(net_present_value.interest_rate==4) & "
+                        "(net_present_value.time_point == 2055)]",
+                        "npv_5_percent": "net_present_value.value[(net_present_value.interest_rate==5) & "
+                        "(net_present_value.time_point == 2075)]",
+                        "stock_0": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & "
+                        "(cross_cutting.time_point == 2025)]",
+                        "stock_1": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & "
+                        "(cross_cutting.time_point == 2035)]",
+                        "stock_2": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & "
+                        "(cross_cutting.time_point == 2045)]",
+                        "stock_3": "cross_cutting.volume_per_ha[(cross_cutting.source == 'standing') & "
+                        "(cross_cutting.time_point == 2055)]",
+                        "harvest_period_1": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & "
+                        "(cross_cutting.time_point >= 2025) & "
+                        "(cross_cutting.time_point < 2035)]",
+                        "harvest_period_2": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & "
+                        "(cross_cutting.time_point >= 2035) & "
+                        "(cross_cutting.time_point < 2045)]",
+                        "harvest_period_3": "cross_cutting.volume_per_ha[(cross_cutting.source == 'harvested') & "
+                        "(cross_cutting.time_point >= 2045) & "
+                        "(cross_cutting.time_point < 2055)]"
+                    }
+                )
             ]
-        },
-        {
-            "time_points": years_np,
-            "generators": [
-                {sequence: [grow_acta]}
+        ),
+        Event(
+            time_points=YEARS_NP,
+            treatments=[
+                GrowActa()
             ]
-        }
+        )
     ],
-    "operation_params": params,
-    "operation_file_params": param_files,
-    "run_constraints": {
-        first_thinning: {
-            "minimum_time_interval": 50
-        },
-        clearcutting: {
-            "minimum_time_interval": 50
-        }
-    },
     "export": [
         export_J,
         {
