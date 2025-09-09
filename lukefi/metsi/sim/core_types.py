@@ -18,7 +18,6 @@ def identity(x):
 
 class DeclaredEvents[T](NamedTuple):
     time_points: list[int]
-    # generators: list[dict["GeneratorFn[T]", list[Callable[[T], T]]]] = [{}]
     treatment_generator: "Generator[T]"
 
 
@@ -44,10 +43,7 @@ class SimConfiguration[T](SimpleNamespace):
             Initializes the SimConfiguration instance with operation and generator
             lookups, and additional keyword arguments.
     """
-    # operation_params: dict[Callable, list[dict[str, Any]]] = {}
-    # operation_file_params: dict[str, dict[str, str]] = {}
     events: list[DeclaredEvents[T]] = []
-    # run_constraints: dict[Callable, dict] = {}
     time_points: list[int] = []
 
     def __init__(self, **kwargs):
@@ -63,11 +59,9 @@ class SimConfiguration[T](SimpleNamespace):
         time_points = set()
         self.events = []
         for event_set in events:
-            # source_time_points = event_set.get('time_points', [])
             source_time_points = event_set.time_points
             new_event = DeclaredEvents(
                 time_points=source_time_points,
-                # generators=event_set.get('generators', [])
                 treatment_generator=event_set.treatments
             )
             self.events.append(new_event)
