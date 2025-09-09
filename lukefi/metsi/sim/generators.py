@@ -23,9 +23,7 @@ Condition = Callable[[T], bool]
 
 
 class GeneratorBase(ABC):
-    @abstractmethod
-    def unwrap(self, parents: list[EventTree[T]]) -> list[EventTree[T]]:
-        pass
+    pass
 
 
 class Generator[T](GeneratorBase, ABC):
