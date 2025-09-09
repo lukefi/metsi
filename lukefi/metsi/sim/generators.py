@@ -5,7 +5,6 @@ from typing import Any, Optional, TypeVar
 from typing import Sequence as Sequence_
 
 from collections.abc import Callable
-from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.sim.core_types import (
     EventTree,
@@ -19,7 +18,7 @@ from lukefi.metsi.app.utils import MetsiException
 T = TypeVar("T")
 
 GeneratorFn = Callable[[Optional[list[EventTree[T]]], ProcessedOperation[T]], list[EventTree[T]]]
-TreatmentFn = Callable[[OpTuple[PossiblyLayered[T]]], OpTuple[PossiblyLayered[T]]]
+TreatmentFn = Callable[[OpTuple[T]], OpTuple[T]]
 Condition = Callable[[T], bool]
 
 
