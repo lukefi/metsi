@@ -1,7 +1,6 @@
 """
 This module contains a collection of util functions and dummy payload functions for test cases
 """
-import os
 import unittest
 from typing import Any, Optional
 from collections.abc import Callable
@@ -9,7 +8,8 @@ import numpy as np
 
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
-from lukefi.metsi.sim.core_types import OpTuple, OperationPayload
+from lukefi.metsi.sim.collected_data import OpTuple
+from lukefi.metsi.sim.core_types import OperationPayload
 
 
 class ConverterTestSuite(unittest.TestCase):

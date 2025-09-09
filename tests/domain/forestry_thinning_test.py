@@ -2,7 +2,7 @@ from lukefi.metsi.domain.collected_types import CrossCuttableTree
 from tests.test_utils import ConverterTestSuite
 from lukefi.metsi.data.model import ReferenceTree
 from lukefi.metsi.domain.forestry_operations.thinning_limits import *
-from lukefi.metsi.sim.core_types import CollectedData
+from lukefi.metsi.sim.collected_data import CollectedData
 import lukefi.metsi.domain.forestry_operations.thinning as thin
 import numpy as np
 from lukefi.metsi.domain.utils.file_io import get_timber_price_table

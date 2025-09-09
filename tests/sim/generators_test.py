@@ -1,8 +1,10 @@
 from typing import Callable
 import unittest
+from lukefi.metsi.sim.collected_data import CollectedData
+from lukefi.metsi.sim.event import Event
 import lukefi.metsi.sim.generators
-from lukefi.metsi.sim.core_types import CollectedData, EventTree, OperationPayload, SimConfiguration
-from lukefi.metsi.sim.generators import sequence, compose_nested, alternatives
+from lukefi.metsi.sim.core_types import EventTree, OperationPayload, SimConfiguration
+from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment, sequence, compose_nested, alternatives
 from lukefi.metsi.sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from tests.test_utils import inc, collecting_increment, parametrized_operation
 
@@ -36,17 +38,17 @@ class TestGenerators(unittest.TestCase):
     def test_yaml_declaration(self):
         declaration = {
             "simulation_events": [
-                {
-                    "time_points": [0, 1],
-                    "generators": [
-                        {
-                            sequence: [
-                                collecting_increment,
-                                collecting_increment
-                            ]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[0, 1],
+                    treatments=Sequence([
+                        Treatment(
+                            treatment_fn=collecting_increment
+                        ),
+                        Treatment(
+                            treatment_fn=collecting_increment
+                        ),
+                    ])
+                )
             ]
         }
         config = SimConfiguration(**declaration)
@@ -64,20 +66,18 @@ class TestGenerators(unittest.TestCase):
 
     def test_operation_run_constraints_success(self):
         declaration = {
-            "run_constraints": {
-                collecting_increment: {
-                    "minimum_time_interval": 2
-                }
-            },
             "simulation_events": [
-                {
-                    "time_points": [1, 3],
-                    "generators": [
-                        {
-                            sequence: [collecting_increment]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[1, 3],
+                    treatments=Sequence([
+                        Treatment(
+                            treatment_fn=collecting_increment,
+                            run_constraints={
+                                "minimum_time_interval": 2
+                            }
+                        )
+                    ])
+                )
             ]
         }
         config = SimConfiguration(**declaration)
@@ -101,17 +101,23 @@ class TestGenerators(unittest.TestCase):
                 }
             },
             "simulation_events": [
-                {
-                    "time_points": [1, 3],
-                    "generators": [
-                        {
-                            sequence: [
-                                inc,
-                                inc
-                            ]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[1, 3],
+                    treatments=Sequence([
+                        Treatment(
+                            treatment_fn=inc,
+                            run_constraints={
+                                "minimum_time_interval": 2
+                            }
+                        ),
+                        Treatment(
+                            treatment_fn=inc,
+                            run_constraints={
+                                "minimum_time_interval": 2
+                            }
+                        )
+                    ])
+                )
             ]
         }
         config = SimConfiguration(**declaration)
@@ -126,17 +132,17 @@ class TestGenerators(unittest.TestCase):
     def test_tree_generators_by_time_point(self):
         declaration = {
             "simulation_events": [
-                {
-                    "time_points": [0, 1],
-                    "generators": [
-                        {
-                            sequence: [
-                                inc,
-                                inc
-                            ]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[0, 1],
+                    treatments=Sequence([
+                        Treatment(
+                            inc
+                        ),
+                        Treatment(
+                            inc
+                        )
+                    ])
+                )
             ]
         }
         config = SimConfiguration(**declaration)
@@ -164,52 +170,36 @@ class TestGenerators(unittest.TestCase):
         and alternatives result in 4 branches with separately incremented values."""
         declaration = {
             "simulation_events": [
-                {
-                    "time_points": [0],
-                    "generators": [
-                        {
-                            sequence: [
-                                collecting_increment,  # 1
-                                {
-                                    sequence: [
-                                        collecting_increment  # 2
-                                    ]
-                                },
-                                {
-                                    alternatives: [
-                                        collecting_increment,  # 3
-                                        {
-                                            sequence: [
-                                                collecting_increment,  # 3
-                                                {
-                                                    alternatives: [
-                                                        collecting_increment,  # 4
-                                                        {
-                                                            sequence: [
-                                                                collecting_increment,  # 4
-                                                                collecting_increment  # 5
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            sequence: [
-                                                collecting_increment,  # 3
-                                                collecting_increment,  # 4
-                                                collecting_increment,  # 5
-                                                collecting_increment  # 6
-                                            ]
-                                        }
-                                    ]
-                                },
-                                collecting_increment,  # 4, 5, 6, 7
-                                collecting_increment  # 5, 6, 7, 8
-                            ]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[0],
+                    treatments=Sequence([
+                        Treatment(collecting_increment),
+                        Sequence([
+                            Treatment(collecting_increment)
+                        ]),
+                        Alternatives([
+                            Treatment(collecting_increment),
+                            Sequence([
+                                Treatment(collecting_increment),
+                                Alternatives([
+                                    Treatment(collecting_increment),
+                                    Sequence([
+                                        Treatment(collecting_increment),
+                                        Treatment(collecting_increment)
+                                    ])
+                                ])
+                            ]),
+                            Sequence([
+                                Treatment(collecting_increment),
+                                Treatment(collecting_increment),
+                                Treatment(collecting_increment),
+                                Treatment(collecting_increment)
+                            ])
+                        ]),
+                        Treatment(collecting_increment),
+                        Treatment(collecting_increment)
+                    ])
+                )
             ]
         }
         config = SimConfiguration(**declaration)
@@ -251,25 +241,33 @@ class TestGenerators(unittest.TestCase):
                 ]
             },
             "simulation_events": [
-                {
-                    "time_points": [0],
-                    "generators": [
-                        {
-                            sequence: [
-                                increment,
-                                {
-                                    alternatives: [
-                                        {
-                                            sequence: [increment]
-                                        },
-                                        inc_param
-                                    ]
-                                },
-                                increment
-                            ]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[0],
+                    treatments=Sequence([
+                        Treatment(increment),
+                        Alternatives([
+                            Sequence([
+                                Treatment(increment)
+                            ]),
+                            Alternatives([
+                                Treatment(
+                                    inc_param,
+                                    parameters={
+                                        "incrementation": 2
+                                    }
+                                ),
+                                Treatment(
+                                    inc_param,
+                                    parameters={
+                                        "incrementation": 3
+                                    }
+                                )
+
+                            ]),
+                        ]),
+                        Treatment(increment)
+                    ])
+                )
             ]
         }
         config = SimConfiguration(**declaration)
@@ -301,63 +299,45 @@ class TestGenerators(unittest.TestCase):
         """
         declaration_one = {
             "simulation_events": [
-                {
-                    "time_points": [0],
-                    "generators": [
-                        {
-                            sequence: [
-                                collecting_increment,
-                                {
-                                    alternatives: [
-                                        {
-                                            alternatives: [
-                                                collecting_increment,
-                                                collecting_increment
-                                            ]
-                                        },
-                                        {
-                                            sequence: [
-                                                collecting_increment,
-                                                collecting_increment
-                                            ]
-                                        },
-                                        {
-                                            alternatives: [
-                                                collecting_increment,
-                                                collecting_increment
-                                            ]
-                                        }
-                                    ]
-                                },
-                                collecting_increment
-                            ]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[0],
+                    treatments=Sequence([
+                        Treatment(collecting_increment),
+                        Alternatives([
+                            Alternatives([
+                                Treatment(collecting_increment),
+                                Treatment(collecting_increment)
+                            ]),
+                            Sequence([
+                                Treatment(collecting_increment),
+                                Treatment(collecting_increment)
+                            ]),
+                            Alternatives([
+                                Treatment(collecting_increment),
+                                Treatment(collecting_increment)
+                            ])
+                        ]),
+                        Treatment(collecting_increment)
+                    ])
+                )
             ]
         }
         declaration_two = {
             "simulation_events": [
-                {
-                    "time_points": [0],
-                    "generators": [
-                        {
-                            sequence: [
-                                collecting_increment,
-                                {
-                                    alternatives: [
-                                        {sequence: [collecting_increment]},
-                                        {sequence: [collecting_increment]},
-                                        {sequence: [collecting_increment, collecting_increment]},
-                                        {sequence: [collecting_increment]},
-                                        {sequence: [collecting_increment]}
-                                    ]
-                                },
-                                collecting_increment
-                            ]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[0],
+                    treatments=Sequence([
+                        Treatment(collecting_increment),
+                        Alternatives([
+                            Sequence([Treatment(collecting_increment)]),
+                            Sequence([Treatment(collecting_increment)]),
+                            Sequence([Treatment(collecting_increment), Treatment(collecting_increment)]),
+                            Sequence([Treatment(collecting_increment)]),
+                            Sequence([Treatment(collecting_increment)])
+                        ]),
+                        Treatment(collecting_increment)
+                    ])
+                )
             ]
         }
         configs = [
@@ -381,30 +361,6 @@ class TestGenerators(unittest.TestCase):
                 results[i].append(value)
         self.assertListEqual(results[0], results[1])
 
-    def test_simulation_events_sequence_multiparameter_exception(self):
-        declaration = {
-            "operation_params": {
-                collecting_increment: [
-                    {"param1": 1},
-                    {"param1": 2}
-                ]
-            },
-            "simulation_events": [
-                {
-                    "time_points": [0],
-                    "generators": [
-                        {
-                            sequence: [
-                                collecting_increment
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
-        config = SimConfiguration(**declaration)
-        self.assertRaises(Exception, lukefi.metsi.sim.generators.full_tree_generators, config)
-
     def test_simple_processable_chain(self):
         operation_tags: list[Callable] = [inc, inc, inc, parametrized_operation]
         operation_params = {parametrized_operation: [{'amplify': True}]}
@@ -427,41 +383,28 @@ class TestGenerators(unittest.TestCase):
     def test_generate_time_series(self):
         declaration = {
             "simulation_events": [
-                {
-                    "time_points": [0, 1, 4, 100, 1000, 8, 9],
-                    "generators": [
-                        {
-                            sequence: [
-                                inc,
-                                inc
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "time_points": [9, 8],
-                    "generators": [
-                        {
-                            sequence: [
-                                inc,
-                                inc
-                            ]
-                        }
-                    ]
-                },
-                {
-                    "time_points": [4, 6, 10, 12],
-                    "generators": [
-                        {
-                            sequence: [
-                                inc,
-                                inc
-                            ]
-                        }
-                    ]
-                }
+                Event(
+                    time_points=[0, 1, 4, 100, 1000, 8, 9],
+                    treatments=Sequence([
+                        Treatment(inc),
+                        Treatment(inc)
+                    ])
+                ),
+                Event(
+                    time_points=[9, 8],
+                    treatments=Sequence([
+                        Treatment(inc),
+                        Treatment(inc)
+                    ])
+                ),
+                Event(
+                    time_points=[4, 6, 10, 12],
+                    treatments=Sequence([
+                        Treatment(inc),
+                        Treatment(inc)
+                    ])
+                )
             ]
         }
-        dummy_dict = {}
         result = SimConfiguration(**declaration)
         self.assertEqual([0, 1, 4, 6, 8, 9, 10, 12, 100, 1000], result.time_points)
