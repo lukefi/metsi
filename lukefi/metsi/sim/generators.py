@@ -1,7 +1,7 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from copy import copy
 import os
-from typing import Any, Optional, TypeVar
+from typing import Any, Optional, TypeVar, override
 from typing import Sequence as Sequence_
 
 from collections.abc import Callable
@@ -22,28 +22,47 @@ TreatmentFn = Callable[[OpTuple[T]], OpTuple[T]]
 Condition = Callable[[T], bool]
 
 
-class GeneratorBase(ABC):
+class GeneratorBase[T](ABC):
     """Shared abstract base class for Generator and Treatment types."""
+    @abstractmethod
+    def unwrap(self, parents: list[EventTree[T]], time_point: int) -> list[EventTree[T]]:
+        pass
 
 
 class Generator[T](GeneratorBase, ABC):
     """Abstract base class for generator types."""
     generator_fn: GeneratorFn[T]
-    treatments: Sequence_[GeneratorBase]
+    children: Sequence_[GeneratorBase]
 
 
 class Sequence[T](Generator[T]):
     """Generator for sequential treatments."""
-    def __init__(self, treatments: Sequence_[GeneratorBase]):
+
+    def __init__(self, children: Sequence_[GeneratorBase]):
         self.generator_fn = sequence
-        self.treatments = treatments
+        self.children = children
+
+    @override
+    def unwrap(self, parents: list[EventTree], time_point: int) -> list[EventTree]:
+        current = parents
+        for child in self.children:
+            current = child.unwrap(current, time_point)
+        return current
 
 
 class Alternatives[T](Generator[T]):
     """Generator for branching treatments"""
-    def __init__(self, treatments: Sequence_[GeneratorBase]):
+
+    def __init__(self, children: Sequence_[GeneratorBase]):
         self.generator_fn = alternatives
-        self.treatments = treatments
+        self.children = children
+
+    @override
+    def unwrap(self, parents: list[EventTree], time_point: int) -> list[EventTree]:
+        retval = []
+        for child in self.children:
+            retval.extend(child.unwrap(parents, time_point))
+        return retval
 
 
 class Treatment[T](GeneratorBase):
@@ -81,6 +100,17 @@ class Treatment[T](GeneratorBase):
         else:
             self.conditions = []
 
+    def unwrap(self, parents: list[EventTree], time_point: int) -> list[EventTree]:
+        retval = []
+        for parent in parents:
+            branch = EventTree(self._prepare_paremeterized_treatment(time_point), parent)
+            parent.add_branch(branch)
+            retval.append(branch)
+        return retval
+
+    def _prepare_paremeterized_treatment(self, time_point) -> ProcessedOperation[T]:
+        return prepare_parametrized_treatment(self, time_point)
+
     def check_file_params(self):
         for _, path in self.file_parameters.items():
             if not os.path.isfile(path):
@@ -112,7 +142,7 @@ class NestableGenerator[T]:
         self.time_point = time_point
         self.nested_generators = []
         self.free_treatments = []
-        children_tags = generator.treatments
+        children_tags = generator.children
 
         for child in children_tags:
             self.wrap_generator_candidate(child)
@@ -122,8 +152,8 @@ class NestableGenerator[T]:
                 # leaf node, prepare the actual GeneratorFn
                 prepared_operations: list[ProcessedOperation[T]] = []
                 for treatment in self.free_treatments:
-                    ops: list[ProcessedOperation[T]] = prepare_parametrized_treatments(treatment, time_point)
-                    prepared_operations.extend(ops)
+                    op = prepare_parametrized_treatment(treatment, time_point)
+                    prepared_operations.append(op)
                 self.prepared_generator = generator_function(self.generator.generator_fn, *prepared_operations)
             else:
                 self.wrap_free_treatments()
@@ -144,7 +174,7 @@ class NestableGenerator[T]:
         afterwards."""
         if self.free_treatments:
             decl = copy(self.generator)
-            decl.treatments = self.free_treatments
+            decl.children = self.free_treatments
             self.nested_generators.append(NestableGenerator(decl, self.time_point))
             self.free_treatments = []
 
@@ -272,11 +302,10 @@ def generator_function(key: GeneratorFn[T],
     return lambda parent_nodes: key(parent_nodes, *fns)
 
 
-def prepare_parametrized_treatments(treatment: Treatment[T],
-                                    time_point: int) -> list[ProcessedOperation[T]]:
+def prepare_parametrized_treatment(treatment: Treatment[T], time_point: int) -> ProcessedOperation[T]:
     treatment.check_file_params()
     combined_params = treatment.merge_params()
-    return [prepared_processor(treatment.treatment_fn, time_point, treatment.run_constraints, **combined_params)]
+    return prepared_processor(treatment.treatment_fn, time_point, treatment.run_constraints, **combined_params)
 
 
 def full_tree_generators(config: SimConfiguration[T]) -> NestableGenerator[T]:
