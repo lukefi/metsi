@@ -36,35 +36,31 @@ class SimConfiguration[T](SimpleNamespace):
             time_points.update(source_time_points)
         self.time_points = sorted(time_points)
 
+    def full_tree_generators(self) -> Generator[T]:
+        """
+        Create a NestableGenerator describing a single simulator run.
 
-def full_tree_generators[T](config: SimConfiguration[T]) -> Generator[T]:
-    """
-    Create a NestableGenerator describing a single simulator run.
+        :return: a list of prepared generator functions
+        """
+        wrapper = []
+        for time_point in self.time_points:
+            generator_declarations = generator_declarations_for_time_point(self.events, time_point)
+            time_point_wrapper_declaration: Sequence[T] = Sequence(generator_declarations, time_point)
+            wrapper.append(time_point_wrapper_declaration)
+        return Sequence(wrapper, 0)
 
-    :param config: a prepared SimConfiguration object
-    :return: a list of prepared generator functions
-    """
-    wrapper = []
-    for time_point in config.time_points:
-        generator_declarations = generator_declarations_for_time_point(config.events, time_point)
-        time_point_wrapper_declaration: Sequence[T] = Sequence(generator_declarations, time_point)
-        wrapper.append(time_point_wrapper_declaration)
-    return Sequence(wrapper, 0)
+    def partial_tree_generators_by_time_point(self) -> dict[int, Generator[T]]:
+        """
+        Create a dict of NestableGenerators keyed by their time_point in the simulation. Used for generating
+        partial EventTrees of the simulation.
 
+        :return: a list of prepared generator functions
+        """
 
-def partial_tree_generators_by_time_point[T](config: SimConfiguration[T]) -> dict[int, Generator[T]]:
-    """
-    Create a dict of NestableGenerators keyed by their time_point in the simulation. Used for generating
-    partial EventTrees of the simulation.
+        generators_by_time_point = {}
 
-    :param config: a prepared SimConfiguration object
-    :return: a list of prepared generator functions
-    """
-
-    generators_by_time_point = {}
-
-    for time_point in config.time_points:
-        generator_declarations = generator_declarations_for_time_point(config.events, time_point)
-        sequence_wrapper_declaration: Generator[T] = Sequence(generator_declarations, time_point)
-        generators_by_time_point[time_point] = sequence_wrapper_declaration
-    return generators_by_time_point
+        for time_point in self.time_points:
+            generator_declarations = generator_declarations_for_time_point(self.events, time_point)
+            sequence_wrapper_declaration: Generator[T] = Sequence(generator_declarations, time_point)
+            generators_by_time_point[time_point] = sequence_wrapper_declaration
+        return generators_by_time_point
