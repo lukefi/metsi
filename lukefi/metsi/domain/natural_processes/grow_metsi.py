@@ -5,6 +5,7 @@
 # MetsiGrow is NOT licensed under MPL-2.0.
 # MetsiGrow is released under a separate Source Available – Non-Commercial license.
 # See MetsiGrow's LICENSE-NC.md for full details.
+
 from typing import Optional,TypeVar
 from functools import cached_property
 from collections import defaultdict
@@ -138,38 +139,43 @@ class MetsiGrowPredictor(Predict):
 
     # -- management vars (defaults) --------
 
-
-
     @property
     def spedom(self) -> Species:
         """
-        Dominant species (MetsiGrow Species):
-        1) Choose by total basal area per species.
-        2) If all basal areas are zero/unavailable, fall back to stems/ha.
+        Finds dominant species from MetsiGrow species.
 
-        If to_mg_species fails for any tree, this property raises ValueError (no swallowing).
+        Rules:
+          - Aggregate basal area per species; if any BA > 0, return the species with max BA.
+          - Otherwise, aggregate stems_per_ha per species; if any stems > 0, return max stems.
+          - If there are no reference trees, or both BA and stems are zero/missing, raise ValueError.
         """
-        # 1) Basal area aggregation by Species
+        trees = getattr(self.stand, "reference_trees", None)
+        if not trees:
+            raise ValueError(
+                "Cannot determine dominant species: stand has no reference trees."
+            )
+
+        # 1) Dominant by basal area
         ba_by_species: dict[Species, float] = defaultdict(float)
-        for t in getattr(self.stand, "reference_trees", []):
-            # If t.species is None, you may keep your default (PINE) or change as needed
-            sp = to_mg_species(t.species if t.species is not None else Species.PINE)
+        for t in trees:
+            sp = to_mg_species(t.species)
             ba_by_species[sp] += float(calculate_basal_area(t) or 0.0)
 
         if any(v > 0.0 for v in ba_by_species.values()):
             return max(ba_by_species.items(), key=lambda kv: kv[1])[0]
 
-        # 2) Fallback: stems/ha
+        # 2) Fallback to stems/ha 
         stems_by_species: dict[Species, float] = defaultdict(float)
-        for t in getattr(self.stand, "reference_trees", []):
-            sp = to_mg_species(t.species if t.species is not None else Species.PINE)
+        for t in trees:
+            sp = to_mg_species(t.species)
             stems_by_species[sp] += float(getattr(t, "stems_per_ha", 0.0) or 0.0)
 
-        if stems_by_species:
+        if any(v > 0.0 for v in stems_by_species.values()):
             return max(stems_by_species.items(), key=lambda kv: kv[1])[0]
 
-        # Sensible fallback if no trees present
-        return Species.DECIDUOUS
+        raise ValueError(
+            "Cannot determine dominant species: all basal areas and stem counts are zero or missing."
+        )
 
     @property
     def prt(self) -> Origin:
