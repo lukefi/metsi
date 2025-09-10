@@ -95,7 +95,7 @@ class Treatment[T](GeneratorBase):
     def unwrap(self, parents: list[EventTree], time_point: int) -> list[EventTree]:
         retval = []
         for parent in parents:
-            branch = EventTree(self._prepare_paremeterized_treatment(time_point), parent)
+            branch = EventTree(self._prepare_paremeterized_treatment(time_point))
             parent.add_branch(branch)
             retval.append(branch)
         return retval

@@ -34,7 +34,7 @@ def evaluate_sequence(payload: T, *operations: Callable[[T], T]) -> T:
     return current
 
 
-def run_chains_iteratively(payload: T, chains: list[list[Callable[[T], T]]]) -> list[T]:
+def _run_chains_iteratively(payload: T, chains: list[list[Callable[[T], T]]]) -> list[T]:
     """Execute all given operation chains for the given state payload. Return the collection of success results from
     all chains.
 
@@ -53,7 +53,7 @@ def run_chains_iteratively(payload: T, chains: list[list[Callable[[T], T]]]) -> 
 
 def chain_evaluator(payload: OperationPayload[T], root_node: EventTree[T]) -> list[OperationPayload[T]]:
     chains = root_node.operation_chains()
-    return run_chains_iteratively(payload, chains)
+    return _run_chains_iteratively(payload, chains)
 
 
 def depth_first_evaluator(payload: OperationPayload[T], root_node: EventTree[T]) -> list[OperationPayload[T]]:
