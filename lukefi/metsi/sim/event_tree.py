@@ -1,5 +1,4 @@
 from typing import Optional
-import weakref
 from copy import copy, deepcopy
 
 from lukefi.metsi.data.layered_model import PossiblyLayered
@@ -16,34 +15,15 @@ class EventTree[T]:
     Event represents a computational operation in a tree of following event paths.
     """
 
-    __slots__ = ('wrapped_operation', 'branches', '_previous_ref', '__weakref__')
+    __slots__ = ('wrapped_operation', 'branches')
 
     wrapped_operation: "ProcessedOperation[T]"
     branches: list["EventTree[T]"]
-    _previous_ref: Optional[weakref.ReferenceType["EventTree[T]"]]
 
-    def __init__(self,
-                 operation: Optional["ProcessedOperation[T]"] = None,
-                 previous: Optional['EventTree[T]'] = None):
+    def __init__(self, operation: Optional["ProcessedOperation[T]"] = None):
 
         self.wrapped_operation = operation or identity
-        self._previous_ref = weakref.ref(previous) if previous else None
         self.branches = []
-
-    @property
-    def previous(self):
-        return self._previous_ref() if self._previous_ref else None
-
-    @previous.setter
-    def previous(self, prev: Optional['EventTree[T]']):
-        self._previous_ref = weakref.ref(prev) if prev else None
-
-    def find_root(self):
-        return self if self.previous is None else self.previous.find_root()
-
-    def attach(self, previous: 'EventTree[T]'):
-        self.previous = previous
-        previous.add_branch(self)
 
     def operation_chains(self) -> list[list["ProcessedOperation[T]"]]:
         """
@@ -104,8 +84,4 @@ class EventTree[T]:
         return results
 
     def add_branch(self, et: 'EventTree[T]'):
-        et.previous = self
         self.branches.append(et)
-
-    def add_branch_from_operation(self, operation: "ProcessedOperation[T]"):
-        self.add_branch(EventTree(operation, self))
