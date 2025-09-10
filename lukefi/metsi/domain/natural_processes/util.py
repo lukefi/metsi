@@ -13,16 +13,16 @@ def update_stand_growth(
     """In-place update stand's reference trees with given diameters, heights and stem count.
     Increase ages for trees and stand. Remove sapling flag from trees that have grown beyond 1.3m. """
     for i, t in enumerate(stand.reference_trees):
-        height_before_growth = t.height
+        height_before_growth = t.height or 0.0
         t.breast_height_diameter = diameters[i]
         t.height = heights[i]
         t.stems_per_ha = stems[i]
-        t.biological_age += step
+        t.biological_age = (t.biological_age or 0.0) + step
         if height_before_growth < 1.3 <= t.height:
             t.breast_height_age = t.biological_age
         if t.height >= 1.3 and t.sapling:
             t.sapling = False
-    stand.year += step
+    stand.year = (stand.year or 0) + step
 
 
 def update_stand_growth_vectorized(stand: ForestStand,
