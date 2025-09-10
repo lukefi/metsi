@@ -1,16 +1,25 @@
 from collections.abc import Callable
 from copy import deepcopy
+from typing import TypeVar
 from lukefi.metsi.data.layered_model import PossiblyLayered
-from lukefi.metsi.sim.core_types import Evaluator, OperationPayload, SimConfiguration, EventTree
+from lukefi.metsi.sim.event_tree import EventTree
 from lukefi.metsi.sim.generators import (
-    NestableGenerator,
+    Generator,
+    compose_nested)
+from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.sim_configuration import (
+    SimConfiguration,
     full_tree_generators,
-    compose_nested,
     partial_tree_generators_by_time_point)
 from lukefi.metsi.sim.state_tree import StateTree
 
+T = TypeVar("T")
 
-def evaluate_sequence[T](payload: T, *operations: Callable[[T], T]) -> T:
+Evaluator = Callable[[OperationPayload[T], EventTree[T]], list[OperationPayload[T]]]
+Runner = Callable[[OperationPayload[T], SimConfiguration, Evaluator[T]], list[OperationPayload[T]]]
+
+
+def evaluate_sequence(payload: T, *operations: Callable[[T], T]) -> T:
     """
     Compute a single processing result for single data input.
 
@@ -28,7 +37,7 @@ def evaluate_sequence[T](payload: T, *operations: Callable[[T], T]) -> T:
     return current
 
 
-def run_chains_iteratively[T](payload: T, chains: list[list[Callable[[T], T]]]) -> list[T]:
+def run_chains_iteratively(payload: T, chains: list[list[Callable[[T], T]]]) -> list[T]:
     """Execute all given operation chains for the given state payload. Return the collection of success results from
     all chains.
 
@@ -45,18 +54,18 @@ def run_chains_iteratively[T](payload: T, chains: list[list[Callable[[T], T]]]) 
     return results
 
 
-def chain_evaluator[T](payload: OperationPayload[T], root_node: EventTree[T]) -> list[OperationPayload[T]]:
+def chain_evaluator(payload: OperationPayload[T], root_node: EventTree[T]) -> list[OperationPayload[T]]:
     chains = root_node.operation_chains()
     return run_chains_iteratively(payload, chains)
 
 
-def depth_first_evaluator[T](payload: OperationPayload[T], root_node: EventTree[T]) -> list[OperationPayload[T]]:
+def depth_first_evaluator(payload: OperationPayload[T], root_node: EventTree[T]) -> list[OperationPayload[T]]:
     state_tree: StateTree[PossiblyLayered[T]] = StateTree()
     return root_node.evaluate(payload, state_tree)
 
 
-def run_full_tree_strategy[T](payload: OperationPayload[T], config: SimConfiguration,
-                              evaluator: Evaluator[T] = chain_evaluator) -> list[OperationPayload[T]]:
+def run_full_tree_strategy(payload: OperationPayload[T], config: SimConfiguration,
+                           evaluator: Evaluator[T] = chain_evaluator) -> list[OperationPayload[T]]:
     """Process the given operation payload using a simulation state tree created from the declaration. Full simulation
     tree and operation chains are pre-generated for the run. This tree strategy creates the full theoretical branching
     tree for the simulation, carrying a significant memory and runtime overhead for large trees.
@@ -67,15 +76,15 @@ def run_full_tree_strategy[T](payload: OperationPayload[T], config: SimConfigura
     :return: a list of resulting simulation state payloads
     """
 
-    nestable_generator = full_tree_generators(config)
-    root_node = compose_nested(nestable_generator)
+    nestable_generator: Generator[T] = full_tree_generators(config)
+    root_node: EventTree[T] = compose_nested(nestable_generator)
     result = evaluator(payload, root_node)
     return result
 
 
-def run_partial_tree_strategy[T](payload: OperationPayload[T], config: SimConfiguration,
-                                 evaluator: Evaluator[T] = chain_evaluator
-                                 ) -> list[OperationPayload[T]]:
+def run_partial_tree_strategy(payload: OperationPayload[T], config: SimConfiguration[T],
+                              evaluator: Evaluator[T] = chain_evaluator
+                              ) -> list[OperationPayload[T]]:
     """Process the given operation payload using a simulation state tree created from the declaration. The simulation
     tree and operation chains are generated and executed in order per simulation time point. This reduces the amount of
     redundant, always-failing operation chains and redundant branches of the simulation tree.
@@ -85,8 +94,7 @@ def run_partial_tree_strategy[T](payload: OperationPayload[T], config: SimConfig
     :param evaluator: a function for performing computation from given EventTree and for given OperationPayload
     :return: a list of resulting simulation state payloads
     """
-    generators_by_time_point: dict[int, NestableGenerator[T]
-                                   ] = partial_tree_generators_by_time_point(config)
+    generators_by_time_point: dict[int, Generator[T]] = partial_tree_generators_by_time_point(config)
     root_nodes: dict[int, EventTree[T]] = {}
     results: list[OperationPayload[T]] = [payload]
 

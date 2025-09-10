@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Callable, Optional, TypeVar
 
-from lukefi.metsi.sim.core_types import ProcessedOperation
+from lukefi.metsi.sim.operation_payload import ProcessedOperation
 from lukefi.metsi.sim.operation_payload import OperationPayload
 if TYPE_CHECKING:
     from lukefi.metsi.sim.generators import TreatmentFn

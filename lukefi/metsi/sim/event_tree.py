@@ -1,63 +1,14 @@
-from collections.abc import Callable
-from copy import deepcopy, copy
-from types import SimpleNamespace
-from typing import TYPE_CHECKING, NamedTuple, Optional, TypeVar
+from typing import Optional
 import weakref
+from copy import copy, deepcopy
 
 from lukefi.metsi.data.layered_model import PossiblyLayered
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.operation_payload import OperationPayload, ProcessedOperation
 from lukefi.metsi.sim.state_tree import StateTree
-if TYPE_CHECKING:
-    from lukefi.metsi.sim.event import Event
-    from lukefi.metsi.sim.generators import Generator
 
 
 def identity(x):
     return x
-
-
-class DeclaredEvents[T](NamedTuple):
-    time_points: list[int]
-    treatment_generator: "Generator[T]"
-
-
-class SimConfiguration[T](SimpleNamespace):
-    """
-    A class to manage simulation configuration, including operations, generators,
-    events, and time points.
-    Attributes:
-        events: A list of declared events for the simulation.
-        time_points: A sorted list of unique time points derived from the
-            declared simulation events.
-    Methods:
-        __init__(**kwargs):
-            Initializes the SimConfiguration instance with operation and generator
-            lookups, and additional keyword arguments.
-    """
-    events: list[DeclaredEvents[T]] = []
-    time_points: list[int] = []
-
-    def __init__(self, **kwargs):
-        """
-        Initializes the core simulation object.
-        Args:
-            **kwargs: Additional keyword arguments to be passed to the parent class initializer.
-        """
-        super().__init__(**kwargs)
-        self._populate_simulation_events(self.simulation_events)
-
-    def _populate_simulation_events(self, events: list["Event[T]"]):
-        time_points = set()
-        self.events = []
-        for event_set in events:
-            source_time_points = event_set.time_points
-            new_event = DeclaredEvents(
-                time_points=source_time_points,
-                treatment_generator=event_set.treatments
-            )
-            self.events.append(new_event)
-            time_points.update(source_time_points)
-        self.time_points = sorted(time_points)
 
 
 class EventTree[T]:
@@ -158,10 +109,3 @@ class EventTree[T]:
 
     def add_branch_from_operation(self, operation: "ProcessedOperation[T]"):
         self.add_branch(EventTree(operation, self))
-
-
-T = TypeVar("T")
-Evaluator = Callable[[OperationPayload[T], EventTree[T]], list[OperationPayload[T]]]
-Runner = Callable[[OperationPayload[T], SimConfiguration, Evaluator[T]], list[OperationPayload[T]]]
-ProcessedOperation = Callable[[OperationPayload[T]], OperationPayload[T]]
-ProcessedGenerator = Callable[[Optional[list[EventTree[T]]]], list[EventTree[T]]]
