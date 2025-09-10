@@ -7,10 +7,7 @@ from lukefi.metsi.sim.generators import (
     Generator,
     compose_nested)
 from lukefi.metsi.sim.operation_payload import OperationPayload
-from lukefi.metsi.sim.sim_configuration import (
-    SimConfiguration,
-    full_tree_generators,
-    partial_tree_generators_by_time_point)
+from lukefi.metsi.sim.sim_configuration import SimConfiguration
 from lukefi.metsi.sim.state_tree import StateTree
 
 T = TypeVar("T")
@@ -76,7 +73,7 @@ def run_full_tree_strategy(payload: OperationPayload[T], config: SimConfiguratio
     :return: a list of resulting simulation state payloads
     """
 
-    nestable_generator: Generator[T] = full_tree_generators(config)
+    nestable_generator: Generator[T] = config.full_tree_generators()
     root_node: EventTree[T] = compose_nested(nestable_generator)
     result = evaluator(payload, root_node)
     return result
@@ -94,7 +91,7 @@ def run_partial_tree_strategy(payload: OperationPayload[T], config: SimConfigura
     :param evaluator: a function for performing computation from given EventTree and for given OperationPayload
     :return: a list of resulting simulation state payloads
     """
-    generators_by_time_point: dict[int, Generator[T]] = partial_tree_generators_by_time_point(config)
+    generators_by_time_point: dict[int, Generator[T]] = config.partial_tree_generators_by_time_point()
     root_nodes: dict[int, EventTree[T]] = {}
     results: list[OperationPayload[T]] = [payload]
 

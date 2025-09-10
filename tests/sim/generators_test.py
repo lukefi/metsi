@@ -6,7 +6,7 @@ import lukefi.metsi.sim.generators
 from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment, compose_nested
 from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
-from lukefi.metsi.sim.sim_configuration import SimConfiguration, full_tree_generators, partial_tree_generators_by_time_point
+from lukefi.metsi.sim.sim_configuration import SimConfiguration
 from tests.test_utils import inc, collecting_increment, parametrized_operation
 
 
@@ -28,7 +28,7 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = full_tree_generators(config)
+        generator = config.full_tree_generators()
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
@@ -57,7 +57,7 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = full_tree_generators(config)
+        generator = config.full_tree_generators()
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(
@@ -97,7 +97,7 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = full_tree_generators(config)
+        generator = config.full_tree_generators()
         result = compose_nested(generator)
         chain = result.operation_chains()[0]
         payload = OperationPayload(computational_unit=0,
@@ -123,7 +123,7 @@ class TestGenerators(unittest.TestCase):
         }
         config = SimConfiguration(**declaration)
         # generators for 2 time points'
-        generators = partial_tree_generators_by_time_point(config)
+        generators = config.partial_tree_generators_by_time_point()
         self.assertEqual(2, len(generators.values()))
 
         # 1 sequence generators in each time point
@@ -179,7 +179,7 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = full_tree_generators(config)
+        generator = config.full_tree_generators()
         tree = compose_nested(generator)
         chains = tree.operation_chains()
         self.assertEqual(4, len(chains))
@@ -247,7 +247,7 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = full_tree_generators(config)
+        generator = config.full_tree_generators()
         tree = compose_nested(generator)
         chains = tree.operation_chains()
         self.assertEqual(3, len(chains))
@@ -320,7 +320,7 @@ class TestGenerators(unittest.TestCase):
             SimConfiguration(**declaration_one),
             SimConfiguration(**declaration_two)
         ]
-        generators = [full_tree_generators(config) for config in configs]
+        generators = [config.full_tree_generators() for config in configs]
         trees = [compose_nested(generator) for generator in generators]
         chains_sets = [tree.operation_chains() for tree in trees]
 
