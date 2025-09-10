@@ -23,27 +23,32 @@ Condition = Callable[[T], bool]
 
 
 class GeneratorBase(ABC):
-    pass
+    """Shared abstract base class for Generator and Treatment types."""
 
 
 class Generator[T](GeneratorBase, ABC):
+    """Abstract base class for generator types."""
     generator_fn: GeneratorFn[T]
     treatments: Sequence_[GeneratorBase]
 
 
 class Sequence[T](Generator[T]):
+    """Generator for sequential treatments."""
     def __init__(self, treatments: Sequence_[GeneratorBase]):
         self.generator_fn = sequence
         self.treatments = treatments
 
 
 class Alternatives[T](Generator[T]):
+    """Generator for branching treatments"""
     def __init__(self, treatments: Sequence_[GeneratorBase]):
         self.generator_fn = alternatives
         self.treatments = treatments
 
 
 class Treatment[T](GeneratorBase):
+    """Base class for treatments. Contains conditions and parameters and the actual function that operates on the
+    simulation state."""
     conditions: list[Condition[T]]
     parameters: dict[str, Any]
     file_parameters: dict[str, str]
@@ -102,8 +107,7 @@ class NestableGenerator[T]:
     free_treatments: list[Treatment[T]]
 
     def __init__(self, generator: Generator[T], time_point: int):
-        """Construct a NestableGenerator for a given generator block within the SimConfiguration and for the given
-        time point."""
+        """Construct a NestableGenerator for a given generator block and for the given time point."""
         self.generator = generator
         self.time_point = time_point
         self.nested_generators = []
@@ -126,7 +130,7 @@ class NestableGenerator[T]:
 
     def wrap_generator_candidate(self, candidate: GeneratorBase):
         """Create NestableGenerators for nested generator declarations within current generator block. Separate
-        individual operations as free operations into self state."""
+        individual treatments as free treatments into self state."""
         if isinstance(candidate, Generator):
             # Encountered a nested generator.
             self.wrap_free_treatments()
@@ -136,7 +140,7 @@ class NestableGenerator[T]:
             self.free_treatments.append(candidate)
 
     def wrap_free_treatments(self):
-        """Create NestableGenerators for individual operations collected into self state. Clear the list of operations
+        """Create NestableGenerators for individual treatments collected into self state. Clear the list of treatments
         afterwards."""
         if self.free_treatments:
             decl = copy(self.generator)
