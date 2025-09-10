@@ -126,22 +126,6 @@ class Motti4DLL:
                 pass
         return min(int(mty), 6)
 
-    def _apply_overrides(self, yy, overrides: Optional[dict] = None):
-        if not overrides:
-            return
-        # Allow explicit assignment of known scalar fields
-        scalar_ok = {
-            "mal", "mty", "verl", "verlt", "alr", "year", "step",
-            "spedom", "spedom2", "nstorey", "gstorey",
-            "lake", "sea"
-        }
-        for k, v in overrides.items():
-            if k in scalar_ok and hasattr(yy, k):
-                try:
-                    setattr(yy, k, float(v))
-                except AttributeError:
-                    pass
-
     # ---------- FFI ----------
 
     def _cdef_source(self) -> str:
@@ -241,16 +225,27 @@ class Motti4DLL:
     # ---------- site + trees ----------
 
     @staticmethod
-    def _auto_euref_km(y1: float, x1: float) -> Tuple[float, float]:
-        # Helper if you accidentally pass meters or lat/long.
+    def _auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
+        """
+        Normalize to EUREF-FIN/TM35FIN kilometers.
+        - Raise if values look like lat/long.
+        - If values look like meters (>10_000), divide by 1000.
+        - Otherwise, pass through unchanged (already km).
+        """
         abs_y, abs_x = abs(y1), abs(x1)
+
+        # Clear lat/long guard
         if abs_y <= 90.0 and abs_x <= 180.0:
             raise ValueError(
                 f"Coordinates look like lat/long (Y={y1}, X={x1}). "
-                "Motti expects EUREF-FIN/TM35 in kilometers (e.g., Y~6900, X~3400)."
+                "Expected EUREF-FIN/TM35 in kilometers."
             )
-        if abs_y > 10000.0 or abs_x > 10000.0:
+
+        # meters → km
+        if abs_y > 10_000.0 or abs_x > 10_000.0:
             return y1 / 1000.0, x1 / 1000.0
+
+        # already km
         return y1, x1
 
     def new_site(
@@ -263,7 +258,10 @@ class Motti4DLL:
         step: float = 5.0,
         convert_coords: bool = False,
         convert_mela_site: bool = True,
-        overrides: Optional[dict] = None,
+        spedom: Optional[int] = None,
+        spedom2: Optional[int] = None,
+        nstorey: float = 1.0,
+        gstorey: float = 1.0,
     ):
         """
         IMPORTANT: Matches C flow -> SiteInit first, then fill fields (no dd), then CheckYY.
@@ -306,8 +304,12 @@ class Motti4DLL:
         yy.nstorey = 1.0
         yy.gstorey = 1.0
 
-        # allow caller to override specific scalars (including spedom/spedom2)
-        self._apply_overrides(yy, overrides)
+        yy.nstorey = float(nstorey)
+        yy.gstorey = float(gstorey)
+        if spedom is not None:
+            yy.spedom = float(spedom)
+        if spedom2 is not None:
+            yy.spedom2 = float(spedom2)
 
         # 3) Validate
         nerr = ffi.new("int *")

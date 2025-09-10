@@ -1,9 +1,7 @@
 from __future__ import annotations
-import math
 from pathlib import Path
-from typing import Optional, Union, Iterable,  Tuple, Dict, Mapping
+from typing import Optional, Union, Iterable, Tuple, Mapping, Dict
 from functools import cached_property
-from collections import defaultdict
 from types import MappingProxyType
 
 from lukefi.metsi.forestry.forestry_utils import (
@@ -43,23 +41,24 @@ def _species_to_motti(spe: int) -> int:
         return int(TreeSpecies.OTHER_CONIFEROUS)  # 8
     if ts in DECIDUOUS_SPECIES:
         return int(TreeSpecies.OTHER_DECIDUOUS)  # 9
-    return int(TreeSpecies.OTHER_DECIDUOUS)  # sensible fallback
 
-def _dominant_species_codes(stand) -> Dict[str, int]:
+    raise ValueError(f"Unsupported tree species code: {int(spe)}")
+
+def _spedom(stand) -> int:
     """
     Pick dominant species.
     Prefer basal area totals; if BA totals are all zero/missing, fall back to stems/ha.
-    Returns 'spedom' and 'spedom2' as Mottispecies codes.
+    Returns dominant species as Mottispecies codes.
     """
     # 1) Try basal area first
     use_basal = overall_basal_area(stand.reference_trees) > 0.0
-    per: dict[int, float] = defaultdict(float)
+    per: Dict[int, float] = {}
 
     if use_basal:
         # group BA by Motti species code
         for t in stand.reference_trees:
             motti = _species_to_motti(int(t.species))
-            per[motti] += float(calculate_basal_area(t) or 0.0)
+            per[motti] = per.get(motti, 0.0) + float(calculate_basal_area(t) or 0.0)
 
         # if everything was zero (e.g., no diameters), fall back to stems
         if sum(per.values()) == 0.0:
@@ -70,15 +69,14 @@ def _dominant_species_codes(stand) -> Dict[str, int]:
     if not use_basal:
         for t in stand.reference_trees:
             motti = _species_to_motti(int(t.species))
-            per[motti] += float(t.stems_per_ha or 0.0)
+            per[motti] = per.get(motti, 0.0) + float(t.stems_per_ha or 0.0)
 
-    # 3) Choose top-2 (with a sensible default if only one)
+    # 3) Choose top-1
     if not per:
-        return {"spedom": 1, "spedom2": 2}
-    ordered = sorted(per.items(), key=lambda kv: kv[1], reverse=True)
-    top1 = ordered[0][0]
-    top2 = ordered[1][0] if len(ordered) > 1 else (2 if top1 == 1 else 1)
-    return {"spedom": top1, "spedom2": top2}
+        raise ValueError(
+            "Cannot determine dominant species: all basal areas and stem counts are zero or missing."
+        )
+    return max(per.items(), key=lambda kv: kv[1])[0]
 
 
 def _resolve_shared_object(p: Union[str, Path]) -> Path:
@@ -195,7 +193,7 @@ class MottiDLLPredictor:
         return tuple(MappingProxyType(d) for d in self._trees_py)
 
     def evolve(self, step: int = 5) -> GrowthDeltas:
-        dom = _dominant_species_codes(self.stand)
+        dominant_species = _spedom(self.stand)
         site = self.dll.new_site(
             Y=self.get_y, X=self.get_x, Z=self.get_z,
             lake=self.lake, sea=self.sea,
@@ -204,11 +202,10 @@ class MottiDLLPredictor:
             verl=self.verl, verlt=self.verlt, alr=self.alr,
             year=self.year, step=step,
             convert_coords=True,
-            overrides={
-                "spedom": int(dom["spedom"]),
-                "spedom2": int(dom["spedom2"]),
-                "nstorey": 1, "gstorey": 1,
-            },
+            spedom=dominant_species,
+            spedom2=dominant_species,
+            nstorey=1.0,
+            gstorey=1.0,
             convert_mela_site=self.use_dll_site_convert,
         )
         trees, n = self.dll.new_trees(self._trees_py)
