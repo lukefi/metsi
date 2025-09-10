@@ -19,7 +19,7 @@ control_structure = {
     "preprocessing_params": {
         preproc_filter: [
             {
-                "remove trees": "tree_type not in (None, 'V', 'U', 'S', 'T', 'N')",
+                "remove trees": "tree_type not in ('V', 'U', 'S', 'T', 'N')",
                 "remove stands": "site_type_category is None"
             }
         ],
