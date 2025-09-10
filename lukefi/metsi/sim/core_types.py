@@ -26,16 +26,7 @@ class SimConfiguration[T](SimpleNamespace):
     A class to manage simulation configuration, including operations, generators,
     events, and time points.
     Attributes:
-        operation_params: A dictionary containing
-            parameters for each operation, where the key is the operation name and
-            the value is a list of parameter dictionaries.
-        operation_file_params: A dictionary containing
-            file-related parameters for operations, where the key is the operation
-            name and the value is a dictionary of file parameters.
         events: A list of declared events for the simulation.
-        run_constraints: A dictionary defining constraints for
-            simulation runs, where the key is a constraint name and the value is a
-            dictionary of constraint details.
         time_points: A sorted list of unique time points derived from the
             declared simulation events.
     Methods:
