@@ -1,6 +1,7 @@
+from collections.abc import Callable
 from copy import copy, deepcopy
 from types import SimpleNamespace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypeVar
 
 from lukefi.metsi.data.layered_model import LayeredObject, PossiblyLayered
 from lukefi.metsi.sim.collected_data import CollectedData
@@ -29,3 +30,6 @@ class OperationPayload[T](SimpleNamespace):
             collected_data=copy(self.collected_data),
             operation_history=list(self.operation_history)
         )
+
+T = TypeVar("T")
+ProcessedOperation = Callable[[OperationPayload[T]], OperationPayload[T]]

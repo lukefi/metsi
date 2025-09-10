@@ -13,9 +13,10 @@ from lukefi.metsi.sim.runners import (
     run_partial_tree_strategy,
     depth_first_evaluator,
     chain_evaluator)
-from lukefi.metsi.sim.core_types import Runner, SimConfiguration, Evaluator
 from lukefi.metsi.app.utils import MetsiException
-
+from lukefi.metsi.sim.runners import Evaluator
+from lukefi.metsi.sim.runners import Runner
+from lukefi.metsi.sim.sim_configuration import SimConfiguration
 
 def run_stands(stands: StandList,
                config: SimConfiguration,
