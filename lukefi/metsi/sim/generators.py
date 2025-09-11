@@ -144,13 +144,6 @@ def simple_processable_chain(operation_tags: list[Callable[[T], T]],
     return result
 
 
-def generator_function(key: GeneratorFn[T],
-                       *fns: ProcessedOperation[T]) -> ProcessedGenerator[T]:
-    """Crate a generator function wrapper for function by the key. Binds the
-    argument list of functions with the generator."""
-    return lambda parent_nodes: key(parent_nodes, *fns)
-
-
 def prepare_parametrized_treatment(treatment: Treatment[T], time_point: int) -> ProcessedOperation[T]:
     treatment.check_file_params()
     combined_params = treatment.merge_params()
