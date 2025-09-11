@@ -7,7 +7,7 @@ from collections.abc import Callable
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.event_tree import EventTree
-from lukefi.metsi.sim.operation_payload import ProcessedOperation
+from lukefi.metsi.sim.operation_payload import OperationPayload, ProcessedOperation
 from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
 from lukefi.metsi.app.utils import MetsiException
 
@@ -71,13 +71,13 @@ class Alternatives[T](Generator[T]):
 class Treatment[T](GeneratorBase):
     """Base class for treatments. Contains conditions and parameters and the actual function that operates on the
     simulation state."""
-    conditions: list[Condition[T]]
+    conditions: list[Condition[T, OperationPayload[T]]]
     parameters: dict[str, Any]
     file_parameters: dict[str, str]
     treatment_fn: TreatmentFn[T]
 
     def __init__(self, treatment_fn: TreatmentFn[T], parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[T]]] = None,
+                 conditions: Optional[list[Condition[T, OperationPayload[T]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         self.treatment_fn = treatment_fn
 

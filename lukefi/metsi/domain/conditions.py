@@ -4,7 +4,7 @@ from lukefi.metsi.sim.generators import TreatmentFn
 from lukefi.metsi.sim.operation_payload import OperationPayload
 
 
-class MinimumTimeInterval[T](Condition[T]):
+class MinimumTimeInterval[T](Condition[T, OperationPayload[T]]):
     def __init__(self, minimum_time: int, operation: Optional[TreatmentFn[T]] = None) -> None:
         if operation is not None:
             super().__init__(lambda t, x: _check_eligible_to_run(t, x, operation, minimum_time))
