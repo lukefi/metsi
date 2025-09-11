@@ -1,6 +1,6 @@
 import numpy as np
 from lukefi.metsi.domain.collected_types import CrossCutResult, CrossCuttableTree
-from lukefi.metsi.sim.core_types import OpTuple
+from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.utils.file_io import get_timber_price_table
 from lukefi.metsi.forestry.cross_cutting.cross_cutting import cross_cut
