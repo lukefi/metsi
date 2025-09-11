@@ -1,5 +1,6 @@
 import unittest
 
+from lukefi.metsi.domain.conditions import MinimumTimeInterval
 from lukefi.metsi.sim.event import Event
 from lukefi.metsi.sim.generators import Sequence, Treatment
 from lukefi.metsi.sim.runners import evaluate_sequence
@@ -62,12 +63,12 @@ class ComputationModelTest(unittest.TestCase):
                     time_points=[1, 2, 3],
                     treatments=[
                         Treatment(
+                            conditions=[
+                                MinimumTimeInterval(5)
+                            ],
                             treatment_fn=fn1,
                             parameters={
                                 'param1': 1
-                            },
-                            run_constraints={
-                                'minimum_time_interval': 5
                             }
                         ),
                         Treatment(
@@ -80,12 +81,12 @@ class ComputationModelTest(unittest.TestCase):
                     treatments=[
                         Sequence([
                             Treatment(
+                                conditions=[
+                                    MinimumTimeInterval(5)
+                                ],
                                 treatment_fn=fn1,
                                 parameters={
                                     'param1': 1
-                                },
-                                run_constraints={
-                                    'minimum_time_interval': 5
                                 }
                             ),
                             Treatment(
