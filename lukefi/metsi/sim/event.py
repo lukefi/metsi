@@ -1,12 +1,10 @@
-from collections.abc import Callable
 from copy import deepcopy
 from typing import Optional, TypeVar
 
+from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.generators import Alternatives, GeneratorBase, Generator, Sequence
 
 T = TypeVar('T')  # T = ForestStand
-
-Condition = Callable[[T], bool]
 
 
 class Event[T]:
