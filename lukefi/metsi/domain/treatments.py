@@ -17,12 +17,13 @@ from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
 from lukefi.metsi.domain.natural_processes.grow_metsi import grow_metsi
 from lukefi.metsi.sim.event import Condition
 from lukefi.metsi.sim.generators import Treatment
+from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.operations import do_nothing
 
 
 class Planting(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=planting,
                          parameters=parameters,
@@ -32,7 +33,7 @@ class Planting(Treatment[ForestStand]):
 
 class CrossCutStandingTrees(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=cross_cut_standing_trees,
                          parameters=parameters,
@@ -42,7 +43,7 @@ class CrossCutStandingTrees(Treatment[ForestStand]):
 
 class CollectStandingTreeProperties(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=collect_standing_tree_properties,
                          parameters=parameters,
@@ -52,7 +53,7 @@ class CollectStandingTreeProperties(Treatment[ForestStand]):
 
 class CalculateNpv(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=calculate_npv,
                          parameters=parameters,
@@ -62,7 +63,7 @@ class CalculateNpv(Treatment[ForestStand]):
 
 class CalculateBiomass(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=calculate_biomass,
                          parameters=parameters,
@@ -72,7 +73,7 @@ class CalculateBiomass(Treatment[ForestStand]):
 
 class ReportState(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=report_state,
                          parameters=parameters,
@@ -82,7 +83,7 @@ class ReportState(Treatment[ForestStand]):
 
 class DoNothing(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=do_nothing,
                          parameters=parameters,
@@ -92,7 +93,7 @@ class DoNothing(Treatment[ForestStand]):
 
 class FirstThinning(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=first_thinning,
                          parameters=parameters,
@@ -102,7 +103,7 @@ class FirstThinning(Treatment[ForestStand]):
 
 class EvenThinning(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=even_thinning,
                          parameters=parameters,
@@ -112,7 +113,7 @@ class EvenThinning(Treatment[ForestStand]):
 
 class Clearcutting(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=clearcutting,
                          parameters=parameters,
@@ -122,7 +123,7 @@ class Clearcutting(Treatment[ForestStand]):
 
 class CrossCutFelledTrees(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=cross_cut_felled_trees,
                          parameters=parameters,
@@ -132,7 +133,7 @@ class CrossCutFelledTrees(Treatment[ForestStand]):
 
 class CollectFelledTreeProperties(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=collect_felled_tree_properties,
                          parameters=parameters,
@@ -142,7 +143,7 @@ class CollectFelledTreeProperties(Treatment[ForestStand]):
 
 class ReportPeriod(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=report_period,
                          parameters=parameters,
@@ -152,7 +153,7 @@ class ReportPeriod(Treatment[ForestStand]):
 
 class ReportCollectives(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=report_collectives,
                          parameters=parameters,
@@ -162,7 +163,7 @@ class ReportCollectives(Treatment[ForestStand]):
 
 class GrowActa(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=grow_acta,
                          parameters=parameters,
@@ -172,7 +173,7 @@ class GrowActa(Treatment[ForestStand]):
 
 class GrowMetsi(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=grow_metsi,
                          parameters=parameters,
@@ -182,7 +183,7 @@ class GrowMetsi(Treatment[ForestStand]):
 
 class ThinningFromBelow(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=thinning_from_below,
                          parameters=parameters,
@@ -192,7 +193,7 @@ class ThinningFromBelow(Treatment[ForestStand]):
 
 class ThinningFromAbove(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[ForestStand]]] = None,
+                 conditions: Optional[list[Condition[ForestStand, OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=thinning_from_above,
                          parameters=parameters,

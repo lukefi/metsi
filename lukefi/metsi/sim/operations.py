@@ -27,7 +27,7 @@ def prepared_operation(operation_entrypoint: Callable[[T], T], **operation_param
 
 def prepared_processor(operation_tag: "TreatmentFn[T]",
                        time_point: int,
-                       operation_conditions: list[Condition[T]],
+                       operation_conditions: list[Condition[T, OperationPayload[T]]],
                        **operation_parameters: dict[str,
                                                     dict]) -> ProcessedOperation[T]:
     """prepares a processor function with an operation entrypoint"""
@@ -37,7 +37,7 @@ def prepared_processor(operation_tag: "TreatmentFn[T]",
 
 
 def _processor(payload: OperationPayload[T], operation: "TreatmentFn[T]", operation_tag: "TreatmentFn[T]",
-               time_point: int, operation_conditions: list[Condition[T]],
+               time_point: int, operation_conditions: list[Condition[T, OperationPayload[T]]],
                **operation_parameters: dict[str, dict]) -> OperationPayload[T]:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     for condition in operation_conditions:
