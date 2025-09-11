@@ -24,4 +24,4 @@ def _check_eligible_to_run(
         operation: TreatmentFn[ForestStand],
         minimum_time_interval: int) -> bool:
     last_run = _get_operation_last_run(payload.operation_history, operation)
-    return last_run is None or minimum_time_interval < (time_point - last_run)
+    return last_run is None or minimum_time_interval <= (time_point - last_run)
