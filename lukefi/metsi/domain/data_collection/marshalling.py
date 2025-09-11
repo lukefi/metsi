@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from lukefi.metsi.data.model import ForestStand
 
 from lukefi.metsi.domain.utils.collectives import property_collector, autocollective, _collector_wrapper
-from lukefi.metsi.sim.core_types import OpTuple
+from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.sim.operations import T
 from lukefi.metsi.app.utils import MetsiException
 

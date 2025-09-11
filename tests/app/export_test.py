@@ -3,8 +3,8 @@ from types import SimpleNamespace
 from collections import OrderedDict
 import unittest
 from lukefi.metsi.app.export_handlers.j import j_xda, j_cda
-from lukefi.metsi.sim.core_types import CollectedData, OperationPayload
-
+from lukefi.metsi.sim.collected_data import CollectedData
+from lukefi.metsi.sim.operation_payload import OperationPayload
 
 class TestExport(unittest.TestCase):
 
