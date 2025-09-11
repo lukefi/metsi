@@ -1,3 +1,4 @@
+from lukefi.metsi.domain.conditions import MinimumTimeInterval
 from lukefi.metsi.domain.pre_ops import convert_coordinates, generate_reference_trees, preproc_filter
 from lukefi.metsi.domain.treatments import (
     CalculateBiomass,
@@ -155,14 +156,14 @@ control_structure = {
                         }
                     ),
                     FirstThinning(
+                        conditions=[
+                            MinimumTimeInterval(50)
+                        ],
                         parameters={
                             "thinning_factor": 0.97,
                             "e": 0.2,
                             "dominant_height_lower_bound": 11,
                             "dominant_height_upper_bound": 16
-                        },
-                        run_constraints={
-                            "minimum_time_interval": 50
                         }
                     ),
                 ]),
