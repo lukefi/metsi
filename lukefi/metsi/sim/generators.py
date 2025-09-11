@@ -34,6 +34,17 @@ class Generator[T](GeneratorBase, ABC):
         self.children = children
         self.time_point = time_point
 
+    def compose_nested(self) -> EventTree[T]:
+        """
+        Generate a simulation EventTree using the given NestableGenerator.
+
+        :param nestable_generator: NestableGenerator tree for generating a EventTree.
+        :return: The root node of the generated EventTree
+        """
+        root: EventTree[T] = EventTree()
+        self.unwrap([root], 0)
+        return root
+
 
 class Sequence[T](Generator[T]):
     """Generator for sequential treatments."""
@@ -101,32 +112,22 @@ class Treatment[T](GeneratorBase):
         return retval
 
     def _prepare_paremeterized_treatment(self, time_point) -> ProcessedOperation[T]:
-        return prepare_parametrized_treatment(self, time_point)
+        self._check_file_params()
+        combined_params = self._merge_params()
+        return prepared_processor(self.treatment_fn, time_point, self.run_constraints, **combined_params)
 
-    def check_file_params(self):
+    def _check_file_params(self):
         for _, path in self.file_parameters.items():
             if not os.path.isfile(path):
                 raise FileNotFoundError(f"file {path} defined in operation_file_params was not found")
 
-    def merge_params(self) -> dict[str, Any]:
+    def _merge_params(self) -> dict[str, Any]:
         common_keys = self.parameters.keys() & self.file_parameters.keys()
         if common_keys:
             raise MetsiException(
                 f"parameter(s) {common_keys} were defined both in 'parameters' and 'file_parameters' sections "
                 "in control.py. Please change the name of one of them.")
         return self.parameters | self.file_parameters  # pipe is the merge operator
-
-
-def compose_nested(nestable_generator: Generator[T]) -> EventTree[T]:
-    """
-    Generate a simulation EventTree using the given NestableGenerator.
-
-    :param nestable_generator: NestableGenerator tree for generating a EventTree.
-    :return: The root node of the generated EventTree
-    """
-    root: EventTree[T] = EventTree()
-    nestable_generator.unwrap([root], 0)
-    return root
 
 
 def simple_processable_chain(operation_tags: list[Callable[[T], T]],
@@ -142,9 +143,3 @@ def simple_processable_chain(operation_tags: list[Callable[[T], T]],
                                  "generators.")
         result.append(prepared_operation(tag, **params[0]))
     return result
-
-
-def prepare_parametrized_treatment(treatment: Treatment[T], time_point: int) -> ProcessedOperation[T]:
-    treatment.check_file_params()
-    combined_params = treatment.merge_params()
-    return prepared_processor(treatment.treatment_fn, time_point, treatment.run_constraints, **combined_params)

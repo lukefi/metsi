@@ -3,9 +3,8 @@ from copy import deepcopy
 from typing import TypeVar
 from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.sim.event_tree import EventTree
-from lukefi.metsi.sim.generators import (
-    Generator,
-    compose_nested)
+from lukefi.metsi.sim.generators import Generator
+
 from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.sim_configuration import SimConfiguration
 from lukefi.metsi.sim.state_tree import StateTree
@@ -74,7 +73,7 @@ def run_full_tree_strategy(payload: OperationPayload[T], config: SimConfiguratio
     """
 
     nestable_generator: Generator[T] = config.full_tree_generators()
-    root_node: EventTree[T] = compose_nested(nestable_generator)
+    root_node: EventTree[T] = nestable_generator.compose_nested()
     result = evaluator(payload, root_node)
     return result
 
@@ -97,7 +96,7 @@ def run_partial_tree_strategy(payload: OperationPayload[T], config: SimConfigura
 
     # build chains_by_time_point, which is a dict of chains
     for time_point, nestable_generator in generators_by_time_point.items():
-        root_nodes[time_point] = compose_nested(nestable_generator)
+        root_nodes[time_point] = nestable_generator.compose_nested()
 
     for time_point in config.time_points:
         root_node = root_nodes[time_point]
