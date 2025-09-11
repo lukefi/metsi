@@ -30,8 +30,11 @@ def _maybe_chdir(tmp_dir: Optional[Path] = None):
 
 class Motti4DLL:
     # Class-level caches to avoid reloading the DLL (and re-adding search dirs)
-    _LIB_CACHE = {}          # key: resolved dll path (str) -> (ffi, lib)
-    _DLL_DIR_HANDLES = {}    # key: dir path (str) -> handle from os.add_dll_directory
+    _LIB_CACHE: dict[str, tuple[FFI, Any]] = {}         # key: resolved dll path (str) -> (ffi, lib)
+    _DLL_DIR_HANDLES: dict[str, Any] = {}     # key: dir path (str) -> handle from os.add_dll_directory
+
+    ffi: FFI
+    lib: Any
     """
     Wrapper aligned with the C wrapper’s flow:
       SiteInit(Y,X,Z) -> fill yy (no dd) -> CheckYY -> Init -> UpdateAfterImport -> (loop) Growth
@@ -50,15 +53,13 @@ class Motti4DLL:
         ffi = FFI()
         ffi.cdef(self._cdef_source())
         # Add DLL search dirs once; keep handles alive
-        try:
-            if hasattr(os, "add_dll_directory"):
-                for p in (lib_path.parent, self.data_dir):
-                    if p:
-                        ps = str(Path(p).resolve())
-                        if ps not in Motti4DLL._DLL_DIR_HANDLES:
-                            Motti4DLL._DLL_DIR_HANDLES[ps] = os.add_dll_directory(ps)
-        except AttributeError:
-            pass
+
+        if hasattr(os, "add_dll_directory"):
+            for p in (lib_path.parent, self.data_dir):
+                if p:
+                    ps = str(Path(p).resolve())
+                    if ps not in Motti4DLL._DLL_DIR_HANDLES:
+                        Motti4DLL._DLL_DIR_HANDLES[ps] = os.add_dll_directory(ps)
 
         lib: Any = ffi.dlopen(str(lib_path))
         Motti4DLL._LIB_CACHE[key] = (ffi, lib)
@@ -72,12 +73,12 @@ class Motti4DLL:
         return cls._auto_euref_km(y, x)
 
     @classmethod
-    def set_lib_cache(cls, key: str, value: tuple[object, object]) -> None:
+    def set_lib_cache(cls, key: str, value: tuple[FFI, Any]) -> None:
         """Expose safe setter for LIB_CACHE (for tests)."""
         cls._LIB_CACHE[key] = value
 
     @classmethod
-    def get_lib_cache(cls, key: str) -> tuple[object, object] | None:
+    def get_lib_cache(cls, key: str) -> tuple[FFI, Any] | None:
         """Expose safe getter for LIB_CACHE (for tests)."""
         return cls._LIB_CACHE.get(key)
 
@@ -91,7 +92,7 @@ class Motti4DLL:
     def param_290(self) -> float:
         # expose a public name
         return getattr(self, "_290", 0.0)
-    
+
     @param_290.setter
     def param_290(self, value: float) -> None:
         self._290 = value
@@ -105,11 +106,8 @@ class Motti4DLL:
 
     def convert_species_code(self, spe: int | float) -> int:
         # Prefer DLL helper; otherwise match the C wrapper policy (7->8, 8->9)
-        if self._has("Convert_Tree_Spec"):
-            try:
-                return int(round(float(self.lib.Convert_Tree_Spec(float(spe)))))
-            except AttributeError:
-                pass
+        if hasattr(self.lib, "Convert_Tree_Spec"):
+            return int(round(float(self.lib.Convert_Tree_Spec(float(spe)))))
         s = int(spe)
         if s == 7:  # other conifers
             return 8
@@ -119,11 +117,9 @@ class Motti4DLL:
 
     def convert_site_index(self, mty: int | float) -> int:
         # Prefer DLL helper; otherwise cap <= 6 (matches their Convert_Site policy)
-        if self._has("Convert_Site"):
-            try:
-                return int(round(float(self.lib.Convert_Site(int(mty)))))
-            except AttributeError:
-                pass
+        if hasattr(self.lib, "Convert_Site"):
+            return int(round(float(self.lib.Convert_Site(float(mty)))))
+
         return min(int(mty), 6)
 
     # ---------- FFI ----------

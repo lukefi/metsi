@@ -253,8 +253,8 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
             stems.append(max((t.stems_per_ha or 0.0) + id_to_delta_f[tid], 0.0))
         else:
             # Not returned by DLL -> treat as dead/removed
-            diameters.append(t.breast_height_diameter)
-            heights.append(t.height)
+            diameters.append(t.breast_height_diameter or 0.0)
+            heights.append(t.height or 0.0)
             stems.append(0.0)
 
     update_stand_growth(stand, diameters, heights, stems, step)
