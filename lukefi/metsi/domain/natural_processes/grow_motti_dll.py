@@ -259,5 +259,4 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
             stems.append(0.0)
 
     update_stand_growth(stand, diameters, heights, stems, step)
-    #stand.reference_trees = [t for t in stand.reference_trees if (t.stems_per_ha is not None and t.stems_per_ha >= 1.0)]
     return stand, None
