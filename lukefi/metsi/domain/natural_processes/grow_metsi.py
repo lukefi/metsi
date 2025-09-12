@@ -77,11 +77,8 @@ class MetsiGrowPredictor(Predict):
     Extend metsi_grow.Predict to interface ForestStand & ReferenceTree data.
     """
 
-    def __init__(self, stand: ForestStand, *args, **kwargs):
-        try:
-            super().__init__(*args, **kwargs)  # type: ignore[misc]
-        except TypeError:
-            pass
+    def __init__(self, stand: ForestStand) -> None:
+        super().__init__()
         self.stand = stand  # store stand for property access
         self.year = float(_require(stand.year, "stand.year"))
         y_coord = (stand.geo_location or (None, None))[0]
