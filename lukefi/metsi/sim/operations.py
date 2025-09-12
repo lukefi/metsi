@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Callable, Optional, TypeVar
+from typing import TYPE_CHECKING, Callable, TypeVar
 
 from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.operation_payload import ProcessedOperation
@@ -8,11 +8,6 @@ if TYPE_CHECKING:
 
 
 T = TypeVar("T")
-
-
-def _get_operation_last_run(operation_history: list[tuple[int, "TreatmentFn[T]", dict[str, dict]]],
-                            operation_tag: "TreatmentFn[T]") -> Optional[int]:
-    return next((t for t, o, _ in reversed(operation_history) if o == operation_tag), None)
 
 
 def do_nothing(data: T, **kwargs) -> T:
@@ -27,7 +22,7 @@ def prepared_operation(operation_entrypoint: Callable[[T], T], **operation_param
 
 def prepared_processor(operation_tag: "TreatmentFn[T]",
                        time_point: int,
-                       operation_conditions: list[Condition[T, OperationPayload[T]]],
+                       operation_conditions: list[Condition[OperationPayload[T]]],
                        **operation_parameters: dict[str,
                                                     dict]) -> ProcessedOperation[T]:
     """prepares a processor function with an operation entrypoint"""
@@ -37,7 +32,7 @@ def prepared_processor(operation_tag: "TreatmentFn[T]",
 
 
 def _processor(payload: OperationPayload[T], operation: "TreatmentFn[T]", operation_tag: "TreatmentFn[T]",
-               time_point: int, operation_conditions: list[Condition[T, OperationPayload[T]]],
+               time_point: int, operation_conditions: list[Condition[OperationPayload[T]]],
                **operation_parameters: dict[str, dict]) -> OperationPayload[T]:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     for condition in operation_conditions:
