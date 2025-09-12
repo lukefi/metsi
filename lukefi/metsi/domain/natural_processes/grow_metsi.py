@@ -89,46 +89,32 @@ class MetsiGrowPredictor(Predict):
         x_coord = (stand.geo_location or (None, None))[1]
         self.get_y = float(y_coord or 0.0)
         self.get_x = float(x_coord or 0.0)
+        mal_raw = _require(stand.land_use_category, "stand.land_use_category")
+        self.mal = LandUseCategoryVMI(int(getattr(mal_raw, "value", mal_raw)))
 
+        mty_raw = _require(stand.site_type_category, "stand.site_type_category")
+        self.mty = SiteTypeVMI(int(getattr(mty_raw, "value", mty_raw)))
+
+        alr_raw = _require(stand.soil_peatland_category, "stand.soil_peatland_category")
+        self.alr = SoilCategoryVMI(int(getattr(alr_raw, "value", alr_raw)))
+
+        # tax class reduction can be optional; default to NONE if missing
+        verlt_raw = stand.tax_class_reduction
+        self.verlt = TaxClassReduction(
+            int(getattr(verlt_raw, "value", verlt_raw)) if verlt_raw is not None
+            else int(TaxClassReduction.NONE)
+        )
+        self.dd  = self.stand.degree_days or 0.0
+        self.sea  = self.stand.sea_effect or 0.0
+        self.lake  = self.stand.lake_effect or 0.0
+
+        tc_raw = stand.tax_class
+        val = int(getattr(tc_raw, "value", tc_raw) or 0)
+        if val:  # non-zero, valid
+            self.verl = TaxClass(val)
     # -- management vars (defaults) --------
+
     
-    @property
-    def dd(self) -> float:
-        assert self.stand.degree_days is not None, "stand.geo_location must be set"
-        return self.stand.degree_days
-    
-    @property
-    def sea(self) -> float:
-        return _require(self.stand.sea_effect, "stand.sea_effect")
-
-    @property
-    def lake(self) -> float:
-        return _require(self.stand.lake_effect, "stand.lake_effect")
-
-    @property
-    def mal(self) -> LandUseCategoryVMI:
-        return LandUseCategoryVMI(self.stand.land_use_category)
-
-    @property
-    def mty(self) -> SiteTypeVMI:
-        return SiteTypeVMI(self.stand.site_type_category)
-
-    @property
-    def alr(self) -> SoilCategoryVMI:
-        return SoilCategoryVMI(self.stand.soil_peatland_category)
-
-    @property
-    def verl(self) -> TaxClass:
-        return TaxClass(self.stand.tax_class)
-
-    @property
-    def verlt(self) -> TaxClassReduction:
-        return TaxClassReduction(self.stand.tax_class_reduction)
-
-
-
-
-
     @property
     def spedom(self) -> Species:
         """
