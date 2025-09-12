@@ -64,7 +64,7 @@ class ComputationModelTest(unittest.TestCase):
                     treatments=[
                         Treatment(
                             conditions=[
-                                MinimumTimeInterval(5)
+                                MinimumTimeInterval(5, fn1)
                             ],
                             treatment_fn=fn1,
                             parameters={
@@ -82,7 +82,7 @@ class ComputationModelTest(unittest.TestCase):
                         Sequence([
                             Treatment(
                                 conditions=[
-                                    MinimumTimeInterval(5)
+                                    MinimumTimeInterval(5, fn1)
                                 ],
                                 treatment_fn=fn1,
                                 parameters={

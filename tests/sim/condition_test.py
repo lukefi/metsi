@@ -5,8 +5,8 @@ from lukefi.metsi.sim.condition import Condition
 
 class ConditionTest(unittest.TestCase):
     def test_condition_combinations(self):
-        c1 = Condition[int, int](lambda t, _: t >= 2)
-        c2 = Condition[int, int](lambda _, x: x < 5)
+        c1 = Condition[int](lambda t, _: t >= 2)
+        c2 = Condition[int](lambda _, x: x < 5)
 
         c_and = c1 & c2
         c_or = c1 | c2
