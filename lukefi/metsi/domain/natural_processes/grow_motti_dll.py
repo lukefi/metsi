@@ -1,4 +1,3 @@
-from __future__ import annotations
 from pathlib import Path
 from typing import Optional, Union, Iterable, Tuple, Mapping, Dict
 from functools import cached_property
