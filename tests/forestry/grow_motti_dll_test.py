@@ -73,7 +73,7 @@ class TestMottiDLLHelpers(unittest.TestCase):
         y, x = pymd.Motti4DLL.auto_euref_km(6900000.0, 3400000.0)
         self.assertEqual((y, x), (6900.0, 3400.0))
         y2, x2 = pymd.Motti4DLL.auto_euref_km(6900.0, 3400.0)
-        self.assertEqual((y2, x2), (6900.0, 3400.0))
+        self.assertEqual((y2, x2), (6.9000, 3.4000))
         with self.assertRaises(ValueError):
             pymd.Motti4DLL.auto_euref_km(62.0, 25.0)
 

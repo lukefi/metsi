@@ -97,13 +97,6 @@ class Motti4DLL:
     def param_290(self, value: float) -> None:
         self._290 = value
 
-    def _has(self, name: str) -> bool:
-        try:
-            getattr(self.lib, name)
-            return True
-        except AttributeError:
-            return False
-
     def convert_species_code(self, spe: int | float) -> int:
         # Prefer DLL helper; otherwise match the C wrapper policy (7->8, 8->9)
         if hasattr(self.lib, "Convert_Tree_Spec"):
@@ -224,9 +217,8 @@ class Motti4DLL:
     def _auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
         """
         Normalize to EUREF-FIN/TM35FIN kilometers.
+        Input is expected to be in meters
         - Raise if values look like lat/long.
-        - If values look like meters (>10_000), divide by 1000.
-        - Otherwise, pass through unchanged (already km).
         """
         abs_y, abs_x = abs(y1), abs(x1)
 
@@ -237,12 +229,8 @@ class Motti4DLL:
                 "Expected EUREF-FIN/TM35 in kilometers."
             )
 
-        # meters → km
-        if abs_y > 10_000.0 or abs_x > 10_000.0:
-            return y1 / 1000.0, x1 / 1000.0
+        return y1 / 1000.0, x1 / 1000.0
 
-        # already km
-        return y1, x1
 
     def new_site(
         self,
@@ -252,7 +240,6 @@ class Motti4DLL:
         mal: int = 1, mty: int = 3, verl: int = 2, verlt: int = 0, alr: int = 1,
         year: Optional[float] = 2010.0,   # safe default if caller does not provide
         step: float = 5.0,
-        convert_coords: bool = False,
         convert_mela_site: bool = True,
         spedom: Optional[int] = None,
         spedom2: Optional[int] = None,
@@ -268,7 +255,7 @@ class Motti4DLL:
 
         # 1) SiteInit with only Y,X,Z
         try:
-            y_km, x_km = (self._auto_euref_km(Y, X) if convert_coords else (Y, X))
+            y_km, x_km = self._auto_euref_km(Y, X)
         except ValueError as e:
             raise RuntimeError(str(e)) from e
 

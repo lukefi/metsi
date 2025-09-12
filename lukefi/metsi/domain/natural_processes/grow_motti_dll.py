@@ -201,7 +201,6 @@ class MottiDLLPredictor:
             mty=self.mty,
             verl=self.verl, verlt=self.verlt, alr=self.alr,
             year=self.year, step=step,
-            convert_coords=True,
             spedom=dominant_species,
             spedom2=dominant_species,
             nstorey=1.0,
