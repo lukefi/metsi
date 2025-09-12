@@ -96,17 +96,6 @@ class Motti4DLL:
     def param_290(self, value: float) -> None:
         self._290 = value
 
-    def convert_species_code(self, spe: int | float) -> int:
-        # Prefer DLL helper; otherwise match the C wrapper policy (7->8, 8->9)
-        if hasattr(self.lib, "Convert_Tree_Spec"):
-            return int(round(float(self.lib.Convert_Tree_Spec(float(spe)))))
-        s = int(spe)
-        if s == 7:  # other conifers
-            return 8
-        if s == 8:  # other deciduous
-            return 9
-        return s
-
     def convert_site_index(self, mty: int | float) -> int:
         # Prefer DLL helper; otherwise cap <= 6 (matches their Convert_Site policy)
         if hasattr(self.lib, "Convert_Site"):

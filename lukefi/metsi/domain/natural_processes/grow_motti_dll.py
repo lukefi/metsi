@@ -210,6 +210,9 @@ class MottiDLLPredictor:
         return self.dll.grow(site, trees, n, step=step, ctrl=None, skip_init=True)
 
 
+def species_to_motti(x: int) -> int:
+    return _species_to_motti(x)
+
 def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters) -> Tuple["ForestStand", None]:
     """
     Evolves the stand by `step` years. If no predictor is provided and `data_dir` is None,

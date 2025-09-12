@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 from pathlib import Path
 from typing import cast
-
+from cffi import FFI
 import lukefi.metsi.domain.natural_processes.motti_dll_wrapper as pymd
 import lukefi.metsi.domain.natural_processes.grow_motti_dll as gm_dll
 
@@ -88,13 +88,14 @@ class TestMottiDLLHelpers(unittest.TestCase):
     def test_convert_fallbacks_without_real_lib(self):
         dummy = Path("dummy_lib.so").resolve()
         key = str(dummy).lower()
-        pymd.Motti4DLL.set_lib_cache(key, (object(), SimpleNamespace()))
+        ffi = FFI()
+        pymd.Motti4DLL.set_lib_cache(key, (ffi, SimpleNamespace()))
         dll = pymd.Motti4DLL(dummy)
 
         # species mapping fallback: 7→8, 8→9; else unchanged
-        self.assertEqual(dll.convert_species_code(7), 8)
-        self.assertEqual(dll.convert_species_code(8), 9)
-        self.assertEqual(dll.convert_species_code(3), 3)
+        self.assertEqual(gm_dll.species_to_motti(7), 6)
+        self.assertEqual(gm_dll.species_to_motti(8), 8)
+        self.assertEqual(gm_dll.species_to_motti(3), 3)
 
         # site index cap at 6
         self.assertEqual(dll.convert_site_index(10), 6)
