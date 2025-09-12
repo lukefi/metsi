@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.0.0] - 2025-09-09
+
+### Changed
+
+- Event declarations in simulation_events changed to Event, Generator and Treatment objects
+
 ## [2.3.7] - 2025-09-03
 
 ### Fixed

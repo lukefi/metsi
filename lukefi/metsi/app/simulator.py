@@ -1,3 +1,4 @@
+from typing import Any
 from lukefi.metsi.data.layered_model import LayeredObject
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
@@ -6,14 +7,16 @@ from lukefi.metsi.app.app_types import ForestOpPayload
 from lukefi.metsi.app.metsi_enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
+from lukefi.metsi.sim.collected_data import CollectedData
 from lukefi.metsi.sim.runners import (
     run_full_tree_strategy,
     run_partial_tree_strategy,
     depth_first_evaluator,
     chain_evaluator)
-from lukefi.metsi.sim.core_types import CollectedData, Runner, SimConfiguration, Evaluator
 from lukefi.metsi.app.utils import MetsiException
-
+from lukefi.metsi.sim.runners import Evaluator
+from lukefi.metsi.sim.runners import Runner
+from lukefi.metsi.sim.sim_configuration import SimConfiguration
 
 def run_stands(stands: StandList,
                config: SimConfiguration,
@@ -61,8 +64,8 @@ def resolve_evaluation_strategy(source: EvaluationStrategy) -> Evaluator[ForestS
     raise MetsiException(f"Unable to resolve event tree evaluation strategy '{source}'")
 
 
-def simulate_alternatives(config: MetsiConfiguration, control, stands: StandList):
-    simconfig = SimConfiguration(**control)
+def simulate_alternatives(config: MetsiConfiguration, control: dict[str, Any], stands: StandList):
+    simconfig = SimConfiguration[ForestStand](**control)
     formation_strategy = resolve_formation_strategy(config.formation_strategy)
     evaluation_strategy = resolve_evaluation_strategy(config.evaluation_strategy)
     result = run_stands(stands, simconfig, formation_strategy, evaluation_strategy)

@@ -5,7 +5,7 @@ from lukefi.metsi.domain.forestry_operations.thinning_limits import (
     resolve_thinning_bounds, resolve_first_thinning_residue)
 from lukefi.metsi.forestry.harvest import thinning
 from lukefi.metsi.forestry import forestry_utils as futil
-from lukefi.metsi.sim.core_types import CollectedData, OpTuple
+from lukefi.metsi.sim.collected_data import CollectedData, OpTuple
 
 
 def evaluate_thinning_conditions(predicates):

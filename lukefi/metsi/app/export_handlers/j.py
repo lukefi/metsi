@@ -7,7 +7,8 @@ from collections.abc import Iterator, Iterable
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import SimResults
 from lukefi.metsi.domain.utils.collectives import CollectFn, GetVarFn, compile_collector, getvarfn, autocollective
-from lukefi.metsi.sim.core_types import OperationPayload
+from lukefi.metsi.sim.operation_payload import OperationPayload
+
 
 T = TypeVar("T")
 

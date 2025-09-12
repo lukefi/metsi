@@ -1,5 +1,5 @@
 from lukefi.metsi.domain.collected_types import PriceableOperationInfo
-from lukefi.metsi.sim.core_types import OpTuple
+from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.data.model import ForestStand
 
 
