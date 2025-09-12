@@ -6,7 +6,7 @@
 # MetsiGrow is released under a separate Source Available – Non-Commercial license.
 # See MetsiGrow's LICENSE-NC.md for full details.
 
-from typing import Optional,TypeVar
+from typing import Optional,TypeVar, Sequence
 from collections import defaultdict
 from lukefi.metsi.forestry.forestry_utils import calculate_basal_area
 
@@ -112,23 +112,41 @@ class MetsiGrowPredictor(Predict):
         if val:  # non-zero, valid
             self.verl = TaxClass(val)
 
-        self.spedom = self._compute_spedom_from_stand()
 
         self.trees_f = self._trees_f()
         self.prt = Origin.NATURAL
 
         self.trees_d = self._trees_d()
         self.trees_h = self._trees_h()
-        self.trees_spe = self._trees_spe()
         self.trees_t0 = self._trees_t0()
         self.trees_t13 = self._trees_t13()
         self.trees_storie = self._trees_storie()
         self.trees_snt = self._trees_snt()
 
+        self._spedom_cache: Species | None = None
+        self._trees_spe_cache: list[Species] | None = None
+
+    @property
+    def spedom(self) -> Species:
+        if self._spedom_cache is None:
+            self._spedom_cache = self._compute_spedom_from_stand()
+        return self._spedom_cache
+
+    @spedom.setter
+    def spedom(self, value: Species) -> None:
+        self._spedom_cache = value
 
 
+    @property
+    def trees_spe(self) -> Sequence[Species]:
+        if self._trees_spe_cache is None:
+            self._trees_spe_cache = self._trees_spe()
+        return self._trees_spe_cache
 
-
+    @trees_spe.setter
+    def trees_spe(self, value) -> None:
+        # Accept any Sequence[Species]; normalize to list
+        self._trees_spe_cache = list(value)
 
 
     # -- management vars (defaults) --------

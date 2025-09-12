@@ -4,8 +4,8 @@ from types import SimpleNamespace
 from unittest.mock import patch
 import lukefi.metsi.domain.natural_processes.grow_metsi as mg
 from lukefi.metsi.data.model import ForestStand
-from lukefi.metsi.data.enums.internal import (LandUseCategory, 
-                                              SiteType, 
+from lukefi.metsi.data.enums.internal import (LandUseCategory,
+                                              SiteType,
                                               SoilPeatlandCategory
                                             )
 
