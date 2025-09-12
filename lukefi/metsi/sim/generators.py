@@ -71,13 +71,13 @@ class Alternatives[T](Generator[T]):
 class Treatment[T](GeneratorBase):
     """Base class for treatments. Contains conditions and parameters and the actual function that operates on the
     simulation state."""
-    conditions: list[Condition[T, OperationPayload[T]]]
+    conditions: list[Condition[OperationPayload[T]]]
     parameters: dict[str, Any]
     file_parameters: dict[str, str]
     treatment_fn: TreatmentFn[T]
 
     def __init__(self, treatment_fn: TreatmentFn[T], parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[T, OperationPayload[T]]]] = None,
+                 conditions: Optional[list[Condition[OperationPayload[T]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         self.treatment_fn = treatment_fn
 
@@ -93,8 +93,6 @@ class Treatment[T](GeneratorBase):
 
         if conditions is not None:
             self.conditions = conditions
-            for condition in self.conditions:
-                condition.parent = self
         else:
             self.conditions = []
 

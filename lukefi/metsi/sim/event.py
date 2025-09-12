@@ -10,11 +10,11 @@ T = TypeVar('T')  # T = ForestStand
 
 class Event[T]:
     time_points: list[int]
-    conditions: list[Condition[T, OperationPayload[T]]]
+    conditions: list[Condition[OperationPayload[T]]]
     treatment_generator: Generator[T]
 
     def __init__(self, time_points: list[int], treatments: Generator[T] | list[GeneratorBase] | set[GeneratorBase],
-                 conditions: Optional[list[Condition[T, OperationPayload[T]]]] = None) -> None:
+                 conditions: Optional[list[Condition[OperationPayload[T]]]] = None) -> None:
         self.time_points = time_points
         if isinstance(treatments, Generator):
             self.treatment_generator = treatments
