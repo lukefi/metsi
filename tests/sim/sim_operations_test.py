@@ -1,6 +1,7 @@
 import unittest
 import tests.test_utils
-from lukefi.metsi.sim.operations import prepared_operation, _get_operation_last_run
+from lukefi.metsi.domain.conditions import _get_operation_last_run
+from lukefi.metsi.sim.operations import prepared_operation
 
 
 class SimOperationsTest(unittest.TestCase):

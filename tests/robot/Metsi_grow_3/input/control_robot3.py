@@ -1,4 +1,6 @@
 from lukefi.metsi.domain.conditions import MinimumTimeInterval
+from lukefi.metsi.domain.forestry_operations.clearcut import clearcutting
+from lukefi.metsi.domain.forestry_operations.thinning import first_thinning
 from lukefi.metsi.domain.pre_ops import (
     compute_location_metadata,
     generate_reference_trees,
@@ -127,7 +129,7 @@ control_structure = {
                     ),
                     FirstThinning(
                         conditions=[
-                            MinimumTimeInterval(50)
+                            MinimumTimeInterval(50, first_thinning)
                         ],
                         parameters={
                             "thinning_factor": 0.97,
@@ -145,7 +147,7 @@ control_structure = {
                     Sequence([
                         Clearcutting(
                             conditions=[
-                                MinimumTimeInterval(50)
+                                MinimumTimeInterval(50, clearcutting)
                             ],
                             file_parameters={
                                 "clearcutting_limits_ages": "data/parameter_files/renewal_ages_southernFI.txt",

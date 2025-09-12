@@ -49,7 +49,7 @@ class TestGenerators(unittest.TestCase):
                     treatments=Sequence([
                         Treatment(
                             conditions=[
-                                MinimumTimeInterval(2)
+                                MinimumTimeInterval(2, collecting_increment)
                             ],
                             treatment_fn=collecting_increment
                         )
@@ -78,13 +78,13 @@ class TestGenerators(unittest.TestCase):
                     treatments=Sequence([
                         Treatment(
                             conditions=[
-                                MinimumTimeInterval(2)
+                                MinimumTimeInterval(2, inc)
                             ],
                             treatment_fn=inc
                         ),
                         Treatment(
                             conditions=[
-                                MinimumTimeInterval(2)
+                                MinimumTimeInterval(2, inc)
                             ],
                             treatment_fn=inc
                         )
