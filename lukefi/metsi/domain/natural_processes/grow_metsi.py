@@ -7,7 +7,6 @@
 # See MetsiGrow's LICENSE-NC.md for full details.
 
 from typing import Optional,TypeVar
-from functools import cached_property
 from collections import defaultdict
 from lukefi.metsi.forestry.forestry_utils import calculate_basal_area
 
@@ -112,11 +111,29 @@ class MetsiGrowPredictor(Predict):
         val = int(getattr(tc_raw, "value", tc_raw) or 0)
         if val:  # non-zero, valid
             self.verl = TaxClass(val)
+
+        self.spedom = self._compute_spedom_from_stand()
+
+        self.trees_f = self._trees_f()
+        self.prt = Origin.NATURAL
+
+        self.trees_d = self._trees_d()
+        self.trees_h = self._trees_h()
+        self.trees_spe = self._trees_spe()
+        self.trees_t0 = self._trees_t0()
+        self.trees_t13 = self._trees_t13()
+        self.trees_storie = self._trees_storie()
+        self.trees_snt = self._trees_snt()
+
+
+
+
+
+
+
     # -- management vars (defaults) --------
 
-    
-    @property
-    def spedom(self) -> Species:
+    def _compute_spedom_from_stand(self) -> Species:
         """
         Finds dominant species from MetsiGrow species.
 
@@ -140,7 +157,7 @@ class MetsiGrowPredictor(Predict):
         if any(v > 0.0 for v in ba_by_species.values()):
             return max(ba_by_species.items(), key=lambda kv: kv[1])[0]
 
-        # 2) Fallback to stems/ha 
+        # 2) Fallback to stems/ha
         stems_by_species: dict[Species, float] = defaultdict(float)
         for t in trees:
             sp = to_mg_species(t.species)
@@ -153,28 +170,22 @@ class MetsiGrowPredictor(Predict):
             "Cannot determine dominant species: all basal areas and stem counts are zero or missing."
         )
 
-    @property
-    def prt(self) -> Origin:
-        return Origin.NATURAL
+
 
     # -- tree variables --------------------
 
-    @cached_property
-    def trees_f(self) -> list[float]:
+    def _trees_f(self) -> list[float]:
         if self.stand.reference_trees is None:
             return [0.0]
         return [(t.stems_per_ha or 0.0) for t in self.stand.reference_trees]
 
-    @cached_property
-    def trees_d(self) -> list[float]:
+    def _trees_d(self) -> list[float]:
         return [(t.breast_height_diameter or 0.01) for t in self.stand.reference_trees]
 
-    @cached_property
-    def trees_h(self) -> list[float]:
+    def _trees_h(self) -> list[float]:
         return [(t.height or 0.0) for t in self.stand.reference_trees]
 
-    @cached_property
-    def trees_spe(self) -> list[Species]:
+    def _trees_spe(self) -> list[Species]:
         converted = []
         for t in self.stand.reference_trees:
             try:
@@ -184,21 +195,17 @@ class MetsiGrowPredictor(Predict):
                 raise
         return converted
 
-    @cached_property
-    def trees_t0(self) -> list[float]:
+    def _trees_t0(self) -> list[float]:
         return [int((self.year or 0) - (t.biological_age or 0.0)) for t in self.stand.reference_trees]
 
-    @cached_property
-    def trees_t13(self) -> list[float]:
+    def _trees_t13(self) -> list[float]:
         return [self.year - (t.breast_height_age or 0.0) for t in self.stand.reference_trees]
 
-    @cached_property
-    def trees_storie(self) -> list[Storie]:
+    def _trees_storie(self) -> list[Storie]:
         # TODO: derive or import storie data
         return [Storie.NONE for _ in self.stand.reference_trees]
 
-    @cached_property
-    def trees_snt(self) -> list[Origin]:
+    def _trees_snt(self) -> list[Origin]:
         return [
             Origin(t.origin + 1) if t.origin is not None else Origin.NATURAL
             for t in self.stand.reference_trees
@@ -218,8 +225,8 @@ def grow_metsi(input_: tuple[ForestStand, None], /, **operation_parameters) -> t
     growth = pred.evolve(step=step)
 
     # apply deltas
-    diameters = [t.breast_height_diameter + d for t, d in zip(stand.reference_trees, growth.trees_id)]
-    heights   = [t.height + h for t, h in zip(stand.reference_trees, growth.trees_ih)]
+    diameters = [(t.breast_height_diameter or 0.0) + d for t, d in zip(stand.reference_trees, growth.trees_id)]
+    heights   = [(t.height or 0.0) + h for t, h in zip(stand.reference_trees, growth.trees_ih)]
     stems     = [(t.stems_per_ha or 0.0) + df for t, df in zip(stand.reference_trees, growth.trees_if)]
 
     update_stand_growth(stand, diameters, heights, stems, step)
