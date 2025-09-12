@@ -84,31 +84,19 @@ class MetsiGrowPredictor(Predict):
         except TypeError:
             pass
         self.stand = stand  # store stand for property access
+        self.year = float(_require(stand.year, "stand.year"))
+        y_coord = (stand.geo_location or (None, None))[0]
+        x_coord = (stand.geo_location or (None, None))[1]
+        self.get_y = float(y_coord or 0.0)
+        self.get_x = float(x_coord or 0.0)
 
-    # -- site variables --------------------
-
-    @property
-    def year(self) -> int:
-        return _require(self.stand.year, "stand.year")
-
-    @property
-    def get_y(self) -> float:
-        if self.stand.geo_location is None or self.stand.geo_location[0] is None:
-            return 0.0
-        return self.stand.geo_location[0]
-
-    @property
-    def get_x(self) -> float:
-        if self.stand.geo_location is None or self.stand.geo_location[1] is None:
-            return 0.0
-        return self.stand.geo_location[1]
-
-
+    # -- management vars (defaults) --------
+    
     @property
     def dd(self) -> float:
         assert self.stand.degree_days is not None, "stand.geo_location must be set"
         return self.stand.degree_days
-
+    
     @property
     def sea(self) -> float:
         return _require(self.stand.sea_effect, "stand.sea_effect")
@@ -137,7 +125,9 @@ class MetsiGrowPredictor(Predict):
     def verlt(self) -> TaxClassReduction:
         return TaxClassReduction(self.stand.tax_class_reduction)
 
-    # -- management vars (defaults) --------
+
+
+
 
     @property
     def spedom(self) -> Species:
