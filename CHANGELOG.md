@@ -4,12 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-
-## [2.3.8] - 2025-09-10
+## [2.3.9] - 2025-09-15
 
 ### Added
 
 - Support for Motti dll growth model. 
+## [2.3.8] - 2025-09-04
+
+### Fixed
+
+- Combined wrapper of GrowMetsi to one file. 
+- Fixed linter warnings related to GrowMetsi wrapper and unit test.
+- spe2metsi changed to_mg_species
 
 ## [2.3.7] - 2025-09-03
 
