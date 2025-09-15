@@ -107,6 +107,10 @@ def _resolve_shared_object(p: Union[str, Path]) -> Path:
     # No match found; return directory so downstream can raise a clear error when loading.
     return p
 
+
+
+
+
 class MottiDLLPredictor:
     def __init__(
         self,
@@ -193,8 +197,9 @@ class MottiDLLPredictor:
 
     def evolve(self, step: int = 5) -> GrowthDeltas:
         dominant_species = _spedom(self.stand)
+        y_km, x_km = auto_euref_km(self.get_y, self.get_x)
         site = self.dll.new_site(
-            Y=self.get_y, X=self.get_x, Z=self.get_z,
+            Y=y_km, X=x_km, Z=self.get_z,
             lake=self.lake, sea=self.sea,
             mal=self.mal,
             mty=self.mty,
@@ -210,6 +215,25 @@ class MottiDLLPredictor:
         return self.dll.grow(site, trees, n, step=step, ctrl=None, skip_init=True)
 
 
+
+def auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
+    """
+    Normalize to EUREF-FIN/TM35FIN kilometers.
+    Input is expected to be in meters
+    - Raise if values look like lat/long.
+    """
+    abs_y, abs_x = abs(y1), abs(x1)
+
+    # Clear lat/long guard
+    if abs_y <= 90.0 and abs_x <= 180.0:
+        raise ValueError(
+            f"Coordinates look like lat/long (Y={y1}, X={x1}). "
+            "Expected EUREF-FIN/TM35 in kilometers."
+        )
+
+    return y1 / 1000.0, x1 / 1000.0
+
+
 def species_to_motti(x: int) -> int:
     return _species_to_motti(x)
 
@@ -220,7 +244,7 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
     """
     step = int(operation_parameters.get("step", 5))
     data_dir = operation_parameters.get("data_dir", None)
-    predictor = operation_parameters.get("predictor", None)  # <-- NEW
+    predictor = operation_parameters.get("predictor", None)
 
     stand, _ = input_
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, List, Tuple, Optional, Dict, Any, cast
+from typing import List, Tuple, Optional, Dict, Any, cast
 import os
 from contextlib import contextmanager
 
@@ -65,11 +65,6 @@ class Motti4DLL:
         self.ffi, self.lib = ffi, lib
 
     # ---------- helpers ----------
-
-    @classmethod
-    def auto_euref_km(cls, y: float, x: float) -> tuple[float, float]:
-        """Public wrapper for coordinate normalization."""
-        return cls._auto_euref_km(y, x)
 
     @classmethod
     def set_lib_cache(cls, key: str, value: tuple[FFI, Any]) -> None:
@@ -201,25 +196,6 @@ class Motti4DLL:
 
     # ---------- site + trees ----------
 
-    @staticmethod
-    def _auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
-        """
-        Normalize to EUREF-FIN/TM35FIN kilometers.
-        Input is expected to be in meters
-        - Raise if values look like lat/long.
-        """
-        abs_y, abs_x = abs(y1), abs(x1)
-
-        # Clear lat/long guard
-        if abs_y <= 90.0 and abs_x <= 180.0:
-            raise ValueError(
-                f"Coordinates look like lat/long (Y={y1}, X={x1}). "
-                "Expected EUREF-FIN/TM35 in kilometers."
-            )
-
-        return y1 / 1000.0, x1 / 1000.0
-
-
     def new_site(
         self,
         *,
@@ -242,24 +218,20 @@ class Motti4DLL:
         yy = cast(Any, ffi.new("Motti4Site *"))
 
         # 1) SiteInit with only Y,X,Z
-        try:
-            y_km, x_km = self._auto_euref_km(Y, X)
-        except ValueError as e:
-            raise RuntimeError(str(e)) from e
 
         rv = ffi.new("int *")
         with _maybe_chdir(self.data_dir):
             lib.Motti4SiteInit(yy,
-                               ffi.new("float *", float(y_km)),
-                               ffi.new("float *", float(x_km)),
+                               ffi.new("float *", float(Y)),
+                               ffi.new("float *", float(X)),
                                ffi.new("float *", float(Z)),
                                rv)
         if rv[0] != 0:
             raise RuntimeError(f"Motti4SiteInit failed (rv={rv[0]})")
 
         # 2) Fill the rest (do NOT set yy.dd ourselves)
-        yy.Y = float(y_km)
-        yy.X = float(x_km)
+        yy.Y = float(Y)
+        yy.X = float(X)
         yy.Z = float(Z)
         yy.lake = float(lake)
         yy.sea = float(sea)
@@ -292,13 +264,12 @@ class Motti4DLL:
 
         return yy
 
-    def new_trees(self, trees_py: Iterable[dict]) -> Tuple[object, int]:
+    def new_trees(self, trees_py: list[dict]) -> Tuple[object, int]:
         """
             fields used: id, f, d13, h, spe, age, age13, cr, snt
         """
         ffi = self.ffi
         yp = ffi.new("Motti4Trees *")
-        numtrees = 0
         for i, t in enumerate(trees_py):
             yp[0][i].id = int(t.get("id", i + 1))
             yp[0][i].f = float(t.get("f", 0.0))
@@ -310,8 +281,7 @@ class Motti4DLL:
             yp[0][i].cr = float(t.get("cr", 0.0))
             yp[0][i].snt = float(t.get("snt", 1))
             yp[0][i].crerror = 0.0  # clear before growth
-            numtrees += 1
-        return yp, numtrees
+        return yp, len(trees_py)
 
     # ---------- full grow (Init -> UpdateAfterImport -> loop Growth) ----------
 
@@ -326,16 +296,16 @@ class Motti4DLL:
         vcr_state = ffi.new("Motti4VcrArray *")
         apv_state = ffi.new("Motti4KorArray *")
         fert_array = ffi.new("Motti4FerArray *")
-        mottiCtrl = cast(Any, ffi.new("Motti4Ctrl *"))
+        motti_control = cast(Any, ffi.new("Motti4Ctrl *"))
         # defaults like the C wrapper
-        mottiCtrl.death_tree = 1
+        motti_control.death_tree = 1
         if ctrl:
             if "death_tree" in ctrl:
-                mottiCtrl.death_tree = int(bool(ctrl["death_tree"]))
+                motti_control.death_tree = int(bool(ctrl["death_tree"]))
             if "death_forest" in ctrl:
-                mottiCtrl.death_forest = int(bool(ctrl["death_forest"]))
+                motti_control.death_forest = int(bool(ctrl["death_forest"]))
             if "calibrate" in ctrl:
-                mottiCtrl.calibrate = int(bool(ctrl["calibrate"]))
+                motti_control.calibrate = int(bool(ctrl["calibrate"]))
 
         ntrees_p = ffi.new("int *", numtrees)
         err = ffi.new("int *")
@@ -345,7 +315,8 @@ class Motti4DLL:
         # Init (only when building trees inside DLL). With host trees, SKIP like the C wrapper.
         if not skip_init:
             with _maybe_chdir(self.data_dir):
-                lib.Motti4Init(strata, yy, saplings, kor_state, vcr_state, apv_state, yp, mottiCtrl, ntrees_p, err, rv)
+                lib.Motti4Init(strata, yy, saplings, kor_state, vcr_state, apv_state, yp,
+                               motti_control, ntrees_p, err, rv)
             if rv[0] != 0 or err[0] != 0:
                 raise RuntimeError(f"Motti4Init failed (rv={rv[0]}, err={err[0]})")
 
@@ -374,7 +345,8 @@ class Motti4DLL:
             step_p = ffi.new("int *", remaining)
             rv[0] = 0
             with _maybe_chdir(self.data_dir):
-                lib.Motti4Growth(yy, yp, saplings, kor_state, vcr_state, apv_state, ntrees_p, fert_array, numfer, mottiCtrl, step_p, rv)
+                lib.Motti4Growth(yy, yp, saplings, kor_state, vcr_state, apv_state, ntrees_p,
+                                 fert_array, numfer, motti_control, step_p, rv)
             if rv[0] != 0:
                 raise RuntimeError(f"Motti4Growth failed (rv={rv[0]})")
 

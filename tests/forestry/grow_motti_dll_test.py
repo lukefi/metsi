@@ -70,12 +70,12 @@ class TestGrowMottiDLL(unittest.TestCase):
 
 class TestMottiDLLHelpers(unittest.TestCase):
     def test_auto_euref_km_validations(self):
-        y, x = pymd.Motti4DLL.auto_euref_km(6900000.0, 3400000.0)
+        y, x = gm_dll.auto_euref_km(6900000.0, 3400000.0)
         self.assertEqual((y, x), (6900.0, 3400.0))
-        y2, x2 = pymd.Motti4DLL.auto_euref_km(6900.0, 3400.0)
+        y2, x2 = gm_dll.auto_euref_km(6900.0, 3400.0)
         self.assertEqual((y2, x2), (6.9000, 3.4000))
         with self.assertRaises(ValueError):
-            pymd.Motti4DLL.auto_euref_km(62.0, 25.0)
+            gm_dll.auto_euref_km(62.0, 25.0)
 
     def test_maybe_chdir_context_manager(self):
         orig = Path.cwd()
