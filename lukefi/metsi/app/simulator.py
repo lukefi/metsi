@@ -1,5 +1,5 @@
 from typing import Any
-from lukefi.metsi.data.layered_model import LayeredObject
+from lukefi.metsi.data.layered_model import LayeredObject, PossiblyLayered
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
@@ -8,6 +8,7 @@ from lukefi.metsi.app.metsi_enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.collected_data import CollectedData
+from lukefi.metsi.sim.core_types import Evaluator, Runner, SimConfiguration
 from lukefi.metsi.sim.runners import (
     run_full_tree_strategy,
     run_partial_tree_strategy,
@@ -27,14 +28,21 @@ def run_stands(stands: StandList,
 
     retval: dict[str, list[ForestOpPayload]] = {}
     for stand in stands:
-        overlaid_stand = LayeredObject[ForestStand](stand)
-        overlaid_stand.reference_trees = [LayeredObject[ReferenceTree](tree) for tree in overlaid_stand.reference_trees]
-        overlaid_stand.tree_strata = [LayeredObject[TreeStratum](stratum) for stratum in overlaid_stand.tree_strata]
+        overlaid_stand: PossiblyLayered[ForestStand]
+        if not stand.vectorized:
+            overlaid_stand = LayeredObject[ForestStand](stand)
+            overlaid_stand.reference_trees = [LayeredObject[ReferenceTree]
+                                              (tree) for tree in overlaid_stand.reference_trees]
+            overlaid_stand.tree_strata = [LayeredObject[TreeStratum](stratum) for stratum in overlaid_stand.tree_strata]
+        else:
+            overlaid_stand = stand
+
         payload = ForestOpPayload(
-            computational_unit=overlaid_stand,
+            computational_unit=stand,
             collected_data=CollectedData(initial_time_point=config.time_points[0]),
             operation_history=[],
         )
+
         schedule_payloads = runner(payload, config, evaluator)
         identifier = stand.identifier
         print_logline(f"Alternatives for stand {identifier}: {len(schedule_payloads)}")
