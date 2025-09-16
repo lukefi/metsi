@@ -25,6 +25,7 @@ dependencies = [
     "rpy2==3.6.1",
     "numba==0.61.2",
     "scipy==1.16.1",
+    "cffi==1.17.1",
 ]
 
 [project.optional-dependencies]
@@ -38,7 +39,8 @@ tests = [
     "types-lupa",
     "pandas-stubs",
     "types-shapely",
-    "types-geopandas"
+    "types-geopandas",
+    "types-cffi",
 ]
 
 [project.scripts]

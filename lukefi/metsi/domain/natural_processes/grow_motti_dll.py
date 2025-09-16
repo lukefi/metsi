@@ -177,17 +177,17 @@ class MottiDLLPredictor:
 
             spe = _species_to_motti(int(t.species))
             tid = int((getattr(t, "tree_number", None) or (idx + 1)))
-            trees.append(dict(
-                id=tid,
-                f=float(t.stems_per_ha or 0.0),
-                d13=float(t.breast_height_diameter or 0.0),
-                h=float(t.height or 0.0),
-                spe=int(spe),
-                age=float(t.biological_age or 0.0),
-                age13=float(t.breast_height_age or 0.0),
-                cr=float(getattr(t, "crown_ratio", 0.0) or 0.0),
-                snt=int((t.origin or 0) + 1),
-            ))
+            trees.append({
+                "id": tid,
+                "f": float(t.stems_per_ha or 0.0),
+                "d13": float(t.breast_height_diameter or 0.0),
+                "h": float(t.height or 0.0),
+                "spe": int(spe),
+                "age": float(t.biological_age or 0.0),
+                "age13": float(t.breast_height_age or 0.0),
+                "cr": float(getattr(t, "crown_ratio", 0.0) or 0.0),
+                "snt": int((t.origin or 0) + 1),
+            })
         return trees
 
     @property
