@@ -46,6 +46,11 @@ def update_stand_growth_vectorized(stand: PossiblyLayered[ForestStand],
     trees.breast_height_diameter = diameters
     trees.height = heights
     trees.stems_per_ha = stems
+    trees.biological_age = trees.biological_age + step
+    trees.breast_height_age = np.where(
+        (height_before_growth < 1.3) & (1.3 <= trees.height),
+        trees.biological_age,
+        trees.breast_height_age)
     trees.sapling = np.where(
         trees.height >= 1.3,
         False,

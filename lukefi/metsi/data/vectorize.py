@@ -47,6 +47,7 @@ def vectorize(stands: StandList, **operation_params) -> StandList:
                 raise MetsiException(f"Unknown target type '{t}'")
             setattr(stand, f"{t}_soa", container_obj().vectorize(attr_dict))
             delattr(stand, t)
+        stand.vectorized = True
     return stands
 
 
