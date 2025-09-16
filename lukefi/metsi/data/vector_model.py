@@ -27,7 +27,6 @@ DTYPES_TREE: dict[str, npt.DTypeLike] = {
     "sapling": np.bool_,
     "tree_type": np.dtype("U20"),
     "tuhon_ilmiasu": np.dtype("U20"),
-    "latvuskerros": np.float64  # NOTE: for benchmarking purposes
 }
 
 DTYPES_STRATA: dict[str, npt.DTypeLike] = {
@@ -194,9 +193,10 @@ class VectorData():
             VectorData: Shallow copy of self
         """
         for key in self.dtypes:
-            attr: npt.NDArray
-            attr = getattr(self, key)
-            attr.flags.writeable = False
+            attr: Optional[npt.NDArray]
+            attr = getattr(self, key, None)
+            if attr is not None:
+                attr.flags.writeable = False
         return copy(self)
 
 

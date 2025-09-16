@@ -150,6 +150,6 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
                         hg,
                         g) / 100,
                     0)
-                ds *= 1 + pd
-                hs *= 1 + ph
+                ds = ds * (1 + pd)
+                hs = hs * (1 + ph)
     return ds, hs

@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Optional
+from typing import Optional, override
 from dataclasses import dataclass
 from lukefi.metsi.app.utils import MetsiException
 from lukefi.metsi.data.enums.internal import (LandUseCategory, OwnerCategory, SiteType, SoilPeatlandCategory,
@@ -8,6 +8,7 @@ from lukefi.metsi.data.enums.mela import MelaLandUseCategory
 from lukefi.metsi.data.formats.util import convert_str_to_type as conv
 from lukefi.metsi.data.layered_model import LayeredObject
 from lukefi.metsi.data.vector_model import ReferenceTrees, Strata
+from lukefi.metsi.sim.finalizable import Finalizable
 
 # NOTE:
 # * the deepcopy methods here are roughly equivalent to
@@ -394,9 +395,11 @@ class ReferenceTree():
 
 @dataclass(init=True, repr=False, order=False, unsafe_hash=False, frozen=False, match_args=False, kw_only=False,
            slots=False, weakref_slot=False, eq=False)
-class ForestStand():
+class ForestStand(Finalizable):
     # VMI data type 1
     # SMK data type Stand
+
+    vectorized: bool = False
 
     reference_trees: list[ReferenceTree] = dataclasses.field(default_factory=list)
     tree_strata: list[TreeStratum] = dataclasses.field(default_factory=list)
@@ -466,8 +469,12 @@ class ForestStand():
     def __deepcopy__(self, memo: dict) -> 'ForestStand':
         stand = ForestStand.__new__(ForestStand)
         stand.__dict__.update(self.__dict__)
-        stand.reference_trees = [t.__deepcopy__(memo) for t in stand.reference_trees]
-        stand.tree_strata = [s.__deepcopy__(memo) for s in stand.tree_strata]
+        if not stand.vectorized:
+            stand.reference_trees = [t.__deepcopy__(memo) for t in stand.reference_trees]
+            stand.tree_strata = [s.__deepcopy__(memo) for s in stand.tree_strata]
+        elif self.reference_trees_soa is not None and self.tree_strata_soa is not None:
+            stand.reference_trees_soa = self.reference_trees_soa.finalize()
+            stand.tree_strata_soa = self.tree_strata_soa.finalize()
         if stand.monthly_temperatures is not None:
             stand.monthly_temperatures = list(stand.monthly_temperatures)
         if stand.monthly_rainfall is not None:
@@ -668,6 +675,11 @@ class ForestStand():
             ad = [getattr(self, k) for k in keys]  # Needs to fail noisy
         return ad
 
+    @override
+    def finalize(self):
+        if self.reference_trees_soa is not None and self.tree_strata_soa is not None:
+            self.reference_trees_soa = self.reference_trees_soa.finalize()
+            self.tree_strata_soa = self.tree_strata_soa.finalize()
 
 def create_layered_tree(**kwargs) -> LayeredObject[ReferenceTree]:
     prototype = ReferenceTree()
