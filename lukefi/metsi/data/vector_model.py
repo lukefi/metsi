@@ -57,23 +57,35 @@ class VectorData():
     """
     Base class for generic SoA data.
     """
+    dtypes: dict[str, npt.DTypeLike]
+    size: int
 
     def __init__(self, dtypes: dict[str, npt.DTypeLike]):
         self.dtypes = dtypes
 
-    def vectorize(self, attr_dict):
-        for k, v in attr_dict.items():
-            setattr(self, k, np.array(self.defaultify(v, self.dtypes[k]), self.dtypes[k]))
-            if not self.is_contiguous(k):
-                raise MetsiException("Vectorized data is not contiguous")
+    def vectorize(self, attr_dict: dict[str, list[Any]]):
         self.set_size(attr_dict)
+        for attribute_name, data_type in self.dtypes.items():
+            setattr(
+                self,
+                attribute_name,
+                np.array(
+                    self.defaultify(
+                        attr_dict.get(
+                            attribute_name,
+                            [None] *
+                            self.size),
+                        data_type),
+                    data_type))
+            if not self.is_contiguous(attribute_name):
+                raise MetsiException("Vectorized data is not contiguous")
         return self
 
     def is_contiguous(self, name):
         arr = getattr(self, name)
         return bool(arr.flags['CONTIGUOUS']) and bool(arr.flags['C_CONTIGUOUS'])
 
-    def set_size(self, attr_dict):
+    def set_size(self, attr_dict: dict[str, list[Any]]):
         size = len(attr_dict.get('identifier', []))
         setattr(self, 'size', size)
 
@@ -201,7 +213,6 @@ class VectorData():
 
 
 class ReferenceTrees(VectorData):
-    size: int
     identifier: npt.NDArray[np.str_]
     tree_number: npt.NDArray[np.int32]
     species: npt.NDArray[np.int32]
@@ -230,7 +241,6 @@ class ReferenceTrees(VectorData):
 
 
 class Strata(VectorData):
-    size: int
     identifier: npt.NDArray[np.str_]
     species: npt.NDArray[np.int32]
     mean_diameter: npt.NDArray[np.float64]
