@@ -259,10 +259,10 @@ def write_full_simulation_result_dirtree(result: SimResults, app_arguments: Mets
         for i, schedule in enumerate(schedules):
             if app_arguments.state_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
-                filepath = determine_file_path(schedule_dir, app_arguments.state_output_container)
+                filepath = determine_file_path(schedule_dir, f"sim_result.{app_arguments.state_output_container.value}")
                 write_stands_to_file(ExportableContainer([schedule.computational_unit], None),
                                      filepath,
-                                     app_arguments.state_output_container)
+                                     app_arguments.state_output_container.value)
             if app_arguments.derived_data_output_container is not None:
                 schedule_dir = prepare_target_directory(f"{app_arguments.target_directory}/{stand_id}/{i}")
                 filepath = determine_file_path(schedule_dir, app_arguments.derived_data_output_container)
