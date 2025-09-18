@@ -23,181 +23,217 @@ from lukefi.metsi.sim.operations import do_nothing
 
 class Planting(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=planting,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class CrossCutStandingTrees(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=cross_cut_standing_trees,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class CollectStandingTreeProperties(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=collect_standing_tree_properties,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class CalculateNpv(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=calculate_npv,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class CalculateBiomass(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=calculate_biomass,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class ReportState(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=report_state,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class DoNothing(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=do_nothing,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class FirstThinning(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=first_thinning,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class EvenThinning(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=even_thinning,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class Clearcutting(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=clearcutting,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class CrossCutFelledTrees(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=cross_cut_felled_trees,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class CollectFelledTreeProperties(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=collect_felled_tree_properties,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class ReportPeriod(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=report_period,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class ReportCollectives(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=report_collectives,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class GrowActa(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=grow_acta,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class GrowMetsi(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=grow_metsi,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class ThinningFromBelow(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=thinning_from_below,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
 class ThinningFromAbove(Treatment[ForestStand]):
     def __init__(self, parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
         super().__init__(treatment_fn=thinning_from_above,
                          parameters=parameters,
-                         conditions=conditions,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
                          file_parameters=file_parameters)
 
 
