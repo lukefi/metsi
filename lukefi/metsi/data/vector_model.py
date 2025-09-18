@@ -239,6 +239,26 @@ class ReferenceTrees(VectorData):
     def __init__(self):
         super().__init__(DTYPES_TREE)
 
+    def as_rst_row(self, i: int) -> list:
+        return [
+            self.stems_per_ha[i],
+            self.species[i],
+            self.breast_height_diameter[i],
+            self.height[i],
+            self.breast_height_age[i],
+            self.biological_age[i],
+            self.saw_log_volume_reduction_factor[i],
+            self.pruning_year[i],
+            self.age_when_10cm_diameter_at_breast_height[i],
+            self.origin[i],
+            self.tree_number[i],
+            self.stand_origin_relative_position[i, 0],
+            self.stand_origin_relative_position[i, 1],
+            self.stand_origin_relative_position[i, 2],
+            self.lowest_living_branch_height[i],
+            self.management_category[i],
+            None,
+        ]
 
 class Strata(VectorData):
     identifier: npt.NDArray[np.str_]
