@@ -52,8 +52,7 @@ control_structure = {
         preproc_filter: [
             {
                 "remove trees": "sapling or stems_per_ha == 0",
-                "remove stands": "site_type_category == 0",  # not reference_trees
-                "remove stands": "site_type_category == None"
+                "remove stands": "(site_type_category == None) or (site_type_category == 0)",  # not reference_trees
             }
         ]
     },
@@ -105,7 +104,7 @@ control_structure = {
                 Alternatives([
                     DoNothing(),
                     FirstThinning(
-                        conditions=[
+                        preconditions=[
                             MinimumTimeInterval(50, first_thinning)
                         ],
                         parameters={
@@ -123,7 +122,7 @@ control_structure = {
                     ),
                     Sequence([
                         Clearcutting(
-                            conditions=[
+                            preconditions=[
                                 MinimumTimeInterval(50, clearcutting)
                             ],
                             file_parameters={
