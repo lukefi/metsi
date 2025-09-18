@@ -123,7 +123,8 @@ class EventTree[T]:
         :return: list of result payloads from this EventTree or as concatenated from its branches
         """
         current = self.wrapped_operation(payload)
-        current.computational_unit.finalize()
+        if isinstance(current.computational_unit, Finalizable):
+            current.computational_unit.finalize()
         branching_state: StateTree | None = None
         if state_tree is not None:
             state_tree.state = deepcopy(current.computational_unit)
@@ -255,7 +256,7 @@ class CollectedData:
 class OperationPayload[T](SimpleNamespace):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
-    computational_unit: PossiblyLayered[Finalizable]
+    computational_unit: PossiblyLayered[T]
     collected_data: CollectedData
     operation_history: list[tuple[int, "Operation[T]", dict[str, dict]]]
 
