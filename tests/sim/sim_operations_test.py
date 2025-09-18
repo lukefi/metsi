@@ -1,6 +1,6 @@
 import unittest
-from lukefi.metsi.sim.collected_data import OpTuple
 import tests.test_utils
+from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.sim.core_types import OperationPayload
 from lukefi.metsi.sim.operations import prepared_operation, _get_operation_last_run
 
