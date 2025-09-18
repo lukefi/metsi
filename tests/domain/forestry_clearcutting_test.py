@@ -5,7 +5,7 @@ import lukefi.metsi.domain.forestry_operations.clearcut as clearcut
 from lukefi.metsi.forestry import forestry_utils as futil
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.domain.forestry_operations.thinning_limits import SpeciesKey
-from lukefi.metsi.sim.core_types import CollectedData
+from lukefi.metsi.sim.collected_data import CollectedData
 import lukefi.metsi.domain.forestry_operations.planting as plnt
 from lukefi.metsi.domain.utils.enums import SiteTypeKey
 

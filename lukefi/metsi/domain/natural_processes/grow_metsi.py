@@ -8,6 +8,7 @@
 
 from typing import Optional,TypeVar, Sequence
 from collections import defaultdict
+from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.forestry.forestry_utils import calculate_basal_area
 
 from lukefi.metsi.data.enums.internal import (
@@ -30,6 +31,7 @@ from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.chain import (
     Origin,
     Storie,
 )
+from lukefi.metsi.sim.collected_data import OpTuple
 
 def to_mg_species(code) -> Species:
     """
@@ -77,7 +79,7 @@ class MetsiGrowPredictor(Predict):
     Extend metsi_grow.Predict to interface ForestStand & ReferenceTree data.
     """
 
-    def __init__(self, stand: ForestStand) -> None:
+    def __init__(self, stand: PossiblyLayered[ForestStand]) -> None:
         super().__init__()
         self.stand = stand  # store stand for property access
         self.year = float(_require(stand.year, "stand.year"))
@@ -228,12 +230,12 @@ class MetsiGrowPredictor(Predict):
 
 # ---------- public API ----------
 
-def grow_metsi(input_: tuple[ForestStand, None], /, **operation_parameters) -> tuple[ForestStand, None]:
+def grow_metsi(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Wrapper for metsi_grow evolve pipeline. Applies growth step to ForestStand.
     """
     step = operation_parameters.get("step", 5)
-    stand, _ = input_
+    stand, collected_data = input_
 
     # build predictor (use local class; no import from the old module path)
     pred = MetsiGrowPredictor(stand)
@@ -248,4 +250,4 @@ def grow_metsi(input_: tuple[ForestStand, None], /, **operation_parameters) -> t
 
     # prune dead trees
     stand.reference_trees = [t for t in stand.reference_trees if (t.stems_per_ha or 0.0) >= 1.0]
-    return stand, None
+    return stand, collected_data

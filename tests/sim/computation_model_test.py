@@ -1,6 +1,7 @@
 import unittest
 
-from lukefi.metsi.sim.generators import sequence, alternatives
+from lukefi.metsi.sim.event import Event
+from lukefi.metsi.sim.generators import Sequence, Treatment, sequence, alternatives
 from lukefi.metsi.sim.runners import evaluate_sequence
 from lukefi.metsi.sim.core_types import EventTree, SimConfiguration
 from tests.test_utils import inc
@@ -40,8 +41,8 @@ class ComputationModelTest(unittest.TestCase):
         self.assertListEqual([3, 3, 3, 3], results)
 
     def test_sim_configuration(self):
-        fn1 = lambda x: x
-        fn2 = lambda y: y
+        def fn1(x): return x
+        def fn2(y): return y
         operation_lookup = {
             'operation1': fn1,
             'operation2': fn2
@@ -60,24 +61,42 @@ class ComputationModelTest(unittest.TestCase):
                 }
             },
             'simulation_events': [
-                {
-                    'time_points': [1, 2, 3],
-                    'generators': [
-                        'operation1',
-                        'operation2'
+                Event(
+                    time_points=[1, 2, 3],
+                    treatments=[
+                        Treatment(
+                            treatment_fn=fn1,
+                            parameters={
+                                'param1': 1
+                            },
+                            run_constraints={
+                                'minimum_time_interval': 5
+                            }
+                        ),
+                        Treatment(
+                            treatment_fn=fn2
+                        )
                     ]
-                },
-                {
-                    'time_points': [3, 4, 5],
-                    'generators': [
-                        {
-                            'sequence': [
-                                'operation1',
-                                'operation2'
-                            ]
-                        }
+                ),
+                Event(
+                    time_points=[3, 4, 5],
+                    treatments=[
+                        Sequence([
+                            Treatment(
+                                treatment_fn=fn1,
+                                parameters={
+                                    'param1': 1
+                                },
+                                run_constraints={
+                                    'minimum_time_interval': 5
+                                }
+                            ),
+                            Treatment(
+                                treatment_fn=fn2
+                            )
+                        ])
                     ]
-                }
+                )
             ]
         }
         result = SimConfiguration(operation_lookup=operation_lookup, generator_lookup=generator_lookup, **config)

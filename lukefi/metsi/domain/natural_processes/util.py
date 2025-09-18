@@ -1,11 +1,12 @@
 import numpy as np
 import numpy.typing as npt
 from lukefi.metsi.app.utils import MetsiException
+from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.data.model import ForestStand
 
 
 def update_stand_growth(
-        stand: ForestStand,
+        stand: PossiblyLayered[ForestStand],
         diameters: list[float],
         heights: list[float],
         stems: list[float],
@@ -25,7 +26,7 @@ def update_stand_growth(
     stand.year = (stand.year or 0) + step
 
 
-def update_stand_growth_vectorized(stand: ForestStand,
+def update_stand_growth_vectorized(stand: PossiblyLayered[ForestStand],
                                    diameters: npt.NDArray[np.float64],
                                    heights: npt.NDArray[np.float64],
                                    stems: npt.NDArray[np.float64],

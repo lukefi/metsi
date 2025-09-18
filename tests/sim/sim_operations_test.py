@@ -1,5 +1,4 @@
 import unittest
-from lukefi.metsi.sim.util import merge_operation_params, get_operation_file_params
 import tests.test_utils
 from lukefi.metsi.sim.operations import prepared_operation, _get_operation_last_run
 
@@ -16,18 +15,6 @@ class SimOperationsTest(unittest.TestCase):
             function = prepared_operation(tests.test_utils.parametrized_operation, **case[0][1])
             result = function(case[0][0])
             self.assertEqual(case[1], result)
-
-    def test_operation_with_params_from_file(self):
-        operation_params = {"one": 1, "two": 2}
-        file_params = {"dummy_operation": {"dummy_file":"tests/resources/operations_test/test_dummy"}}
-        read_file_params = get_operation_file_params("dummy_operation", file_params)
-        merged_params = merge_operation_params(operation_params, read_file_params)
-        operation = prepared_operation(
-            tests.test_utils.parametrized_operation_using_file_parameter, 
-            **merged_params
-        )
-
-        self.assertEqual(operation("foo"), "kissa123\n")
 
     def test_operation_last_run(self):
         operation_history = [
@@ -46,5 +33,3 @@ class SimOperationsTest(unittest.TestCase):
         self.assertEqual(_get_operation_last_run(operation_history, "operation2"), 6)
         self.assertEqual(_get_operation_last_run(operation_history, "operation3"), 8)
         self.assertEqual(_get_operation_last_run(operation_history, "operationX"), None)
-
-

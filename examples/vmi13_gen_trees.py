@@ -2,7 +2,6 @@
 
 from examples.declarations.export_prepro import default_csv
 from lukefi.metsi.domain.pre_ops import *
-from lukefi.metsi.domain.sim_ops import *
 from lukefi.metsi.sim.generators import *
 
 control_structure = {

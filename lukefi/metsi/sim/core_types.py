@@ -1,12 +1,15 @@
-from collections import OrderedDict
 from collections.abc import Callable
 from copy import deepcopy, copy
 from types import SimpleNamespace
-from typing import NamedTuple, Optional, Any, TypeVar
+from typing import TYPE_CHECKING, NamedTuple, Optional, TypeVar
 import weakref
 
-from lukefi.metsi.data.layered_model import LayeredObject, PossiblyLayered
+from lukefi.metsi.data.layered_model import PossiblyLayered
+from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.state_tree import StateTree
+if TYPE_CHECKING:
+    from lukefi.metsi.sim.event import Event
+    from lukefi.metsi.sim.generators import Generator
 
 
 def identity(x):
@@ -14,25 +17,16 @@ def identity(x):
 
 
 class DeclaredEvents[T](NamedTuple):
-    time_points: list[int] = []
-    generators: list[dict["GeneratorFn[T]", list[Callable[[T], T]]]] = [{}]
+    time_points: list[int]
+    treatment_generator: "Generator[T]"
 
 
-class SimConfiguration(SimpleNamespace):
+class SimConfiguration[T](SimpleNamespace):
     """
     A class to manage simulation configuration, including operations, generators,
     events, and time points.
     Attributes:
-        operation_params: A dictionary containing
-            parameters for each operation, where the key is the operation name and
-            the value is a list of parameter dictionaries.
-        operation_file_params: A dictionary containing
-            file-related parameters for operations, where the key is the operation
-            name and the value is a dictionary of file parameters.
         events: A list of declared events for the simulation.
-        run_constraints: A dictionary defining constraints for
-            simulation runs, where the key is a constraint name and the value is a
-            dictionary of constraint details.
         time_points: A sorted list of unique time points derived from the
             declared simulation events.
     Methods:
@@ -40,10 +34,7 @@ class SimConfiguration(SimpleNamespace):
             Initializes the SimConfiguration instance with operation and generator
             lookups, and additional keyword arguments.
     """
-    operation_params: dict[Callable, list[dict[str, Any]]] = {}
-    operation_file_params: dict[str, dict[str, str]] = {}
-    events: list[DeclaredEvents] = []
-    run_constraints: dict[Callable, dict] = {}
+    events: list[DeclaredEvents[T]] = []
     time_points: list[int] = []
 
     def __init__(self, **kwargs):
@@ -55,14 +46,14 @@ class SimConfiguration(SimpleNamespace):
         super().__init__(**kwargs)
         self._populate_simulation_events(self.simulation_events)
 
-    def _populate_simulation_events(self, events: list):
+    def _populate_simulation_events(self, events: list["Event[T]"]):
         time_points = set()
         self.events = []
         for event_set in events:
-            source_time_points = event_set.get('time_points', [])
+            source_time_points = event_set.time_points
             new_event = DeclaredEvents(
                 time_points=source_time_points,
-                generators=event_set.get('generators', [])
+                treatment_generator=event_set.treatments
             )
             self.events.append(new_event)
             time_points.update(source_time_points)
@@ -125,7 +116,7 @@ class EventTree[T]:
         Recursive pre-order walkthrough of this event tree to evaluate its operations with the given payload,
         copying it for branching. If given a root node, a StateTree is also constructed, containing all complete
         intermediate states in the simulation.
-        
+
         :param payload: the simulation data payload (we don't care what it is here)
         :param state_tree: optional state tree node
         :return: list of result payloads from this EventTree or as concatenated from its branches
@@ -169,123 +160,8 @@ class EventTree[T]:
         self.add_branch(EventTree(operation, self))
 
 
-class CollectedData:
-
-    def __init__(
-        self,
-        operation_results: Optional[dict[str, Any]] = None,
-        current_time_point: Optional[int] = None,
-        initial_time_point: Optional[int] = None
-    ):
-        self.operation_results: dict[str, Any] = operation_results or {}
-        self.current_time_point: int = current_time_point or initial_time_point or 0
-        self.initial_time_point: int = initial_time_point or 0
-
-    def _copy_op_results(self, value: Any) -> dict | list:
-        """
-        optimises the deepcopy of self by shallow copying dict and list type operation_results.
-        This relies on the assumption that an operation result is not modified after it's stored.
-        """
-        if isinstance(value, dict):
-            return OrderedDict(value.items())
-        if isinstance(value, list):
-            return list(value)
-        return deepcopy(value)
-
-    def __copy__(self) -> "CollectedData":
-        return CollectedData(
-            operation_results={k: self._copy_op_results(v) for k, v in self.operation_results.items()},
-            current_time_point=self.current_time_point,
-            initial_time_point=self.initial_time_point
-        )
-
-    def prev(self, tag: str) -> Any:
-        try:
-            return next(reversed(self.operation_results[tag].values()))
-        except (KeyError, StopIteration):
-            return None
-
-    def get(self, tag: str) -> Any:
-        try:
-            return self.operation_results[tag]
-        except KeyError:
-            self.operation_results[tag] = OrderedDict()
-            return self.operation_results[tag]
-
-    def store(self, tag: str, collected_data: Any):
-        self.get(tag)[self.current_time_point] = collected_data
-
-    def get_list_result(self, tag: str) -> list[Any]:
-        try:
-            return self.operation_results[tag]
-        except KeyError:
-            self.operation_results[tag] = []
-            return self.operation_results[tag]
-
-    def extend_list_result(self, tag: str, collected_data: list[Any]):
-        self.get_list_result(tag).extend(collected_data)
-
-    def upsert_nested(self, value, *keys):
-        """
-        Upsert a value under a key path in a nested dictionary (under self.operation_results).
-        :param value: The value to upsert.
-        :param keys: The key path to the value to be upserted. Lenght of keys must be
-        larger than 1; this method is not intended to be used for upserting values  directly
-        under operation_results.
-        """
-        def _upsert(d: dict, value: dict, *keys):
-            if len(keys) == 1:
-                try:
-                    if keys[0] in d.keys():
-                        # a dictionary will be updated with a dictionary,
-                        # but other types will overrider the existing value
-                        if isinstance(value, dict) and isinstance(d[keys[0]], dict):
-                            d[keys[0]].update(value)
-                        else:
-                            d[keys[0]] = value
-                    else:
-                        d[keys[0]] = value
-                except KeyError:
-                    d[keys[0]] = value
-                return d
-
-            key = keys[0]
-            d[key] = _upsert(d.get(key, {}), value, *keys[1:])
-            return d
-
-        if len(keys) < 2:
-            raise ValueError("At least two keys must be provided.")
-
-        _upsert(self.get(keys[0]), value, *keys[1:])
-
-
-class OperationPayload[T](SimpleNamespace):
-    """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
-    operation calls. """
-    computational_unit: PossiblyLayered[T]
-    collected_data: CollectedData
-    operation_history: list[tuple[int, "Operation[T]", dict[str, dict]]]
-
-    def __copy__(self) -> "OperationPayload[T]":
-        copy_like: PossiblyLayered[T]
-        if isinstance(self.computational_unit, LayeredObject):
-            copy_like = self.computational_unit.new_layer()
-            copy_like.reference_trees = [tree.new_layer() for tree in copy_like.reference_trees]
-            copy_like.tree_strata = [stratum.new_layer() for stratum in copy_like.tree_strata]
-        else:
-            copy_like = deepcopy(self.computational_unit)
-
-        return OperationPayload(
-            computational_unit=copy_like,
-            collected_data=copy(self.collected_data),
-            operation_history=list(self.operation_history)
-        )
-
-
 T = TypeVar("T")
-OpTuple = tuple[T, CollectedData]
 Evaluator = Callable[[OperationPayload[T], EventTree[T]], list[OperationPayload[T]]]
 Runner = Callable[[OperationPayload[T], SimConfiguration, Evaluator[T]], list[OperationPayload[T]]]
-GeneratorFn = Callable[[Optional[list[EventTree[T]]]], list[EventTree[T]]]
-Operation = Callable[[OpTuple[PossiblyLayered[T]]], OpTuple[PossiblyLayered[T]]]
 ProcessedOperation = Callable[[OperationPayload[T]], OperationPayload[T]]
+ProcessedGenerator = Callable[[Optional[list[EventTree[T]]]], list[EventTree[T]]]

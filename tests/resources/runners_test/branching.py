@@ -1,30 +1,22 @@
-from lukefi.metsi.sim.generators import alternatives, sequence
+from lukefi.metsi.sim.event import Event
+from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment
 from lukefi.metsi.sim.operations import do_nothing
 from tests.test_utils import collecting_increment
 
 
 control_structure = {
-  "run_constraints": {
-    collecting_increment: {
-      "minimum_time_interval": 2
-    }
-  },
-  "simulation_events": [
-    {
-      "time_points": [1, 2, 3, 4],
-      "generators": [
-        {
-          sequence: [
-            do_nothing
-          ]
-        },
-        {
-          alternatives: [
-            do_nothing,
-            collecting_increment
-          ]
-        }
-      ]
-    }
-  ]
+    "simulation_events": [
+        Event(
+            time_points=[1, 2, 3, 4],
+            treatments=Sequence([
+                Sequence([
+                    Treatment(do_nothing),
+                ]),
+                Alternatives([
+                    Treatment(do_nothing),
+                    Treatment(collecting_increment, run_constraints={"minimum_time_interval": 2})
+                ])
+            ])
+        )
+    ]
 }

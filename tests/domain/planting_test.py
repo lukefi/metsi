@@ -2,7 +2,7 @@
 import unittest
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.enums.internal import TreeSpecies
-from lukefi.metsi.sim.core_types import CollectedData
+from lukefi.metsi.sim.collected_data import CollectedData
 import lukefi.metsi.domain.forestry_operations.planting as plnt
 from lukefi.metsi.domain.utils.enums import SoilPreparationKey
 

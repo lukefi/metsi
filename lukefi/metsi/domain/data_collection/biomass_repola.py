@@ -2,8 +2,8 @@ import math
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.domain.collected_types import BiomassData
-from lukefi.metsi.sim.core_types import OpTuple
 from lukefi.metsi.app.utils import MetsiException
+from lukefi.metsi.sim.collected_data import OpTuple
 
 
 # Sources

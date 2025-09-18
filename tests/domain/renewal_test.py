@@ -2,7 +2,7 @@ from copy import deepcopy
 import unittest
 from lukefi.metsi.domain.forestry_operations.renewal import *
 
-from lukefi.metsi.sim.core_types import CollectedData
+from lukefi.metsi.sim.collected_data import CollectedData
 
 class RenewalTest(unittest.TestCase):
     payload = (
