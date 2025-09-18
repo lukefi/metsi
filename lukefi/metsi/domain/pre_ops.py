@@ -13,9 +13,6 @@ from lukefi.metsi.forestry.preprocessing.tree_generation_validation import creat
     debug_output_row_from_comparison_set, debug_output_header_row
 from lukefi.metsi.data.vectorize import vectorize
 from lukefi.metsi.app.utils import MetsiException
-from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.lasum import ilmanor
-from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.coord import etrs_tm35_to_ykj as conv
-from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.kor import xkor
 
 
 def preproc_filter(stands: StandList, **operation_params) -> StandList:
@@ -32,6 +29,12 @@ def compute_location_metadata(stands: StandList, **operation_params) -> StandLis
     These properties are: height above sea level, temperature sum, sea effect, lake effect, monthly temperature and
     monthly rainfall
     """
+
+    # Lazy import of optional MetsiGrow functions.
+    from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.lasum import ilmanor  # pylint: disable=import-outside-toplevel
+    from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.coord import etrs_tm35_to_ykj as conv  # pylint: disable=import-outside-toplevel
+    from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.kor import xkor  # pylint: disable=import-outside-toplevel
+
     _ = operation_params
 
     for stand in stands:
