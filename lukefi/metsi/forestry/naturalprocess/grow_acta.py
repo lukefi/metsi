@@ -114,8 +114,10 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
     """
     if trees.size == 0:
         return np.array([]), np.array([])
-    ds = trees.breast_height_diameter
-    hs = trees.height
+
+    ds = trees.breast_height_diameter.copy()
+    hs = trees.height.copy()
+
     for s in range(step):
         bigh = np.extract(hs >= 1.3, hs)
         if bigh.size > 0:
@@ -130,7 +132,7 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
                 hg = np.sum(hs * gs, where=trees.species == spe) / gg
 
                 condition = (trees.species == spe) & (hs >= 1.3)
-                
+
                 pd = yearly_diameter_growth_by_species_vectorized(spe,
                                                                   ds[condition],
                                                                   hs[condition],
@@ -146,8 +148,6 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
                                                                 dg,
                                                                 hg,
                                                                 g) / 100
-                ds = ds.copy()
-                hs = hs.copy()
                 ds[condition] = ds[condition] * (1 + pd)
                 hs[condition] = hs[condition] * (1 + ph)
                 hs[hs < 1.3] += 0.3
