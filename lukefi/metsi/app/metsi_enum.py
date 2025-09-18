@@ -104,6 +104,7 @@ class StateOutputFormat(StringConfigEnum):
     PICKLE = 'pickle'
     JSON = 'json'
     CSV = 'csv'
+    RST = 'rst'
 
 
 class DerivedDataOutputFormat(StringConfigEnum):

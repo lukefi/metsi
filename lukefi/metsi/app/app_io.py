@@ -27,7 +27,7 @@ class MetsiConfiguration(SimpleNamespace):
     run_modes = [RunMode.PREPROCESS, RunMode.EXPORT_PREPRO, RunMode.SIMULATE, RunMode.POSTPROCESS, RunMode.EXPORT]
     state_format = StateFormat.FDM
     state_input_container = StateInputFormat.CSV
-    state_output_container: Optional[str] = None
+    state_output_container: Optional[StateOutputFormat] = None
     derived_data_output_container: Optional[str] = None
     formation_strategy = FormationStrategy.PARTIAL
     evaluation_strategy = EvaluationStrategy.DEPTH
