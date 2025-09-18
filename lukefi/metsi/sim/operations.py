@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING, Callable, TypeVar
 
+from lukefi.metsi.app.utils import ConditionFailed
 from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.operation_payload import ProcessedOperation
 from lukefi.metsi.sim.operation_payload import OperationPayload
@@ -22,22 +23,26 @@ def prepared_operation(operation_entrypoint: Callable[[T], T], **operation_param
 
 def prepared_processor(operation_tag: "TreatmentFn[T]",
                        time_point: int,
-                       operation_conditions: list[Condition[OperationPayload[T]]],
-                       **operation_parameters: dict[str,
-                                                    dict]) -> ProcessedOperation[T]:
+                       preconditions: list[Condition[OperationPayload[T]]],
+                       postconditions: list[Condition[OperationPayload[T]]],
+                       **operation_parameters: dict[str, dict]) -> ProcessedOperation[T]:
     """prepares a processor function with an operation entrypoint"""
     operation: "TreatmentFn[T]" = prepared_operation(operation_tag, **operation_parameters)
     return lambda payload: _processor(payload, operation, operation_tag, time_point,
-                                      operation_conditions, **operation_parameters)
+                                      preconditions, postconditions, **operation_parameters)
 
 
-def _processor(payload: OperationPayload[T], operation: "TreatmentFn[T]", operation_tag: "TreatmentFn[T]",
-               time_point: int, operation_conditions: list[Condition[OperationPayload[T]]],
+def _processor(payload: OperationPayload[T],
+               operation: "TreatmentFn[T]",
+               operation_tag: "TreatmentFn[T]",
+               time_point: int,
+               preconditions: list[Condition[OperationPayload[T]]],
+               postconditions: list[Condition[OperationPayload[T]]],
                **operation_parameters: dict[str, dict]) -> OperationPayload[T]:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
-    for condition in operation_conditions:
+    for condition in preconditions:
         if not condition(time_point, payload):
-            raise UserWarning(f'{operation_tag} aborted - condition "{condition}" failed')
+            raise ConditionFailed(f'{operation_tag} aborted - condition "{condition}" failed')
 
     payload.collected_data.current_time_point = time_point
     try:
@@ -46,11 +51,16 @@ def _processor(payload: OperationPayload[T], operation: "TreatmentFn[T]", operat
         raise UserWarning(f"Unable to perform operation {operation_tag}, "
                           f"at time point {time_point}; reason: {e}") from e
 
-    payload.operation_history.append((time_point, operation_tag, operation_parameters))
-
     newpayload: OperationPayload[T] = OperationPayload(
         computational_unit=new_state,
         collected_data=payload.collected_data if new_collected_data is None else new_collected_data,
         operation_history=payload.operation_history
     )
+
+    for condition in postconditions:
+        if not condition(time_point, newpayload):
+            raise ConditionFailed(f'{operation_tag} aborted - condition "{condition}" failed')
+
+    payload.operation_history.append((time_point, operation_tag, operation_parameters))
+
     return newpayload

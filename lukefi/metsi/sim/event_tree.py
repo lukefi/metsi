@@ -1,6 +1,7 @@
 from typing import Optional
 from copy import copy, deepcopy
 
+from lukefi.metsi.app.utils import ConditionFailed
 from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.sim.operation_payload import OperationPayload, ProcessedOperation
 from lukefi.metsi.sim.state_tree import StateTree
@@ -53,6 +54,7 @@ class EventTree[T]:
         :return: list of result payloads from this EventTree or as concatenated from its branches
         """
         current = self.wrapped_operation(payload)
+
         branching_state: StateTree | None = None
         if state_tree is not None:
             state_tree.state = deepcopy(current.computational_unit)
@@ -77,7 +79,7 @@ class EventTree[T]:
                 results.extend(evaluated_branch)
                 if state_tree is not None and branching_state is not None:
                     state_tree.add_branch(branching_state)
-            except UserWarning:
+            except (ConditionFailed, UserWarning):
                 ...
         if len(results) == 0:
             raise UserWarning("Branch aborted with all children failing")
