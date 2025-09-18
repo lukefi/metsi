@@ -334,8 +334,6 @@ class ForestStand(Finalizable):
     # VMI data type 1
     # SMK data type Stand
 
-    vectorized: bool = False
-
     reference_trees: list[ReferenceTree] = dataclasses.field(default_factory=list)
     tree_strata: list[TreeStratum] = dataclasses.field(default_factory=list)
 
@@ -404,16 +402,16 @@ class ForestStand(Finalizable):
     def __deepcopy__(self, memo: dict) -> 'ForestStand':
         stand = ForestStand.__new__(ForestStand)
         stand.__dict__.update(self.__dict__)
-        if not stand.vectorized:
+        if self.reference_trees_soa is None or self.tree_strata_soa is None:
             stand.reference_trees = [t.__deepcopy__(memo) for t in stand.reference_trees]
             stand.tree_strata = [s.__deepcopy__(memo) for s in stand.tree_strata]
-        elif self.reference_trees_soa is not None and self.tree_strata_soa is not None:
+        else:
             stand.reference_trees_soa = self.reference_trees_soa.finalize()
             stand.tree_strata_soa = self.tree_strata_soa.finalize()
-        if stand.monthly_temperatures is not None:
-            stand.monthly_temperatures = list(stand.monthly_temperatures)
-        if stand.monthly_rainfall is not None:
-            stand.monthly_rainfall = list(stand.monthly_rainfall)
+        if self.monthly_temperatures is not None:
+            stand.monthly_temperatures = list(self.monthly_temperatures)
+        if self.monthly_rainfall is not None:
+            stand.monthly_rainfall = list(self.monthly_rainfall)
         return stand
 
     def __hash__(self):
