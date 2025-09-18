@@ -1,9 +1,8 @@
 import unittest
-import tests.test_utils
 from lukefi.metsi.sim.collected_data import OpTuple
-from lukefi.metsi.sim.operation_payload import OperationPayload
-from lukefi.metsi.domain.conditions import _get_operation_last_run
-from lukefi.metsi.sim.operations import prepared_operation
+import tests.test_utils
+from lukefi.metsi.sim.core_types import OperationPayload
+from lukefi.metsi.sim.operations import prepared_operation, _get_operation_last_run
 
 
 class SimOperationsTest(unittest.TestCase):
