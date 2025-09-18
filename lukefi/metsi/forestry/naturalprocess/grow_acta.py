@@ -100,8 +100,10 @@ def grow_diameter_and_height(
                     ds[i] = 1.0
     return ds, hs
 
+
 yearly_diameter_growth_by_species_vectorized = np.vectorize(yearly_diameter_growth_by_species)
 yearly_height_growth_by_species_vectorized = np.vectorize(yearly_height_growth_by_species)
+
 
 def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
                                         step: int = 5) -> tuple[npt.NDArray[np.float64],
@@ -127,29 +129,27 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
                 dg = np.sum(ds * gs, where=trees.species == spe) / gg
                 hg = np.sum(hs * gs, where=trees.species == spe) / gg
 
-                pd = np.where(
-                    trees.species == spe,
-                    yearly_diameter_growth_by_species_vectorized(
-                        spe,
-                        ds,
-                        hs,
-                        ag,
-                        dg,
-                        hg,
-                        hdom,
-                        g) / 100,
-                    0)
-                ph = np.where(
-                    trees.species == spe,
-                    yearly_height_growth_by_species_vectorized(
-                        spe,
-                        ds,
-                        hs,
-                        ag,
-                        dg,
-                        hg,
-                        g) / 100,
-                    0)
-                ds = ds * (1 + pd)
-                hs = hs * (1 + ph)
+                condition = (trees.species == spe) & (hs >= 1.3)
+                
+                pd = yearly_diameter_growth_by_species_vectorized(spe,
+                                                                  ds[condition],
+                                                                  hs[condition],
+                                                                  ag,
+                                                                  dg,
+                                                                  hg,
+                                                                  hdom,
+                                                                  g) / 100
+                ph = yearly_height_growth_by_species_vectorized(spe,
+                                                                ds[condition],
+                                                                hs[condition],
+                                                                ag,
+                                                                dg,
+                                                                hg,
+                                                                g) / 100
+                ds = ds.copy()
+                hs = hs.copy()
+                ds[condition] = ds[condition] * (1 + pd)
+                hs[condition] = hs[condition] * (1 + ph)
+                hs[hs < 1.3] += 0.3
+                ds[(ds == 0) & (hs >= 1.3)] = 1.0
     return ds, hs
