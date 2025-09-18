@@ -29,7 +29,7 @@ def run_stands(stands: StandList,
     retval: dict[str, list[ForestOpPayload]] = {}
     for stand in stands:
         overlaid_stand: PossiblyLayered[ForestStand]
-        if not stand.vectorized:
+        if stand.reference_trees_soa is None or stand.tree_strata_soa is None:
             overlaid_stand = LayeredObject[ForestStand](stand)
             overlaid_stand.reference_trees = [LayeredObject[ReferenceTree]
                                               (tree) for tree in overlaid_stand.reference_trees]
@@ -38,7 +38,7 @@ def run_stands(stands: StandList,
             overlaid_stand = stand
 
         payload = ForestOpPayload(
-            computational_unit=stand,
+            computational_unit=overlaid_stand,
             collected_data=CollectedData(initial_time_point=config.time_points[0]),
             operation_history=[],
         )

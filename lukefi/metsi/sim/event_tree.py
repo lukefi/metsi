@@ -3,6 +3,7 @@ from copy import copy, deepcopy
 
 from lukefi.metsi.app.utils import ConditionFailed
 from lukefi.metsi.data.layered_model import PossiblyLayered
+from lukefi.metsi.sim.finalizable import Finalizable
 from lukefi.metsi.sim.operation_payload import OperationPayload, ProcessedOperation
 from lukefi.metsi.sim.state_tree import StateTree
 
@@ -54,7 +55,8 @@ class EventTree[T]:
         :return: list of result payloads from this EventTree or as concatenated from its branches
         """
         current = self.wrapped_operation(payload)
-
+        if isinstance(current.computational_unit, Finalizable):
+            current.computational_unit.finalize()
         branching_state: StateTree | None = None
         if state_tree is not None:
             state_tree.state = deepcopy(current.computational_unit)
