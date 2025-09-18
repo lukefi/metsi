@@ -11,7 +11,6 @@ from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.sim.operation_payload import OperationPayload
 
-
 class ConverterTestSuite(unittest.TestCase):
     def run_with_test_assertions(self, assertions: list[tuple], fn: Callable):
         for case in assertions:
