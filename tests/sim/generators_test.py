@@ -19,8 +19,10 @@ class TestGenerators(unittest.TestCase):
             inc
         )
         chain = root.operation_chains()[0]
-        computation_result = run_sequence(0, *chain)
-        self.assertEqual(3, computation_result)
+        computation_result = run_sequence(OperationPayload(computational_unit=0,
+                                                           collected_data=None,
+                                                           operation_history={}), *chain)
+        self.assertEqual(3, computation_result.computational_unit)
         self.assertEqual(1, len(result))
         self.assertEqual(4, len(chain))
 
@@ -367,8 +369,10 @@ class TestGenerators(unittest.TestCase):
         chain = lukefi.metsi.sim.generators.simple_processable_chain(operation_tags,
                                                                      operation_params)
         self.assertEqual(len(operation_tags), len(chain))
-        result = evaluate_sequence(1, *chain)
-        self.assertEqual(4000, result)
+        result = evaluate_sequence(OperationPayload(computational_unit=1,
+                                                    collected_data=None,
+                                                    operation_history={}), *chain)
+        self.assertEqual(4000, result.computational_unit)
 
     def test_simple_processable_chain_multiparameter_exception(self):
         operation_tags = ['param_oper']
