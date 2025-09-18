@@ -62,8 +62,8 @@ class VectorModelTest(unittest.TestCase):
         self.assertEqual(self.vector_data.z[0], 3.0)
 
         self.assertEqual(self.vector_data.x[1], 7)
-        self.assertEqual(self.vector_data.y[1], -1)
-        self.assertTrue(np.isnan(self.vector_data.z[1]))
+        self.assertEqual(self.vector_data.y[1], 0)
+        self.assertEqual(self.vector_data.z[1], 0.0)
 
         self.assertEqual(self.vector_data.x[2], 4)
         self.assertEqual(self.vector_data.y[2], 5)
@@ -109,8 +109,8 @@ class VectorModelTest(unittest.TestCase):
         self.assertDictEqual(self.vector_data.read(0), {"x": 1, "y": 2, "z": 3.0})
         self.assertDictEqual(self.vector_data.read(2), {"x": 4, "y": 5, "z": 6.0})
         self.assertEqual(self.vector_data.read(1)["x"], 7)
-        self.assertEqual(self.vector_data.read(1)["y"], -1)
-        self.assertTrue(np.isnan(self.vector_data.read(1)["z"]))
+        self.assertEqual(self.vector_data.read(1)["y"], 0)
+        self.assertEqual(self.vector_data.read(1)["z"], 0.0)
 
     def test_update(self):
         self.vector_data.create({"x": 1, "y": 2, "z": 3.0})
@@ -128,8 +128,8 @@ class VectorModelTest(unittest.TestCase):
         self.assertEqual(self.vector_data.z[0], 3.0)
 
         self.assertEqual(self.vector_data.x[1], 7)
-        self.assertEqual(self.vector_data.y[1], -1)
-        self.assertTrue(np.isnan(self.vector_data.read(1)["z"]))
+        self.assertEqual(self.vector_data.y[1], 0)
+        self.assertEqual(self.vector_data.read(1)["z"], 0.0)
 
         self.assertEqual(self.vector_data.x[2], 8)
         self.assertEqual(self.vector_data.y[2], 5)

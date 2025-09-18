@@ -94,9 +94,9 @@ class VectorData():
 
     def to_default(self, value: Optional[Any], field_type: npt.DTypeLike) -> Any:
         """ Replace None with appropriate defaults based on field type. """
-        int_default = -1
+        int_default = 0
         str_default = ""
-        float_default = np.nan
+        float_default = 0.0
         bool_default = False
         tuple_default = (np.nan, np.nan, np.nan)
         object_default = None
