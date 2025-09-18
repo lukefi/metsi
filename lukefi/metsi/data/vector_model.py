@@ -81,8 +81,8 @@ class VectorData():
                 raise MetsiException("Vectorized data is not contiguous")
         return self
 
-    def is_contiguous(self, name):
-        arr = getattr(self, name)
+    def is_contiguous(self, name: str):
+        arr: npt.NDArray = getattr(self, name)
         return bool(arr.flags['CONTIGUOUS']) and bool(arr.flags['C_CONTIGUOUS'])
 
     def set_size(self, attr_dict: dict[str, list[Any]]):
