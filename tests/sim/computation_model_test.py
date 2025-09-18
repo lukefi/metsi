@@ -81,7 +81,7 @@ class ComputationModelTest(unittest.TestCase):
                     treatments=[
                         Sequence([
                             Treatment(
-                                conditions=[
+                                preconditions=[
                                     MinimumTimeInterval(5, fn1)
                                 ],
                                 treatment_fn=fn1,

@@ -16,7 +16,7 @@ control_structure = {
                 Alternatives([
                     Treatment(do_nothing),
                     Treatment(
-                        conditions=[
+                        preconditions=[
                             MinimumTimeInterval(2, collecting_increment)
                         ],
                         treatment_fn=collecting_increment
