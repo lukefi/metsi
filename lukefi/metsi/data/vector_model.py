@@ -260,35 +260,6 @@ class ReferenceTrees(VectorData):
             None,
         ]
 
-    def as_internal_csv_row(self, i) -> list[str]:
-        return [
-            "tree",
-            str(self.identifier[i]),
-            str(self.species[i]),
-            str(self.origin[i]),
-            str(self.stems_per_ha[i]),
-            str(self.breast_height_diameter[i]),
-            str(self.height[i]),
-            str(self.measured_height[i]),
-            str(self.breast_height_age[i]),
-            str(self.biological_age[i]),
-            str(self.saw_log_volume_reduction_factor[i]),
-            str(self.pruning_year[i]),
-            str(self.age_when_10cm_diameter_at_breast_height[i]),
-            str(self.tree_number[i]),
-            str(self.stand_origin_relative_position[i, 0]),
-            str(self.stand_origin_relative_position[i, 1]),
-            str(self.stand_origin_relative_position[i, 2]),
-            str(self.lowest_living_branch_height[i]),
-            str(self.management_category[i]),
-            str(self.tree_category[i]),
-            str(self.sapling[i]),
-            str(self.storey[i]),
-            str(self.tree_type[i]),
-            str(self.tuhon_ilmiasu[i])
-        ]
-
-
 class Strata(VectorData):
     identifier: npt.NDArray[np.str_]
     species: npt.NDArray[np.int32]
