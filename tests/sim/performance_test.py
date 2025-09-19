@@ -4,8 +4,9 @@ import unittest
 
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.sim.collected_data import CollectedData
-from lukefi.metsi.sim.core_types import OperationPayload, SimConfiguration
+from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, chain_evaluator, depth_first_evaluator
+from lukefi.metsi.sim.sim_configuration import SimConfiguration
 
 optime = 0
 counter = 0

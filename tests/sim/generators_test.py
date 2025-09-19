@@ -3,38 +3,14 @@ import unittest
 from lukefi.metsi.sim.collected_data import CollectedData
 from lukefi.metsi.sim.event import Event
 import lukefi.metsi.sim.generators
-from lukefi.metsi.sim.core_types import EventTree, OperationPayload, SimConfiguration
-from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment, sequence, compose_nested, alternatives
+from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment
+from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
+from lukefi.metsi.sim.sim_configuration import SimConfiguration
 from tests.test_utils import inc, collecting_increment, parametrized_operation
 
 
 class TestGenerators(unittest.TestCase):
-    def test_event_sequence_generating(self):
-        root = EventTree()
-        result = sequence(
-            [root],
-            inc,
-            inc,
-            inc
-        )
-        chain = root.operation_chains()[0]
-        computation_result = run_sequence(0, *chain)
-        self.assertEqual(3, computation_result)
-        self.assertEqual(1, len(result))
-        self.assertEqual(4, len(chain))
-
-    def test_branch_generating(self):
-        parent1 = EventTree()
-        parent2 = EventTree()
-        result = alternatives(
-            [parent1, parent2],
-            *[inc, inc, inc]
-        )
-        self.assertEqual(6, len(result))
-        self.assertEqual(3, len(parent1.branches))
-        self.assertEqual(3, len(parent2.branches))
-
     def test_yaml_declaration(self):
         declaration = {
             "simulation_events": [
@@ -52,8 +28,8 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
-        result = compose_nested(generator)
+        generator = config.full_tree_generators()
+        result = generator.compose_nested()
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             computational_unit=0,
@@ -81,8 +57,8 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
-        result = compose_nested(generator)
+        generator = config.full_tree_generators()
+        result = generator.compose_nested()
         chain = result.operation_chains()[0]
         payload = OperationPayload(
             computational_unit=0,
@@ -121,8 +97,8 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
-        result = compose_nested(generator)
+        generator = config.full_tree_generators()
+        result = generator.compose_nested()
         chain = result.operation_chains()[0]
         payload = OperationPayload(computational_unit=0,
                                    operation_history=[],
@@ -147,7 +123,7 @@ class TestGenerators(unittest.TestCase):
         }
         config = SimConfiguration(**declaration)
         # generators for 2 time points'
-        generators = lukefi.metsi.sim.generators.partial_tree_generators_by_time_point(config)
+        generators = config.partial_tree_generators_by_time_point()
         self.assertEqual(2, len(generators.values()))
 
         # 1 sequence generators in each time point
@@ -156,8 +132,8 @@ class TestGenerators(unittest.TestCase):
 
         # 1 chain from both generated trees
         # 1 root + 2 processors (inc) in both chains
-        tree_one = compose_nested(gen_one)
-        tree_two = compose_nested(gen_two)
+        tree_one = gen_one.compose_nested()
+        tree_two = gen_two.compose_nested()
         chain_one = tree_one.operation_chains()
         chain_two = tree_two.operation_chains()
         self.assertEqual(1, len(chain_one))
@@ -203,8 +179,8 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
-        tree = compose_nested(generator)
+        generator = config.full_tree_generators()
+        tree = generator.compose_nested()
         chains = tree.operation_chains()
         self.assertEqual(4, len(chains))
 
@@ -271,8 +247,8 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         config = SimConfiguration(**declaration)
-        generator = lukefi.metsi.sim.generators.full_tree_generators(config)
-        tree = compose_nested(generator)
+        generator = config.full_tree_generators()
+        tree = generator.compose_nested()
         chains = tree.operation_chains()
         self.assertEqual(3, len(chains))
 
@@ -344,8 +320,8 @@ class TestGenerators(unittest.TestCase):
             SimConfiguration(**declaration_one),
             SimConfiguration(**declaration_two)
         ]
-        generators = [lukefi.metsi.sim.generators.full_tree_generators(config) for config in configs]
-        trees = [compose_nested(generator) for generator in generators]
+        generators = [config.full_tree_generators() for config in configs]
+        trees = [generator.compose_nested() for generator in generators]
         chains_sets = [tree.operation_chains() for tree in trees]
 
         results = ([], [])

@@ -61,39 +61,6 @@ class CollectedData:
     def extend_list_result(self, tag: str, collected_data: list[Any]):
         self.get_list_result(tag).extend(collected_data)
 
-    def upsert_nested(self, value, *keys):
-        """
-        Upsert a value under a key path in a nested dictionary (under self.operation_results).
-        :param value: The value to upsert.
-        :param keys: The key path to the value to be upserted. Lenght of keys must be
-        larger than 1; this method is not intended to be used for upserting values  directly
-        under operation_results.
-        """
-        def _upsert(d: dict, value: dict, *keys):
-            if len(keys) == 1:
-                try:
-                    if keys[0] in d.keys():
-                        # a dictionary will be updated with a dictionary,
-                        # but other types will overrider the existing value
-                        if isinstance(value, dict) and isinstance(d[keys[0]], dict):
-                            d[keys[0]].update(value)
-                        else:
-                            d[keys[0]] = value
-                    else:
-                        d[keys[0]] = value
-                except KeyError:
-                    d[keys[0]] = value
-                return d
-
-            key = keys[0]
-            d[key] = _upsert(d.get(key, {}), value, *keys[1:])
-            return d
-
-        if len(keys) < 2:
-            raise ValueError("At least two keys must be provided.")
-
-        _upsert(self.get(keys[0]), value, *keys[1:])
-
 
 T = TypeVar("T")
 OpTuple = tuple[PossiblyLayered[T], CollectedData]
