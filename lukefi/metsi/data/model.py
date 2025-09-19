@@ -6,7 +6,7 @@ from lukefi.metsi.data.enums.internal import (LandUseCategory, OwnerCategory, Si
                                               TreeSpecies, DrainageCategory, Storey)
 from lukefi.metsi.data.enums.mela import MelaLandUseCategory
 from lukefi.metsi.data.formats.util import convert_str_to_type as conv
-from lukefi.metsi.data.layered_model import LayeredObject
+from lukefi.metsi.data.layered_model import LayeredObject, PossiblyLayered
 from lukefi.metsi.data.vector_model import ReferenceTrees, Strata
 from lukefi.metsi.sim.finalizable import Finalizable
 
@@ -209,22 +209,6 @@ class TreeStratum():
         result.storey = Storey(int(row[21])) if row[21] != "None" else None
         return result
 
-    def as_rsts_row(self):
-        return [
-            self.tree_number,
-            self.species,
-            self.origin,
-            self.stems_per_ha,
-            self.mean_diameter,
-            self.mean_height,
-            self.breast_height_age,
-            self.biological_age,
-            self.basal_area,
-            self.sapling_stems_per_ha,
-            self.storey,
-            self.number_of_generated_trees
-        ]
-
 
 @dataclass(init=True, repr=False, order=False, unsafe_hash=False, frozen=False, match_args=False, kw_only=False,
            slots=False, weakref_slot=False, eq=False)
@@ -313,34 +297,6 @@ class ReferenceTree():
             return True
         return False
 
-    def as_internal_csv_row(self) -> list[str]:
-        return [
-            "tree",
-            str(self.identifier),
-            str(self.species),
-            str(self.origin),
-            str(self.stems_per_ha),
-            str(self.breast_height_diameter),
-            str(self.height),
-            str(self.measured_height),
-            str(self.breast_height_age),
-            str(self.biological_age),
-            str(self.saw_log_volume_reduction_factor),
-            str(self.pruning_year),
-            str(self.age_when_10cm_diameter_at_breast_height),
-            str(self.tree_number),
-            str(self.stand_origin_relative_position[0]),
-            str(self.stand_origin_relative_position[1]),
-            str(self.stand_origin_relative_position[2]),
-            str(self.lowest_living_branch_height),
-            str(self.management_category),
-            str(self.tree_category),
-            str(self.sapling),
-            str(self.storey),
-            str(self.tree_type),
-            str(self.tuhon_ilmiasu)
-        ]
-
     @classmethod
     def from_csv_row(cls, row) -> "ReferenceTree":
         result = cls()
@@ -370,27 +326,6 @@ class ReferenceTree():
         result.tree_type = conv(row[22], str)
         result.tuhon_ilmiasu = conv(row[23], str)
         return result
-
-    def as_rst_row(self):
-        return [
-            self.stems_per_ha,
-            self.species,
-            self.breast_height_diameter,
-            self.height,
-            self.breast_height_age,
-            self.biological_age,
-            self.saw_log_volume_reduction_factor,
-            self.pruning_year,
-            self.age_when_10cm_diameter_at_breast_height,
-            self.origin,
-            self.tree_number,
-            self.stand_origin_relative_position[0],
-            self.stand_origin_relative_position[1],
-            self.stand_origin_relative_position[2],
-            self.lowest_living_branch_height,
-            self.management_category,
-            None,
-        ]
 
 
 @dataclass(init=True, repr=False, order=False, unsafe_hash=False, frozen=False, match_args=False, kw_only=False,
@@ -528,56 +463,6 @@ class ForestStand(Finalizable):
     def has_strata(self):
         return len(self.tree_strata) > 0
 
-    def as_internal_csv_row(self, decl_keys: Optional[list[str]] = None) -> list[str]:
-        result = ["stand", self.identifier]
-        result.extend(self.as_internal_row())
-        if decl_keys is not None:
-            result.extend(self.get_value_list(decl_keys))
-        return result
-
-    def as_internal_row(self):
-        return [
-            self.management_unit_id,
-            self.year,
-            self.area,
-            self.area_weight,
-            self.geo_location[0] if self.geo_location is not None else None,
-            self.geo_location[1] if self.geo_location is not None else None,
-            self.geo_location[2] if self.geo_location is not None else None,
-            self.geo_location[3] if self.geo_location is not None else None,
-            self.degree_days,
-            self.owner_category,
-            self.land_use_category,
-            self.soil_peatland_category,
-            self.site_type_category,
-            self.tax_class_reduction,
-            self.tax_class,
-            self.drainage_category,
-            self.drainage_feasibility,
-            self.drainage_year,
-            self.fertilization_year,
-            self.soil_surface_preparation_year,
-            self.natural_regeneration_feasibility,
-            self.regeneration_area_cleaning_year,
-            self.development_class,
-            self.artificial_regeneration_year,
-            self.young_stand_tending_year,
-            self.pruning_year,
-            self.cutting_year,
-            self.forestry_centre_id,
-            self.forest_management_category,
-            self.method_of_last_cutting,
-            self.municipality_id,
-            self.fra_category,
-            self.land_use_category_detail,
-            self.auxiliary_stand,
-            self.area_weight_factors[0],
-            self.area_weight_factors[1],
-            self.stand_id,
-            self.basal_area,
-            self.dominant_storey_age
-        ]
-
     def from_row(self, row):
         self.management_unit_id = conv(row[0], int)
         self.year = conv(row[1], int)
@@ -627,44 +512,6 @@ class ForestStand(Finalizable):
         stand.from_row(row[2:])
         return stand
 
-    def as_rst_row(self):
-        return [
-            self.management_unit_id,
-            self.year,
-            self.area,
-            self.area_weight,
-            self.geo_location[0] if self.geo_location else None,
-            self.geo_location[1] if self.geo_location else None,
-            self.stand_id,
-            self.geo_location[2] if self.geo_location else None,
-            self.degree_days,
-            self.owner_category.value if self.owner_category else None,
-            self.land_use_category.value if self.land_use_category else None,
-            self.soil_peatland_category,
-            self.site_type_category,
-            self.tax_class_reduction,
-            self.tax_class,
-            self.drainage_category,
-            self.drainage_feasibility,
-            None,
-            self.drainage_year,
-            self.fertilization_year,
-            self.soil_surface_preparation_year,
-            self.natural_regeneration_feasibility,
-            self.regeneration_area_cleaning_year,
-            self.development_class,
-            self.artificial_regeneration_year,
-            self.young_stand_tending_year,
-            self.pruning_year,
-            self.cutting_year,
-            self.forestry_centre_id,
-            self.forest_management_category,
-            self.method_of_last_cutting,
-            self.municipality_id,
-            None,
-            self.dominant_storey_age,
-        ]
-
     def get_value_list(self, keys: Optional[list[str]] = None) -> list:
         """ Returns instance values as list based on keys.
             If keys are not present all attribute values are returned """
@@ -678,6 +525,7 @@ class ForestStand(Finalizable):
         if self.reference_trees_soa is not None and self.tree_strata_soa is not None:
             self.reference_trees_soa = self.reference_trees_soa.finalize()
             self.tree_strata_soa = self.tree_strata_soa.finalize()
+
 
 def create_layered_tree(**kwargs) -> LayeredObject[ReferenceTree]:
     prototype = ReferenceTree()
@@ -701,3 +549,189 @@ def create_layered_stratum(**kwargs) -> LayeredObject[TreeStratum]:
     for k, v in kwargs.items():
         setattr(layered, k, v)
     return layered
+
+
+def stand_as_internal_csv_row(stand: PossiblyLayered[ForestStand], decl_keys: Optional[list[str]] = None) -> list[str]:
+    result = ["stand", stand.identifier]
+    result.extend(stand_as_internal_row(stand))
+    if decl_keys is not None:
+        result.extend(stand.get_value_list(decl_keys))
+    return result
+
+
+def tree_as_internal_csv_row(tree: PossiblyLayered[ReferenceTree]) -> list[str]:
+    return [
+        "tree",
+        str(tree.identifier),
+        str(tree.species),
+        str(tree.origin),
+        str(tree.stems_per_ha),
+        str(tree.breast_height_diameter),
+        str(tree.height),
+        str(tree.measured_height),
+        str(tree.breast_height_age),
+        str(tree.biological_age),
+        str(tree.saw_log_volume_reduction_factor),
+        str(tree.pruning_year),
+        str(tree.age_when_10cm_diameter_at_breast_height),
+        str(tree.tree_number),
+        str(tree.stand_origin_relative_position[0]),
+        str(tree.stand_origin_relative_position[1]),
+        str(tree.stand_origin_relative_position[2]),
+        str(tree.lowest_living_branch_height),
+        str(tree.management_category),
+        str(tree.tree_category),
+        str(tree.sapling),
+        str(tree.storey),
+        str(tree.tree_type),
+        str(tree.tuhon_ilmiasu)
+    ]
+
+
+def stratum_as_internal_csv_row(stratum: PossiblyLayered[TreeStratum]) -> list[str]:
+    return [
+        "stratum",
+        str(stratum.identifier),
+        str(stratum.species),
+        str(stratum.origin),
+        str(stratum.stems_per_ha),
+        str(stratum.mean_diameter),
+        str(stratum.mean_height),
+        str(stratum.breast_height_age),
+        str(stratum.biological_age),
+        str(stratum.basal_area),
+        str(stratum.saw_log_volume_reduction_factor),
+        str(stratum.cutting_year),
+        str(stratum.age_when_10cm_diameter_at_breast_height),
+        str(stratum.tree_number),
+        str(stratum.stand_origin_relative_position[0]),
+        str(stratum.stand_origin_relative_position[1]),
+        str(stratum.stand_origin_relative_position[2]),
+        str(stratum.lowest_living_branch_height),
+        str(stratum.management_category),
+        str(stratum.sapling_stems_per_ha),
+        str(stratum.sapling_stratum),
+        str(stratum.storey)
+    ]
+
+
+def stand_as_rst_row(stand: PossiblyLayered[ForestStand]):
+    return [
+        stand.management_unit_id,
+        stand.year,
+        stand.area,
+        stand.area_weight,
+        stand.geo_location[0] if stand.geo_location else None,
+        stand.geo_location[1] if stand.geo_location else None,
+        stand.stand_id,
+        stand.geo_location[2] if stand.geo_location else None,
+        stand.degree_days,
+        stand.owner_category.value if stand.owner_category else None,
+        stand.land_use_category.value if stand.land_use_category else None,
+        stand.soil_peatland_category,
+        stand.site_type_category,
+        stand.tax_class_reduction,
+        stand.tax_class,
+        stand.drainage_category,
+        stand.drainage_feasibility,
+        None,
+        stand.drainage_year,
+        stand.fertilization_year,
+        stand.soil_surface_preparation_year,
+        stand.natural_regeneration_feasibility,
+        stand.regeneration_area_cleaning_year,
+        stand.development_class,
+        stand.artificial_regeneration_year,
+        stand.young_stand_tending_year,
+        stand.pruning_year,
+        stand.cutting_year,
+        stand.forestry_centre_id,
+        stand.forest_management_category,
+        stand.method_of_last_cutting,
+        stand.municipality_id,
+        None,
+        stand.dominant_storey_age,
+    ]
+
+
+def stand_as_internal_row(stand: PossiblyLayered[ForestStand]):
+    return [
+        stand.management_unit_id,
+        stand.year,
+        stand.area,
+        stand.area_weight,
+        stand.geo_location[0] if stand.geo_location is not None else None,
+        stand.geo_location[1] if stand.geo_location is not None else None,
+        stand.geo_location[2] if stand.geo_location is not None else None,
+        stand.geo_location[3] if stand.geo_location is not None else None,
+        stand.degree_days,
+        stand.owner_category,
+        stand.land_use_category,
+        stand.soil_peatland_category,
+        stand.site_type_category,
+        stand.tax_class_reduction,
+        stand.tax_class,
+        stand.drainage_category,
+        stand.drainage_feasibility,
+        stand.drainage_year,
+        stand.fertilization_year,
+        stand.soil_surface_preparation_year,
+        stand.natural_regeneration_feasibility,
+        stand.regeneration_area_cleaning_year,
+        stand.development_class,
+        stand.artificial_regeneration_year,
+        stand.young_stand_tending_year,
+        stand.pruning_year,
+        stand.cutting_year,
+        stand.forestry_centre_id,
+        stand.forest_management_category,
+        stand.method_of_last_cutting,
+        stand.municipality_id,
+        stand.fra_category,
+        stand.land_use_category_detail,
+        stand.auxiliary_stand,
+        stand.area_weight_factors[0],
+        stand.area_weight_factors[1],
+        stand.stand_id,
+        stand.basal_area,
+        stand.dominant_storey_age
+    ]
+
+
+def tree_as_rst_row(tree: PossiblyLayered[ReferenceTree]):
+    return [
+        tree.stems_per_ha,
+        tree.species,
+        tree.breast_height_diameter,
+        tree.height,
+        tree.breast_height_age,
+        tree.biological_age,
+        tree.saw_log_volume_reduction_factor,
+        tree.pruning_year,
+        tree.age_when_10cm_diameter_at_breast_height,
+        tree.origin,
+        tree.tree_number,
+        tree.stand_origin_relative_position[0],
+        tree.stand_origin_relative_position[1],
+        tree.stand_origin_relative_position[2],
+        tree.lowest_living_branch_height,
+        tree.management_category,
+        None,
+    ]
+
+
+def stratum_as_rsts_row(stratum: PossiblyLayered[TreeStratum]):
+    return [
+        stratum.tree_number,
+        stratum.species,
+        stratum.origin,
+        stratum.stems_per_ha,
+        stratum.mean_diameter,
+        stratum.mean_height,
+        stratum.breast_height_age,
+        stratum.biological_age,
+        stratum.basal_area,
+        stratum.sapling_stems_per_ha,
+        stratum.storey,
+        stratum.number_of_generated_trees
+    ]
