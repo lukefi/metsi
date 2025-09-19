@@ -148,8 +148,8 @@ def grow_diameter_and_height_vectorized(trees: ReferenceTrees,
                                                                 dg,
                                                                 hg,
                                                                 g) / 100
-                ds[condition] = ds[condition] * (1 + pd)
-                hs[condition] = hs[condition] * (1 + ph)
-                hs[hs < 1.3] += 0.3
-                ds[(ds == 0) & (hs >= 1.3)] = 1.0
+                ds[condition] *= (1 + pd)
+                hs[condition] *= (1 + ph)
+        hs[hs < 1.3] += 0.3
+        ds[(ds == 0) & (hs >= 1.3)] = 1.0
     return ds, hs
