@@ -5,8 +5,9 @@ from typing import Sequence as Sequence_
 
 from collections.abc import Callable
 from lukefi.metsi.sim.collected_data import OpTuple
+from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.event_tree import EventTree
-from lukefi.metsi.sim.operation_payload import ProcessedOperation
+from lukefi.metsi.sim.operation_payload import OperationPayload, ProcessedOperation
 from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
 from lukefi.metsi.app.utils import MetsiException
 
@@ -14,7 +15,6 @@ T = TypeVar("T")
 
 GeneratorFn = Callable[[Optional[list[EventTree[T]]], ProcessedOperation[T]], list[EventTree[T]]]
 TreatmentFn = Callable[[OpTuple[T]], OpTuple[T]]
-Condition = Callable[[T], bool]
 ProcessedGenerator = Callable[[Optional[list[EventTree[T]]]], list[EventTree[T]]]
 
 
@@ -71,16 +71,16 @@ class Alternatives[T](Generator[T]):
 class Treatment[T](GeneratorBase):
     """Base class for treatments. Contains conditions and parameters and the actual function that operates on the
     simulation state."""
-    conditions: list[Condition[T]]
+    preconditions: list[Condition[OperationPayload[T]]]
+    postconditions: list[Condition[OperationPayload[T]]]
     parameters: dict[str, Any]
     file_parameters: dict[str, str]
-    run_constraints: dict[str, Any]
     treatment_fn: TreatmentFn[T]
 
     def __init__(self, treatment_fn: TreatmentFn[T], parameters: Optional[dict[str, Any]] = None,
-                 conditions: Optional[list[Condition[T]]] = None,
-                 file_parameters: Optional[dict[str, str]] = None,
-                 run_constraints: Optional[dict[str, Any]] = None) -> None:
+                 preconditions: Optional[list[Condition[OperationPayload[T]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[T]]]] = None,
+                 file_parameters: Optional[dict[str, str]] = None) -> None:
         self.treatment_fn = treatment_fn
 
         if parameters is not None:
@@ -93,15 +93,15 @@ class Treatment[T](GeneratorBase):
         else:
             self.file_parameters = {}
 
-        if run_constraints is not None:
-            self.run_constraints = run_constraints
+        if preconditions is not None:
+            self.preconditions = preconditions
         else:
-            self.run_constraints = {}
+            self.preconditions = []
 
-        if conditions is not None:
-            self.conditions = conditions
+        if postconditions is not None:
+            self.postconditions = postconditions
         else:
-            self.conditions = []
+            self.postconditions = []
 
     def unwrap(self, parents: list[EventTree], time_point: int) -> list[EventTree]:
         retval = []
@@ -114,7 +114,12 @@ class Treatment[T](GeneratorBase):
     def _prepare_paremeterized_treatment(self, time_point) -> ProcessedOperation[T]:
         self._check_file_params()
         combined_params = self._merge_params()
-        return prepared_processor(self.treatment_fn, time_point, self.run_constraints, **combined_params)
+        return prepared_processor(
+            self.treatment_fn,
+            time_point,
+            self.preconditions,
+            self.postconditions,
+            **combined_params)
 
     def _check_file_params(self):
         for _, path in self.file_parameters.items():

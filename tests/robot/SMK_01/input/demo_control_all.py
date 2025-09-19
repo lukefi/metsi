@@ -1,3 +1,6 @@
+from lukefi.metsi.domain.conditions import MinimumTimeInterval
+from lukefi.metsi.domain.forestry_operations.clearcut import clearcutting
+from lukefi.metsi.domain.forestry_operations.thinning import first_thinning
 from lukefi.metsi.domain.pre_ops import convert_coordinates, generate_reference_trees, preproc_filter
 from lukefi.metsi.domain.treatments import (
     CalculateBiomass,
@@ -105,8 +108,7 @@ control_structure = {
         preproc_filter: [
             {
                 "remove trees": "sapling or stems_per_ha == 0",
-                "remove stands": "site_type_category == 0",  # not reference_trees
-                "remove stands": "site_type_category == None"
+                "remove stands": "(site_type_category == None) or (site_type_category == 0)",  # not reference_trees
             }
         ]
     },
@@ -156,14 +158,14 @@ control_structure = {
                         }
                     ),
                     FirstThinning(
+                        preconditions=[
+                            MinimumTimeInterval(50, first_thinning)
+                        ],
                         parameters={
                             "thinning_factor": 0.97,
                             "e": 0.2,
                             "dominant_height_lower_bound": 11,
                             "dominant_height_upper_bound": 16
-                        },
-                        run_constraints={
-                            "minimum_time_interval": 50
                         }
                     ),
                     EvenThinning(
@@ -174,12 +176,12 @@ control_structure = {
                     ),
                     Sequence([
                         Clearcutting(
+                            preconditions=[
+                                MinimumTimeInterval(50, clearcutting)
+                            ],
                             file_parameters={
                                 "clearcutting_limits_ages": "data/parameter_files/renewal_ages_southernFI.txt",
                                 "clearcutting_limits_diameters": "data/parameter_files/renewal_diameters_southernFI.txt"
-                            },
-                            run_constraints={
-                                "minimum_time_interval": 50
                             }
                         ),
                         Planting(

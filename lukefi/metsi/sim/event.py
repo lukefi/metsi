@@ -1,21 +1,20 @@
-from collections.abc import Callable
 from copy import deepcopy
 from typing import Optional, TypeVar
 
+from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.generators import Alternatives, GeneratorBase, Generator, Sequence
+from lukefi.metsi.sim.operation_payload import OperationPayload
 
 T = TypeVar('T')  # T = ForestStand
-
-Condition = Callable[[T], bool]
 
 
 class Event[T]:
     time_points: list[int]
-    conditions: list[Condition[T]]
+    conditions: list[Condition[OperationPayload[T]]]
     treatment_generator: Generator[T]
 
     def __init__(self, time_points: list[int], treatments: Generator[T] | list[GeneratorBase] | set[GeneratorBase],
-                 conditions: Optional[list[Condition[T]]] = None) -> None:
+                 conditions: Optional[list[Condition[OperationPayload[T]]]] = None) -> None:
         self.time_points = time_points
         if isinstance(treatments, Generator):
             self.treatment_generator = treatments
