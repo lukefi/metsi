@@ -1,5 +1,6 @@
 from typing import Callable
 import unittest
+from lukefi.metsi.domain.conditions import MinimumTimeInterval
 from lukefi.metsi.sim.collected_data import CollectedData
 from lukefi.metsi.sim.event import Event
 import lukefi.metsi.sim.generators
@@ -47,10 +48,10 @@ class TestGenerators(unittest.TestCase):
                     time_points=[1, 3],
                     treatments=Sequence([
                         Treatment(
-                            treatment_fn=collecting_increment,
-                            run_constraints={
-                                "minimum_time_interval": 2
-                            }
+                            conditions=[
+                                MinimumTimeInterval(2, collecting_increment)
+                            ],
+                            treatment_fn=collecting_increment
                         )
                     ])
                 )
@@ -71,26 +72,21 @@ class TestGenerators(unittest.TestCase):
 
     def test_operation_run_constraints_fail(self):
         declaration = {
-            "run_constraints": {
-                inc: {
-                    "minimum_time_interval": 2
-                }
-            },
             "simulation_events": [
                 Event(
                     time_points=[1, 3],
                     treatments=Sequence([
                         Treatment(
-                            treatment_fn=inc,
-                            run_constraints={
-                                "minimum_time_interval": 2
-                            }
+                            conditions=[
+                                MinimumTimeInterval(2, inc)
+                            ],
+                            treatment_fn=inc
                         ),
                         Treatment(
-                            treatment_fn=inc,
-                            run_constraints={
-                                "minimum_time_interval": 2
-                            }
+                            conditions=[
+                                MinimumTimeInterval(2, inc)
+                            ],
+                            treatment_fn=inc
                         )
                     ])
                 )

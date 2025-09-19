@@ -26,8 +26,8 @@ class StateTree[T]:
         else:
             raise MetsiException(f"Unsupported format {fmt}")
 
-    @classmethod
-    def read_from_file(cls, path: str | Path, fmt: str = "pickle") -> 'StateTree':
+    @staticmethod
+    def read_from_file(path: str | Path, fmt: str = "pickle") -> 'StateTree':
         if fmt == "pickle":
             with open(path, "rb") as f:
                 return pickle.load(f)
