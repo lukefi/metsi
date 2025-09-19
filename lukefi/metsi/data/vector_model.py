@@ -27,7 +27,6 @@ DTYPES_TREE: dict[str, npt.DTypeLike] = {
     "sapling": np.bool_,
     "tree_type": np.dtype("U20"),
     "tuhon_ilmiasu": np.dtype("U20"),
-    "latvuskerros": np.float64  # NOTE: for benchmarking purposes
 }
 
 DTYPES_STRATA: dict[str, npt.DTypeLike] = {
@@ -58,23 +57,35 @@ class VectorData():
     """
     Base class for generic SoA data.
     """
+    dtypes: dict[str, npt.DTypeLike]
+    size: int
 
     def __init__(self, dtypes: dict[str, npt.DTypeLike]):
         self.dtypes = dtypes
 
-    def vectorize(self, attr_dict):
-        for k, v in attr_dict.items():
-            setattr(self, k, np.array(self.defaultify(v, self.dtypes[k]), self.dtypes[k]))
-            if not self.is_contiguous(k):
-                raise MetsiException("Vectorized data is not contiguous")
+    def vectorize(self, attr_dict: dict[str, list[Any]]):
         self.set_size(attr_dict)
+        for attribute_name, data_type in self.dtypes.items():
+            setattr(
+                self,
+                attribute_name,
+                np.array(
+                    self.defaultify(
+                        attr_dict.get(
+                            attribute_name,
+                            [None] *
+                            self.size),
+                        data_type),
+                    data_type))
+            if not self.is_contiguous(attribute_name):
+                raise MetsiException("Vectorized data is not contiguous")
         return self
 
-    def is_contiguous(self, name):
-        arr = getattr(self, name)
+    def is_contiguous(self, name: str):
+        arr: npt.NDArray = getattr(self, name)
         return bool(arr.flags['CONTIGUOUS']) and bool(arr.flags['C_CONTIGUOUS'])
 
-    def set_size(self, attr_dict):
+    def set_size(self, attr_dict: dict[str, list[Any]]):
         size = len(attr_dict.get('identifier', []))
         setattr(self, 'size', size)
 
@@ -194,14 +205,14 @@ class VectorData():
             VectorData: Shallow copy of self
         """
         for key in self.dtypes:
-            attr: npt.NDArray
-            attr = getattr(self, key)
-            attr.flags.writeable = False
+            attr: Optional[npt.NDArray]
+            attr = getattr(self, key, None)
+            if attr is not None:
+                attr.flags.writeable = False
         return copy(self)
 
 
 class ReferenceTrees(VectorData):
-    size: int
     identifier: npt.NDArray[np.str_]
     tree_number: npt.NDArray[np.int32]
     species: npt.NDArray[np.int32]
@@ -228,9 +239,57 @@ class ReferenceTrees(VectorData):
     def __init__(self):
         super().__init__(DTYPES_TREE)
 
+    def as_rst_row(self, i: int) -> list:
+        return [
+            self.stems_per_ha[i],
+            self.species[i],
+            self.breast_height_diameter[i],
+            self.height[i],
+            self.breast_height_age[i],
+            self.biological_age[i],
+            self.saw_log_volume_reduction_factor[i],
+            self.pruning_year[i],
+            self.age_when_10cm_diameter_at_breast_height[i],
+            self.origin[i],
+            self.tree_number[i],
+            self.stand_origin_relative_position[i, 0],
+            self.stand_origin_relative_position[i, 1],
+            self.stand_origin_relative_position[i, 2],
+            self.lowest_living_branch_height[i],
+            self.management_category[i],
+            None,
+        ]
+
+    def as_internal_csv_row(self, i) -> list[str]:
+        return [
+            "tree",
+            str(self.identifier[i]),
+            str(self.species[i]),
+            str(self.origin[i]),
+            str(self.stems_per_ha[i]),
+            str(self.breast_height_diameter[i]),
+            str(self.height[i]),
+            str(self.measured_height[i]),
+            str(self.breast_height_age[i]),
+            str(self.biological_age[i]),
+            str(self.saw_log_volume_reduction_factor[i]),
+            str(self.pruning_year[i]),
+            str(self.age_when_10cm_diameter_at_breast_height[i]),
+            str(self.tree_number[i]),
+            str(self.stand_origin_relative_position[i, 0]),
+            str(self.stand_origin_relative_position[i, 1]),
+            str(self.stand_origin_relative_position[i, 2]),
+            str(self.lowest_living_branch_height[i]),
+            str(self.management_category[i]),
+            str(self.tree_category[i]),
+            str(self.sapling[i]),
+            str(self.storey[i]),
+            str(self.tree_type[i]),
+            str(self.tuhon_ilmiasu[i])
+        ]
+
 
 class Strata(VectorData):
-    size: int
     identifier: npt.NDArray[np.str_]
     species: npt.NDArray[np.int32]
     mean_diameter: npt.NDArray[np.float64]
@@ -254,3 +313,29 @@ class Strata(VectorData):
 
     def __init__(self):
         super().__init__(DTYPES_STRATA)
+
+    def as_internal_csv_row(self, i) -> list[str]:
+        return [
+            "stratum",
+            str(self.identifier[i]),
+            str(self.species[i]),
+            str(self.origin[i]),
+            str(self.stems_per_ha[i]),
+            str(self.mean_diameter[i]),
+            str(self.mean_height[i]),
+            str(self.breast_height_age[i]),
+            str(self.biological_age[i]),
+            str(self.basal_area[i]),
+            str(self.saw_log_volume_reduction_factor[i]),
+            str(self.cutting_year[i]),
+            str(self.age_when_10cm_diameter_at_breast_height[i]),
+            str(self.tree_number[i]),
+            str(self.stand_origin_relative_position[i, 0]),
+            str(self.stand_origin_relative_position[i, 1]),
+            str(self.stand_origin_relative_position[i, 2]),
+            str(self.lowest_living_branch_height[i]),
+            str(self.management_category[i]),
+            str(self.sapling_stems_per_ha[i]),
+            str(self.sapling_stratum[i]),
+            str(self.storey[i])
+        ]

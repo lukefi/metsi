@@ -5,7 +5,7 @@ from collections.abc import Callable
 from lukefi.metsi.app.app_types import ExportableContainer
 from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.layered_model import PossiblyLayered
-from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
+from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum, stand_as_internal_csv_row, stand_as_rst_row, stratum_as_rsts_row, tree_as_internal_csv_row, tree_as_rst_row
 from lukefi.metsi.data.formats.rst_const import MSBInitialDataRecordConst as msb_meta
 from lukefi.metsi.domain.forestry_types import StandList
 
@@ -36,7 +36,8 @@ def msb_metadata(stand: PossiblyLayered[ForestStand]) -> tuple[list[str], list[s
         msb_meta.logical_record_metadata_length,
         msb_meta.stand_record_length,
         msb_meta.logical_subrecord_metadata_length,
-        len(stand.reference_trees) * msb_meta.tree_record_length
+        (len(stand.reference_trees) if stand.reference_trees_soa is None else stand.reference_trees_soa.size) *
+        msb_meta.tree_record_length
     ])
     physical_record_metadata = [
         rst_float(outputtable_id),  # UID
@@ -51,7 +52,7 @@ def msb_metadata(stand: PossiblyLayered[ForestStand]) -> tuple[list[str], list[s
         rst_float(msb_meta.stand_record_length)
     ]
     logical_subrecord_metadata = [
-        rst_float(len(stand.reference_trees)),
+        rst_float(len(stand.reference_trees) if stand.reference_trees_soa is None else stand.reference_trees_soa.size),
         rst_float(msb_meta.tree_record_length)
     ]
     return physical_record_metadata, logical_record_metadata, logical_subrecord_metadata
@@ -84,12 +85,16 @@ def rst_forest_stand_rows(stand: PossiblyLayered[ForestStand], additional_vars: 
     result.append(" ".join(chain(
         msb_preliminary_records[0],
         msb_preliminary_records[1],
-        map(rst_float, stand.as_rst_row()),
+        map(rst_float, stand_as_rst_row(stand)),
         msb_preliminary_records[2]
     )))
     # Reference tree row(s)
-    for tree in stand.reference_trees:
-        result.append(" ".join(map(rst_float, tree.as_rst_row())))
+    if stand.reference_trees_soa is not None:
+        for i in range(stand.reference_trees_soa.size):
+            result.append(" ".join(map(rst_float, stand.reference_trees_soa.as_rst_row(i))))
+    else:
+        for tree in stand.reference_trees:
+            result.append(" ".join(map(rst_float, tree_as_rst_row(tree))))
     return result
 
 
@@ -98,10 +103,10 @@ def rsts_forest_stand_rows(stand: PossiblyLayered[ForestStand]) -> list[str]:
     result = []
     result.append(" ".join(chain(
         [str(parse_float(stand.identifier) or stand.stand_id)],
-        map(rst_float, stand.as_rst_row())
+        map(rst_float, stand_as_rst_row(stand))
     )))
     for stratum in stand.tree_strata:
-        result.append(" ".join(map(rst_float, stratum.as_rsts_row())))
+        result.append(" ".join(map(rst_float, stratum_as_rsts_row(stratum))))
     return result
 
 
@@ -115,23 +120,32 @@ def stand_to_csv_rows(stand: PossiblyLayered[ForestStand], delimeter: str,
                       additional_vars: Optional[list[str]]) -> list[str]:
     """converts the :stand:, its reference trees and tree strata to csv rows."""
     result = []
-    result.append(delimeter.join(map(csv_value, stand.as_internal_csv_row(additional_vars))))
-    result.extend(
-        map(
-            lambda tree: delimeter.join(
-                map(
-                    csv_value,
-                    tree.as_internal_csv_row())),
-            stand.reference_trees)
-    )
-    result.extend(
-        map(
-            lambda stratum: delimeter.join(
-                map(
-                    csv_value,
-                    stratum.as_internal_csv_row())),
-            stand.tree_strata)
-    )
+    result.append(delimeter.join(map(csv_value, stand_as_internal_csv_row(stand, additional_vars))))
+    if stand.reference_trees_soa is None:
+        result.extend(
+            map(
+                lambda tree: delimeter.join(
+                    map(
+                        csv_value,
+                        tree_as_internal_csv_row(tree))),
+                stand.reference_trees)
+        )
+    else:
+        for i in range(stand.reference_trees_soa.size):
+            result.append(delimeter.join(map(csv_value, stand.reference_trees_soa.as_internal_csv_row(i))))
+
+    if stand.tree_strata_soa is None:
+        result.extend(
+            map(
+                lambda stratum: delimeter.join(
+                    map(
+                        csv_value,
+                        stratum.as_internal_csv_row())),
+                stand.tree_strata)
+        )
+    else:
+        for i in range(stand.tree_strata_soa.size):
+            result.append(delimeter.join(map(csv_value, stand.tree_strata_soa.as_internal_csv_row(i))))
     return result
 
 

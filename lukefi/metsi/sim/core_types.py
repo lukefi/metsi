@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, NamedTuple, Optional, TypeVar
 import weakref
 
 from lukefi.metsi.data.layered_model import PossiblyLayered
+from lukefi.metsi.sim.finalizable import Finalizable
 from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.state_tree import StateTree
 if TYPE_CHECKING:
@@ -129,7 +130,8 @@ class EventTree[T]:
             state_tree.time_point = current.operation_history[-1][0] if len(current.operation_history) > 0 else None
             state_tree.operation_params = current.operation_history[-1][2] if len(
                 current.operation_history) > 0 else None
-
+        if isinstance(current.computational_unit, Finalizable):
+            current.computational_unit.finalize()
         if len(self.branches) == 0:
             return [current]
         if len(self.branches) == 1:
