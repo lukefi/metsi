@@ -4,7 +4,8 @@ from typing import Any, Optional, TypeVar, override
 from typing import Sequence as Sequence_
 
 from collections.abc import Callable
-from lukefi.metsi.sim.processor import prepared_processor
+from lukefi.metsi.sim.operations import prepared_operation
+from lukefi.metsi.sim.processor import processor
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.event_tree import EventTree
@@ -114,12 +115,9 @@ class Event[T](GeneratorBase):
     def _prepare_paremeterized_treatment(self, time_point) -> ProcessedTreatment[T]:
         self._check_file_params()
         combined_params = self._merge_params()
-        return prepared_processor(
-            self.treatment,
-            time_point,
-            self.preconditions,
-            self.postconditions,
-            **combined_params)
+        prepared_treatment = prepared_operation(self.treatment, **combined_params)
+        return lambda payload: processor(payload, prepared_treatment, self.treatment, time_point,
+                                        self.preconditions, self.postconditions, **combined_params)
 
     def _check_file_params(self):
         for _, path in self.file_parameters.items():
