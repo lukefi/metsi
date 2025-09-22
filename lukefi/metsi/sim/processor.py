@@ -1,32 +1,18 @@
-from typing import TypeVar, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from lukefi.metsi.app.utils import ConditionFailed
 from lukefi.metsi.sim.condition import Condition
-from lukefi.metsi.sim.operations import prepared_operation
-from lukefi.metsi.sim.simulation_payload import ProcessedTreatment, SimulationPayload
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 if TYPE_CHECKING:
     from lukefi.metsi.sim.generators import TreatmentFn
 
-T = TypeVar("T")
 
-
-def prepared_processor(treatment: "TreatmentFn[T]",
-                       time_point: int,
-                       preconditions: list[Condition[SimulationPayload[T]]],
-                       postconditions: list[Condition[SimulationPayload[T]]],
-                       **operation_parameters: dict[str, dict]) -> ProcessedTreatment[T]:
-    """prepares a processor function with an operation entrypoint"""
-    prepared_treatment = prepared_operation(treatment, **operation_parameters)
-    return lambda payload: _processor(payload, prepared_treatment, treatment, time_point,
-                                      preconditions, postconditions, **operation_parameters)
-
-
-def _processor(payload: SimulationPayload[T],
-               operation: "TreatmentFn[T]",
-               operation_tag: "TreatmentFn[T]",
-               time_point: int,
-               preconditions: list[Condition[SimulationPayload[T]]],
-               postconditions: list[Condition[SimulationPayload[T]]],
-               **operation_parameters: dict[str, dict]) -> SimulationPayload[T]:
+def processor[T](payload: SimulationPayload[T],
+              operation: "TreatmentFn[T]",
+              operation_tag: "TreatmentFn[T]",
+              time_point: int,
+              preconditions: list[Condition[SimulationPayload[T]]],
+              postconditions: list[Condition[SimulationPayload[T]]],
+              **operation_parameters: dict[str, dict]) -> SimulationPayload[T]:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     for condition in preconditions:
         if not condition(time_point, payload):
