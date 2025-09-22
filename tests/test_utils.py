@@ -11,7 +11,6 @@ from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.sim.operation_payload import OperationPayload
 
-
 class ConverterTestSuite(unittest.TestCase):
     def run_with_test_assertions(self, assertions: list[tuple], fn: Callable):
         for case in assertions:
@@ -40,8 +39,9 @@ def collecting_increment(input: OpTuple[int], **operation_params) -> OpTuple[int
     return state + incrementation, collected_data
 
 
-def inc(x: int) -> int:
-    return x + 1
+def inc(x: OperationPayload[int]) -> OperationPayload[int]:
+    x.computational_unit += 1
+    return x
 
 
 def dec(x: int) -> int:
@@ -56,11 +56,10 @@ def grow_dummy(f: float, d: float, h: float, dd: float) -> tuple[float, float, f
     return f-f%100, d+dd/500, h+dd/1000
 
 
-def parametrized_operation(x, **kwargs):
+def parametrized_operation(x: OperationPayload[int], **kwargs) -> OperationPayload[int]:
     if kwargs.get('amplify') is True:
-        return x * 1000
-    else:
-        return x
+        x.computational_unit *= 1000
+    return x
 
 def parametrized_operation_using_file_parameter(x, **kwargs):
     file_path = kwargs.get("dummy_file")

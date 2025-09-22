@@ -3,6 +3,7 @@ import unittest
 from lukefi.metsi.domain.conditions import MinimumTimeInterval
 from lukefi.metsi.sim.event import Event
 from lukefi.metsi.sim.generators import Sequence, Treatment
+from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.runners import evaluate_sequence
 from lukefi.metsi.sim.event_tree import EventTree
 from lukefi.metsi.sim.sim_configuration import SimConfiguration
@@ -35,12 +36,16 @@ class ComputationModelTest(unittest.TestCase):
     def test_run_chains(self):
         chains = self.root.operation_chains()
         for chain in chains:
-            result = evaluate_sequence(0, *chain)
-            self.assertEqual(3, result)
+            result = evaluate_sequence(OperationPayload(computational_unit=0,
+                                                      collected_data=None,
+                                                      operation_history={}), *chain)
+            self.assertEqual(3, result.computational_unit)
 
     def test_evaluator(self):
-        results = self.root.evaluate(0)
-        self.assertListEqual([3, 3, 3, 3], results)
+        results = self.root.evaluate(OperationPayload(computational_unit=0,
+                                                      collected_data=None,
+                                                      operation_history={}))
+        self.assertListEqual([3, 3, 3, 3], [result.computational_unit for result in results])
 
     def test_sim_configuration(self):
         def fn1(x):

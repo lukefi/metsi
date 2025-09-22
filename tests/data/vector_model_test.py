@@ -129,7 +129,7 @@ class VectorModelTest(unittest.TestCase):
 
         self.assertEqual(self.vector_data.x[1], 7)
         self.assertEqual(self.vector_data.y[1], -1)
-        self.assertTrue(np.isnan(self.vector_data.z[1]))
+        self.assertTrue(np.isnan(self.vector_data.read(1)["z"]))
 
         self.assertEqual(self.vector_data.x[2], 8)
         self.assertEqual(self.vector_data.y[2], 5)
