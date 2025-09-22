@@ -4,13 +4,11 @@ import copy
 import traceback
 from typing import Callable
 from pathlib import Path
-
 from lukefi.metsi.app.preprocessor import (
     preprocess_stands,
     slice_stands_by_percentage,
     slice_stands_by_size
 )
-
 from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
 from lukefi.metsi.domain.forestry_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
