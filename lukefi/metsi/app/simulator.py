@@ -18,6 +18,7 @@ from lukefi.metsi.sim.runners import Evaluator
 from lukefi.metsi.sim.runners import Runner
 from lukefi.metsi.sim.sim_configuration import SimConfiguration
 
+
 def run_stands(stands: StandList,
                config: SimConfiguration,
                runner: Runner[ForestStand],
@@ -29,7 +30,7 @@ def run_stands(stands: StandList,
     for stand in stands:
         overlaid_stand: PossiblyLayered[ForestStand]
         if stand.reference_trees_soa is None or stand.tree_strata_soa is None:
-            # If the state is not vectorized, wrap it as a LayeredObject so that new nodes in the EventTree don't have 
+            # If the state is not vectorized, wrap it as a LayeredObject so that new nodes in the EventTree don't have
             # to copy the entire state in memory and can just store the data that has actually changed instead.
             # This is not necessary for vectorized data since similar functionality is provided by the finalize method.
             overlaid_stand = LayeredObject[ForestStand](stand)
