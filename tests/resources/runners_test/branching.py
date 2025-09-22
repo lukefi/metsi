@@ -1,3 +1,4 @@
+from lukefi.metsi.domain.conditions import MinimumTimeInterval
 from lukefi.metsi.sim.event import Event
 from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment
 from lukefi.metsi.sim.operations import do_nothing
@@ -14,7 +15,12 @@ control_structure = {
                 ]),
                 Alternatives([
                     Treatment(do_nothing),
-                    Treatment(collecting_increment, run_constraints={"minimum_time_interval": 2})
+                    Treatment(
+                        conditions=[
+                            MinimumTimeInterval(2, collecting_increment)
+                        ],
+                        treatment_fn=collecting_increment
+                    )
                 ])
             ])
         )
