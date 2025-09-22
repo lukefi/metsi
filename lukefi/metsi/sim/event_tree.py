@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 from lukefi.metsi.app.utils import ConditionFailed
 from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.sim.finalizable import Finalizable
-from lukefi.metsi.sim.operation_payload import OperationPayload, ProcessedOperation
+from lukefi.metsi.sim.simulation_payload import SimulationPayload, ProcessedTreatment
 from lukefi.metsi.sim.state_tree import StateTree
 
 
@@ -17,34 +17,34 @@ class EventTree[T]:
     Event represents a computational operation in a tree of following event paths.
     """
 
-    __slots__ = ('wrapped_operation', 'branches')
+    __slots__ = ('processed_treatment', 'branches')
 
-    wrapped_operation: ProcessedOperation[T]
+    processed_treatment: ProcessedTreatment[T]
     branches: list["EventTree[T]"]
 
-    def __init__(self, operation: Optional[ProcessedOperation[T]] = None):
+    def __init__(self, treatment: Optional[ProcessedTreatment[T]] = None):
 
-        self.wrapped_operation = operation or identity
+        self.processed_treatment = treatment or identity
         self.branches = []
 
-    def operation_chains(self) -> list[list[ProcessedOperation[T]]]:
+    def operation_chains(self) -> list[list[ProcessedTreatment[T]]]:
         """
         Recursively produce a list of lists of possible operation chains represented by this event tree in post-order
         traversal.
         """
         if len(self.branches) == 0:
             # Yes. A leaf node returns a single chain with a single operation.
-            return [[self.wrapped_operation]]
-        result: list[list[ProcessedOperation[T]]] = []
+            return [[self.processed_treatment]]
+        result: list[list[ProcessedTreatment[T]]] = []
         for branch in self.branches:
             chains = branch.operation_chains()
             for chain in chains:
-                result.append([self.wrapped_operation] + chain)
+                result.append([self.processed_treatment] + chain)
         return result
 
     def evaluate(self,
-                 payload: OperationPayload[T],
-                 state_tree: Optional[StateTree[PossiblyLayered[T]]] = None) -> list[OperationPayload[T]]:
+                 payload: SimulationPayload[T],
+                 state_tree: Optional[StateTree[PossiblyLayered[T]]] = None) -> list[SimulationPayload[T]]:
         """
         Recursive pre-order walkthrough of this event tree to evaluate its operations with the given payload,
         copying it for branching. If given a root node, a StateTree is also constructed, containing all complete
@@ -54,13 +54,13 @@ class EventTree[T]:
         :param state_tree: optional state tree node
         :return: list of result payloads from this EventTree or as concatenated from its branches
         """
-        current = self.wrapped_operation(payload)
+        current = self.processed_treatment(payload)
         branching_state: StateTree | None = None
         if state_tree is not None:
             state_tree.state = deepcopy(current.computational_unit)
-            state_tree.done_operation = current.operation_history[-1][1] if len(current.operation_history) > 0 else None
+            state_tree.done_treatment = current.operation_history[-1][1] if len(current.operation_history) > 0 else None
             state_tree.time_point = current.operation_history[-1][0] if len(current.operation_history) > 0 else None
-            state_tree.operation_params = current.operation_history[-1][2] if len(
+            state_tree.treatment_params = current.operation_history[-1][2] if len(
                 current.operation_history) > 0 else None
         if isinstance(current.computational_unit, Finalizable):
             current.computational_unit.finalize()
@@ -71,7 +71,7 @@ class EventTree[T]:
                 branching_state = StateTree()
                 state_tree.add_branch(branching_state)
             return self.branches[0].evaluate(current, branching_state)
-        results: list[OperationPayload[T]] = []
+        results: list[SimulationPayload[T]] = []
         for branch in self.branches:
             try:
                 if state_tree is not None:

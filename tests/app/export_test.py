@@ -4,7 +4,7 @@ from collections import OrderedDict
 import unittest
 from lukefi.metsi.app.export_handlers.j import j_xda, j_cda
 from lukefi.metsi.sim.collected_data import CollectedData
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 
 class TestExport(unittest.TestCase):
 
@@ -15,10 +15,10 @@ class TestExport(unittest.TestCase):
         }
         data = {
             "1": [
-                OperationPayload(
+                SimulationPayload(
                     computational_unit = SimpleNamespace(a=1, b=2),
                     collected_data = CollectedData(
-                        operation_results = {
+                        treatment_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": 1, "y": 2, "z": 3 },
                                 5: { "x": 4, "y": 5, "z": 6 },
@@ -29,10 +29,10 @@ class TestExport(unittest.TestCase):
                 )
             ],
             "2": [
-                OperationPayload(
+                SimulationPayload(
                     computational_unit = SimpleNamespace(a=-1, b=-2),
                     collected_data = CollectedData(
-                        operation_results = {
+                        treatment_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": 10, "y": 20, "z": 30 },
                                 5: { "x": 40, "y": 50, "z": 60 },
@@ -41,10 +41,10 @@ class TestExport(unittest.TestCase):
                         }
                     )
                 ),
-                OperationPayload(
+                SimulationPayload(
                     computational_unit = SimpleNamespace(a=-1, b=-2),
                     collected_data = CollectedData(
-                        operation_results = {
+                        treatment_results = {
                             "report_collectives": OrderedDict({
                                 0: { "x": -1, "y": -2, "z": -3 },
                                 5: { "x": 4, "y": 5, "z": 6 },

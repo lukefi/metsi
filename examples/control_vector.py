@@ -1,8 +1,8 @@
 from lukefi.metsi.data.vectorize import vectorize
 from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta_vectorized
 from lukefi.metsi.domain.pre_ops import generate_reference_trees, preproc_filter
-from lukefi.metsi.sim.event import Event
-from lukefi.metsi.sim.generators import Sequence, Treatment
+from lukefi.metsi.sim.simulation_instruction import SimulationInstruction
+from lukefi.metsi.sim.generators import Sequence, Event
 
 
 control_structure = {
@@ -32,10 +32,10 @@ control_structure = {
         ]
     },
     "simulation_events": [
-        Event(
+        SimulationInstruction(
             time_points=[2020],
-            treatments=Sequence([
-                Treatment(grow_acta_vectorized)
+            events=Sequence([
+                Event(grow_acta_vectorized)
             ])
         )
     ],

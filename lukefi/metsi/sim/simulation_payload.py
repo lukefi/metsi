@@ -9,14 +9,14 @@ if TYPE_CHECKING:
     from lukefi.metsi.sim.generators import TreatmentFn
 
 
-class OperationPayload[T](SimpleNamespace):
+class SimulationPayload[T](SimpleNamespace):
     """Data structure for keeping simulation state and progress data. Passed on as the data package of chained
     operation calls. """
     computational_unit: PossiblyLayered[T]
     collected_data: CollectedData
     operation_history: list[tuple[int, "TreatmentFn[T]", dict[str, dict]]]
 
-    def __copy__(self) -> "OperationPayload[T]":
+    def __copy__(self) -> "SimulationPayload[T]":
         copy_like: PossiblyLayered[T]
         if isinstance(self.computational_unit, LayeredObject):
             copy_like = self.computational_unit.new_layer()
@@ -25,11 +25,11 @@ class OperationPayload[T](SimpleNamespace):
         else:
             copy_like = deepcopy(self.computational_unit)
 
-        return OperationPayload(
+        return SimulationPayload(
             computational_unit=copy_like,
             collected_data=copy(self.collected_data),
             operation_history=list(self.operation_history)
         )
 
 T = TypeVar("T")
-ProcessedOperation = Callable[[OperationPayload[T]], OperationPayload[T]]
+ProcessedTreatment = Callable[[SimulationPayload[T]], SimulationPayload[T]]

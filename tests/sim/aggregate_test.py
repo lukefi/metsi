@@ -6,7 +6,7 @@ from lukefi.metsi.sim.collected_data import CollectedData
 class AggregateUtilsTest(unittest.TestCase):
 
     collected_data = CollectedData(
-        operation_results = {
+        treatment_results = {
             'oper1': OrderedDict(
                 {
                     0: {

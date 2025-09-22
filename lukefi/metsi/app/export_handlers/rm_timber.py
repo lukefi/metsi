@@ -1,6 +1,6 @@
 from pathlib import Path
 from collections import defaultdict
-from lukefi.metsi.app.app_types import SimResults
+from lukefi.metsi.domain.forestry_types import SimResults
 from lukefi.metsi.app.file_io import row_writer
 from lukefi.metsi.domain.collected_types import CrossCutResult
 from lukefi.metsi.sim.collected_data import CollectedData

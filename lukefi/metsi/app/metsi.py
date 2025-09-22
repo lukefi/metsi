@@ -12,7 +12,7 @@ from lukefi.metsi.app.preprocessor import (
 )
 
 from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
-from lukefi.metsi.app.app_types import SimResults
+from lukefi.metsi.domain.forestry_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.app.export import export_files, export_preprocessed
 from lukefi.metsi.app.file_io import prepare_target_directory, read_stands_from_file, \

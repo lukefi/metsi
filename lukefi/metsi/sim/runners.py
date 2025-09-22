@@ -6,14 +6,14 @@ from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.sim.event_tree import EventTree
 from lukefi.metsi.sim.generators import Generator
 
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 from lukefi.metsi.sim.sim_configuration import SimConfiguration
 from lukefi.metsi.sim.state_tree import StateTree
 
 T = TypeVar("T")
 
-Evaluator = Callable[[OperationPayload[T], EventTree[T]], list[OperationPayload[T]]]
-Runner = Callable[[OperationPayload[T], SimConfiguration, Evaluator[T]], list[OperationPayload[T]]]
+Evaluator = Callable[[SimulationPayload[T], EventTree[T]], list[SimulationPayload[T]]]
+Runner = Callable[[SimulationPayload[T], SimConfiguration, Evaluator[T]], list[SimulationPayload[T]]]
 
 
 def evaluate_sequence(payload: T, *operations: Callable[[T], T]) -> T:
@@ -51,18 +51,18 @@ def _run_chains_iteratively(payload: T, chains: list[list[Callable[[T], T]]]) ->
     return results
 
 
-def chain_evaluator(payload: OperationPayload[T], root_node: EventTree[T]) -> list[OperationPayload[T]]:
+def chain_evaluator(payload: SimulationPayload[T], root_node: EventTree[T]) -> list[SimulationPayload[T]]:
     chains = root_node.operation_chains()
     return _run_chains_iteratively(payload, chains)
 
 
-def depth_first_evaluator(payload: OperationPayload[T], root_node: EventTree[T]) -> list[OperationPayload[T]]:
+def depth_first_evaluator(payload: SimulationPayload[T], root_node: EventTree[T]) -> list[SimulationPayload[T]]:
     state_tree: StateTree[PossiblyLayered[T]] = StateTree()
     return root_node.evaluate(payload, state_tree)
 
 
-def run_full_tree_strategy(payload: OperationPayload[T], config: SimConfiguration,
-                           evaluator: Evaluator[T] = chain_evaluator) -> list[OperationPayload[T]]:
+def run_full_tree_strategy(payload: SimulationPayload[T], config: SimConfiguration,
+                           evaluator: Evaluator[T] = chain_evaluator) -> list[SimulationPayload[T]]:
     """Process the given operation payload using a simulation state tree created from the declaration. Full simulation
     tree and operation chains are pre-generated for the run. This tree strategy creates the full theoretical branching
     tree for the simulation, carrying a significant memory and runtime overhead for large trees.
@@ -79,9 +79,9 @@ def run_full_tree_strategy(payload: OperationPayload[T], config: SimConfiguratio
     return result
 
 
-def run_partial_tree_strategy(payload: OperationPayload[T], config: SimConfiguration[T],
+def run_partial_tree_strategy(payload: SimulationPayload[T], config: SimConfiguration[T],
                               evaluator: Evaluator[T] = chain_evaluator
-                              ) -> list[OperationPayload[T]]:
+                              ) -> list[SimulationPayload[T]]:
     """Process the given operation payload using a simulation state tree created from the declaration. The simulation
     tree and operation chains are generated and executed in order per simulation time point. This reduces the amount of
     redundant, always-failing operation chains and redundant branches of the simulation tree.
@@ -93,7 +93,7 @@ def run_partial_tree_strategy(payload: OperationPayload[T], config: SimConfigura
     """
     generators_by_time_point: dict[int, Generator[T]] = config.partial_tree_generators_by_time_point()
     root_nodes: dict[int, EventTree[T]] = {}
-    results: list[OperationPayload[T]] = [payload]
+    results: list[SimulationPayload[T]] = [payload]
 
     # build chains_by_time_point, which is a dict of chains
     for time_point, nestable_generator in generators_by_time_point.items():
@@ -101,7 +101,7 @@ def run_partial_tree_strategy(payload: OperationPayload[T], config: SimConfigura
 
     for time_point in config.time_points:
         root_node = root_nodes[time_point]
-        time_point_results: list[OperationPayload] = []
+        time_point_results: list[SimulationPayload] = []
         for payload_ in results:
             payload_results = evaluator(payload_, root_node)
             time_point_results.extend(payload_results)

@@ -16,9 +16,9 @@ from lukefi.metsi.data.formats.io_utils import (
     mela_par_file_content)
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import ExportableContainer
-from lukefi.metsi.app.app_types import SimResults, ForestOpPayload
+from lukefi.metsi.domain.forestry_types import SimResults
 from lukefi.metsi.data.layered_model import PossiblyLayered
-from lukefi.metsi.domain.forestry_types import StandList, ForestStand
+from lukefi.metsi.domain.forestry_types import ForestOpPayload, StandList, ForestStand
 from lukefi.metsi.data.formats.declarative_conversion import Conversion
 from lukefi.metsi.app.utils import MetsiException
 from lukefi.metsi.sim.collected_data import CollectedData

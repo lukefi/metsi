@@ -5,9 +5,9 @@ from typing import TypeVar, Generic, Any, Union, IO
 from collections.abc import Iterator, Iterable
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
-from lukefi.metsi.app.app_types import SimResults
+from lukefi.metsi.domain.forestry_types import SimResults
 from lukefi.metsi.domain.utils.collectives import CollectFn, GetVarFn, compile_collector, getvarfn, autocollective
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 
 
 T = TypeVar("T")
@@ -43,7 +43,7 @@ class CollectiveSeries(Generic[T]):
         yield from self.data
 
 
-def getseries(schedule: OperationPayload, name: str) -> CollectiveSeries:
+def getseries(schedule: SimulationPayload, name: str) -> CollectiveSeries:
     """Get a `CollectiveSeries` for the collective `name` from an `OperationPayload`."""
     data, index = [], []
     for t, c in schedule.collected_data.operation_results["report_collectives"].items():  # type: ignore

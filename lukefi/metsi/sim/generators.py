@@ -4,16 +4,16 @@ from typing import Any, Optional, TypeVar, override
 from typing import Sequence as Sequence_
 
 from collections.abc import Callable
+from lukefi.metsi.sim.processor import prepared_processor
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.event_tree import EventTree
-from lukefi.metsi.sim.operation_payload import OperationPayload, ProcessedOperation
-from lukefi.metsi.sim.operations import prepared_processor, prepared_operation
+from lukefi.metsi.sim.simulation_payload import SimulationPayload, ProcessedTreatment
 from lukefi.metsi.app.utils import MetsiException
 
 T = TypeVar("T")
 
-GeneratorFn = Callable[[Optional[list[EventTree[T]]], ProcessedOperation[T]], list[EventTree[T]]]
+GeneratorFn = Callable[[Optional[list[EventTree[T]]], ProcessedTreatment[T]], list[EventTree[T]]]
 TreatmentFn = Callable[[OpTuple[T]], OpTuple[T]]
 ProcessedGenerator = Callable[[Optional[list[EventTree[T]]]], list[EventTree[T]]]
 
@@ -68,20 +68,20 @@ class Alternatives[T](Generator[T]):
         return retval
 
 
-class Treatment[T](GeneratorBase):
+class Event[T](GeneratorBase):
     """Base class for treatments. Contains conditions and parameters and the actual function that operates on the
     simulation state."""
-    preconditions: list[Condition[OperationPayload[T]]]
-    postconditions: list[Condition[OperationPayload[T]]]
+    preconditions: list[Condition[SimulationPayload[T]]]
+    postconditions: list[Condition[SimulationPayload[T]]]
     parameters: dict[str, Any]
     file_parameters: dict[str, str]
-    treatment_fn: TreatmentFn[T]
+    treatment: TreatmentFn[T]
 
-    def __init__(self, treatment_fn: TreatmentFn[T], parameters: Optional[dict[str, Any]] = None,
-                 preconditions: Optional[list[Condition[OperationPayload[T]]]] = None,
-                 postconditions: Optional[list[Condition[OperationPayload[T]]]] = None,
+    def __init__(self, treatment: TreatmentFn[T], parameters: Optional[dict[str, Any]] = None,
+                 preconditions: Optional[list[Condition[SimulationPayload[T]]]] = None,
+                 postconditions: Optional[list[Condition[SimulationPayload[T]]]] = None,
                  file_parameters: Optional[dict[str, str]] = None) -> None:
-        self.treatment_fn = treatment_fn
+        self.treatment = treatment
 
         if parameters is not None:
             self.parameters = parameters
@@ -111,11 +111,11 @@ class Treatment[T](GeneratorBase):
             retval.append(branch)
         return retval
 
-    def _prepare_paremeterized_treatment(self, time_point) -> ProcessedOperation[T]:
+    def _prepare_paremeterized_treatment(self, time_point) -> ProcessedTreatment[T]:
         self._check_file_params()
         combined_params = self._merge_params()
         return prepared_processor(
-            self.treatment_fn,
+            self.treatment,
             time_point,
             self.preconditions,
             self.postconditions,
@@ -133,18 +133,3 @@ class Treatment[T](GeneratorBase):
                 f"parameter(s) {common_keys} were defined both in 'parameters' and 'file_parameters' sections "
                 "in control.py. Please change the name of one of them.")
         return self.parameters | self.file_parameters  # pipe is the merge operator
-
-
-def simple_processable_chain(operation_tags: list[Callable[[T], T]],
-                             operation_params: dict[Callable[[T], T], Any]) -> list[Callable[[T], T]]:
-    """Prepare a list of partially applied (parametrized) operation functions based on given declaration of operation
-    tags and operation parameters"""
-    result: list[Callable[[T], T]] = []
-    for tag in operation_tags if operation_tags is not None else []:
-        params = operation_params.get(tag, [{}])
-        if len(params) > 1:
-            raise MetsiException(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
-                                 "Defining multiple parameter sets is only supported for alternative clause "
-                                 "generators.")
-        result.append(prepared_operation(tag, **params[0]))
-    return result
