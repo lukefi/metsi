@@ -8,7 +8,6 @@ from lukefi.metsi.app.metsi_enum import FormationStrategy, EvaluationStrategy
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.sim.collected_data import CollectedData
-from lukefi.metsi.sim.core_types import Evaluator, Runner, SimConfiguration
 from lukefi.metsi.sim.runners import (
     run_full_tree_strategy,
     run_partial_tree_strategy,
