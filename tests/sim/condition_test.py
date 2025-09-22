@@ -1,6 +1,9 @@
 import unittest
 
+from lukefi.metsi.sim.collected_data import CollectedData, OpTuple
 from lukefi.metsi.sim.condition import Condition
+from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment
+from lukefi.metsi.sim.operation_payload import OperationPayload
 
 
 class ConditionTest(unittest.TestCase):
@@ -20,3 +23,43 @@ class ConditionTest(unittest.TestCase):
         self.assertTrue(c_or(1, 3))
         self.assertTrue(c_or(5, 6))
         self.assertFalse(c_or(1, 6))
+
+    def test_condition_checking(self):
+        def step(x: OpTuple[int]) -> OpTuple[int]:
+            computational_unit, collected_data = x
+            computational_unit = computational_unit.__add__(1)
+            return computational_unit, collected_data
+
+        generator = Alternatives([
+            Sequence([
+                Treatment(step, preconditions=[Condition(lambda _, x: x.computational_unit.__le__(2))]),
+                Treatment(step, preconditions=[Condition(lambda _, x: x.computational_unit.__ge__(2))]),
+                Treatment(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(4))]),
+            ]),
+            Sequence([
+                Treatment(step, preconditions=[Condition(lambda _, x: x.computational_unit.__lt__(2))]),
+                Treatment(step, preconditions=[Condition(lambda _, x: x.computational_unit.__ge__(2))]),
+                Treatment(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(3))]),
+            ]),
+            Sequence([
+                Treatment(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(2))]),
+                Treatment(step, postconditions=[Condition(lambda _, x: x.computational_unit.__lt__(5))]),
+            ]),
+            Treatment(step, preconditions=[Condition(lambda _, x: True)]),
+            Treatment(step, preconditions=[Condition(lambda _, x: False)]),
+            Treatment(step, postconditions=[Condition(lambda _, x: True)]),
+            Treatment(step, postconditions=[Condition(lambda _, x: False)]),
+        ])
+
+        root = generator.compose_nested()
+        result = root.evaluate(
+            OperationPayload(
+                computational_unit=1,
+                collected_data=CollectedData(),
+                operation_history={}))
+
+        self.assertEqual(len(result), 4)
+        self.assertEqual(result[0].computational_unit, 4)
+        self.assertEqual(result[1].computational_unit, 3)
+        self.assertEqual(result[2].computational_unit, 2)
+        self.assertEqual(result[3].computational_unit, 2)

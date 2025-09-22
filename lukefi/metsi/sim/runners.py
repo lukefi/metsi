@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from copy import deepcopy
 from typing import TypeVar
+from lukefi.metsi.app.utils import ConditionFailed
 from lukefi.metsi.data.layered_model import PossiblyLayered
 from lukefi.metsi.sim.event_tree import EventTree
 from lukefi.metsi.sim.generators import Generator
@@ -44,7 +45,7 @@ def _run_chains_iteratively(payload: T, chains: list[list[Callable[[T], T]]]) ->
     for chain in chains:
         try:
             results.append(evaluate_sequence(deepcopy(payload), *chain))
-        except UserWarning:
+        except (ConditionFailed, UserWarning):
             ...
             # TODO aborted run reporting
     return results
