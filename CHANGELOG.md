@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [3.2.1] - 2025-09-22
+
+### Added
+
+- Added support for csv and rst state output for vectorized data
+
+### Fixed
+
+- Fixed simulation flow for vectorized data
+- Fixed grow_acta_vectorized implementation
+- Fixed state output mechanism
+- Fixed rst and csv output for non-vectorized data
+
 ## [3.2.0] - 2025-09-22
 
 ### Added
