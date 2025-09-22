@@ -3,32 +3,33 @@ from typing import Optional, TypeVar
 
 from lukefi.metsi.sim.condition import Condition
 from lukefi.metsi.sim.generators import Alternatives, GeneratorBase, Generator, Sequence
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 
 T = TypeVar('T')  # T = ForestStand
 
 
-class Event[T]:
+class SimulationInstruction[T]:
     time_points: list[int]
-    conditions: list[Condition[OperationPayload[T]]]
-    treatment_generator: Generator[T]
+    conditions: list[Condition[SimulationPayload[T]]]
+    event_generator: Generator[T]
 
-    def __init__(self, time_points: list[int], treatments: Generator[T] | list[GeneratorBase] | set[GeneratorBase],
-                 conditions: Optional[list[Condition[OperationPayload[T]]]] = None) -> None:
+    def __init__(self, time_points: list[int], events: Generator[T] | list[GeneratorBase] | set[GeneratorBase],
+                 conditions: Optional[list[Condition[SimulationPayload[T]]]] = None) -> None:
         self.time_points = time_points
-        if isinstance(treatments, Generator):
-            self.treatment_generator = treatments
-        elif isinstance(treatments, list):
-            self.treatment_generator = Sequence(treatments)
-        elif isinstance(treatments, set):
-            self.treatment_generator = Alternatives(list(treatments))
+        if isinstance(events, Generator):
+            self.event_generator = events
+        elif isinstance(events, list):
+            self.event_generator = Sequence(events)
+        elif isinstance(events, set):
+            self.event_generator = Alternatives(list(events))
         if conditions is not None:
             self.conditions = conditions
         else:
             self.conditions = []
 
 
-def generator_declarations_for_time_point(events: list[Event[T]], time: int) -> list[Generator[T]]:
+def generator_declarations_for_time_point(
+        simulation_instructions: list[SimulationInstruction[T]], time: int) -> list[Generator[T]]:
     """
     From events declarations, find the EventTree generators declared for the given time point.
 
@@ -37,9 +38,9 @@ def generator_declarations_for_time_point(events: list[Event[T]], time: int) -> 
     :return: list of generator declarations for the desired point of time
     """
     generator_declarations: list[Generator[T]] = []
-    for event in events:
-        if time in event.time_points:
-            generator_copy = deepcopy(event.treatment_generator)
+    for instruction in simulation_instructions:
+        if time in instruction.time_points:
+            generator_copy = deepcopy(instruction.event_generator)
             generator_copy.time_point = time
             generator_declarations.append(generator_copy)
     return generator_declarations

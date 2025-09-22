@@ -4,7 +4,7 @@ import unittest
 
 from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum
 from lukefi.metsi.sim.collected_data import CollectedData
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 from lukefi.metsi.sim.runners import run_full_tree_strategy, run_partial_tree_strategy, chain_evaluator, depth_first_evaluator
 from lukefi.metsi.sim.sim_configuration import SimConfiguration
 
@@ -81,7 +81,7 @@ class PerformanceTest(unittest.TestCase):
         sims = create_sim_configs(workload_time)
 
         # run once to eliminate cold start effect
-        run_full_tree_strategy(OperationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=sims[0].time_points[0]), operation_history=[]), sims[0])
+        run_full_tree_strategy(SimulationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=sims[0].time_points[0]), operation_history=[]), sims[0])
         optime = 0
         counter = 0
 
@@ -91,7 +91,7 @@ class PerformanceTest(unittest.TestCase):
                 print(f"  strategy {strategy.__name__}")
                 for evaluator in evaluators:
                     print(f"    evaluator {evaluator.__name__}")
-                    payload = OperationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=sim.time_points[0]), operation_history=[])
+                    payload = SimulationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=sim.time_points[0]), operation_history=[])
                     start = time.time_ns()
                     result = strategy(payload, sim, evaluator)
                     end = time.time_ns()
@@ -132,7 +132,7 @@ class PerformanceTest(unittest.TestCase):
             TreeStratum(),
             TreeStratum()
         ]
-        payload = OperationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=0), operation_history=[])
+        payload = SimulationPayload(computational_unit=fixture, collected_data=CollectedData(initial_time_point=0), operation_history=[])
 
         steps = 50000
         worktime = 0.00001

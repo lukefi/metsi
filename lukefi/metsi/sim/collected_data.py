@@ -9,11 +9,11 @@ class CollectedData:
 
     def __init__(
         self,
-        operation_results: Optional[dict[str, Any]] = None,
+        treatment_results: Optional[dict[str, Any]] = None,
         current_time_point: Optional[int] = None,
         initial_time_point: Optional[int] = None
     ):
-        self.operation_results: dict[str, Any] = operation_results or {}
+        self.operation_results: dict[str, Any] = treatment_results or {}
         self.current_time_point: int = current_time_point or initial_time_point or 0
         self.initial_time_point: int = initial_time_point or 0
 
@@ -30,7 +30,7 @@ class CollectedData:
 
     def __copy__(self) -> "CollectedData":
         return CollectedData(
-            operation_results={k: self._copy_op_results(v) for k, v in self.operation_results.items()},
+            treatment_results={k: self._copy_op_results(v) for k, v in self.operation_results.items()},
             current_time_point=self.current_time_point,
             initial_time_point=self.initial_time_point
         )

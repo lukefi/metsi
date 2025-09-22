@@ -19,7 +19,7 @@ class CrossCuttingOperationTest(unittest.TestCase):
         payload = (
             ForestStand(area=2.0),
             CollectedData(
-                operation_results={
+                treatment_results={
                     "felled_trees": [CrossCuttableTree(
                                     stems_per_ha= 0.006261167484111818,
                                     species = TreeSpecies.UNKNOWN_CONIFEROUS,

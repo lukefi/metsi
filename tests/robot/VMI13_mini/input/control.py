@@ -3,7 +3,7 @@ from lukefi.metsi.domain.conditions import MinimumTimeInterval
 from lukefi.metsi.domain.forestry_operations.clearcut import clearcutting
 from lukefi.metsi.domain.forestry_operations.thinning import first_thinning
 from lukefi.metsi.domain.pre_ops import generate_reference_trees, preproc_filter, scale_area_weight
-from lukefi.metsi.domain.treatments import (
+from lukefi.metsi.domain.events import (
     CalculateBiomass,
     CalculateNpv,
     Clearcutting,
@@ -19,7 +19,7 @@ from lukefi.metsi.domain.treatments import (
     ReportCollectives,
     ReportPeriod,
     ReportState)
-from lukefi.metsi.sim.event import Alternatives, Event, Sequence
+from lukefi.metsi.sim.simulation_instruction import Alternatives, SimulationInstruction, Sequence
 from lukefi.metsi.sim.operations import do_nothing
 
 
@@ -57,9 +57,9 @@ control_structure = {
         ]
     },
     "simulation_events": [
-        Event(
+        SimulationInstruction(
             time_points=[2020],
-            treatments=[
+            events=[
                 Planting(
                     parameters={
                         "tree_count": 10,
@@ -70,9 +70,9 @@ control_structure = {
                 )
             ]
         ),
-        Event(
+        SimulationInstruction(
             time_points=[2020, 2025, 2030, 2035, 2040, 2045, 2050],
-            treatments=[
+            events=[
                 CrossCutStandingTrees(
                     file_parameters={
                         "timber_price_table": "data/parameter_files/timber_price_table.csv"
@@ -98,9 +98,9 @@ control_structure = {
                 ReportState()
             ]
         ),
-        Event(
+        SimulationInstruction(
             time_points=[2035, 2045],
-            treatments=[
+            events=[
                 Alternatives([
                     DoNothing(),
                     FirstThinning(
@@ -156,17 +156,17 @@ control_structure = {
                 ])
             ]
         ),
-        Event(
+        SimulationInstruction(
             time_points=[2020, 2030, 2040, 2050],
-            treatments=Sequence([
+            events=Sequence([
                 ReportPeriod(
                     parameters={"overall_volume": "cross_cutting.volume_per_ha"}
                 )
             ])
         ),
-        Event(
+        SimulationInstruction(
             time_points=[2050],
-            treatments=[
+            events=[
                 ReportCollectives(
                     parameters={
                         "identifier": "identifier",
@@ -202,9 +202,9 @@ control_structure = {
                 )
             ]
         ),
-        Event(
+        SimulationInstruction(
             time_points=[2020, 2025, 2030, 2035, 2040, 2045, 2050],
-            treatments=[
+            events=[
                 GrowActa()
             ]
         )

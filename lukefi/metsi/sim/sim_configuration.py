@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from lukefi.metsi.sim.event import Event, generator_declarations_for_time_point
+from lukefi.metsi.sim.simulation_instruction import SimulationInstruction, generator_declarations_for_time_point
 from lukefi.metsi.sim.generators import Generator, Sequence
 
 
@@ -16,7 +16,7 @@ class SimConfiguration[T](SimpleNamespace):
             Initializes the SimConfiguration instance with operation and generator
             lookups, and additional keyword arguments.
     """
-    events: list[Event[T]] = []
+    instructions: list[SimulationInstruction[T]] = []
     time_points: list[int] = []
 
     def __init__(self, **kwargs):
@@ -26,13 +26,13 @@ class SimConfiguration[T](SimpleNamespace):
             **kwargs: Additional keyword arguments to be passed to the parent class initializer.
         """
         super().__init__(**kwargs)
-        self._populate_simulation_events(self.simulation_events)
+        self._populate_simulation_instructions(self.simulation_events)
 
-    def _populate_simulation_events(self, events: list["Event[T]"]):
+    def _populate_simulation_instructions(self, instructions: list["SimulationInstruction[T]"]):
         time_points = set()
-        self.events = events
-        for event in events:
-            source_time_points = event.time_points
+        self.instructions = instructions
+        for instruction in instructions:
+            source_time_points = instruction.time_points
             time_points.update(source_time_points)
         self.time_points = sorted(time_points)
 
@@ -44,7 +44,7 @@ class SimConfiguration[T](SimpleNamespace):
         """
         wrapper = []
         for time_point in self.time_points:
-            generator_declarations = generator_declarations_for_time_point(self.events, time_point)
+            generator_declarations = generator_declarations_for_time_point(self.instructions, time_point)
             time_point_wrapper_declaration: Sequence[T] = Sequence(generator_declarations, time_point)
             wrapper.append(time_point_wrapper_declaration)
         return Sequence(wrapper, 0)
@@ -60,7 +60,7 @@ class SimConfiguration[T](SimpleNamespace):
         generators_by_time_point = {}
 
         for time_point in self.time_points:
-            generator_declarations = generator_declarations_for_time_point(self.events, time_point)
+            generator_declarations = generator_declarations_for_time_point(self.instructions, time_point)
             sequence_wrapper_declaration: Generator[T] = Sequence(generator_declarations, time_point)
             generators_by_time_point[time_point] = sequence_wrapper_declaration
         return generators_by_time_point

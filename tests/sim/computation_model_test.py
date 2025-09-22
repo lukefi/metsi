@@ -1,9 +1,9 @@
 import unittest
 
 from lukefi.metsi.domain.conditions import MinimumTimeInterval
-from lukefi.metsi.sim.event import Event
-from lukefi.metsi.sim.generators import Sequence, Treatment
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.simulation_instruction import SimulationInstruction
+from lukefi.metsi.sim.generators import Sequence, Event
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 from lukefi.metsi.sim.runners import evaluate_sequence
 from lukefi.metsi.sim.event_tree import EventTree
 from lukefi.metsi.sim.sim_configuration import SimConfiguration
@@ -36,13 +36,13 @@ class ComputationModelTest(unittest.TestCase):
     def test_run_chains(self):
         chains = self.root.operation_chains()
         for chain in chains:
-            result = evaluate_sequence(OperationPayload(computational_unit=0,
+            result = evaluate_sequence(SimulationPayload(computational_unit=0,
                                                       collected_data=None,
                                                       operation_history={}), *chain)
             self.assertEqual(3, result.computational_unit)
 
     def test_evaluator(self):
-        results = self.root.evaluate(OperationPayload(computational_unit=0,
+        results = self.root.evaluate(SimulationPayload(computational_unit=0,
                                                       collected_data=None,
                                                       operation_history={}))
         self.assertListEqual([3, 3, 3, 3], [result.computational_unit for result in results])
@@ -56,38 +56,38 @@ class ComputationModelTest(unittest.TestCase):
 
         config = {
             'simulation_events': [
-                Event(
+                SimulationInstruction(
                     time_points=[1, 2, 3],
-                    treatments=[
-                        Treatment(
+                    events=[
+                        Event(
                             preconditions=[
                                 MinimumTimeInterval(5, fn1)
                             ],
-                            treatment_fn=fn1,
+                            treatment=fn1,
                             parameters={
                                 'param1': 1
                             }
                         ),
-                        Treatment(
-                            treatment_fn=fn2
+                        Event(
+                            treatment=fn2
                         )
                     ]
                 ),
-                Event(
+                SimulationInstruction(
                     time_points=[3, 4, 5],
-                    treatments=[
+                    events=[
                         Sequence([
-                            Treatment(
+                            Event(
                                 preconditions=[
                                     MinimumTimeInterval(5, fn1)
                                 ],
-                                treatment_fn=fn1,
+                                treatment=fn1,
                                 parameters={
                                     'param1': 1
                                 }
                             ),
-                            Treatment(
-                                treatment_fn=fn2
+                            Event(
+                                treatment=fn2
                             )
                         ])
                     ]
@@ -96,4 +96,4 @@ class ComputationModelTest(unittest.TestCase):
         }
         result = SimConfiguration(**config)
         self.assertListEqual([1, 2, 3, 4, 5], result.time_points)
-        self.assertEqual(2, len(result.events))
+        self.assertEqual(2, len(result.instructions))

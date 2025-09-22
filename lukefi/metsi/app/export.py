@@ -4,13 +4,13 @@ from functools import partial
 from typing import Any, Callable, Optional
 
 from lukefi.metsi.app.app_io import MetsiConfiguration
-from lukefi.metsi.app.app_types import SimResults, ExportableContainer
+from lukefi.metsi.app.app_types import ExportableContainer
 from lukefi.metsi.app.export_handlers.j import j_out, parse_j_config
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.app.export_handlers.rm_timber import rm_schedules_events_timber, rm_schedules_events_trees
 from lukefi.metsi.app.file_io import write_stands_to_file, determine_file_path
-from lukefi.metsi.domain.forestry_types import StandList
-from lukefi.metsi.sim.generators import simple_processable_chain
+from lukefi.metsi.domain.forestry_types import SimResults, StandList
+from lukefi.metsi.sim.operations import simple_processable_chain
 from lukefi.metsi.sim.runners import evaluate_sequence
 
 
