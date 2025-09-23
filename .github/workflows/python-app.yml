@@ -49,6 +49,11 @@ jobs:
       run: |
         pylint lukefi --output-format=github
 
+    - name: Run pylint, TODO warnings only
+      continue-on-error: true
+      run: |
+        pylint lukefi --output-format=github --disable=all --enable=fixme
+    
     - name: Run mypy
       run: |
         sudo apt-get install -y jq
