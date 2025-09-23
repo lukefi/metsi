@@ -32,14 +32,6 @@ class GrowthOperationsTest(unittest.TestCase):
                                fixture.reference_trees_soa.breast_height_diameter))
         self.assertTrue(np.all(stand.reference_trees_soa.height >= fixture.reference_trees_soa.height))
 
-    def assert_domain_sensibility_vectorized(self, stand: ForestStand):
-        fixture = vectorize([prepare_growth_test_stand()])[0]
-        self.assertTrue(
-            np.all(stand.reference_trees_soa.stems_per_ha <= fixture.reference_trees_soa.stems_per_ha))
-        self.assertTrue(np.all(stand.reference_trees_soa.breast_height_diameter >=
-                               fixture.reference_trees_soa.breast_height_diameter))
-        self.assertTrue(np.all(stand.reference_trees_soa.height >= fixture.reference_trees_soa.height))
-
     def test_grow_acta(self):
         stand = prepare_growth_test_stand()
         grow_acta((stand, None))

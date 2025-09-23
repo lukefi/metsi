@@ -5,7 +5,8 @@ from lukefi.metsi.sim.event import Event
 from lukefi.metsi.sim.generators import Sequence, Treatment
 from lukefi.metsi.sim.operation_payload import OperationPayload
 from lukefi.metsi.sim.runners import evaluate_sequence
-from lukefi.metsi.sim.core_types import EventTree, OperationPayload, SimConfiguration
+from lukefi.metsi.sim.event_tree import EventTree
+from lukefi.metsi.sim.sim_configuration import SimConfiguration
 from tests.test_utils import inc
 
 

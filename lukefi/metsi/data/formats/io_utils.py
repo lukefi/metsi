@@ -45,7 +45,7 @@ def msb_metadata(stand: PossiblyLayered[ForestStand]) -> tuple[list[str], list[s
         msb_meta.stand_record_length,
         msb_meta.logical_subrecord_metadata_length,
         (len(stand.reference_trees) if stand.reference_trees_soa is None else stand.reference_trees_soa.size) *
-            msb_meta.tree_record_length
+        msb_meta.tree_record_length
     ])
     physical_record_metadata = [
         rst_float(outputtable_id),  # UID
@@ -102,7 +102,7 @@ def rst_forest_stand_rows(stand: PossiblyLayered[ForestStand], additional_vars: 
             result.append(" ".join(map(rst_float, stand.reference_trees_soa.as_rst_row(i))))
     else:
         for tree in stand.reference_trees:
-            result.append(" ".join(map(rst_float, tree.as_rst_row())))
+            result.append(" ".join(map(rst_float, tree_as_rst_row(tree))))
     return result
 
 

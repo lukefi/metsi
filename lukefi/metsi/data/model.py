@@ -526,6 +526,7 @@ class ForestStand(Finalizable):
             self.reference_trees_soa = self.reference_trees_soa.finalize()
             self.tree_strata_soa = self.tree_strata_soa.finalize()
 
+
 def create_layered_tree(**kwargs) -> LayeredObject[ReferenceTree]:
     prototype = ReferenceTree()
     layered = LayeredObject(prototype)

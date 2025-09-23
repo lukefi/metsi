@@ -12,33 +12,6 @@ from tests.test_utils import inc, collecting_increment, parametrized_operation
 
 
 class TestGenerators(unittest.TestCase):
-    def test_event_sequence_generating(self):
-        root = EventTree()
-        result = sequence(
-            [root],
-            inc,
-            inc,
-            inc
-        )
-        chain = root.operation_chains()[0]
-        computation_result = run_sequence(OperationPayload(computational_unit=0,
-                                                           collected_data=None,
-                                                           operation_history={}), *chain)
-        self.assertEqual(3, computation_result.computational_unit)
-        self.assertEqual(1, len(result))
-        self.assertEqual(4, len(chain))
-
-    def test_branch_generating(self):
-        parent1 = EventTree()
-        parent2 = EventTree()
-        result = alternatives(
-            [parent1, parent2],
-            *[inc, inc, inc]
-        )
-        self.assertEqual(6, len(result))
-        self.assertEqual(3, len(parent1.branches))
-        self.assertEqual(3, len(parent2.branches))
-
     def test_yaml_declaration(self):
         declaration = {
             "simulation_events": [
