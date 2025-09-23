@@ -19,7 +19,8 @@ from lukefi.metsi.data.enums.internal import (
 )
 from lukefi.metsi.data.vector_model import ReferenceTrees
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth_vectorized
-from lukefi.metsi.sim.core_types import OpTuple
+from lukefi.metsi.sim.collected_data import OpTuple
+from lukefi.metsi.data.layered_model import PossiblyLayered
 
 # Lower-level MetsiGrow types
 from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.chain import (
@@ -93,7 +94,7 @@ class MetsiGrowPredictorVec(Predict):
     Extend metsi_grow.Predict to interface ForestStand & ReferenceTree data.
     """
 
-    def __init__(self, stand: ForestStand) -> None:
+    def __init__(self, stand: PossiblyLayered[ForestStand]) -> None:
         super().__init__()
         self.stand = stand
         self.year = float(_require(stand.year, "stand.year"))
@@ -248,13 +249,13 @@ class MetsiGrowPredictorVec(Predict):
 
 # ---------- public API  ----------
 
-def grow_metsi_vec(input_: tuple[ForestStand, None], /, **operation_parameters) -> tuple[ForestStand, None]:
+def grow_metsi_vec(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Wrapper for metsi_grow. Applies growth step to ForestStand.
     Assumes input is vectorized
     """
     step = operation_parameters.get("step", 5)
-    stand, _ = input_
+    stand, collected_data = input_
     if stand.reference_trees_soa is None:
         raise MetsiException("Reference trees not vectorized")
     if stand.reference_trees_soa.size == 0:
@@ -284,4 +285,4 @@ def grow_metsi_vec(input_: tuple[ForestStand, None], /, **operation_parameters) 
     if to_delete.size > 0:
         stand.reference_trees_soa.delete(to_delete.tolist())
 
-    return stand, None
+    return stand, collected_data
