@@ -5,7 +5,15 @@ from collections.abc import Callable
 from lukefi.metsi.app.app_types import ExportableContainer
 from lukefi.metsi.data.formats.util import parse_float
 from lukefi.metsi.data.layered_model import PossiblyLayered
-from lukefi.metsi.data.model import ForestStand, ReferenceTree, TreeStratum, stand_as_internal_csv_row, stand_as_rst_row, stratum_as_rsts_row, tree_as_internal_csv_row, tree_as_rst_row
+from lukefi.metsi.data.model import (
+    ForestStand,
+    ReferenceTree,
+    TreeStratum,
+    stand_as_internal_csv_row,
+    stand_as_rst_row,
+    stratum_as_rsts_row,
+    tree_as_internal_csv_row,
+    tree_as_rst_row)
 from lukefi.metsi.data.formats.rst_const import MSBInitialDataRecordConst as msb_meta
 from lukefi.metsi.domain.forestry_types import StandList
 
