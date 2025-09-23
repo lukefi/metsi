@@ -5,6 +5,7 @@ __pycache__
 .env
 issues
 build
+myenv
 *.egg-info
 **/c/lib
 
