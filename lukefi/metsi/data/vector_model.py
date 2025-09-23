@@ -155,6 +155,8 @@ class VectorData():
                 else:
                     setattr(self, key, np.append(vector, value))  # append always creates a copy
 
+        self.size = len(getattr(self, 'identifier'))
+        
     def read(self, index: int) -> dict[str, Any]:
         """
         Reads all contained data at given index.
@@ -195,7 +197,9 @@ class VectorData():
         """
         for key in self.dtypes:
             vector: npt.NDArray = getattr(self, key)
-            setattr(self, key, np.delete(vector, index))  # delete always creates a copy
+            setattr(self, key, np.delete(vector, index, axis=0))  # delete always creates a copy
+
+        self.size = len(getattr(self, 'identifier'))
 
     def finalize(self):
         """

@@ -221,7 +221,8 @@ class MetsiGrowPredictorVec(Predict):
             raise ValueError("Cannot determine dominant species: no reference trees.")
 
         # convert species for each tree
-        mg_species = [to_mg_species(v for v in rt.species.tolist())]
+        #mg_species = [to_mg_species(v) for v in rt.species.tolist()]
+        mg_species = list(self.trees_spe)
 
         # basal area per tree: stems_per_ha * pi * (0.005 * d)^2  (d in cm → m radius)
         d = _nan_to_num(rt.breast_height_diameter, 0.0)
