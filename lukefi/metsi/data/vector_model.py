@@ -35,7 +35,7 @@ DTYPES_STRATA: dict[str, npt.DTypeLike] = {
     "mean_diameter": np.float64,
     "mean_height": np.float64,
     "breast_height_age": np.float64,
-    "biological_age": np.int32,
+    "biological_age": np.float64,
     "stems_per_ha": np.float64,
     "basal_area": np.float64,
     "origin": np.int32,
@@ -295,7 +295,7 @@ class Strata(VectorData):
     mean_diameter: npt.NDArray[np.float64]
     mean_height: npt.NDArray[np.float64]
     breast_height_age: npt.NDArray[np.float64]
-    biological_age: npt.NDArray[np.int32]
+    biological_age: npt.NDArray[np.float64]
     stems_per_ha: npt.NDArray[np.float64]
     basal_area: npt.NDArray[np.float64]
     origin: npt.NDArray[np.int32]
