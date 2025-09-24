@@ -13,7 +13,7 @@ initialised = False  # pylint: disable=invalid-name # Pylint thinks all module s
 def get_r_with_sourced_scripts() -> robjects.R:
     """Returns the R instance that has sourced all required R-scripts. During sourcing, the working directory is set to
     .../forestryfunctions, after which it's set back to the initial directory."""
-    global initialised
+    global initialised  # pylint: disable=global-statement # Not viable to change current implementation.
     r = robjects.r
 
     if not initialised:

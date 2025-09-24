@@ -27,7 +27,7 @@ def continuous_growth_r(stand: ForestStand, step: int = 5) -> ForestStand:
     """Pukkala growth models implemented by Lauri Mehtätalo"""
     if len(stand.reference_trees) == 0:
         return stand
-    global pukkala_loaded
+    global pukkala_loaded  # pylint: disable=global-statement # Not viable to change current implementation.
     dir_ = Path(__file__).parent.parent.resolve() / "r" / "pukkala_growth"
     growth_script_file = dir_ / "growthfuncs.R"
     if not pukkala_loaded:

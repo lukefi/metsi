@@ -80,7 +80,7 @@ control_structure = {
                 Sequence([
                     Alternatives([
                         Treatment(do_a_thing,
-                                  conditions=[
+                                  preconditions=[
                                       # Conditions can be combined with | and & operators.
                                       # Here do_a_thing will be performed if the year is 2025 or any time that the last
                                       # cutting method was 1.
@@ -88,7 +88,7 @@ control_structure = {
                                       ForestCondition(lambda _, x: x.computational_unit.method_of_last_cutting == 1)
                                   ]),
                         Treatment(do_another_thing,
-                                  conditions=[
+                                  preconditions=[
                                       # Combined conditions can also be expressed with just one lambda:.
                                       # This time do_another_thing will be performed the year 2030 for all non-auxiliary
                                       # stands.
@@ -98,7 +98,7 @@ control_structure = {
                         Treatment(do_yet_another_thing,
                                   # More complex conditions can be formulated in separate modules, such as pre-made
                                   # libraries, and combined freely in non-trivial ways.
-                                  conditions=[
+                                  preconditions=[
                                       (first_condition & second_condition) | (third_condition)
                                   ])
                     ]),

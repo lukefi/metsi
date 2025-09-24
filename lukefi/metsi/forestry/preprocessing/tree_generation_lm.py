@@ -22,7 +22,7 @@ def tree_generation_lm(
         degree_days: float,
         stand_basal_area: float,
         **params) -> list[ReferenceTree]:
-    global lm_tree_generation_loaded
+    global lm_tree_generation_loaded  # pylint: disable=global-statement # Not viable to change current implementation.
     dir_ = Path(__file__).parent.parent.resolve() / "r"
     growth_script_file = dir_ / "lm_tree_generation.R"
     if not lm_tree_generation_loaded:

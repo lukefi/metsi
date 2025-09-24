@@ -45,6 +45,20 @@ jobs:
         python -m pip install --upgrade pip
         pip install .[tests]
 
+    - name: Run pylint
+      run: |
+        pylint lukefi --output-format=github
+
+    - name: Run pylint, TODO warnings only
+      continue-on-error: true
+      run: |
+        pylint lukefi --output-format=github --disable=all --enable=fixme --fail-under=0
+    
+    - name: Run mypy
+      run: |
+        sudo apt-get install -y jq
+        mypy -p lukefi --output=json | jq -r '"::\(.severity) title=Mypy issue,file=\(.file),line=\(.line),col=\(.column)::\(.message)"'
+
     - name: Install R dependencies
       uses: r-lib/actions/setup-r-dependencies@v2
       with:
@@ -53,17 +67,6 @@ jobs:
     - name: Compile shared libraries
       run: |
         make -C lukefi/metsi/forestry/c
-
-    - name: Run pylint
-      continue-on-error: true
-      run: |
-        pylint lukefi --output-format=github
-
-    - name: Run mypy
-      continue-on-error: true
-      run: |
-        sudo apt-get install -y jq
-        mypy -p lukefi --output=json | jq -r '"::\(.severity) title=Mypy issue,file=\(.file),line=\(.line),col=\(.column)::\(.message)"'
 
     - name: Test with pytest
       run: |
