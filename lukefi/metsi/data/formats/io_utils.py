@@ -119,7 +119,7 @@ def rsts_forest_stand_rows(stand: PossiblyLayered[ForestStand]) -> list[str]:
 
 
 def csv_value(source: Any) -> str:
-    if source is None:
+    if source in ("-1", "nan", "", None):
         return "None"
     return str(source)
 
