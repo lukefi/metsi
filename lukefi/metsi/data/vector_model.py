@@ -62,6 +62,7 @@ class VectorData():
 
     def __init__(self, dtypes: dict[str, npt.DTypeLike]):
         self.dtypes = dtypes
+        self.size = 0
 
     def vectorize(self, attr_dict: dict[str, list[Any]]):
         self.set_size(attr_dict)
@@ -155,8 +156,8 @@ class VectorData():
                 else:
                     setattr(self, key, np.append(vector, value))  # append always creates a copy
 
-        self.size = len(getattr(self, 'identifier'))
-        
+        self._recompute_size()
+
     def read(self, index: int) -> dict[str, Any]:
         """
         Reads all contained data at given index.
@@ -199,7 +200,7 @@ class VectorData():
             vector: npt.NDArray = getattr(self, key)
             setattr(self, key, np.delete(vector, index, axis=0))  # delete always creates a copy
 
-        self.size = len(getattr(self, 'identifier'))
+        self._recompute_size()
 
     def finalize(self):
         """
@@ -214,6 +215,15 @@ class VectorData():
             if attr is not None:
                 attr.flags.writeable = False
         return copy(self)
+
+    def _recompute_size(self) -> None:
+        # Find the first present ndarray among declared fields
+        for key in self.dtypes:
+            arr = getattr(self, key, None)
+            if isinstance(arr, np.ndarray):
+                self.size = len(arr)
+                return
+        self.size = 0
 
 
 class ReferenceTrees(VectorData):
