@@ -20,7 +20,7 @@ ProcessedGenerator = Callable[[Optional[list[EventTree[T]]]], list[EventTree[T]]
 
 
 class GeneratorBase[T](ABC):
-    """Shared abstract base class for Generator and Treatment types."""
+    """Shared abstract base class for Generator and Event types."""
     @abstractmethod
     def unwrap(self, parents: list[EventTree[T]], time_point: int) -> list[EventTree[T]]:
         pass
@@ -48,7 +48,7 @@ class Generator[T](GeneratorBase, ABC):
 
 
 class Sequence[T](Generator[T]):
-    """Generator for sequential treatments."""
+    """Generator for sequential events."""
 
     @override
     def unwrap(self, parents: list[EventTree], time_point: int) -> list[EventTree]:
@@ -59,7 +59,7 @@ class Sequence[T](Generator[T]):
 
 
 class Alternatives[T](Generator[T]):
-    """Generator for branching treatments"""
+    """Generator for branching events"""
 
     @override
     def unwrap(self, parents: list[EventTree], time_point: int) -> list[EventTree]:
@@ -70,7 +70,7 @@ class Alternatives[T](Generator[T]):
 
 
 class Event[T](GeneratorBase):
-    """Base class for treatments. Contains conditions and parameters and the actual function that operates on the
+    """Base class for events. Contains conditions and parameters and the actual treatment function that operates on the
     simulation state."""
     preconditions: list[Condition[SimulationPayload[T]]]
     postconditions: list[Condition[SimulationPayload[T]]]
