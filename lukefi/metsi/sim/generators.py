@@ -104,6 +104,7 @@ class Event[T](GeneratorBase):
         else:
             self.postconditions = []
 
+    @override
     def unwrap(self, parents: list[EventTree], time_point: int) -> list[EventTree]:
         retval = []
         for parent in parents:
@@ -117,7 +118,7 @@ class Event[T](GeneratorBase):
         combined_params = self._merge_params()
         prepared_treatment = prepared_operation(self.treatment, **combined_params)
         return lambda payload: processor(payload, prepared_treatment, self.treatment, time_point,
-                                        self.preconditions, self.postconditions, **combined_params)
+                                         self.preconditions, self.postconditions, **combined_params)
 
     def _check_file_params(self):
         for _, path in self.file_parameters.items():
