@@ -7,12 +7,12 @@ if TYPE_CHECKING:
 
 
 def processor[T](payload: SimulationPayload[T],
-              operation: "TreatmentFn[T]",
-              operation_tag: "TreatmentFn[T]",
-              time_point: int,
-              preconditions: list[Condition[SimulationPayload[T]]],
-              postconditions: list[Condition[SimulationPayload[T]]],
-              **operation_parameters: dict[str, dict]) -> SimulationPayload[T]:
+                 operation: "TreatmentFn[T]",
+                 operation_tag: "TreatmentFn[T]",
+                 time_point: int,
+                 preconditions: list[Condition[SimulationPayload[T]]],
+                 postconditions: list[Condition[SimulationPayload[T]]],
+                 **operation_parameters: dict[str, dict]) -> SimulationPayload[T]:
     """Managed run conditions and history of a simulator operation. Evaluates the operation."""
     for condition in preconditions:
         if not condition(time_point, payload):
