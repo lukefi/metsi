@@ -8,8 +8,13 @@ from lukefi.metsi.sim.simulation_payload import SimulationPayload
 
 class ConditionTest(unittest.TestCase):
     def test_condition_combinations(self):
+
+        @Condition[int]
+        def c2(time: int, x: int) -> bool:
+            _ = time
+            return x < 5
+
         c1 = Condition[int](lambda t, _: t >= 2)
-        c2 = Condition[int](lambda _, x: x < 5)
 
         c_and = c1 & c2
         c_or = c1 | c2
