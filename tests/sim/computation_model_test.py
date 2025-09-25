@@ -55,7 +55,7 @@ class ComputationModelTest(unittest.TestCase):
             return y
 
         config = {
-            'simulation_events': [
+            'simulation_instructions': [
                 SimulationInstruction(
                     time_points=[1, 2, 3],
                     events=[

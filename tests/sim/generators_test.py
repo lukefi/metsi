@@ -14,7 +14,7 @@ from tests.test_utils import inc, collecting_increment, parametrized_operation
 class TestGenerators(unittest.TestCase):
     def test_yaml_declaration(self):
         declaration = {
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[0, 1],
                     events=Sequence([
@@ -43,7 +43,7 @@ class TestGenerators(unittest.TestCase):
 
     def test_operation_run_constraints_success(self):
         declaration = {
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[1, 3],
                     events=Sequence([
@@ -72,7 +72,7 @@ class TestGenerators(unittest.TestCase):
 
     def test_operation_run_constraints_fail(self):
         declaration = {
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[1, 3],
                     events=Sequence([
@@ -103,7 +103,7 @@ class TestGenerators(unittest.TestCase):
 
     def test_tree_generators_by_time_point(self):
         declaration = {
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[0, 1],
                     events=Sequence([
@@ -141,7 +141,7 @@ class TestGenerators(unittest.TestCase):
         """Create a nested generators event tree. Use simple incrementation operation with starting value 0. Sequences
         and alternatives result in 4 branches with separately incremented values."""
         declaration = {
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[0],
                     events=Sequence([
@@ -212,7 +212,7 @@ class TestGenerators(unittest.TestCase):
                     {"incrementation": 3}
                 ]
             },
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[0],
                     events=Sequence([
@@ -270,7 +270,7 @@ class TestGenerators(unittest.TestCase):
         sequences with single operations nested in alternatives.
         """
         declaration_one = {
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[0],
                     events=Sequence([
@@ -295,7 +295,7 @@ class TestGenerators(unittest.TestCase):
             ]
         }
         declaration_two = {
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[0],
                     events=Sequence([
@@ -356,7 +356,7 @@ class TestGenerators(unittest.TestCase):
 
     def test_generate_time_series(self):
         declaration = {
-            "simulation_events": [
+            "simulation_instructions": [
                 SimulationInstruction(
                     time_points=[0, 1, 4, 100, 1000, 8, 9],
                     events=Sequence([

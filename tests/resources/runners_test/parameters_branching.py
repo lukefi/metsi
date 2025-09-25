@@ -5,7 +5,7 @@ from tests.test_utils import collecting_increment
 
 
 control_structure = {
-    "simulation_events": [
+    "simulation_instructions": [
         SimulationInstruction(
             time_points=[1, 2],
             events=Sequence([

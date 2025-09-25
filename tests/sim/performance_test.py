@@ -27,22 +27,22 @@ def nodecount(x, sleeptime):
 def create_sim_configs(workload_time):
     """Create 4 simulation configurations with roughly 400 total full strategy nodes each, with increasing width of the tree"""
     return [
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_instructions': [
             {'time_points': list(range(400)), 'generators': [{'sequence': ['nodecount']}]}
         ]}),
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_instructions': [
             {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(6)), 'generators': [{'alternatives': ['nodecount', 'nodecount']}]}
         ]}),
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_instructions': [
             {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(4)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount']}]}
         ]}),
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_instructions': [
             {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(3)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]}
         ]}),
-        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_events': [
+        SimConfiguration(operation_lookup={'nodecount': lambda x: nodecount(x, workload_time)}, **{'simulation_instructions': [
             {'time_points': [0], 'generators': [{'sequence': ['nodecount', 'nodecount', 'nodecount', 'nodecount']}]},
             {'time_points': list(range(3)), 'generators': [{'alternatives': ['nodecount', 'nodecount', 'nodecount', 'nodecount', 'nodecount']}]}
         ]})

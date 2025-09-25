@@ -119,7 +119,7 @@ control_structure = {
     },
 
     # Simulation control declaration
-    "simulation_events": [
+    "simulation_instructions": [
         SimulationInstruction(
             time_points=[YEAR_START],
             events=Sequence([

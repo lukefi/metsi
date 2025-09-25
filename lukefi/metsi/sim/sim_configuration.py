@@ -5,16 +5,14 @@ from lukefi.metsi.sim.generators import Generator, Sequence
 
 class SimConfiguration[T](SimpleNamespace):
     """
-    A class to manage simulation configuration, including operations, generators,
+    A class to manage simulation configuration, including treatments, generators,
     events, and time points.
     Attributes:
-        events: A list of declared events for the simulation.
-        time_points: A sorted list of unique time points derived from the
-            declared simulation events.
+        instructions: A list of instructions for the simulation.
+        time_points: A sorted list of unique time points derived from the simulation instructions.
     Methods:
         __init__(**kwargs):
-            Initializes the SimConfiguration instance with operation and generator
-            lookups, and additional keyword arguments.
+            Initializes the SimConfiguration instance with keyword arguments.
     """
     instructions: list[SimulationInstruction[T]] = []
     time_points: list[int] = []
@@ -26,7 +24,7 @@ class SimConfiguration[T](SimpleNamespace):
             **kwargs: Additional keyword arguments to be passed to the parent class initializer.
         """
         super().__init__(**kwargs)
-        self._populate_simulation_instructions(self.simulation_events)
+        self._populate_simulation_instructions(self.simulation_instructions)
 
     def _populate_simulation_instructions(self, instructions: list["SimulationInstruction[T]"]):
         time_points = set()
@@ -38,7 +36,7 @@ class SimConfiguration[T](SimpleNamespace):
 
     def full_tree_generators(self) -> Generator[T]:
         """
-        Create a NestableGenerator describing a single simulator run.
+        Create a Generator describing a single simulator run.
 
         :return: a list of prepared generator functions
         """
@@ -51,7 +49,7 @@ class SimConfiguration[T](SimpleNamespace):
 
     def partial_tree_generators_by_time_point(self) -> dict[int, Generator[T]]:
         """
-        Create a dict of NestableGenerators keyed by their time_point in the simulation. Used for generating
+        Create a dict of Generators keyed by their time_point in the simulation. Used for generating
         partial EventTrees of the simulation.
 
         :return: a list of prepared generator functions
