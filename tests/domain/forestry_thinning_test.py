@@ -175,7 +175,7 @@ class ThinningsTest(ConverterTestSuite):
         }
 
         collected_data = CollectedData(
-            operation_results = operation_results,
+            treatment_results = operation_results,
             current_time_point = 30
         )
         payload = (None, collected_data)

@@ -2,14 +2,19 @@ import unittest
 
 from lukefi.metsi.sim.collected_data import CollectedData, OpTuple
 from lukefi.metsi.sim.condition import Condition
-from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.generators import Alternatives, Sequence, Event
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 
 
 class ConditionTest(unittest.TestCase):
     def test_condition_combinations(self):
+
+        @Condition[int]
+        def c2(time: int, x: int) -> bool:
+            _ = time
+            return x < 5
+
         c1 = Condition[int](lambda t, _: t >= 2)
-        c2 = Condition[int](lambda _, x: x < 5)
 
         c_and = c1 & c2
         c_or = c1 | c2
@@ -32,28 +37,28 @@ class ConditionTest(unittest.TestCase):
 
         generator = Alternatives([
             Sequence([
-                Treatment(step, preconditions=[Condition(lambda _, x: x.computational_unit.__le__(2))]),
-                Treatment(step, preconditions=[Condition(lambda _, x: x.computational_unit.__ge__(2))]),
-                Treatment(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(4))]),
+                Event(step, preconditions=[Condition(lambda _, x: x.computational_unit.__le__(2))]),
+                Event(step, preconditions=[Condition(lambda _, x: x.computational_unit.__ge__(2))]),
+                Event(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(4))]),
             ]),
             Sequence([
-                Treatment(step, preconditions=[Condition(lambda _, x: x.computational_unit.__lt__(2))]),
-                Treatment(step, preconditions=[Condition(lambda _, x: x.computational_unit.__ge__(2))]),
-                Treatment(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(3))]),
+                Event(step, preconditions=[Condition(lambda _, x: x.computational_unit.__lt__(2))]),
+                Event(step, preconditions=[Condition(lambda _, x: x.computational_unit.__ge__(2))]),
+                Event(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(3))]),
             ]),
             Sequence([
-                Treatment(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(2))]),
-                Treatment(step, postconditions=[Condition(lambda _, x: x.computational_unit.__lt__(5))]),
+                Event(step, postconditions=[Condition(lambda _, x: x.computational_unit.__eq__(2))]),
+                Event(step, postconditions=[Condition(lambda _, x: x.computational_unit.__lt__(5))]),
             ]),
-            Treatment(step, preconditions=[Condition(lambda _, x: True)]),
-            Treatment(step, preconditions=[Condition(lambda _, x: False)]),
-            Treatment(step, postconditions=[Condition(lambda _, x: True)]),
-            Treatment(step, postconditions=[Condition(lambda _, x: False)]),
+            Event(step, preconditions=[Condition(lambda _, x: True)]),
+            Event(step, preconditions=[Condition(lambda _, x: False)]),
+            Event(step, postconditions=[Condition(lambda _, x: True)]),
+            Event(step, postconditions=[Condition(lambda _, x: False)]),
         ])
 
         root = generator.compose_nested()
         result = root.evaluate(
-            OperationPayload(
+            SimulationPayload(
                 computational_unit=1,
                 collected_data=CollectedData(),
                 operation_history={}))

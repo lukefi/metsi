@@ -10,7 +10,7 @@ class ReportStateTest(unittest.TestCase):
 
     def test_report_state_considers_only_current_time_point(self):
         collected_data = CollectedData(
-            operation_results={
+            treatment_results={
                 "cross_cutting": [
                     CrossCutResult(
                         species=TreeSpecies.PINE,
@@ -70,7 +70,7 @@ class ReportStateTest(unittest.TestCase):
         We are accumulating the variable a in operX at time points 10 and 20
         """
         collected_data = CollectedData(
-            operation_results={
+            treatment_results={
                 'operX': [
                     SimpleNamespace(
                         a=10,

@@ -1,5 +1,5 @@
 from lukefi.metsi.domain.forestry_types import StandList
-from lukefi.metsi.sim.generators import simple_processable_chain
+from lukefi.metsi.sim.operations import simple_processable_chain
 from lukefi.metsi.sim.runners import evaluate_sequence
 
 

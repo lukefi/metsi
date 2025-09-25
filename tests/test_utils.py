@@ -9,7 +9,7 @@ import numpy as np
 from lukefi.metsi.data.enums.internal import TreeSpecies
 from lukefi.metsi.data.model import ForestStand, ReferenceTree
 from lukefi.metsi.sim.collected_data import OpTuple
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 
 class ConverterTestSuite(unittest.TestCase):
     def run_with_test_assertions(self, assertions: list[tuple], fn: Callable):
@@ -39,7 +39,7 @@ def collecting_increment(input: OpTuple[int], **operation_params) -> OpTuple[int
     return state + incrementation, collected_data
 
 
-def inc(x: OperationPayload[int]) -> OperationPayload[int]:
+def inc(x: SimulationPayload[int]) -> SimulationPayload[int]:
     x.computational_unit += 1
     return x
 
@@ -56,7 +56,7 @@ def grow_dummy(f: float, d: float, h: float, dd: float) -> tuple[float, float, f
     return f-f%100, d+dd/500, h+dd/1000
 
 
-def parametrized_operation(x: OperationPayload[int], **kwargs) -> OperationPayload[int]:
+def parametrized_operation(x: SimulationPayload[int], **kwargs) -> SimulationPayload[int]:
     if kwargs.get('amplify') is True:
         x.computational_unit *= 1000
     return x
@@ -69,7 +69,7 @@ def parametrized_operation_using_file_parameter(x, **kwargs):
     else:
         return x
 
-def collect_results(payloads: list[OperationPayload]) -> list:
+def collect_results(payloads: list[SimulationPayload]) -> list:
     return list(map(lambda payload: payload.computational_unit, payloads))
 
 

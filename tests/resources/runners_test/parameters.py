@@ -1,14 +1,14 @@
-from lukefi.metsi.sim.event import Event
-from lukefi.metsi.sim.generators import Sequence, Treatment
+from lukefi.metsi.sim.simulation_instruction import SimulationInstruction
+from lukefi.metsi.sim.generators import Sequence, Event
 from tests.test_utils import collecting_increment
 
 
 control_structure = {
-    "simulation_events": [
-        Event(
+    "simulation_instructions": [
+        SimulationInstruction(
             time_points=[1, 2, 3, 4],
-            treatments=Sequence([
-                Treatment(collecting_increment, parameters={"incrementation": 2})
+            events=Sequence([
+                Event(collecting_increment, parameters={"incrementation": 2})
             ])
         )
     ]
