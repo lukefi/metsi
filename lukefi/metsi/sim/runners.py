@@ -1,8 +1,10 @@
 from collections.abc import Callable
 from copy import deepcopy
 from typing import TypeVar
+from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.app.utils import ConditionFailed
 from lukefi.metsi.data.layered_model import PossiblyLayered
+from lukefi.metsi.sim.collected_data import CollectedData
 from lukefi.metsi.sim.event_tree import EventTree
 from lukefi.metsi.sim.generators import Generator
 
@@ -13,7 +15,8 @@ from lukefi.metsi.sim.state_tree import StateTree
 T = TypeVar("T")
 
 Evaluator = Callable[[SimulationPayload[T], EventTree[T]], list[SimulationPayload[T]]]
-Runner = Callable[[SimulationPayload[T], SimConfiguration, Evaluator[T]], list[SimulationPayload[T]]]
+TreeRunner = Callable[[SimulationPayload[T], SimConfiguration, Evaluator[T]], list[SimulationPayload[T]]]
+Runner = Callable[[list[T], SimConfiguration[T], TreeRunner[T], Evaluator[T]], dict[str, list[SimulationPayload[T]]]]
 
 
 def evaluate_sequence(payload: T, *operations: Callable[[T], T]) -> T:
@@ -101,9 +104,27 @@ def run_partial_tree_strategy(payload: SimulationPayload[T], config: SimConfigur
 
     for time_point in config.time_points:
         root_node = root_nodes[time_point]
-        time_point_results: list[SimulationPayload] = []
+        time_point_results: list[SimulationPayload[T]] = []
         for payload_ in results:
             payload_results = evaluator(payload_, root_node)
             time_point_results.extend(payload_results)
         results = time_point_results
     return results
+
+
+def default_runner(units: list[T],
+                   config: SimConfiguration[T],
+                   formation_strategy: TreeRunner[T],
+                   evaluation_strategy: Evaluator[T]) -> dict[str, list[SimulationPayload[T]]]:
+    retval: dict[str, list[SimulationPayload[T]]] = {}
+    for i, unit in enumerate(units):
+        payload = SimulationPayload[T](
+            computational_unit=unit,
+            collected_data=CollectedData(initial_time_point=config.time_points[0]),
+            operation_history=[])
+
+        schedule_payloads = formation_strategy(payload, config, evaluation_strategy)
+
+        print_logline(f"Alternatives for unit {i}: {len(schedule_payloads)}")
+        retval[str(i)] = schedule_payloads
+    return retval
