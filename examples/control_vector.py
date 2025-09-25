@@ -31,7 +31,7 @@ control_structure = {
             }
         ]
     },
-    "simulation_events": [
+    "simulation_instructions": [
         SimulationInstruction(
             time_points=[2020],
             events=Sequence([

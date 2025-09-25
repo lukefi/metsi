@@ -76,7 +76,7 @@ control_structure = {
             }
         ]
     },
-    "simulation_events": [
+    "simulation_instructions": [
         SimulationInstruction(
             time_points=[2025, 2030, 2035],
             events=[
