@@ -20,6 +20,8 @@ from lukefi.metsi.data.enums.internal import (
 )
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
+from lukefi.metsi.sim.collected_data import OpTuple
+from lukefi.metsi.data.layered_model import PossiblyLayered
 
 def _species_to_motti(spe: int) -> int:
     """
@@ -70,11 +72,10 @@ def _spedom(stand) -> int:
             motti = _species_to_motti(int(t.species))
             per[motti] = per.get(motti, 0.0) + float(t.stems_per_ha or 0.0)
 
-    # 3) Choose top-1
     if not per:
-        raise ValueError(
-            "Cannot determine dominant species: all basal areas and stem counts are zero or missing."
-        )
+        return TreeSpecies.PINE
+
+    # 3) Choose top-1
     return max(per.items(), key=lambda kv: kv[1])[0]
 
 
@@ -114,7 +115,7 @@ def _resolve_shared_object(p: Union[str, Path]) -> Path:
 class MottiDLLPredictor:
     def __init__(
         self,
-        stand,
+        stand: PossiblyLayered[ForestStand],
         data_dir: Optional[str] = None,
         use_dll_species_convert: bool = True,
         use_dll_site_convert: bool = True,
@@ -237,7 +238,7 @@ def auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
 def species_to_motti(x: int) -> int:
     return _species_to_motti(x)
 
-def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters) -> Tuple["ForestStand", None]:
+def grow_motti_dll(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Evolves the stand by `step` years. If no predictor is provided and `data_dir` is None,
     this is treated as a no-op (DLL not available).
@@ -246,7 +247,7 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
     data_dir = operation_parameters.get("data_dir", None)
     predictor = operation_parameters.get("predictor", None)
 
-    stand, _ = input_
+    stand, collected_data = input_
 
     # If a predictor is supplied (e.g., from tests), use it, regardless of data_dir.
     if predictor is None:
@@ -283,4 +284,4 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
             stems.append(0.0)
 
     update_stand_growth(stand, diameters, heights, stems, step)
-    return stand, None
+    return stand, collected_data
