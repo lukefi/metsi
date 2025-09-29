@@ -178,7 +178,9 @@ class MottiDLLPredictorVec:
         if n == 0:
             # nothing to do; fake zeros in the same shape the caller expects
             return GrowthDeltas(tree_ids=[], trees_id=[], trees_ih=[], trees_if=[])
-
+        
+        rt.tree_number = np.arange(1, n + 1, dtype=rt.tree_number.dtype)
+        
         spedom = _spedom(self.stand.reference_trees_soa)
 
         # site (DLL converts site index if asked)
@@ -218,6 +220,7 @@ class MottiDLLPredictorVec:
 
         # Species conversion (raises on invalid)
         spe_vec = np.asarray([_species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
+
 
         # Build list[dict] for the DLL (fields used by wrapper)
         trees_py = [
