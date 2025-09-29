@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Dict, Union, Iterable
+from typing import Optional, Dict, Union, Iterable
 from pathlib import Path
 import numpy as np
 
@@ -12,6 +12,7 @@ from lukefi.metsi.data.enums.internal import (
     DECIDUOUS_SPECIES,
 )
 from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.vector_model import ReferenceTrees
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth_vectorized
 from lukefi.metsi.app.utils import MetsiException
 from lukefi.metsi.sim.collected_data import OpTuple
@@ -59,17 +60,16 @@ def auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
     return y1 / 1000.0, x1 / 1000.0
 
 
-def _spedom(stand: ForestStand) -> int | None:
+def _spedom(rt: ReferenceTrees) -> int | None:
     """
     Dominant species from SoA data (Motti species code).
     Prefer basal area totals; if BA totals are all zero/missing, fall back to stems/ha.
     """
-    if stand.reference_trees_soa is None:
-        raise MetsiException("Reference trees not vectorized")
-    rt = stand.reference_trees_soa
+    if rt is None:
+        return None
     n = rt.size
     if n == 0:
-        raise ValueError("No reference trees to determine dominant species.")
+        return None
 
     # Convert species to Motti codes (will raise if invalid)
     spe_codes = np.asarray([_species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
@@ -170,14 +170,16 @@ class MottiDLLPredictorVec:
 
     # ---- evolve ----
 
-    def evolve(self, step: int = 5) -> GrowthDeltas:
+    def evolve(self, step: int = 5, sim_year: int = 0) -> GrowthDeltas:
         rt = self.stand.reference_trees_soa
+        if not rt:
+            return GrowthDeltas(tree_ids=[], trees_id=[], trees_ih=[], trees_if=[])
         n = rt.size
         if n == 0:
             # nothing to do; fake zeros in the same shape the caller expects
             return GrowthDeltas(tree_ids=[], trees_id=[], trees_ih=[], trees_if=[])
 
-        spedom = _spedom(self.stand)
+        spedom = _spedom(self.stand.reference_trees_soa)
 
         # site (DLL converts site index if asked)
         y_km, x_km = auto_euref_km(self.get_y, self.get_x)
@@ -192,7 +194,7 @@ class MottiDLLPredictorVec:
             verl=self.verl,
             verlt=self.verlt,
             alr=self.alr,
-            year=self.year,
+            year=sim_year,
             step=step,
             convert_mela_site=self.use_dll_site_convert,
             spedom=spedom,
@@ -294,6 +296,8 @@ def grow_motti_dll_vec(input_: OpTuple[ForestStand], /, **operation_parameters) 
       - data_dir: path to folder/file for the Motti DLL (required unless a predictor is injected)
       - predictor: optional injected Motti4DLL wrapper (testing)
     """
+
+    sim_year = input_[1].current_time_point or stand.year
     step = int(operation_parameters.get("step", 5))
     data_dir = operation_parameters.get("data_dir", None)
     predictor = operation_parameters.get("predictor", None)
@@ -310,11 +314,11 @@ def grow_motti_dll_vec(input_: OpTuple[ForestStand], /, **operation_parameters) 
     if predictor is None:
         if data_dir is None:
             raise ModuleNotFoundError("data_dir must be provided (directory containing the Motti library).")
-        pred = MottiDLLPredictorVec(stand, data_dir=data_dir)
+        pred = MottiDLLPredictorVec(stand, data_dir= data_dir)
     else:
         pred = predictor
 
-    growth = pred.evolve(step=step)
+    growth = pred.evolve(step= step, sim_year= sim_year)
 
     # Map deltas by returned IDs (subset of original if deaths occurred)
     id_to_delta_d = {int(i): float(d) for i, d in zip(growth.tree_ids, growth.trees_id)}
@@ -345,10 +349,5 @@ def grow_motti_dll_vec(input_: OpTuple[ForestStand], /, **operation_parameters) 
 
     # Apply vectorized update (also advances ages etc. inside util)
     update_stand_growth_vectorized(stand, d_new, h_new, f_new, step)
-
-    # Prune trees with stems < 1.0 (consistent with other vector wrappers)
-    to_delete = np.nonzero(f_new < 1.0)[0]
-    if to_delete.size > 0 and stand.reference_trees_soa is not None:
-        stand.reference_trees_soa.delete(to_delete.tolist())
 
     return stand, collected_data
