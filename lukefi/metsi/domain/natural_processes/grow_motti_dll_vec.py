@@ -66,10 +66,10 @@ def _spedom(rt: ReferenceTrees) -> int | None:
     Prefer basal area totals; if BA totals are all zero/missing, fall back to stems/ha.
     """
     if rt is None:
-        return None
+        return TreeSpecies.PINE
     n = rt.size
     if n == 0:
-        return None
+        return TreeSpecies.PINE
 
     # Convert species to Motti codes (will raise if invalid)
     spe_codes = np.asarray([_species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
@@ -92,7 +92,7 @@ def _spedom(rt: ReferenceTrees) -> int | None:
             per[code] = per.get(code, 0.0) + float(stems)
 
     if not per:
-        return None
+        return TreeSpecies.PINE
 
     return max(per.items(), key=lambda kv: kv[1])[0]
 
