@@ -23,29 +23,6 @@ from lukefi.metsi.domain.natural_processes.util import update_stand_growth
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.data.layered_model import PossiblyLayered
 
-def _species_to_motti(spe: int | None) -> int:
-    """
-    Map internal TreeSpecies -> Motti species codes directly.
-    - Keep main species 1..5 as-is
-    - Collapse both alders (GREY_ALDER, COMMON_ALDER) to 6
-    - If in CONIFEROUS_SPECIES -> 8
-    - If in DECIDUOUS_SPECIES -> 9
-    """
-    if not spe:
-        return TreeSpecies.PINE
-    ts = TreeSpecies(int(spe))
-    if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
-              TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
-              TreeSpecies.ASPEN):
-        return int(ts)
-    if ts in (TreeSpecies.GREY_ALDER, TreeSpecies.COMMON_ALDER):
-        return int(TreeSpecies.GREY_ALDER)  # Motti uses a single Alder code (6)
-    if ts in CONIFEROUS_SPECIES:
-        return int(TreeSpecies.OTHER_CONIFEROUS)  # 8
-    if ts in DECIDUOUS_SPECIES:
-        return int(TreeSpecies.OTHER_DECIDUOUS)  # 9
-
-    raise ValueError(f"Unsupported tree species code: {int(spe)}")
 
 def _spedom(stand) -> int:
     """
@@ -60,7 +37,7 @@ def _spedom(stand) -> int:
     if use_basal:
         # group BA by Motti species code
         for t in stand.reference_trees:
-            motti = _species_to_motti(int(t.species))
+            motti = species_to_motti(int(t.species))
             per[motti] = per.get(motti, 0.0) + float(calculate_basal_area(t) or 0.0)
 
         # if everything was zero (e.g., no diameters), fall back to stems
@@ -71,7 +48,7 @@ def _spedom(stand) -> int:
     # 2) Fallback: stems/ha
     if not use_basal:
         for t in stand.reference_trees:
-            motti = _species_to_motti(int(t.species))
+            motti = species_to_motti(int(t.species))
             per[motti] = per.get(motti, 0.0) + float(t.stems_per_ha or 0.0)
 
     if not per:
@@ -205,7 +182,7 @@ class MottiDLLPredictor:
         trees = []
         for idx, t in enumerate(self.stand.reference_trees):
 
-            spe = _species_to_motti(int(t.species or 0))
+            spe = species_to_motti(int(t.species or 0))
 
             tid = int((getattr(t, "tree_number", None) or (idx + 1)))
             trees.append({
@@ -267,8 +244,29 @@ def auto_euref_km(y1: float | None, x1: float | None) -> tuple[float, float]:
     return y1 / 1000.0, x1 / 1000.0
 
 
-def species_to_motti(x: int) -> int:
-    return _species_to_motti(x)
+def species_to_motti(spe: int | None) -> int:
+    """
+    Map internal TreeSpecies -> Motti species codes directly.
+    - Keep main species 1..5 as-is
+    - Collapse both alders (GREY_ALDER, COMMON_ALDER) to 6
+    - If in CONIFEROUS_SPECIES -> 8
+    - If in DECIDUOUS_SPECIES -> 9
+    """
+    if not spe:
+        return TreeSpecies.PINE
+    ts = TreeSpecies(int(spe))
+    if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
+              TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
+              TreeSpecies.ASPEN):
+        return int(ts)
+    if ts in (TreeSpecies.GREY_ALDER, TreeSpecies.COMMON_ALDER):
+        return int(TreeSpecies.GREY_ALDER)  # Motti uses a single Alder code (6)
+    if ts in CONIFEROUS_SPECIES:
+        return int(TreeSpecies.OTHER_CONIFEROUS)  # 8
+    if ts in DECIDUOUS_SPECIES:
+        return int(TreeSpecies.OTHER_DECIDUOUS)  # 9
+
+    raise ValueError(f"Unsupported tree species code: {int(spe)}")
 
 def grow_motti_dll(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """

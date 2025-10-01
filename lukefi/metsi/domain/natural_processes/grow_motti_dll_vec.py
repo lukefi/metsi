@@ -18,29 +18,6 @@ from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.data.layered_model import PossiblyLayered
 
 
-def _species_to_motti(spe: int) -> int:
-    """
-    Map internal TreeSpecies -> Motti species codes directly.
-    - Keep main species 1..5 as-is
-    - Collapse both alders (GREY_ALDER, COMMON_ALDER) to 6
-    - If in CONIFEROUS_SPECIES -> 8
-    - If in DECIDUOUS_SPECIES -> 9
-    """
-    ts = TreeSpecies(int(spe))
-    if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
-              TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
-              TreeSpecies.ASPEN):
-        return int(ts)
-    if ts in (TreeSpecies.GREY_ALDER, TreeSpecies.COMMON_ALDER):
-        return int(TreeSpecies.GREY_ALDER)  # Motti uses a single Alder code (6)
-    if ts in CONIFEROUS_SPECIES:
-        return int(TreeSpecies.OTHER_CONIFEROUS)  # 8
-    if ts in DECIDUOUS_SPECIES:
-        return int(TreeSpecies.OTHER_DECIDUOUS)  # 9
-
-    raise ValueError(f"Unsupported tree species code: {int(spe)}")
-
-
 def auto_euref_km(y1: float | None, x1: float | None) -> tuple[float, float]:
     """
     Normalize to EUREF-FIN/TM35FIN kilometers.
@@ -73,7 +50,7 @@ def _spedom(rt: ReferenceTrees | Any | None) -> int:
         return TreeSpecies.PINE
 
     # Convert species to Motti codes (will raise if invalid)
-    spe_codes = np.asarray([_species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
+    spe_codes = np.asarray([species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
 
     # Basal area per tree: stems_per_ha * π * (0.5 * d_cm * 0.01 m/cm)^2
     d_cm = np.nan_to_num(rt.breast_height_diameter, nan=0.0)
@@ -237,7 +214,7 @@ class MottiDLLPredictorVec:
         origin = np.nan_to_num(getattr(rt, "origin", np.zeros(n, dtype=float)), nan=0.0)
 
         # Species conversion (raises on invalid)
-        spe_vec = np.asarray([_species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
+        spe_vec = np.asarray([species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
 
 
         # Build list[dict] for the DLL (fields used by wrapper)
@@ -302,8 +279,27 @@ def _resolve_shared_object(p: Union[str, Path]) -> Path:
 
 # -------- public API --------
 
-def species_to_motti(x: int) -> int:
-    return _species_to_motti(x)
+def species_to_motti(spe: int) -> int:
+    """
+    Map internal TreeSpecies -> Motti species codes directly.
+    - Keep main species 1..5 as-is
+    - Collapse both alders (GREY_ALDER, COMMON_ALDER) to 6
+    - If in CONIFEROUS_SPECIES -> 8
+    - If in DECIDUOUS_SPECIES -> 9
+    """
+    ts = TreeSpecies(int(spe))
+    if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
+              TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
+              TreeSpecies.ASPEN):
+        return int(ts)
+    if ts in (TreeSpecies.GREY_ALDER, TreeSpecies.COMMON_ALDER):
+        return int(TreeSpecies.GREY_ALDER)  # Motti uses a single Alder code (6)
+    if ts in CONIFEROUS_SPECIES:
+        return int(TreeSpecies.OTHER_CONIFEROUS)  # 8
+    if ts in DECIDUOUS_SPECIES:
+        return int(TreeSpecies.OTHER_DECIDUOUS)  # 9
+
+    raise ValueError(f"Unsupported tree species code: {int(spe)}")
 
 
 def grow_motti_dll_vec(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
