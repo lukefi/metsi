@@ -23,7 +23,7 @@ from lukefi.metsi.domain.natural_processes.util import update_stand_growth
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.data.layered_model import PossiblyLayered
 
-def _species_to_motti(spe: int) -> int:
+def _species_to_motti(spe: int | None) -> int:
     """
     Map internal TreeSpecies -> Motti species codes directly.
     - Keep main species 1..5 as-is
@@ -31,6 +31,8 @@ def _species_to_motti(spe: int) -> int:
     - If in CONIFEROUS_SPECIES -> 8
     - If in DECIDUOUS_SPECIES -> 9
     """
+    if not spe:
+        return TreeSpecies.PINE
     ts = TreeSpecies(int(spe))
     if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
               TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
@@ -137,46 +139,74 @@ class MottiDLLPredictor:
         self.use_dll_site_convert = use_dll_site_convert
 
     @property
-    def year(self) -> Optional[float]:
-        return getattr(self.stand, "year", None) or 2010.0
+    def year(self) -> float:
+        y = getattr(self.stand, "year", None)
+        return float(y) if y is not None else 2010.0
+
     @property
-    def get_y(self) -> float:
-        return self.stand.geo_location[0]
+    def get_y(self) -> float | None:
+        if self.stand and self.stand.geo_location:
+            return self.stand.geo_location[0]
+        return None
+
     @property
-    def get_x(self) -> float:
-        return self.stand.geo_location[1]
+    def get_x(self) -> float | None:
+        if self.stand and self.stand.geo_location:
+            return self.stand.geo_location[1]
+        return None
+
     @property
     def get_z(self) -> float:
-        z = self.stand.geo_location[2]
-        return float(z if z not in (None, 0.0) else -1.0)  # let DLL infer if missing
+        if self.stand and self.stand.geo_location:
+            z = self.stand.geo_location[2]
+            if z is None or z == 0.0:
+                return -1.0
+            return float(z)
+        return -1.0
+
     @property
     def lake(self) -> float:
-        return getattr(self.stand, "lake_effect", 0.0)
+        v = getattr(self.stand, "lake_effect", 0.0)
+        return float(v if v is not None else 0.0)
+
     @property
     def sea(self) -> float:
-        return getattr(self.stand, "sea_effect", 0.0)
+        v = getattr(self.stand, "sea_effect", 0.0)
+        return float(v if v is not None else 0.0)
+
     @property
     def mal(self) -> int:
-        return int(self.stand.land_use_category)
+        luc = getattr(self.stand, "land_use_category", None)
+        return int(luc.value) if luc is not None else 0
+
     @property
     def mty(self) -> int:
-        return int(self.stand.site_type_category)
+        st = getattr(self.stand, "site_type_category", None)
+        return int(st.value) if st is not None else 0
+
     @property
     def alr(self) -> int:
-        return int(self.stand.soil_peatland_category)
+        s = getattr(self.stand, "soil_peatland_category", None)
+        return int(s.value) if s is not None else 0
+
     @property
     def verl(self) -> int:
-        return int(self.stand.tax_class)
+        v = getattr(self.stand, "tax_class", None)
+        return int(v) if v is not None else 0
+
     @property
     def verlt(self) -> int:
-        return int(self.stand.tax_class_reduction)
+        v = getattr(self.stand, "tax_class_reduction", None)
+        return int(v) if v is not None else 0
+
 
     @cached_property
     def _trees_py(self) -> list[dict]:
         trees = []
         for idx, t in enumerate(self.stand.reference_trees):
 
-            spe = _species_to_motti(int(t.species))
+            spe = _species_to_motti(int(t.species or 0))
+
             tid = int((getattr(t, "tree_number", None) or (idx + 1)))
             trees.append({
                 "id": tid,
@@ -217,12 +247,14 @@ class MottiDLLPredictor:
 
 
 
-def auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
+def auto_euref_km(y1: float | None, x1: float | None) -> tuple[float, float]:
     """
     Normalize to EUREF-FIN/TM35FIN kilometers.
     Input is expected to be in meters
     - Raise if values look like lat/long.
     """
+    if not y1 or not x1:
+        return 0.0, 0.0
     abs_y, abs_x = abs(y1), abs(x1)
 
     # Clear lat/long guard

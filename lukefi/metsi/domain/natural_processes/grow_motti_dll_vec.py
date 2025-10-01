@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Union, Iterable
+from typing import Any, Optional, Dict, Union, Iterable
 from pathlib import Path
 import numpy as np
 
@@ -14,7 +14,6 @@ from lukefi.metsi.data.enums.internal import (
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.vector_model import ReferenceTrees
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth_vectorized
-from lukefi.metsi.app.utils import MetsiException
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.data.layered_model import PossiblyLayered
 
@@ -42,12 +41,14 @@ def _species_to_motti(spe: int) -> int:
     raise ValueError(f"Unsupported tree species code: {int(spe)}")
 
 
-def auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
+def auto_euref_km(y1: float | None, x1: float | None) -> tuple[float, float]:
     """
     Normalize to EUREF-FIN/TM35FIN kilometers.
     Input is expected to be in meters
     - Raise if values look like lat/long.
     """
+    if not y1 or not x1:
+        return (0.0, 0.0)
     abs_y, abs_x = abs(y1), abs(x1)
 
     # Clear lat/long guard
@@ -60,7 +61,7 @@ def auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
     return y1 / 1000.0, x1 / 1000.0
 
 
-def _spedom(rt: ReferenceTrees) -> int | None:
+def _spedom(rt: ReferenceTrees | Any | None) -> int:
     """
     Dominant species from SoA data (Motti species code).
     Prefer basal area totals; if BA totals are all zero/missing, fall back to stems/ha.
@@ -125,48 +126,65 @@ class MottiDLLPredictorVec:
     # ---- stand/site properties ----
     @property
     def year(self) -> float:
-        return float(getattr(self.stand, "year", None) or 2010.0)
+        y = getattr(self.stand, "year", None)
+        return float(y) if y is not None else 2010.0
 
     @property
-    def get_y(self) -> float:
-        return float(self.stand.geo_location[0])
+    def get_y(self) -> float | None:
+        if self.stand and self.stand.geo_location:
+            return self.stand.geo_location[0]
+        return None
 
     @property
-    def get_x(self) -> float:
-        return float(self.stand.geo_location[1])
+    def get_x(self) -> float | None:
+        if self.stand and self.stand.geo_location:
+            return self.stand.geo_location[1]
+        return None
+
 
     @property
     def get_z(self) -> float:
-        z = self.stand.geo_location[2]
-        return float(z if z not in (None, 0.0) else -1.0)  # let DLL infer if missing
+        if self.stand and self.stand.geo_location:
+            z = self.stand.geo_location[2]
+            if z is None or z == 0.0:
+                return -1.0
+            return float(z)
+        return -1.0
 
     @property
     def lake(self) -> float:
-        return float(getattr(self.stand, "lake_effect", 0.0) or 0.0)
+        v = getattr(self.stand, "lake_effect", 0.0)
+        return float(v if v is not None else 0.0)
 
     @property
     def sea(self) -> float:
-        return float(getattr(self.stand, "sea_effect", 0.0) or 0.0)
+        v = getattr(self.stand, "sea_effect", 0.0)
+        return float(v if v is not None else 0.0)
 
     @property
     def mal(self) -> int:
-        return int(self.stand.land_use_category)
+        luc = getattr(self.stand, "land_use_category", None)
+        return int(luc.value) if luc is not None else 0
 
     @property
     def mty(self) -> int:
-        return int(self.stand.site_type_category)
+        st = getattr(self.stand, "site_type_category", None)
+        return int(st.value) if st is not None else 0
 
     @property
     def alr(self) -> int:
-        return int(self.stand.soil_peatland_category)
+        s = getattr(self.stand, "soil_peatland_category", None)
+        return int(s.value) if s is not None else 0
 
     @property
     def verl(self) -> int:
-        return int(self.stand.tax_class)
+        v = getattr(self.stand, "tax_class", None)
+        return int(v) if v is not None else 0
 
     @property
     def verlt(self) -> int:
-        return int(self.stand.tax_class_reduction)
+        v = getattr(self.stand, "tax_class_reduction", None)
+        return int(v) if v is not None else 0
 
     # ---- evolve ----
 
@@ -178,9 +196,9 @@ class MottiDLLPredictorVec:
         if n == 0:
             # nothing to do; fake zeros in the same shape the caller expects
             return GrowthDeltas(tree_ids=[], trees_id=[], trees_ih=[], trees_if=[])
-        
+
         rt.tree_number = np.arange(1, n + 1, dtype=rt.tree_number.dtype)
-        
+
         spedom = _spedom(self.stand.reference_trees_soa)
 
         # site (DLL converts site index if asked)
@@ -300,12 +318,14 @@ def grow_motti_dll_vec(input_: OpTuple[ForestStand], /, **operation_parameters) 
       - predictor: optional injected Motti4DLL wrapper (testing)
     """
 
-    sim_year = input_[1].current_time_point or stand.year
     step = int(operation_parameters.get("step", 5))
     data_dir = operation_parameters.get("data_dir", None)
     predictor = operation_parameters.get("predictor", None)
 
     stand, collected_data = input_
+
+    sim_year: int = int(collected_data.current_time_point if collected_data.current_time_point is not None
+                        else (stand.year or 0))
 
     rt = stand.reference_trees_soa
     if rt is None:
