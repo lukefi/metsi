@@ -1,8 +1,9 @@
-from lukefi.metsi.app.app_types import ForestCondition, ForestOpPayload
+from lukefi.metsi.domain.forestry_types import ForestCondition
+from lukefi.metsi.domain.forestry_types import ForestOpPayload
 from lukefi.metsi.domain.pre_ops import generate_reference_trees, preproc_filter, scale_area_weight
-from lukefi.metsi.domain.treatments import GrowActa
-from lukefi.metsi.sim.event import Event
-from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment
+from lukefi.metsi.domain.events import GrowActa
+from lukefi.metsi.sim.simulation_instruction import SimulationInstruction
+from lukefi.metsi.sim.generators import Alternatives, Sequence, Event
 
 
 def do_a_thing(x):
@@ -32,15 +33,17 @@ def second_condition_check(t: int, x: ForestOpPayload):
     return True
 
 
-def third_condition_check(t: int, x: ForestOpPayload):
+# Conditions can be created by wrapping a predicate function:
+first_condition = ForestCondition(first_condition_check)
+second_condition = ForestCondition(second_condition_check)
+
+
+# Conditions can also be created with the decorator syntax:
+@ForestCondition
+def third_condition(t: int, x: ForestOpPayload):
     # Some complex condition check here.
     _, _ = t, x
     return True
-
-
-first_condition = ForestCondition(first_condition_check)
-second_condition = ForestCondition(second_condition_check)
-third_condition = ForestCondition(third_condition_check)
 
 
 control_structure = {
@@ -73,34 +76,34 @@ control_structure = {
             }
         ]
     },
-    "simulation_events": [
-        Event(
+    "simulation_instructions": [
+        SimulationInstruction(
             time_points=[2025, 2030, 2035],
-            treatments=[
+            events=[
                 Sequence([
                     Alternatives([
-                        Treatment(do_a_thing,
-                                  preconditions=[
-                                      # Conditions can be combined with | and & operators.
-                                      # Here do_a_thing will be performed if the year is 2025 or any time that the last
-                                      # cutting method was 1.
-                                      ForestCondition(lambda t, _: t == 2025) |
-                                      ForestCondition(lambda _, x: x.computational_unit.method_of_last_cutting == 1)
-                                  ]),
-                        Treatment(do_another_thing,
-                                  preconditions=[
-                                      # Combined conditions can also be expressed with just one lambda:.
-                                      # This time do_another_thing will be performed the year 2030 for all non-auxiliary
-                                      # stands.
-                                      ForestCondition(
-                                          lambda t, x: (t == 2030) and (not x.computational_unit.auxiliary_stand))
-                                  ]),
-                        Treatment(do_yet_another_thing,
-                                  # More complex conditions can be formulated in separate modules, such as pre-made
-                                  # libraries, and combined freely in non-trivial ways.
-                                  preconditions=[
-                                      (first_condition & second_condition) | (third_condition)
-                                  ])
+                        Event(do_a_thing,
+                              preconditions=[
+                                  # Conditions can be combined with | and & operators.
+                                  # Here do_a_thing will be performed if the year is 2025 or any time that the last
+                                  # cutting method was 1.
+                                  ForestCondition(lambda t, _: t == 2025) |
+                                  ForestCondition(lambda _, x: x.computational_unit.method_of_last_cutting == 1)
+                              ]),
+                        Event(do_another_thing,
+                              preconditions=[
+                                  # Combined conditions can also be expressed with just one lambda:.
+                                  # This time do_another_thing will be performed the year 2030 for all non-auxiliary
+                                  # stands.
+                                  ForestCondition(
+                                      lambda t, x: (t == 2030) and (not x.computational_unit.auxiliary_stand))
+                              ]),
+                        Event(do_yet_another_thing,
+                              # More complex conditions can be formulated in separate modules, such as pre-made
+                              # libraries, and combined freely in non-trivial ways.
+                              preconditions=[
+                                  (first_condition & second_condition) | (third_condition)
+                              ])
                     ]),
                     GrowActa()
                 ])

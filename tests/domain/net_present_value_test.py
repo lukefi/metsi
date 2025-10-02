@@ -43,7 +43,7 @@ class NPVTest(unittest.TestCase):
     def test_npv_of_untouched_stand_equals_bare_land_value_discounted_to_year_151(self):
         collected_data = CollectedData(
             # no operations have been done for the stand
-            operation_results={},
+            treatment_results={},
         )
         actual = npv._calculate_npv_for_rate(self.stand, collected_data, self.land_values, self.renewal_costs, self.default_rate)
         expected = npv._get_bare_land_value(
@@ -57,7 +57,7 @@ class NPVTest(unittest.TestCase):
 
     def test_npv_of_cross_cut_stand_equals_the_discounted_timber_value_plus_bare_land_value(self):
         collected_data = CollectedData(
-            operation_results={
+            treatment_results={
                 "cross_cutting": [
                     CrossCutResult(
                         species=TreeSpecies.PINE,
@@ -80,7 +80,7 @@ class NPVTest(unittest.TestCase):
 
     def test_npv_of_cross_cut_and_planted_stand_equals_the_discounted_timber_value_minus_planting_cost_plus_bare_land_value(self):
         collected_data = CollectedData(
-            operation_results={
+            treatment_results={
                 "cross_cutting": [
                     CrossCutResult(
                         species=TreeSpecies.PINE,
@@ -109,7 +109,7 @@ class NPVTest(unittest.TestCase):
 
     def test_calculate_npv_only_considers_standing_trees_cross_cut_results_from_the_present_time(self):
         collected_data = CollectedData(
-            operation_results={
+            treatment_results={
                 "cross_cutting": [
                     #this 'standing_trees' result should not be considered, since it's been done at time point 0, and the current time point is 5
                     CrossCutResult(

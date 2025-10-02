@@ -2,10 +2,10 @@ from typing import Callable
 import unittest
 from lukefi.metsi.domain.conditions import MinimumTimeInterval
 from lukefi.metsi.sim.collected_data import CollectedData
-from lukefi.metsi.sim.event import Event
-import lukefi.metsi.sim.generators
-from lukefi.metsi.sim.generators import Alternatives, Sequence, Treatment
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.operations import simple_processable_chain
+from lukefi.metsi.sim.simulation_instruction import SimulationInstruction
+from lukefi.metsi.sim.generators import Alternatives, Sequence, Event
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 from lukefi.metsi.sim.runners import evaluate_sequence as run_sequence, evaluate_sequence
 from lukefi.metsi.sim.sim_configuration import SimConfiguration
 from tests.test_utils import inc, collecting_increment, parametrized_operation
@@ -14,15 +14,15 @@ from tests.test_utils import inc, collecting_increment, parametrized_operation
 class TestGenerators(unittest.TestCase):
     def test_yaml_declaration(self):
         declaration = {
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[0, 1],
-                    treatments=Sequence([
-                        Treatment(
-                            treatment_fn=collecting_increment
+                    events=Sequence([
+                        Event(
+                            treatment=collecting_increment
                         ),
-                        Treatment(
-                            treatment_fn=collecting_increment
+                        Event(
+                            treatment=collecting_increment
                         ),
                     ])
                 )
@@ -32,7 +32,7 @@ class TestGenerators(unittest.TestCase):
         generator = config.full_tree_generators()
         result = generator.compose_nested()
         chain = result.operation_chains()[0]
-        payload = OperationPayload(
+        payload = SimulationPayload(
             computational_unit=0,
             collected_data=CollectedData(),
             operation_history=[]
@@ -43,15 +43,15 @@ class TestGenerators(unittest.TestCase):
 
     def test_operation_run_constraints_success(self):
         declaration = {
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[1, 3],
-                    treatments=Sequence([
-                        Treatment(
+                    events=Sequence([
+                        Event(
                             preconditions=[
                                 MinimumTimeInterval(2, collecting_increment)
                             ],
-                            treatment_fn=collecting_increment
+                            treatment=collecting_increment
                         )
                     ])
                 )
@@ -61,7 +61,7 @@ class TestGenerators(unittest.TestCase):
         generator = config.full_tree_generators()
         result = generator.compose_nested()
         chain = result.operation_chains()[0]
-        payload = OperationPayload(
+        payload = SimulationPayload(
             computational_unit=0,
             collected_data=CollectedData(),
             operation_history=[]
@@ -72,21 +72,21 @@ class TestGenerators(unittest.TestCase):
 
     def test_operation_run_constraints_fail(self):
         declaration = {
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[1, 3],
-                    treatments=Sequence([
-                        Treatment(
+                    events=Sequence([
+                        Event(
                             preconditions=[
                                 MinimumTimeInterval(2, inc)
                             ],
-                            treatment_fn=inc
+                            treatment=inc
                         ),
-                        Treatment(
+                        Event(
                             preconditions=[
                                 MinimumTimeInterval(2, inc)
                             ],
-                            treatment_fn=inc
+                            treatment=inc
                         )
                     ])
                 )
@@ -96,21 +96,21 @@ class TestGenerators(unittest.TestCase):
         generator = config.full_tree_generators()
         result = generator.compose_nested()
         chain = result.operation_chains()[0]
-        payload = OperationPayload(computational_unit=0,
+        payload = SimulationPayload(computational_unit=0,
                                    operation_history=[],
                                    collected_data=CollectedData())
         self.assertRaises(Exception, run_sequence, payload, *chain)
 
     def test_tree_generators_by_time_point(self):
         declaration = {
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[0, 1],
-                    treatments=Sequence([
-                        Treatment(
+                    events=Sequence([
+                        Event(
                             inc
                         ),
-                        Treatment(
+                        Event(
                             inc
                         )
                     ])
@@ -141,35 +141,35 @@ class TestGenerators(unittest.TestCase):
         """Create a nested generators event tree. Use simple incrementation operation with starting value 0. Sequences
         and alternatives result in 4 branches with separately incremented values."""
         declaration = {
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[0],
-                    treatments=Sequence([
-                        Treatment(collecting_increment),
+                    events=Sequence([
+                        Event(collecting_increment),
                         Sequence([
-                            Treatment(collecting_increment)
+                            Event(collecting_increment)
                         ]),
                         Alternatives([
-                            Treatment(collecting_increment),
+                            Event(collecting_increment),
                             Sequence([
-                                Treatment(collecting_increment),
+                                Event(collecting_increment),
                                 Alternatives([
-                                    Treatment(collecting_increment),
+                                    Event(collecting_increment),
                                     Sequence([
-                                        Treatment(collecting_increment),
-                                        Treatment(collecting_increment)
+                                        Event(collecting_increment),
+                                        Event(collecting_increment)
                                     ])
                                 ])
                             ]),
                             Sequence([
-                                Treatment(collecting_increment),
-                                Treatment(collecting_increment),
-                                Treatment(collecting_increment),
-                                Treatment(collecting_increment)
+                                Event(collecting_increment),
+                                Event(collecting_increment),
+                                Event(collecting_increment),
+                                Event(collecting_increment)
                             ])
                         ]),
-                        Treatment(collecting_increment),
-                        Treatment(collecting_increment)
+                        Event(collecting_increment),
+                        Event(collecting_increment)
                     ])
                 )
             ]
@@ -185,7 +185,7 @@ class TestGenerators(unittest.TestCase):
 
         for chain in chains:
             value = evaluate_sequence(
-                OperationPayload(
+                SimulationPayload(
                     computational_unit=0,
                     operation_history=[],
                     collected_data=CollectedData()),
@@ -212,23 +212,23 @@ class TestGenerators(unittest.TestCase):
                     {"incrementation": 3}
                 ]
             },
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[0],
-                    treatments=Sequence([
-                        Treatment(increment),
+                    events=Sequence([
+                        Event(increment),
                         Alternatives([
                             Sequence([
-                                Treatment(increment)
+                                Event(increment)
                             ]),
                             Alternatives([
-                                Treatment(
+                                Event(
                                     inc_param,
                                     parameters={
                                         "incrementation": 2
                                     }
                                 ),
-                                Treatment(
+                                Event(
                                     inc_param,
                                     parameters={
                                         "incrementation": 3
@@ -237,7 +237,7 @@ class TestGenerators(unittest.TestCase):
 
                             ]),
                         ]),
-                        Treatment(increment)
+                        Event(increment)
                     ])
                 )
             ]
@@ -253,7 +253,7 @@ class TestGenerators(unittest.TestCase):
 
         for chain in chains:
             value = evaluate_sequence(
-                OperationPayload(
+                SimulationPayload(
                     computational_unit=0,
                     operation_history=[],
                     collected_data=CollectedData()),
@@ -270,44 +270,44 @@ class TestGenerators(unittest.TestCase):
         sequences with single operations nested in alternatives.
         """
         declaration_one = {
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[0],
-                    treatments=Sequence([
-                        Treatment(collecting_increment),
+                    events=Sequence([
+                        Event(collecting_increment),
                         Alternatives([
                             Alternatives([
-                                Treatment(collecting_increment),
-                                Treatment(collecting_increment)
+                                Event(collecting_increment),
+                                Event(collecting_increment)
                             ]),
                             Sequence([
-                                Treatment(collecting_increment),
-                                Treatment(collecting_increment)
+                                Event(collecting_increment),
+                                Event(collecting_increment)
                             ]),
                             Alternatives([
-                                Treatment(collecting_increment),
-                                Treatment(collecting_increment)
+                                Event(collecting_increment),
+                                Event(collecting_increment)
                             ])
                         ]),
-                        Treatment(collecting_increment)
+                        Event(collecting_increment)
                     ])
                 )
             ]
         }
         declaration_two = {
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[0],
-                    treatments=Sequence([
-                        Treatment(collecting_increment),
+                    events=Sequence([
+                        Event(collecting_increment),
                         Alternatives([
-                            Sequence([Treatment(collecting_increment)]),
-                            Sequence([Treatment(collecting_increment)]),
-                            Sequence([Treatment(collecting_increment), Treatment(collecting_increment)]),
-                            Sequence([Treatment(collecting_increment)]),
-                            Sequence([Treatment(collecting_increment)])
+                            Sequence([Event(collecting_increment)]),
+                            Sequence([Event(collecting_increment)]),
+                            Sequence([Event(collecting_increment), Event(collecting_increment)]),
+                            Sequence([Event(collecting_increment)]),
+                            Sequence([Event(collecting_increment)])
                         ]),
-                        Treatment(collecting_increment)
+                        Event(collecting_increment)
                     ])
                 )
             ]
@@ -324,7 +324,7 @@ class TestGenerators(unittest.TestCase):
         for i, chains in enumerate(chains_sets):
             for chain in chains:
                 value = evaluate_sequence(
-                    OperationPayload(
+                    SimulationPayload(
                         computational_unit=0,
                         operation_history=[],
                         collected_data=CollectedData()),
@@ -336,10 +336,10 @@ class TestGenerators(unittest.TestCase):
     def test_simple_processable_chain(self):
         operation_tags: list[Callable] = [inc, inc, inc, parametrized_operation]
         operation_params = {parametrized_operation: [{'amplify': True}]}
-        chain = lukefi.metsi.sim.generators.simple_processable_chain(operation_tags,
+        chain = simple_processable_chain(operation_tags,
                                                                      operation_params)
         self.assertEqual(len(operation_tags), len(chain))
-        result = evaluate_sequence(OperationPayload(computational_unit=1,
+        result = evaluate_sequence(SimulationPayload(computational_unit=1,
                                                     collected_data=None,
                                                     operation_history={}), *chain)
         self.assertEqual(4000, result.computational_unit)
@@ -349,33 +349,33 @@ class TestGenerators(unittest.TestCase):
         operation_params = {'param_oper': [{'amplify': True}, {'kissa123': 123}]}
         operation_lookup = {'param_oper': parametrized_operation}
         self.assertRaises(Exception,
-                          lukefi.metsi.sim.generators.simple_processable_chain,
+                          simple_processable_chain,
                           operation_tags,
                           operation_params,
                           operation_lookup)
 
     def test_generate_time_series(self):
         declaration = {
-            "simulation_events": [
-                Event(
+            "simulation_instructions": [
+                SimulationInstruction(
                     time_points=[0, 1, 4, 100, 1000, 8, 9],
-                    treatments=Sequence([
-                        Treatment(inc),
-                        Treatment(inc)
+                    events=Sequence([
+                        Event(inc),
+                        Event(inc)
                     ])
                 ),
-                Event(
+                SimulationInstruction(
                     time_points=[9, 8],
-                    treatments=Sequence([
-                        Treatment(inc),
-                        Treatment(inc)
+                    events=Sequence([
+                        Event(inc),
+                        Event(inc)
                     ])
                 ),
-                Event(
+                SimulationInstruction(
                     time_points=[4, 6, 10, 12],
-                    treatments=Sequence([
-                        Treatment(inc),
-                        Treatment(inc)
+                    events=Sequence([
+                        Event(inc),
+                        Event(inc)
                     ])
                 )
             ]

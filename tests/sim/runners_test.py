@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 from lukefi.metsi.sim.collected_data import CollectedData
-from lukefi.metsi.sim.operation_payload import OperationPayload
+from lukefi.metsi.sim.simulation_payload import SimulationPayload
 from lukefi.metsi.sim.runners import evaluate_sequence, run_full_tree_strategy, run_partial_tree_strategy, \
     chain_evaluator, depth_first_evaluator
 from lukefi.metsi.sim.sim_configuration import SimConfiguration
@@ -10,7 +10,7 @@ from lukefi.metsi.app.file_io import read_control_module
 
 class RunnersTest(unittest.TestCase):
     def test_sequence_success(self):
-        payload = OperationPayload(computational_unit=1)
+        payload = SimulationPayload(computational_unit=1)
         result = evaluate_sequence(
             payload,
             identity,
@@ -19,7 +19,7 @@ class RunnersTest(unittest.TestCase):
         self.assertEqual(None, result)
 
     def test_sequence_failure(self):
-        payload = OperationPayload(computational_unit=1)
+        payload = SimulationPayload(computational_unit=1)
         prepared_function = lambda: evaluate_sequence(
             payload,
             identity,
@@ -36,7 +36,7 @@ class RunnersTest(unittest.TestCase):
         declaration = read_control_module(control_path)
         config = SimConfiguration(**declaration)
         print(config)
-        initial = OperationPayload(
+        initial = SimulationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
@@ -56,14 +56,14 @@ class RunnersTest(unittest.TestCase):
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   **declaration)
         print(config)
-        chains_payload = OperationPayload(
+        chains_payload = SimulationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
         )
         results_chains = collect_results(run_full_tree_strategy(chains_payload, config, chain_evaluator))
 
-        depth_payload = OperationPayload(
+        depth_payload = SimulationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
@@ -82,14 +82,14 @@ class RunnersTest(unittest.TestCase):
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   **declaration)
         print(config)
-        chains_payload = OperationPayload(
+        chains_payload = SimulationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
         )
         results_chains = collect_results(run_partial_tree_strategy(chains_payload, config, chain_evaluator))
 
-        depth_payload = OperationPayload(
+        depth_payload = SimulationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
@@ -107,7 +107,7 @@ class RunnersTest(unittest.TestCase):
         declaration = read_control_module(control_path)
         config = SimConfiguration(**declaration)
         # print(config)
-        initial = OperationPayload(
+        initial = SimulationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
@@ -127,7 +127,7 @@ class RunnersTest(unittest.TestCase):
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   **declaration)
         # print(config)
-        initial = OperationPayload(
+        initial = SimulationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]
@@ -146,7 +146,7 @@ class RunnersTest(unittest.TestCase):
         declaration = read_control_module(control_path)
         config = SimConfiguration(operation_lookup={'inc': collecting_increment},
                                   **declaration)
-        initial = OperationPayload(
+        initial = SimulationPayload(
             computational_unit=1,
             collected_data=CollectedData(),
             operation_history=[]

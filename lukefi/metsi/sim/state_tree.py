@@ -8,8 +8,8 @@ from lukefi.metsi.app.utils import MetsiException
 
 class StateTree[T]:
     state: T
-    done_operation: Optional[Callable[[tuple[T, Any]], tuple[T, Any]]]
-    operation_params: Optional[dict[str, Any]]
+    done_treatment: Optional[Callable[[tuple[T, Any]], tuple[T, Any]]]
+    treatment_params: Optional[dict[str, Any]]
     time_point: Optional[int]
     branches: list['StateTree[T]']
 

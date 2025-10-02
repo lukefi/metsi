@@ -1,7 +1,7 @@
 from lukefi.metsi.domain.conditions import MinimumTimeInterval
 from lukefi.metsi.domain.forestry_operations.thinning import first_thinning
 from lukefi.metsi.domain.pre_ops import convert_coordinates, generate_reference_trees, preproc_filter
-from lukefi.metsi.domain.treatments import (
+from lukefi.metsi.domain.events import (
     CalculateBiomass,
     CalculateNpv,
     Clearcutting,
@@ -19,7 +19,7 @@ from lukefi.metsi.domain.treatments import (
     ReportState,
     ThinningFromAbove,
     ThinningFromBelow)
-from lukefi.metsi.sim.event import Event
+from lukefi.metsi.sim.simulation_instruction import SimulationInstruction
 from lukefi.metsi.sim.generators import Alternatives, Sequence
 
 
@@ -123,10 +123,10 @@ control_structure = {
     },
 
     # Simulation control declaration
-    "simulation_events": [
-        Event(
+    "simulation_instructions": [
+        SimulationInstruction(
             time_points=[YEAR_START],
-            treatments=Sequence([
+            events=Sequence([
                 Planting(
                     parameters={
                         "tree_count": 10
@@ -137,13 +137,13 @@ control_structure = {
                 )
             ])
         ),
-        Event(
+        SimulationInstruction(
             time_points=YEARS_REPORT,
-            treatments=[operations_report]
+            events=[operations_report]
         ),
-        Event(
+        SimulationInstruction(
             time_points=YEARS_EVENTS,
-            treatments=[
+            events=[
                 Alternatives([
                     DoNothing(),
                     ThinningFromAbove(
@@ -181,15 +181,15 @@ control_structure = {
                 ])
             ]
         ),
-        Event(
+        SimulationInstruction(
             time_points=YEARS_REPORT,
-            treatments=[
+            events=[
                 ReportPeriod()
             ]
         ),
-        Event(
+        SimulationInstruction(
             time_points=[YEAR_FINAL],
-            treatments=[
+            events=[
                 ReportCollectives(
                     parameters={
                         "identifier": "identifier",
@@ -224,9 +224,9 @@ control_structure = {
                 )
             ]
         ),
-        Event(
+        SimulationInstruction(
             time_points=YEARS_NP,
-            treatments=[
+            events=[
                 GrowActa()
             ]
         )

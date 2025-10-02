@@ -4,21 +4,20 @@ import copy
 import traceback
 from typing import Callable
 from pathlib import Path
-
 from lukefi.metsi.app.preprocessor import (
     preprocess_stands,
     slice_stands_by_percentage,
     slice_stands_by_size
 )
-
 from lukefi.metsi.app.app_io import parse_cli_arguments, MetsiConfiguration, generate_application_configuration, RunMode
-from lukefi.metsi.app.app_types import SimResults
+from lukefi.metsi.domain.forestry_types import SimResults
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.app.export import export_files, export_preprocessed
 from lukefi.metsi.app.file_io import prepare_target_directory, read_stands_from_file, \
     read_full_simulation_result_dirtree, write_full_simulation_result_dirtree, read_control_module
 from lukefi.metsi.app.post_processing import post_process_alternatives
-from lukefi.metsi.app.simulator import simulate_alternatives
+from lukefi.metsi.domain.stand_runner import run_stands
+from lukefi.metsi.sim.simulator import simulate_alternatives
 from lukefi.metsi.app.console_logging import print_logline
 from lukefi.metsi.app.utils import MetsiException
 
@@ -32,7 +31,7 @@ def preprocess(config: MetsiConfiguration, control: dict, stands: StandList) -> 
 
 def simulate(config: MetsiConfiguration, control: dict, stands: StandList) -> SimResults:
     print_logline("Simulating alternatives...")
-    result = simulate_alternatives(config, control, stands)
+    result = simulate_alternatives(config, control, stands, run_stands)
     if config.state_output_container is not None or config.derived_data_output_container is not None:
         print_logline(f"Writing simulation results to '{config.target_directory}'")
         write_full_simulation_result_dirtree(result, config)

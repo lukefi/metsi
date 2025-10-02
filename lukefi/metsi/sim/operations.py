@@ -1,11 +1,6 @@
-from typing import TYPE_CHECKING, Callable, TypeVar
+from typing import Any, Callable, TypeVar
 
-from lukefi.metsi.app.utils import ConditionFailed
-from lukefi.metsi.sim.condition import Condition
-from lukefi.metsi.sim.operation_payload import ProcessedOperation
-from lukefi.metsi.sim.operation_payload import OperationPayload
-if TYPE_CHECKING:
-    from lukefi.metsi.sim.generators import TreatmentFn
+from lukefi.metsi.app.utils import MetsiException
 
 
 T = TypeVar("T")
@@ -21,46 +16,16 @@ def prepared_operation(operation_entrypoint: Callable[[T], T], **operation_param
     return lambda state: operation_entrypoint(state, **operation_parameters)
 
 
-def prepared_processor(operation_tag: "TreatmentFn[T]",
-                       time_point: int,
-                       preconditions: list[Condition[OperationPayload[T]]],
-                       postconditions: list[Condition[OperationPayload[T]]],
-                       **operation_parameters: dict[str, dict]) -> ProcessedOperation[T]:
-    """prepares a processor function with an operation entrypoint"""
-    operation: "TreatmentFn[T]" = prepared_operation(operation_tag, **operation_parameters)
-    return lambda payload: _processor(payload, operation, operation_tag, time_point,
-                                      preconditions, postconditions, **operation_parameters)
-
-
-def _processor(payload: OperationPayload[T],
-               operation: "TreatmentFn[T]",
-               operation_tag: "TreatmentFn[T]",
-               time_point: int,
-               preconditions: list[Condition[OperationPayload[T]]],
-               postconditions: list[Condition[OperationPayload[T]]],
-               **operation_parameters: dict[str, dict]) -> OperationPayload[T]:
-    """Managed run conditions and history of a simulator operation. Evaluates the operation."""
-    for condition in preconditions:
-        if not condition(time_point, payload):
-            raise ConditionFailed(f'{operation_tag} aborted - condition "{condition}" failed')
-
-    payload.collected_data.current_time_point = time_point
-    try:
-        new_state, new_collected_data = operation((payload.computational_unit, payload.collected_data))
-    except UserWarning as e:
-        raise UserWarning(f"Unable to perform operation {operation_tag}, "
-                          f"at time point {time_point}; reason: {e}") from e
-
-    newpayload: OperationPayload[T] = OperationPayload(
-        computational_unit=new_state,
-        collected_data=payload.collected_data if new_collected_data is None else new_collected_data,
-        operation_history=payload.operation_history
-    )
-
-    for condition in postconditions:
-        if not condition(time_point, newpayload):
-            raise ConditionFailed(f'{operation_tag} aborted - condition "{condition}" failed')
-
-    payload.operation_history.append((time_point, operation_tag, operation_parameters))
-
-    return newpayload
+def simple_processable_chain(operation_tags: list[Callable[[T], T]],
+                             operation_params: dict[Callable[[T], T], Any]) -> list[Callable[[T], T]]:
+    """Prepare a list of partially applied (parametrized) operation functions based on given declaration of operation
+    tags and operation parameters"""
+    result: list[Callable[[T], T]] = []
+    for tag in operation_tags if operation_tags is not None else []:
+        params = operation_params.get(tag, [{}])
+        if len(params) > 1:
+            raise MetsiException(f"Trying to apply multiple parameter set for preprocessing operation \'{tag}\'. "
+                                 "Defining multiple parameter sets is only supported for alternative clause "
+                                 "generators.")
+        result.append(prepared_operation(tag, **params[0]))
+    return result
