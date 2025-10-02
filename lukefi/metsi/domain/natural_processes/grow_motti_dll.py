@@ -20,28 +20,9 @@ from lukefi.metsi.data.enums.internal import (
 )
 from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
+from lukefi.metsi.sim.collected_data import OpTuple
+from lukefi.metsi.data.layered_model import PossiblyLayered
 
-def _species_to_motti(spe: int) -> int:
-    """
-    Map internal TreeSpecies -> Motti species codes directly.
-    - Keep main species 1..5 as-is
-    - Collapse both alders (GREY_ALDER, COMMON_ALDER) to 6
-    - If in CONIFEROUS_SPECIES -> 8
-    - If in DECIDUOUS_SPECIES -> 9
-    """
-    ts = TreeSpecies(int(spe))
-    if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
-              TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
-              TreeSpecies.ASPEN):
-        return int(ts)
-    if ts in (TreeSpecies.GREY_ALDER, TreeSpecies.COMMON_ALDER):
-        return int(TreeSpecies.GREY_ALDER)  # Motti uses a single Alder code (6)
-    if ts in CONIFEROUS_SPECIES:
-        return int(TreeSpecies.OTHER_CONIFEROUS)  # 8
-    if ts in DECIDUOUS_SPECIES:
-        return int(TreeSpecies.OTHER_DECIDUOUS)  # 9
-
-    raise ValueError(f"Unsupported tree species code: {int(spe)}")
 
 def _spedom(stand) -> int:
     """
@@ -56,7 +37,7 @@ def _spedom(stand) -> int:
     if use_basal:
         # group BA by Motti species code
         for t in stand.reference_trees:
-            motti = _species_to_motti(int(t.species))
+            motti = species_to_motti(int(t.species))
             per[motti] = per.get(motti, 0.0) + float(calculate_basal_area(t) or 0.0)
 
         # if everything was zero (e.g., no diameters), fall back to stems
@@ -67,14 +48,13 @@ def _spedom(stand) -> int:
     # 2) Fallback: stems/ha
     if not use_basal:
         for t in stand.reference_trees:
-            motti = _species_to_motti(int(t.species))
+            motti = species_to_motti(int(t.species))
             per[motti] = per.get(motti, 0.0) + float(t.stems_per_ha or 0.0)
 
-    # 3) Choose top-1
     if not per:
-        raise ValueError(
-            "Cannot determine dominant species: all basal areas and stem counts are zero or missing."
-        )
+        return TreeSpecies.PINE
+
+    # 3) Choose top-1
     return max(per.items(), key=lambda kv: kv[1])[0]
 
 
@@ -114,7 +94,7 @@ def _resolve_shared_object(p: Union[str, Path]) -> Path:
 class MottiDLLPredictor:
     def __init__(
         self,
-        stand,
+        stand: PossiblyLayered[ForestStand],
         data_dir: Optional[str] = None,
         use_dll_species_convert: bool = True,
         use_dll_site_convert: bool = True,
@@ -136,46 +116,74 @@ class MottiDLLPredictor:
         self.use_dll_site_convert = use_dll_site_convert
 
     @property
-    def year(self) -> Optional[float]:
-        return getattr(self.stand, "year", None) or 2010.0
+    def year(self) -> float:
+        y = getattr(self.stand, "year", None)
+        return float(y) if y is not None else 2010.0
+
     @property
-    def get_y(self) -> float:
-        return self.stand.geo_location[0]
+    def get_y(self) -> float | None:
+        if self.stand and self.stand.geo_location:
+            return self.stand.geo_location[0]
+        return None
+
     @property
-    def get_x(self) -> float:
-        return self.stand.geo_location[1]
+    def get_x(self) -> float | None:
+        if self.stand and self.stand.geo_location:
+            return self.stand.geo_location[1]
+        return None
+
     @property
     def get_z(self) -> float:
-        z = self.stand.geo_location[2]
-        return float(z if z not in (None, 0.0) else -1.0)  # let DLL infer if missing
+        if self.stand and self.stand.geo_location:
+            z = self.stand.geo_location[2]
+            if z is None or z == 0.0:
+                return -1.0
+            return float(z)
+        return -1.0
+
     @property
     def lake(self) -> float:
-        return getattr(self.stand, "lake_effect", 0.0)
+        v = getattr(self.stand, "lake_effect", 0.0)
+        return float(v if v is not None else 0.0)
+
     @property
     def sea(self) -> float:
-        return getattr(self.stand, "sea_effect", 0.0)
+        v = getattr(self.stand, "sea_effect", 0.0)
+        return float(v if v is not None else 0.0)
+
     @property
     def mal(self) -> int:
-        return int(self.stand.land_use_category)
+        luc = getattr(self.stand, "land_use_category", None)
+        return int(luc.value) if luc is not None else 0
+
     @property
     def mty(self) -> int:
-        return int(self.stand.site_type_category)
+        st = getattr(self.stand, "site_type_category", None)
+        return int(st.value) if st is not None else 0
+
     @property
     def alr(self) -> int:
-        return int(self.stand.soil_peatland_category)
+        s = getattr(self.stand, "soil_peatland_category", None)
+        return int(s.value) if s is not None else 0
+
     @property
     def verl(self) -> int:
-        return int(self.stand.tax_class)
+        v = getattr(self.stand, "tax_class", None)
+        return int(v) if v is not None else 0
+
     @property
     def verlt(self) -> int:
-        return int(self.stand.tax_class_reduction)
+        v = getattr(self.stand, "tax_class_reduction", None)
+        return int(v) if v is not None else 0
+
 
     @cached_property
     def _trees_py(self) -> list[dict]:
         trees = []
         for idx, t in enumerate(self.stand.reference_trees):
 
-            spe = _species_to_motti(int(t.species))
+            spe = species_to_motti(int(t.species or 0))
+
             tid = int((getattr(t, "tree_number", None) or (idx + 1)))
             trees.append({
                 "id": tid,
@@ -216,12 +224,14 @@ class MottiDLLPredictor:
 
 
 
-def auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
+def auto_euref_km(y1: float | None, x1: float | None) -> tuple[float, float]:
     """
     Normalize to EUREF-FIN/TM35FIN kilometers.
     Input is expected to be in meters
     - Raise if values look like lat/long.
     """
+    if not y1 or not x1:
+        return 0.0, 0.0
     abs_y, abs_x = abs(y1), abs(x1)
 
     # Clear lat/long guard
@@ -234,10 +244,31 @@ def auto_euref_km(y1: float, x1: float) -> tuple[float, float]:
     return y1 / 1000.0, x1 / 1000.0
 
 
-def species_to_motti(x: int) -> int:
-    return _species_to_motti(x)
+def species_to_motti(spe: int | None) -> int:
+    """
+    Map internal TreeSpecies -> Motti species codes directly.
+    - Keep main species 1..5 as-is
+    - Collapse both alders (GREY_ALDER, COMMON_ALDER) to 6
+    - If in CONIFEROUS_SPECIES -> 8
+    - If in DECIDUOUS_SPECIES -> 9
+    """
+    if not spe:
+        return TreeSpecies.PINE
+    ts = TreeSpecies(int(spe))
+    if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
+              TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
+              TreeSpecies.ASPEN):
+        return int(ts)
+    if ts in (TreeSpecies.GREY_ALDER, TreeSpecies.COMMON_ALDER):
+        return int(TreeSpecies.GREY_ALDER)  # Motti uses a single Alder code (6)
+    if ts in CONIFEROUS_SPECIES:
+        return int(TreeSpecies.OTHER_CONIFEROUS)  # 8
+    if ts in DECIDUOUS_SPECIES:
+        return int(TreeSpecies.OTHER_DECIDUOUS)  # 9
 
-def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters) -> Tuple["ForestStand", None]:
+    raise ValueError(f"Unsupported tree species code: {int(spe)}")
+
+def grow_motti_dll(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
     Evolves the stand by `step` years. If no predictor is provided and `data_dir` is None,
     this is treated as a no-op (DLL not available).
@@ -246,7 +277,7 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
     data_dir = operation_parameters.get("data_dir", None)
     predictor = operation_parameters.get("predictor", None)
 
-    stand, _ = input_
+    stand, collected_data = input_
 
     # If a predictor is supplied (e.g., from tests), use it, regardless of data_dir.
     if predictor is None:
@@ -283,4 +314,4 @@ def grow_motti_dll(input_: Tuple["ForestStand", None], /, **operation_parameters
             stems.append(0.0)
 
     update_stand_growth(stand, diameters, heights, stems, step)
-    return stand, None
+    return stand, collected_data

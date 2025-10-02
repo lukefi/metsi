@@ -15,6 +15,8 @@ from lukefi.metsi.domain.forestry_operations.thinning import (
     even_thinning, first_thinning, thinning_from_above, thinning_from_below)
 from lukefi.metsi.domain.natural_processes.grow_acta import grow_acta
 from lukefi.metsi.domain.natural_processes.grow_metsi import grow_metsi
+from lukefi.metsi.domain.natural_processes.grow_motti_dll import grow_motti_dll
+from lukefi.metsi.domain.natural_processes.grow_motti_dll_vec import grow_motti_dll_vec
 from lukefi.metsi.sim.event import Condition
 from lukefi.metsi.sim.generators import Treatment
 from lukefi.metsi.sim.operation_payload import OperationPayload
@@ -211,6 +213,19 @@ class GrowMetsi(Treatment[ForestStand]):
                          preconditions=preconditions,
                          postconditions=postconditions,
                          file_parameters=file_parameters)
+
+class GrowMotti(Treatment[ForestStand]):
+    def __init__(self, vectorized: bool = False,
+                 parameters: Optional[dict[str, Any]] = None,
+                 preconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 postconditions: Optional[list[Condition[OperationPayload[ForestStand]]]] = None,
+                 file_parameters: Optional[dict[str, str]] = None) -> None:
+        super().__init__(treatment_fn=grow_motti_dll_vec if vectorized else grow_motti_dll,
+                         parameters=parameters,
+                         preconditions=preconditions,
+                         postconditions=postconditions,
+                         file_parameters=file_parameters)
+
 
 
 class ThinningFromBelow(Treatment[ForestStand]):

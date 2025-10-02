@@ -50,7 +50,5 @@ def update_stand_growth_vectorized(stand: PossiblyLayered[ForestStand],
         trees.height >= 1.3,
         False,
         trees.sapling)
-    if stand.year is not None:
-        stand.year += step
-    else:
-        stand.year = step
+
+    stand.year = (stand.year or 0) + step
