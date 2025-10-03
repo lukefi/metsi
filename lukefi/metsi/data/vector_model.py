@@ -62,7 +62,10 @@ class VectorData():
 
     def __init__(self, dtypes: dict[str, npt.DTypeLike]):
         self.dtypes = dtypes
-        self.size = 0
+        self.vectorize({})
+
+    def __len__(self):
+        return self.size
 
     def vectorize(self, attr_dict: dict[str, list[Any]]):
         self.set_size(attr_dict)
