@@ -1,12 +1,12 @@
 from typing import Any
-from lukefi.metsi.data.vector_model import ReferenceTrees, Strata
+from lukefi.metsi.data.vector_model import ReferenceTrees, TreeStrata
 from lukefi.metsi.app.utils import MetsiException
 from lukefi.metsi.domain.forestry_types import StandList
 
 
 CONTAINERS = {
     "reference_trees": ReferenceTrees,
-    "tree_strata": Strata
+    "tree_strata": TreeStrata
 }
 
 
