@@ -20,8 +20,6 @@ class SimulationPayload[T](SimpleNamespace):
         copy_like: PossiblyLayered[T]
         if isinstance(self.computational_unit, LayeredObject):
             copy_like = self.computational_unit.new_layer()
-            copy_like.reference_trees = [tree.new_layer() for tree in copy_like.reference_trees]
-            copy_like.tree_strata = [stratum.new_layer() for stratum in copy_like.tree_strata]
         else:
             copy_like = deepcopy(self.computational_unit)
 
