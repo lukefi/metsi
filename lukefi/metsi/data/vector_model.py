@@ -303,7 +303,7 @@ class ReferenceTrees(VectorData):
         ]
 
 
-class Strata(VectorData):
+class TreeStrata(VectorData):
     identifier: npt.NDArray[np.str_]
     species: npt.NDArray[np.int32]
     mean_diameter: npt.NDArray[np.float64]
