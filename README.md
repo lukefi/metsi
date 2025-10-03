@@ -1,3 +1,12 @@
+#  ⚠️ <bold>Important information about project status</bold> ⚠️
+
+All future development of Metsi is frozen on behalf of Natural Resource Institute. The software is distributed as it is in this GitHub repository and Natural Resource Institute will not take any responsibility of the current nor future condition of the software.
+
+The future development based on Metsi as a forestry simulator will take place in an other repository as a new project called Mela2.0.
+
+For those who are interested about the new fork. Here is the [link](https://www.github.com/lukefi/mela2.0) to the repository.
+
+
 # Metsi forestry simulator
 
 Metsi forestry simulator is a Python based forest growth and maintenance operation simulator developed in Natural
