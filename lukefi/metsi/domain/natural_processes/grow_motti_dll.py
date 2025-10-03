@@ -1,120 +1,106 @@
+from typing import Any, Optional, Dict, Union, Iterable
 from pathlib import Path
-from typing import Optional, Union, Iterable, Tuple, Mapping, Dict
-from functools import cached_property
-from types import MappingProxyType
-
-from lukefi.metsi.forestry.forestry_utils import (
-    calculate_basal_area,
-    overall_basal_area,
-)
+import numpy as np
 
 from lukefi.metsi.domain.natural_processes.motti_dll_wrapper import (
     Motti4DLL,
-    GrowthDeltas
+    GrowthDeltas,
 )
-
 from lukefi.metsi.data.enums.internal import (
     TreeSpecies,
     CONIFEROUS_SPECIES,
     DECIDUOUS_SPECIES,
 )
 from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.vector_model import ReferenceTrees
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
 from lukefi.metsi.sim.collected_data import OpTuple
 from lukefi.metsi.data.layered_model import PossiblyLayered
 
 
-def _spedom(stand) -> int:
+def auto_euref_km(y1: float | None, x1: float | None) -> tuple[float, float]:
     """
-    Pick dominant species.
+    Normalize to EUREF-FIN/TM35FIN kilometers.
+    Input is expected to be in meters
+    - Raise if values look like lat/long.
+    """
+    if not y1 or not x1:
+        return (0.0, 0.0)
+    abs_y, abs_x = abs(y1), abs(x1)
+
+    # Clear lat/long guard
+    if abs_y <= 90.0 and abs_x <= 180.0:
+        raise ValueError(
+            f"Coordinates look like lat/long (Y={y1}, X={x1}). "
+            "Expected EUREF-FIN/TM35 in kilometers."
+        )
+
+    return y1 / 1000.0, x1 / 1000.0
+
+
+def _spedom(rt: ReferenceTrees | Any | None) -> int:
+    """
+    Dominant species from SoA data (Motti species code).
     Prefer basal area totals; if BA totals are all zero/missing, fall back to stems/ha.
-    Returns dominant species as Mottispecies codes.
     """
-    # 1) Try basal area first
-    use_basal = overall_basal_area(stand.reference_trees) > 0.0
+    if rt is None:
+        return TreeSpecies.PINE
+    n = rt.size
+    if n == 0:
+        return TreeSpecies.PINE
+
+    # Convert species to Motti codes (will raise if invalid)
+    spe_codes = np.asarray([species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
+
+    # Basal area per tree: stems_per_ha * π * (0.5 * d_cm * 0.01 m/cm)^2
+    d_cm = np.nan_to_num(rt.breast_height_diameter, nan=0.0)
+    f_ha = np.nan_to_num(rt.stems_per_ha, nan=0.0)
+    ba_per_tree = f_ha * np.pi * (0.5 * d_cm * 0.01) ** 2  # m²/ha contribution
+
+    # Sum BA per species code
     per: Dict[int, float] = {}
+    for code, ba in zip(spe_codes.tolist(), ba_per_tree.tolist()):
+        per[code] = per.get(code, 0.0) + float(ba)
 
-    if use_basal:
-        # group BA by Motti species code
-        for t in stand.reference_trees:
-            motti = species_to_motti(int(t.species))
-            per[motti] = per.get(motti, 0.0) + float(calculate_basal_area(t) or 0.0)
-
-        # if everything was zero (e.g., no diameters), fall back to stems
-        if sum(per.values()) == 0.0:
-            use_basal = False
-            per.clear()
-
-    # 2) Fallback: stems/ha
+    use_basal = any(v > 0.0 for v in per.values())
     if not use_basal:
-        for t in stand.reference_trees:
-            motti = species_to_motti(int(t.species))
-            per[motti] = per.get(motti, 0.0) + float(t.stems_per_ha or 0.0)
+        per.clear()
+        # Fallback: stems/ha totals per species
+        for code, stems in zip(spe_codes.tolist(), f_ha.tolist()):
+            per[code] = per.get(code, 0.0) + float(stems)
 
     if not per:
         return TreeSpecies.PINE
 
-    # 3) Choose top-1
     return max(per.items(), key=lambda kv: kv[1])[0]
 
 
-def _resolve_shared_object(p: Union[str, Path]) -> Path:
-    """
-    Resolve a Motti shared library inside a directory, or pass through an exact file path.
-    Raises ValueError if p is None. Returns a Path (may be a directory if nothing matched).
-    """
-    if p is None:
-        raise ValueError("data_dir must be provided (directory containing the Motti library).")
 
-    p = Path(p)
-
-    # If a direct file path is given, just return it (caller/dlopen will validate existence).
-    if p.is_file():
-        return p
-
-    # If it's a directory, search typical candidates.
-    candidates: Iterable[str] = (
-        # Windows
-        "mottisc.dll", "mottiue.dll",
-        # Linux
-        "libmottisc.so", "libmottiue.so", "mottisc.so", "mottiue.so",
-    )
-    for name in candidates:
-        cand = p / name
-        if cand.exists():
-            return cand
-
-    # No match found; return directory so downstream can raise a clear error when loading.
-    return p
-
-
-
-
+# -------- vectorized predictor --------
 
 class MottiDLLPredictor:
+    """
+    SoA-based predictor feeding the Motti DLL. Builds C tree buffers from vector arrays.
+    """
+
     def __init__(
         self,
         stand: PossiblyLayered[ForestStand],
         data_dir: Optional[str] = None,
-        use_dll_species_convert: bool = True,
         use_dll_site_convert: bool = True,
-        dll: Optional["Motti4DLL"] = None,  # <-- NEW: injectable DLL for tests
-    ):
+        dll: Optional["Motti4DLL"] = None,
+    ) -> None:
         self.stand = stand
-
-        if dll is not None:
-            # Test/DI path: no filesystem, no dlopen
-            self.dll = dll
-        else:
-            # Prod path: resolve from folder (data_dir must be provided)
-            if data_dir is None:
-                raise ValueError("data_dir must be provided (directory containing the Motti library).")
-            resolved = _resolve_shared_object(data_dir)
-            self.dll = Motti4DLL(resolved, data_dir=data_dir)
-
-        self.use_dll_species_convert = use_dll_species_convert
         self.use_dll_site_convert = use_dll_site_convert
 
+        if dll is not None:
+            self.dll = dll
+        else:
+            if data_dir is None:
+                raise ValueError("data_dir must be provided (directory containing the Motti library).")
+            self.dll = Motti4DLL(_resolve_shared_object(data_dir), data_dir=data_dir)
+
+    # ---- stand/site properties ----
     @property
     def year(self) -> float:
         y = getattr(self.stand, "year", None)
@@ -131,6 +117,7 @@ class MottiDLLPredictor:
         if self.stand and self.stand.geo_location:
             return self.stand.geo_location[1]
         return None
+
 
     @property
     def get_z(self) -> float:
@@ -176,75 +163,123 @@ class MottiDLLPredictor:
         v = getattr(self.stand, "tax_class_reduction", None)
         return int(v) if v is not None else 0
 
+    # ---- evolve ----
 
-    @cached_property
-    def _trees_py(self) -> list[dict]:
-        trees = []
-        for idx, t in enumerate(self.stand.reference_trees):
+    def evolve(self, step: int = 5, sim_year: int = 0) -> GrowthDeltas:
+        rt = self.stand.reference_trees
+        if not rt:
+            return GrowthDeltas(tree_ids=[], trees_id=[], trees_ih=[], trees_if=[])
+        n = rt.size
+        if n == 0:
+            # nothing to do; fake zeros in the same shape the caller expects
+            return GrowthDeltas(tree_ids=[], trees_id=[], trees_ih=[], trees_if=[])
 
-            spe = species_to_motti(int(t.species or 0))
+        rt.tree_number = np.arange(1, n + 1, dtype=rt.tree_number.dtype)
 
-            tid = int((getattr(t, "tree_number", None) or (idx + 1)))
-            trees.append({
-                "id": tid,
-                "f": float(t.stems_per_ha or 0.0),
-                "d13": float(t.breast_height_diameter or 0.0),
-                "h": float(t.height or 0.0),
-                "spe": int(spe),
-                "age": float(t.biological_age or 0.0),
-                "age13": float(t.breast_height_age or 0.0),
-                "cr": float(getattr(t, "crown_ratio", 0.0) or 0.0),
-                "snt": int((t.origin or 0) + 1),
-            })
-        return trees
+        spedom = _spedom(self.stand.reference_trees)
 
-    @property
-    def trees(self) -> Tuple[Mapping, ...]:
-        # read-only snapshot to avoid accidental mutation in callers/tests
-        return tuple(MappingProxyType(d) for d in self._trees_py)
-
-    def evolve(self, step: int = 5) -> GrowthDeltas:
-        dominant_species = _spedom(self.stand)
+        # site (DLL converts site index if asked)
         y_km, x_km = auto_euref_km(self.get_y, self.get_x)
         site = self.dll.new_site(
-            Y=y_km, X=x_km, Z=self.get_z,
-            lake=self.lake, sea=self.sea,
+            Y=y_km,
+            X=x_km,
+            Z=self.get_z,
+            lake=self.lake,
+            sea=self.sea,
             mal=self.mal,
             mty=self.mty,
-            verl=self.verl, verlt=self.verlt, alr=self.alr,
-            year=self.year, step=step,
-            spedom=dominant_species,
-            spedom2=dominant_species,
+            verl=self.verl,
+            verlt=self.verlt,
+            alr=self.alr,
+            year=sim_year,
+            step=step,
+            convert_mela_site=self.use_dll_site_convert,
+            spedom=spedom,
+            spedom2=spedom,
             nstorey=1.0,
             gstorey=1.0,
-            convert_mela_site=self.use_dll_site_convert,
-        )
-        trees, n = self.dll.new_trees(self._trees_py)
-        return self.dll.grow(site, trees, n, step=step, ctrl=None, skip_init=True)
-
-
-
-def auto_euref_km(y1: float | None, x1: float | None) -> tuple[float, float]:
-    """
-    Normalize to EUREF-FIN/TM35FIN kilometers.
-    Input is expected to be in meters
-    - Raise if values look like lat/long.
-    """
-    if not y1 or not x1:
-        return 0.0, 0.0
-    abs_y, abs_x = abs(y1), abs(x1)
-
-    # Clear lat/long guard
-    if abs_y <= 90.0 and abs_x <= 180.0:
-        raise ValueError(
-            f"Coordinates look like lat/long (Y={y1}, X={x1}). "
-            "Expected EUREF-FIN/TM35 in kilometers."
         )
 
-    return y1 / 1000.0, x1 / 1000.0
+        # Build trees buffer from SoA
+        # ids are stable 1..n in current order
+        ids = np.arange(1, n + 1, dtype=int)
+
+        # Prepare vectors (with NaN -> 0 for DLL)
+        stems = np.nan_to_num(rt.stems_per_ha, nan=0.0)
+        d13 = np.nan_to_num(rt.breast_height_diameter, nan=0.0)
+        h = np.nan_to_num(rt.height, nan=0.0)
+        age = np.nan_to_num(rt.biological_age, nan=0.0)
+        age13 = np.nan_to_num(rt.breast_height_age, nan=0.0)
+        cr = np.nan_to_num(getattr(rt, "crown_ratio", np.zeros(n, dtype=float)), nan=0.0)
+        origin = np.nan_to_num(getattr(rt, "origin", np.zeros(n, dtype=float)), nan=0.0)
+
+        # Species conversion (raises on invalid)
+        spe_vec = np.asarray([species_to_motti(int(s)) for s in rt.species.tolist()], dtype=int)
 
 
-def species_to_motti(spe: int | None) -> int:
+        # Build list[dict] for the DLL (fields used by wrapper)
+        trees_py = [
+            {
+                "id": int(i),
+                "f": float(f),
+                "d13": float(d),
+                "h": float(hh),
+                "spe": int(sp),
+                "age": float(a),
+                "age13": float(a13),
+                "cr": float(c),
+                "snt": int(o + 1),
+            }
+            for i, f, d, hh, sp, a, a13, c, o in zip(
+                ids.tolist(),
+                stems.tolist(),
+                d13.tolist(),
+                h.tolist(),
+                spe_vec.tolist(),
+                age.tolist(),
+                age13.tolist(),
+                cr.tolist(),
+                origin.astype(int).tolist(),
+            )
+        ]
+
+        yp, _n = self.dll.new_trees(trees_py)
+        return self.dll.grow(site, yp, _n, step=step, ctrl=None, skip_init=True)
+
+
+# -------- DLL path resolver (same behavior as AoS helper) --------
+
+def _resolve_shared_object(p: Union[str, Path]) -> Path:
+    """
+    Resolve a Motti shared library inside a directory, or pass through an exact file path.
+    Raises ValueError if p is None. Returns a Path (may be a directory if nothing matched).
+    """
+    if p is None:
+        raise ValueError("data_dir must be provided (directory containing the Motti library).")
+
+    p = Path(p)
+
+    if p.is_file():
+        return p
+
+    candidates: Iterable[str] = (
+        # Windows
+        "mottisc.dll", "mottiue.dll",
+        # Linux
+        "libmottisc.so", "libmottiue.so", "mottisc.so", "mottiue.so",
+    )
+    for name in candidates:
+        cand = p / name
+        if cand.exists():
+            return cand
+
+    # No match found; return directory so downstream can raise a clear error when loading.
+    return p
+
+
+# -------- public API --------
+
+def species_to_motti(spe: int) -> int:
     """
     Map internal TreeSpecies -> Motti species codes directly.
     - Keep main species 1..5 as-is
@@ -252,8 +287,6 @@ def species_to_motti(spe: int | None) -> int:
     - If in CONIFEROUS_SPECIES -> 8
     - If in DECIDUOUS_SPECIES -> 9
     """
-    if not spe:
-        return TreeSpecies.PINE
     ts = TreeSpecies(int(spe))
     if ts in (TreeSpecies.PINE, TreeSpecies.SPRUCE,
               TreeSpecies.SILVER_BIRCH, TreeSpecies.DOWNY_BIRCH,
@@ -268,50 +301,70 @@ def species_to_motti(spe: int | None) -> int:
 
     raise ValueError(f"Unsupported tree species code: {int(spe)}")
 
+
 def grow_motti_dll(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
-    Evolves the stand by `step` years. If no predictor is provided and `data_dir` is None,
-    this is treated as a no-op (DLL not available).
+    Vector-only Motti grow:
+      - Requires stand.reference_trees_soa
+      - Builds DLL input from SoA, runs growth, applies deltas vectorized
+      - Prunes trees with stems_per_ha < 1.0 after update
+    operation_parameters:
+      - step: int (years), default 5
+      - data_dir: path to folder/file for the Motti DLL (required unless a predictor is injected)
+      - predictor: optional injected Motti4DLL wrapper (testing)
     """
+
     step = int(operation_parameters.get("step", 5))
     data_dir = operation_parameters.get("data_dir", None)
     predictor = operation_parameters.get("predictor", None)
 
     stand, collected_data = input_
 
-    # If a predictor is supplied (e.g., from tests), use it, regardless of data_dir.
+    sim_year: int = int(collected_data.current_time_point if collected_data.current_time_point is not None
+                        else (stand.year or 0))
+
+    rt = stand.reference_trees
+    if rt.size == 0:
+        return input_
+
+    # Construct predictor
     if predictor is None:
-        # No injected predictor. If DLL path isn't provided, raise an error
         if data_dir is None:
             raise ModuleNotFoundError("data_dir must be provided (directory containing the Motti library).")
-
-        # Production path: construct predictor from data_dir.
-        pred = MottiDLLPredictor(stand, data_dir=data_dir)
+        pred = MottiDLLPredictor(stand, data_dir= data_dir)
     else:
         pred = predictor
 
-    for idx, t in enumerate(stand.reference_trees, start=1):
-        t.tree_number = idx
+    growth = pred.evolve(step= step, sim_year= sim_year)
 
+    # Map deltas by returned IDs (subset of original if deaths occurred)
+    id_to_delta_d = {int(i): float(d) for i, d in zip(growth.tree_ids, growth.trees_id)}
+    id_to_delta_h = {int(i): float(h) for i, h in zip(growth.tree_ids, growth.trees_ih)}
+    id_to_delta_f = {int(i): float(f) for i, f in zip(growth.tree_ids, growth.trees_if)}
 
-    growth = pred.evolve(step=step)
+    n = rt.size
+    ids = np.arange(1, n + 1, dtype=int)
 
-    id_to_delta_d  = {int(i): d for i, d in zip(growth.tree_ids, growth.trees_id)}
-    id_to_delta_h  = {int(i): h for i, h in zip(growth.tree_ids, growth.trees_ih)}
-    id_to_delta_f  = {int(i): f for i, f in zip(growth.tree_ids, growth.trees_if)}
+    base_d = np.nan_to_num(rt.breast_height_diameter, nan=0.0)
+    base_h = np.nan_to_num(rt.height, nan=0.0)
+    base_f = np.nan_to_num(rt.stems_per_ha, nan=0.0)
 
-    diameters, heights, stems = [], [], []
-    for t in stand.reference_trees:
-        tid = int(getattr(t, "tree_number", 0))
+    # Build updated arrays in the original order:
+    # - If ID present in DLL result: add deltas
+    # - If missing: stems -> 0 (dead/removed), keep d/h unchanged
+    d_new = base_d.copy()
+    h_new = base_h.copy()
+    f_new = base_f.copy()
+
+    for idx, tid in enumerate(ids.tolist()):
         if tid in id_to_delta_d:
-            diameters.append((t.breast_height_diameter or 0.0) + id_to_delta_d[tid])
-            heights.append((t.height or 0.0) + id_to_delta_h[tid])
-            stems.append(max((t.stems_per_ha or 0.0) + id_to_delta_f[tid], 0.0))
+            d_new[idx] = base_d[idx] + id_to_delta_d[tid]
+            h_new[idx] = base_h[idx] + id_to_delta_h[tid]
+            f_new[idx] = max(base_f[idx] + id_to_delta_f[tid], 0.0)
         else:
-            # Not returned by DLL -> treat as dead/removed
-            diameters.append(t.breast_height_diameter or 0.0)
-            heights.append(t.height or 0.0)
-            stems.append(0.0)
+            f_new[idx] = 0.0
 
-    update_stand_growth(stand, diameters, heights, stems, step)
+    # Apply vectorized update (also advances ages etc. inside util)
+    update_stand_growth(stand, d_new, h_new, f_new, step)
+
     return stand, collected_data

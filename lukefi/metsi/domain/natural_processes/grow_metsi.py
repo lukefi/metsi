@@ -6,20 +6,23 @@
 # MetsiGrow is released under a separate Source Available – Non-Commercial license.
 # See MetsiGrow's LICENSE-NC.md for full details.
 
-from typing import Optional,TypeVar, Sequence
-from collections import defaultdict
-from lukefi.metsi.data.layered_model import PossiblyLayered
-from lukefi.metsi.forestry.forestry_utils import calculate_basal_area
 
+from typing import Sequence
+import numpy as np
+
+from lukefi.metsi.app.utils import MetsiException
+from lukefi.metsi.data.model import ForestStand
 from lukefi.metsi.data.enums.internal import (
     TreeSpecies,
     CONIFEROUS_SPECIES,
     DECIDUOUS_SPECIES,
 )
-from lukefi.metsi.data.model import ForestStand
+from lukefi.metsi.data.vector_model import ReferenceTrees
 from lukefi.metsi.domain.natural_processes.util import update_stand_growth
+from lukefi.metsi.sim.collected_data import OpTuple
+from lukefi.metsi.data.layered_model import PossiblyLayered
 
-# Lower-level MetsiGrow types (still used; no changes here)
+# Lower-level MetsiGrow types
 from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.chain import (
     Predict,
     Species,
@@ -31,7 +34,9 @@ from lukefi.metsi.forestry.naturalprocess.MetsiGrow.metsi_grow.chain import (
     Origin,
     Storie,
 )
-from lukefi.metsi.sim.collected_data import OpTuple
+
+
+# ---------- helpers ----------
 
 def to_mg_species(code) -> Species:
     """
@@ -63,16 +68,26 @@ def to_mg_species(code) -> Species:
 
         raise ValueError(f"Unsupported tree species code: {code!r}") from exc
 
-T = TypeVar("T")
 
-def _require(val: Optional[T], name: str) -> T:
-    """
-    Ensure a required value is set, else raise a ValueError.
-    """
+def _require(val, name: str):
     if val is None:
         raise ValueError(f"{name} must be set before prediction")
     return val
 
+
+def _origin_to_mg(o: int) -> Origin:
+    # In AoS version: Origin(t.origin + 1) if set, else NATURAL
+    try:
+        return Origin(int(o) + 1) if o is not None and int(o) >= 0 else Origin.NATURAL
+    except ValueError:
+        return Origin.NATURAL
+
+
+def _nan_to_num(a: np.ndarray, nan: float = 0.0) -> np.ndarray:
+    return np.nan_to_num(a, nan=nan, posinf=nan, neginf=nan)
+
+
+# ---------- vectorized predictor ----------
 
 class MetsiGrowPredictor(Predict):
     """
@@ -81,12 +96,15 @@ class MetsiGrowPredictor(Predict):
 
     def __init__(self, stand: PossiblyLayered[ForestStand]) -> None:
         super().__init__()
-        self.stand = stand  # store stand for property access
+        self.stand = stand
         self.year = float(_require(stand.year, "stand.year"))
+
+        # stand/site properties
         y_coord = (stand.geo_location or (None, None))[0]
         x_coord = (stand.geo_location or (None, None))[1]
         self.get_y = float(y_coord or 0.0)
         self.get_x = float(x_coord or 0.0)
+
         mal_raw = _require(stand.land_use_category, "stand.land_use_category")
         self.mal = LandUseCategoryVMI(int(getattr(mal_raw, "value", mal_raw)))
 
@@ -96,158 +114,173 @@ class MetsiGrowPredictor(Predict):
         alr_raw = _require(stand.soil_peatland_category, "stand.soil_peatland_category")
         self.alr = SoilCategoryVMI(int(getattr(alr_raw, "value", alr_raw)))
 
-        # tax class reduction can be optional; default to NONE if missing
+        # tax class reduction optional
         verlt_raw = stand.tax_class_reduction
         self.verlt = TaxClassReduction(
             int(getattr(verlt_raw, "value", verlt_raw)) if verlt_raw is not None
             else int(TaxClassReduction.NONE)
         )
-        self.dd  = self.stand.degree_days or 0.0
-        self.sea  = self.stand.sea_effect or 0.0
-        self.lake  = self.stand.lake_effect or 0.0
+
+        self.dd = stand.degree_days or 0.0
+        self.sea = stand.sea_effect or 0.0
+        self.lake = stand.lake_effect or 0.0
 
         tc_raw = stand.tax_class
         val = int(getattr(tc_raw, "value", tc_raw) or 0)
-        if val:  # non-zero, valid
+        if val:
             self.verl = TaxClass(val)
 
-
-        self.trees_f = self._trees_f()
+        # management variables
         self.prt = Origin.NATURAL
 
-        self.trees_d = self._trees_d()
-        self.trees_h = self._trees_h()
-        self.trees_t0 = self._trees_t0()
-        self.trees_t13 = self._trees_t13()
-        self.trees_storie = self._trees_storie()
-        self.trees_snt = self._trees_snt()
+        # tree variables from SoA
+        rt = self._require_rtrees()
 
-        self._spedom_cache: Species | None = None
+        # stems/ha
+        self.trees_f = self._trees_f(rt)
+        # diameters (ensure minimal positive value like AoS 0.01)
+        self.trees_d = self._trees_d(rt)
+        # heights
+        self.trees_h = self._trees_h(rt)
+        # years since t0 and t13
+        self.trees_t0 = self._trees_t0(rt)   # year - biological_age
+        self.trees_t13 = self._trees_t13(rt) # year - breast_height_age
+        # storie placeholder
+        self.trees_storie = [Storie.NONE] * rt.size
+        # origin per tree
+        self.trees_snt = self._trees_snt(rt)
+        # species per tree (MetsiGrow)
         self._trees_spe_cache: list[Species] | None = None
+        self._spedom_cache: Species | None = None
+
+    # --- required tree vectors ---
+
+    def _require_rtrees(self) -> ReferenceTrees:
+        rt = self.stand.reference_trees
+        if rt is None:
+            raise MetsiException("Reference trees not vectorized")
+        return rt
+
+    def _trees_f(self, rt: ReferenceTrees) -> list[float]:
+        return _nan_to_num(rt.stems_per_ha, 0.0).tolist()
+
+    def _trees_d(self, rt: ReferenceTrees) -> list[float]:
+        d = _nan_to_num(rt.breast_height_diameter, 0.01)
+        d = np.where(d <= 0.0, 0.01, d)
+        return d.tolist()
+
+    def _trees_h(self, rt: ReferenceTrees) -> list[float]:
+        return _nan_to_num(rt.height, 0.0).tolist()
+
+    def _trees_t0(self, rt: ReferenceTrees) -> list[int]:
+        # int((year or 0) - (bio_age or 0.0))
+        bio = _nan_to_num(rt.biological_age, 0.0)
+        return (self.year - bio).astype(int).tolist()
+
+    def _trees_t13(self, rt: ReferenceTrees) -> list[int]:
+        bha = _nan_to_num(rt.breast_height_age, 0.0)
+        return (self.year - bha).astype(int).tolist()
+
+    def _trees_snt(self, rt: ReferenceTrees) -> list[Origin]:
+        # Origin(v+1) if v set (>=0), else NATURAL
+        out: list[Origin] = []
+        for v in rt.origin.tolist():
+            out.append(_origin_to_mg(v))
+        return out
+
+    # --- dominant species and per-tree species ---
+
+    @property
+    def trees_spe(self) -> Sequence[Species]:
+        if self._trees_spe_cache is None:
+            rt = self._require_rtrees()
+            conv: list[Species] = []
+            for v in rt.species.tolist():
+                conv.append(to_mg_species(v))
+
+            self._trees_spe_cache = conv
+        return self._trees_spe_cache
+
+    @trees_spe.setter
+    def trees_spe(self, value) -> None:
+        self._trees_spe_cache = list(value)
 
     @property
     def spedom(self) -> Species:
         if self._spedom_cache is None:
-            self._spedom_cache = self._compute_spedom_from_stand()
+            self._spedom_cache = self._compute_spedom_from_stand_soa()
         return self._spedom_cache
 
     @spedom.setter
     def spedom(self, value: Species) -> None:
         self._spedom_cache = value
 
+    def _compute_spedom_from_stand_soa(self) -> Species:
+        rt = self._require_rtrees()
+        if rt.size == 0:
+            raise ValueError("Cannot determine dominant species: no reference trees.")
 
-    @property
-    def trees_spe(self) -> Sequence[Species]:
-        if self._trees_spe_cache is None:
-            self._trees_spe_cache = self._trees_spe()
-        return self._trees_spe_cache
+        mg_species = list(self.trees_spe)
 
-    @trees_spe.setter
-    def trees_spe(self, value) -> None:
-        # Accept any Sequence[Species]; normalize to list
-        self._trees_spe_cache = list(value)
+        # basal area per tree: stems_per_ha * pi * (0.005 * d)^2  (d in cm → m radius)
+        d = _nan_to_num(rt.breast_height_diameter, 0.0)
+        f = _nan_to_num(rt.stems_per_ha, 0.0)
+        ba_per_tree = f * np.pi * (0.01 * 0.5 * d) ** 2
 
-
-    # -- management vars (defaults) --------
-
-    def _compute_spedom_from_stand(self) -> Species:
-        """
-        Finds dominant species from MetsiGrow species.
-
-        Rules:
-          - Aggregate basal area per species; if any BA > 0, return the species with max BA.
-          - Otherwise, aggregate stems_per_ha per species; if any stems > 0, return max stems.
-          - If there are no reference trees, or both BA and stems are zero/missing, raise ValueError.
-        """
-        trees = getattr(self.stand, "reference_trees", None)
-        if not trees:
-            raise ValueError(
-                "Cannot determine dominant species: stand has no reference trees."
-            )
-
-        # 1) Dominant by basal area
-        ba_by_species: dict[Species, float] = defaultdict(float)
-        for t in trees:
-            sp = to_mg_species(t.species)
-            ba_by_species[sp] += float(calculate_basal_area(t) or 0.0)
+        # aggregate by species
+        ba_by_species: dict[Species, float] = {}
+        for s, ba in zip(mg_species, ba_per_tree.tolist()):
+            ba_by_species[s] = ba_by_species.get(s, 0.0) + float(ba)
 
         if any(v > 0.0 for v in ba_by_species.values()):
             return max(ba_by_species.items(), key=lambda kv: kv[1])[0]
 
-        # 2) Fallback to stems/ha
-        stems_by_species: dict[Species, float] = defaultdict(float)
-        for t in trees:
-            sp = to_mg_species(t.species)
-            stems_by_species[sp] += float(getattr(t, "stems_per_ha", 0.0) or 0.0)
+        # fallback to stems
+        stems_by_species: dict[Species, float] = {}
+        for s, stems in zip(mg_species, f.tolist()):
+            stems_by_species[s] = stems_by_species.get(s, 0.0) + float(stems)
 
         if any(v > 0.0 for v in stems_by_species.values()):
             return max(stems_by_species.items(), key=lambda kv: kv[1])[0]
 
-        raise ValueError(
-            "Cannot determine dominant species: all basal areas and stem counts are zero or missing."
-        )
+        raise ValueError("Cannot determine dominant species: all basal areas and stem counts are zero.")
 
 
-
-    # -- tree variables --------------------
-
-    def _trees_f(self) -> list[float]:
-        if self.stand.reference_trees is None:
-            return [0.0]
-        return [(t.stems_per_ha or 0.0) for t in self.stand.reference_trees]
-
-    def _trees_d(self) -> list[float]:
-        return [(t.breast_height_diameter or 0.01) for t in self.stand.reference_trees]
-
-    def _trees_h(self) -> list[float]:
-        return [(t.height or 0.0) for t in self.stand.reference_trees]
-
-    def _trees_spe(self) -> list[Species]:
-        converted = []
-        for t in self.stand.reference_trees:
-            try:
-                converted.append(to_mg_species(t.species or Species.PINE))
-            except Exception as e:
-                print(f"[SpeciesError] Invalid tree species: {t.species} → {e}")
-                raise
-        return converted
-
-    def _trees_t0(self) -> list[float]:
-        return [int((self.year or 0) - (t.biological_age or 0.0)) for t in self.stand.reference_trees]
-
-    def _trees_t13(self) -> list[float]:
-        return [self.year - (t.breast_height_age or 0.0) for t in self.stand.reference_trees]
-
-    def _trees_storie(self) -> list[Storie]:
-        # TODO: derive or import storie data
-        return [Storie.NONE for _ in self.stand.reference_trees]
-
-    def _trees_snt(self) -> list[Origin]:
-        return [
-            Origin(t.origin + 1) if t.origin is not None else Origin.NATURAL
-            for t in self.stand.reference_trees
-        ]
-
-# ---------- public API ----------
+# ---------- public API  ----------
 
 def grow_metsi(input_: OpTuple[ForestStand], /, **operation_parameters) -> OpTuple[ForestStand]:
     """
-    Wrapper for metsi_grow evolve pipeline. Applies growth step to ForestStand.
+    Wrapper for metsi_grow. Applies growth step to ForestStand.
+    Assumes input is vectorized
     """
     step = operation_parameters.get("step", 5)
     stand, collected_data = input_
 
-    # build predictor (use local class; no import from the old module path)
+    if stand.reference_trees.size == 0:
+        return input_
+
+    # build predictor and run growth
     pred = MetsiGrowPredictor(stand)
     growth = pred.evolve(step=step)
 
-    # apply deltas
-    diameters = [(t.breast_height_diameter or 0.0) + d for t, d in zip(stand.reference_trees, growth.trees_id)]
-    heights   = [(t.height or 0.0) + h for t, h in zip(stand.reference_trees, growth.trees_ih)]
-    stems     = [(t.stems_per_ha or 0.0) + df for t, df in zip(stand.reference_trees, growth.trees_if)]
+    rt = stand.reference_trees
 
+    # deltas from MetsiGrow
+    idelta = np.asarray(growth.trees_id, dtype=float)  # diameter increments
+    hdelta = np.asarray(growth.trees_ih, dtype=float)  # height increments
+    fdelta = np.asarray(growth.trees_if, dtype=float)  # stems/ha increments
+
+    # apply deltas to get absolute new values
+    diameters = _nan_to_num(rt.breast_height_diameter, 0.0) + idelta
+    heights   = _nan_to_num(rt.height, 0.0) + hdelta
+    stems     = _nan_to_num(rt.stems_per_ha, 0.0) + fdelta
+
+    # update stand in-place
     update_stand_growth(stand, diameters, heights, stems, step)
 
-    # prune dead trees
-    stand.reference_trees = [t for t in stand.reference_trees if (t.stems_per_ha or 0.0) >= 1.0]
+    # prune dead trees (stems < 1.0)
+    to_delete = np.nonzero(stems < 1.0)[0]
+    if to_delete.size > 0:
+        stand.reference_trees.delete(to_delete.tolist())
+
     return stand, collected_data
