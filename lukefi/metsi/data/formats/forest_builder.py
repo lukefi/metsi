@@ -174,7 +174,7 @@ class VMIBuilder(ForestBuilder):
     def remove_strata(self, stands: StandList):
         """Empties the stands' `tree_strata` lists."""
         for stand in stands:
-            stand.tree_strata.clear()
+            stand.tree_strata_pre_vec.clear()
 
     @abstractmethod
     def find_row_type(self, row: str) -> int:
@@ -277,7 +277,7 @@ class VMI12Builder(VMIBuilder):
                 stand_id = vmi_util.generate_stand_identifier(row, VMI12_STAND_INDICES)
                 stand = result[stand_id]
                 stratum.stand = stand
-                stand.tree_strata.append(stratum)
+                stand.tree_strata_pre_vec.append(stratum)
 
         if self.builder_flags['measured_trees']:
             for i, row in enumerate(self.reference_trees):
@@ -285,7 +285,7 @@ class VMI12Builder(VMIBuilder):
                 stand_id = vmi_util.generate_stand_identifier(row, VMI12_STAND_INDICES)
                 stand = result[stand_id]
                 tree.stand = stand
-                stand.reference_trees.append(tree)
+                stand.reference_trees_pre_vec.append(tree)
 
         return list(result.values())
 
@@ -385,7 +385,7 @@ class VMI13Builder(VMIBuilder):
                 stand_id = vmi_util.generate_stand_identifier(row, VMI13_STAND_INDICES)
                 stand = result[stand_id]
                 stratum.stand = stand
-                stand.tree_strata.append(stratum)
+                stand.tree_strata_pre_vec.append(stratum)
 
         if self.builder_flags['measured_trees']:
             for i, row in enumerate(self.reference_trees):
@@ -393,7 +393,7 @@ class VMI13Builder(VMIBuilder):
                 stand_id = vmi_util.generate_stand_identifier(row, VMI13_STAND_INDICES)
                 stand = result[stand_id]
                 tree.stand = stand
-                stand.reference_trees.append(tree)
+                stand.reference_trees_pre_vec.append(tree)
 
         return list(result.values())
 
@@ -533,8 +533,8 @@ class XMLBuilder(ForestCentreBuilder):
                 stratum.identifier = f"{stand.identifier}.{stratum.tree_number or stratum.identifier}-stratum"
                 stratum.stand = stand
                 strata.append(stratum)
-            stand.tree_strata = strata
-            stand.basal_area = smk_util.calculate_stand_basal_area(stand.tree_strata)
+            stand.tree_strata_pre_vec = strata
+            stand.basal_area = smk_util.calculate_stand_basal_area(stand.tree_strata_pre_vec)
             stands.append(stand)
         return stands
 
@@ -625,7 +625,7 @@ class GeoPackageBuilder(ForestCentreBuilder):
                 stratum = self.convert_stratum_entry(rowj)
                 stratum.stand = stand
                 strata.append(stratum)
-            stand.tree_strata = strata
-            stand.basal_area = smk_util.calculate_stand_basal_area(stand.tree_strata)
+            stand.tree_strata_pre_vec = strata
+            stand.basal_area = smk_util.calculate_stand_basal_area(stand.tree_strata_pre_vec)
             stands.append(stand)
         return stands
