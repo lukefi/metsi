@@ -1,14 +1,12 @@
-from typing import Any, Literal, Optional
+from typing import Any, Optional
 from lukefi.metsi.domain.forestry_types import StandList
 from lukefi.metsi.domain.utils.collectives import GetVarFn, compile_collector, getvarfn
 
-Verb = Literal["select", "remove"]
-VERBS: set[Verb] = {"select", "remove"}
-Object = Literal["stands", "trees", "strata"]
-OBJECTS: set[Object] = {"stands", "trees", "strata"}
+VERBS: set[str] = {"select", "remove"}
+OBJECTS: set[str] = {"stands", "trees", "strata"}
 
 
-def parsecommand(command: str) -> tuple[Verb, Object]:
+def parsecommand(command: str) -> tuple[str, str]:
     parts = command.split()
     if len(parts) > 2:
         raise ValueError(f"filter syntax error: {command}")
@@ -20,23 +18,19 @@ def parsecommand(command: str) -> tuple[Verb, Object]:
         raise ValueError(f"invalid filter verb: {v} (in filter {command})")
     if o not in OBJECTS:
         raise ValueError(f"invalid filter object: {o} (in filter {command})")
-    return v, o # type: ignore
+    return v, o
 
 
 def makegetvarfn(named: dict[str, str], *args: Any, **kwargs: Any) -> GetVarFn:
     getvar: GetVarFn
+
     def getnamed(name):
         return compile_collector(named[name])(getvar)
     getvar = getvarfn(*args, getnamed, **kwargs)
     return getvar
 
 
-def applyfilter(
-    stands: StandList,
-    command: str,
-    expr: str,
-    named: Optional[dict[str, str]] = None
-) -> StandList:
+def applyfilter(stands: StandList, command: str, expr: str, named: Optional[dict[str, str]] = None) -> StandList:
     if named is None:
         named = {}
 
@@ -53,16 +47,16 @@ def applyfilter(
         ]
     elif object_ == "trees":
         for s in stands:
-            s.reference_trees = [
+            s.reference_trees_pre_vec = [
                 t
-                for t in s.reference_trees
+                for t in s.reference_trees_pre_vec
                 if predicate(makegetvarfn(named, t, stand=s))
             ]
     elif object_ == "strata":
         for s in stands:
-            s.tree_strata = [
+            s.tree_strata_pre_vec = [
                 t
-                for t in s.tree_strata
+                for t in s.tree_strata_pre_vec
                 if predicate(makegetvarfn(named, t, stand=s))
             ]
     return stands
