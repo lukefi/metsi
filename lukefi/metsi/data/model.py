@@ -334,11 +334,11 @@ class ForestStand(Finalizable):
     # VMI data type 1
     # SMK data type Stand
 
-    reference_trees: list[ReferenceTree] = dataclasses.field(default_factory=list)
-    tree_strata: list[TreeStratum] = dataclasses.field(default_factory=list)
+    reference_trees_pre_vec: list[ReferenceTree] = dataclasses.field(default_factory=list)
+    tree_strata_pre_vec: list[TreeStratum] = dataclasses.field(default_factory=list)
 
-    reference_trees_soa: Optional[ReferenceTrees] = None
-    tree_strata_soa: Optional[Strata] = None
+    reference_trees: ReferenceTrees = ReferenceTrees()
+    tree_strata: TreeStrata = TreeStrata()
 
     # unique identifier for entity within its domain
     identifier: str = ""
