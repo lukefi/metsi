@@ -27,17 +27,17 @@ class FilterTest(unittest.TestCase):
         t5 = ReferenceTree(identifier="t-5", species=TreeSpecies.ASPEN, breast_height_diameter=15, height=18)
         s1 = TreeStratum(identifier="s-1", species=TreeSpecies.PINE)
         s2 = TreeStratum(identifier="s-2", species=TreeSpecies.SPRUCE)
-        stand1 = ForestStand(identifier="S-1", reference_trees = [t1, t2, t3], tree_strata = [s1, s2])
-        stand2 = ForestStand(identifier="S-2", reference_trees = [t4, t5], tree_strata = [])
+        stand1 = ForestStand(identifier="S-1", reference_trees_pre_vec = [t1, t2, t3], tree_strata_pre_vec = [s1, s2])
+        stand2 = ForestStand(identifier="S-2", reference_trees_pre_vec = [t4, t5], tree_strata_pre_vec = [])
         applyfilter([stand1, stand2], "remove trees", "height < 1.3 and species == 1")
-        self.assertEqual(stand1.reference_trees, [t2, t3])
-        self.assertEqual(stand2.reference_trees, [t4, t5])
+        self.assertEqual(stand1.reference_trees_pre_vec, [t2, t3])
+        self.assertEqual(stand2.reference_trees_pre_vec, [t4, t5])
         applyfilter([stand1, stand2], "select trees", "height > 20")
-        self.assertEqual(stand1.reference_trees, [t3])
-        self.assertEqual(stand2.reference_trees, [])
+        self.assertEqual(stand1.reference_trees_pre_vec, [t3])
+        self.assertEqual(stand2.reference_trees_pre_vec, [])
         applyfilter([stand1, stand2], "select strata", "species == 2")
-        self.assertEqual(stand1.tree_strata, [s2])
-        self.assertEqual(stand2.tree_strata, [])
+        self.assertEqual(stand1.tree_strata_pre_vec, [s2])
+        self.assertEqual(stand2.tree_strata_pre_vec, [])
 
     def test_filter_named(self):
         s1 = ForestStand(identifier="1")
@@ -70,16 +70,16 @@ class FilterTest(unittest.TestCase):
         t2 = ReferenceTree(identifier="2")
         t3 = ReferenceTree(identifier="3")
         t4 = ReferenceTree(identifier="4")
-        s1 = ForestStand(identifier="1", reference_trees=[t1, t2, t3])
-        s2 = ForestStand(identifier="2", reference_trees=[t4])
+        s1 = ForestStand(identifier="1", reference_trees_pre_vec=[t1, t2, t3])
+        s2 = ForestStand(identifier="2", reference_trees_pre_vec=[t4])
         stands = preproc_filter([s1, s2], **{
             "named": {
                 "four":  "identifier == '4'",
-                "empty": "not reference_trees"
+                "empty": "not reference_trees_pre_vec"
             },
             "remove trees": "identifier == '3' or four",
             "select": "not empty"
         })
         self.assertEqual(stands, [s1])
-        self.assertEqual(s1.reference_trees, [t1, t2])
-        self.assertEqual(s2.reference_trees, [])
+        self.assertEqual(s1.reference_trees_pre_vec, [t1, t2])
+        self.assertEqual(s2.reference_trees_pre_vec, [])

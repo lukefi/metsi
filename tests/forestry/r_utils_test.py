@@ -13,7 +13,7 @@ except ImportError:
 class RUtilsTest(unittest.TestCase):
     def test_lmfor_volume(self):
         fixture = ForestStand(degree_days=720.3)
-        fixture.reference_trees = [
+        fixture.reference_trees_pre_vec = [
             ReferenceTree(height=10.4, breast_height_diameter=20.3, species=TreeSpecies.PINE),
             ReferenceTree(height=13.4, breast_height_diameter=14.3, species=TreeSpecies.SILVER_BIRCH)
         ]

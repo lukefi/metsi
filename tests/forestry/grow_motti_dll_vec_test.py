@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 
-import lukefi.metsi.domain.natural_processes.grow_motti_dll_vec as gm_vec
+import lukefi.metsi.domain.natural_processes.grow_motti_dll as gm_vec
 from lukefi.metsi.domain.natural_processes.motti_dll_wrapper import GrowthDeltas
 
 
@@ -37,7 +37,7 @@ def make_stand_vec(rt: SimpleNamespace) -> SimpleNamespace:
         soil_peatland_category=SimpleNamespace(value=1),
         tax_class=1,
         tax_class_reduction=0,
-        reference_trees_soa=rt,
+        reference_trees=rt,
         sapling=sap,
         saplings=sap,  # alias, just in case downstream code uses plural
     )
@@ -133,7 +133,7 @@ class TestGrowMottiDLLVec(unittest.TestCase):
 
         dll_stub = FakeDLL()
         # gm_vec.MottiDLLPredictorVec expects a Motti4DLL, but our stub is duck-typed.
-        pred = gm_vec.MottiDLLPredictorVec(stand, dll=dll_stub)  # type: ignore[arg-type]
+        pred = gm_vec.MottiDLLPredictor(stand, dll=dll_stub)  # type: ignore[arg-type]
 
         # Run evolve once to populate the payload
         _ = pred.evolve(step=5, sim_year=stand.year)
@@ -167,18 +167,18 @@ class TestGrowMottiDLLVec(unittest.TestCase):
                 )
 
         dll_stub = GrowingDLL()
-        pred = gm_vec.MottiDLLPredictorVec(stand, dll=dll_stub)  # type: ignore[arg-type]
+        pred = gm_vec.MottiDLLPredictor(stand, dll=dll_stub)  # type: ignore[arg-type]
         input_tuple = (stand, SimpleNamespace(current_time_point=stand.year))
 
-        out_stand, _ = gm_vec.grow_motti_dll_vec(   
+        out_stand, _ = gm_vec.grow_motti_dll(   
             input_tuple,# type: ignore[arg-type]
             predictor=pred,
             step=5,
         )
 
         # Make linters happy: ensure we got a vector trees container back
-        self.assertIsNotNone(out_stand.reference_trees_soa)
-        rt_out = out_stand.reference_trees_soa
+        self.assertIsNotNone(out_stand.reference_trees)
+        rt_out = out_stand.reference_trees
         assert rt_out is not None
 
         # tree 1 updated by deltas

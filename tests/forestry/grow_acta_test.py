@@ -1,5 +1,8 @@
 import unittest
+
+import numpy as np
 from lukefi.metsi.data.model import ReferenceTree
+from lukefi.metsi.data.vector_model import ReferenceTrees
 from lukefi.metsi.forestry.naturalprocess import grow_acta
 
 
@@ -26,7 +29,7 @@ class GrowActaTest(unittest.TestCase):
                 height_aggregate,
                 dominant_height,
                 basal_area_total)
-            self.assertEqual(i[1], round(result, 4))
+            self.assertEqual(i[1], np.round(result, 4))
 
     def test_yearly_height_growth_by_species(self):
         breast_height_diameter = 10.0
@@ -48,23 +51,21 @@ class GrowActaTest(unittest.TestCase):
                 d13_aggregate,
                 height_aggregate,
                 basal_area_total)
-            self.assertEqual(i[1], round(result, 4))
+            self.assertEqual(i[1], np.round(result, 4))
 
     def test_grow_diameter_and_height(self):
-        diameters = [20.0 + i for i in range(1,6)]
-        heights = [22.0 + i for i in range(1,6)]
-        stems = [200.0 + i*50 for i in range(1,6)]
-        species = [1,2,1,1,2]
-        ages = [50.0 + i for i in range(1,6)]
-        reference_trees = [
-            ReferenceTree(
-                breast_height_diameter=d,
-                height=h,
-                stems_per_ha=f,
-                species=spe,
-                biological_age=age)
-            for d, h, f, spe, age in zip(diameters, heights, stems, species, ages)
-        ]
+        diameters = np.array([20.0 + i for i in range(1,6)])
+        heights = np.array([22.0 + i for i in range(1,6)])
+        stems = np.array([200.0 + i*50 for i in range(1,6)])
+        species = np.array([1,2,1,1,2])
+        ages = np.array([50.0 + i for i in range(1,6)])
+        reference_trees = ReferenceTrees()
+        reference_trees.breast_height_diameter = diameters
+        reference_trees.height = heights
+        reference_trees.stems_per_ha = stems
+        reference_trees.species = species
+        reference_trees.biological_age = ages
+        reference_trees.size = 5
         resd, resh = grow_acta.grow_diameter_and_height(reference_trees)
         self.assertAlmostEqual(21.5682, resd[0], places=4)
         self.assertAlmostEqual(24.1751, resh[0], places=4)
@@ -74,12 +75,12 @@ class GrowActaTest(unittest.TestCase):
         self.assertAlmostEqual(26.1624, resh[2], places=4)
 
     def test_grow_sapling(self):
-        diameters = [1.0, 1.1, 1.2]
-        heights = [0.5, 0.9, 1.2]
-        sapling_trees = [
-            ReferenceTree(breast_height_diameter=d, height=h)
-            for d, h in zip(diameters, heights)
-        ]
+        diameters = np.array([1.0, 1.1, 1.2])
+        heights = np.array([0.5, 0.9, 1.2])
+        sapling_trees = ReferenceTrees()
+        sapling_trees.breast_height_diameter = diameters
+        sapling_trees.height = heights
+        sapling_trees.size = 2
         resd, resh = grow_acta.grow_diameter_and_height(sapling_trees, step=1)
         self.assertEqual(1.0, resd[0])
         self.assertEqual(1.1, resd[1])

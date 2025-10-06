@@ -157,16 +157,16 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(51.0, self.vmi12_stands[1].dominant_storey_age)
 
     def test_vmi12_trees(self):
-        self.assertEqual(0, len(self.vmi12_stands[0].reference_trees))
-        self.assertEqual(1, len(self.vmi12_stands[1].reference_trees))
-        self.assertEqual(0, len(self.vmi12_stands[2].reference_trees))
+        self.assertEqual(0, len(self.vmi12_stands[0].reference_trees_pre_vec))
+        self.assertEqual(1, len(self.vmi12_stands[1].reference_trees_pre_vec))
+        self.assertEqual(0, len(self.vmi12_stands[2].reference_trees_pre_vec))
 
         # Trees with back reference to stand
-        self.assertEqual(self.vmi12_stands[1], self.vmi12_stands[1].reference_trees[0].stand)
-        self.assertEqual('0-999-999-98-1-001-tree', self.vmi12_stands[1].reference_trees[0].identifier)
+        self.assertEqual(self.vmi12_stands[1], self.vmi12_stands[1].reference_trees_pre_vec[0].stand)
+        self.assertEqual('0-999-999-98-1-001-tree', self.vmi12_stands[1].reference_trees_pre_vec[0].identifier)
 
     def test_vmi12_tree_variables(self):
-        tree = self.vmi12_stands[1].reference_trees[0]
+        tree = self.vmi12_stands[1].reference_trees_pre_vec[0]
         # '7' -> '7'
         self.assertEqual('7', tree.tree_category)
         # '1' -> 1
@@ -202,15 +202,15 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(None, tree.tuhon_ilmiasu)
 
     def test_vmi12_strata(self):
-        self.assertEqual(0, len(self.vmi12_stands_ref_trees_false[0].tree_strata))
-        self.assertEqual(1, len(self.vmi12_stands_ref_trees_false[1].tree_strata))
+        self.assertEqual(0, len(self.vmi12_stands_ref_trees_false[0].tree_strata_pre_vec))
+        self.assertEqual(1, len(self.vmi12_stands_ref_trees_false[1].tree_strata_pre_vec))
 
         # Strata with back reference to stand
-        self.assertEqual(self.vmi12_stands_ref_trees_false[1], self.vmi12_stands_ref_trees_false[1].tree_strata[0].stand)
-        self.assertEqual('0-999-999-98-1-01-stratum', self.vmi12_stands_ref_trees_false[1].tree_strata[0].identifier)
+        self.assertEqual(self.vmi12_stands_ref_trees_false[1], self.vmi12_stands_ref_trees_false[1].tree_strata_pre_vec[0].stand)
+        self.assertEqual('0-999-999-98-1-01-stratum', self.vmi12_stands_ref_trees_false[1].tree_strata_pre_vec[0].identifier)
 
     def test_vmi12_stratum(self):
-        stratum = self.vmi12_stands_ref_trees_false[1].tree_strata[0]
+        stratum = self.vmi12_stands_ref_trees_false[1].tree_strata_pre_vec[0]
         # species is '1' -> 1
         self.assertEqual(TreeSpecies.PINE, stratum.species)
         # mean_diameter is '24' (cm) -> 24.0 (cm)
@@ -344,15 +344,15 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(51.0, self.vmi13_stands[1].dominant_storey_age)
 
     def test_vmi13_trees(self):
-        self.assertEqual(0, len(self.vmi13_stands[0].reference_trees))
-        self.assertEqual(3, len(self.vmi13_stands[1].reference_trees))
+        self.assertEqual(0, len(self.vmi13_stands[0].reference_trees_pre_vec))
+        self.assertEqual(3, len(self.vmi13_stands[1].reference_trees_pre_vec))
 
         # Trees with back reference to stand
-        self.assertEqual(self.vmi13_stands[1], self.vmi13_stands[1].reference_trees[0].stand)
-        self.assertEqual('0-2-23-2-1-1-tree', self.vmi13_stands[1].reference_trees[0].identifier)
+        self.assertEqual(self.vmi13_stands[1], self.vmi13_stands[1].reference_trees_pre_vec[0].stand)
+        self.assertEqual('0-2-23-2-1-1-tree', self.vmi13_stands[1].reference_trees_pre_vec[0].identifier)
 
     def test_vmi13_tree_variables(self):
-        tree = self.vmi13_stands[1].reference_trees[0]
+        tree = self.vmi13_stands[1].reference_trees_pre_vec[0]
         # '7' -> '7'
         self.assertEqual('7', tree.tree_category)
         # '1' -> 1
@@ -390,15 +390,15 @@ class TestForestBuilder(unittest.TestCase):
         self.assertEqual(None, tree.tuhon_ilmiasu)
 
     def test_vmi13_strata(self):
-        self.assertEqual(0, len(self.vmi13_stands_ref_trees_false[0].tree_strata))
-        self.assertEqual(2, len(self.vmi13_stands_ref_trees_false[1].tree_strata))
+        self.assertEqual(0, len(self.vmi13_stands_ref_trees_false[0].tree_strata_pre_vec))
+        self.assertEqual(2, len(self.vmi13_stands_ref_trees_false[1].tree_strata_pre_vec))
 
         # Strata with back reference to stand
-        self.assertEqual(self.vmi13_stands_ref_trees_false[1], self.vmi13_stands_ref_trees_false[1].tree_strata[0].stand)
-        self.assertEqual('0-2-23-2-1-1-stratum', self.vmi13_stands_ref_trees_false[1].tree_strata[0].identifier)
+        self.assertEqual(self.vmi13_stands_ref_trees_false[1], self.vmi13_stands_ref_trees_false[1].tree_strata_pre_vec[0].stand)
+        self.assertEqual('0-2-23-2-1-1-stratum', self.vmi13_stands_ref_trees_false[1].tree_strata_pre_vec[0].identifier)
 
     def test_vmi13_stratum(self):
-        stratum = self.vmi13_stands_ref_trees_false[1].tree_strata[0]
+        stratum = self.vmi13_stands_ref_trees_false[1].tree_strata_pre_vec[0]
         # species is 1 -> 1
         self.assertEqual(TreeSpecies.PINE, stratum.species)
         # mean_diameter is '24' (cm) -> 24.0 (cm)
@@ -422,5 +422,5 @@ class TestForestBuilder(unittest.TestCase):
     def test_remove_strata(self):
         stands = deepcopy(self.vmi13_stands)
         self.vmi13_builder().remove_strata(stands)
-        self.assertEqual(0, len(stands[1].tree_strata))
+        self.assertEqual(0, len(stands[1].tree_strata_pre_vec))
 

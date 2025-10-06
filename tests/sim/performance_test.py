@@ -68,7 +68,7 @@ class PerformanceTest(unittest.TestCase):
         with a configured constant amount of system sleep time. This may not be totally accurate but should average out.
         """
         fixture = ForestStand()
-        fixture.reference_trees = [
+        fixture.reference_trees_pre_vec = [
             ReferenceTree(),
             ReferenceTree(),
             ReferenceTree(),
@@ -107,7 +107,7 @@ class PerformanceTest(unittest.TestCase):
     def test_raw_copying_performance(self):
         """This is a manual test case for comparing the copying performance of the OperationPayload."""
         fixture = ForestStand()
-        fixture.reference_trees = [
+        fixture.reference_trees_pre_vec = [
             ReferenceTree(),
             ReferenceTree(),
             ReferenceTree(),
@@ -119,7 +119,7 @@ class PerformanceTest(unittest.TestCase):
             ReferenceTree(),
             ReferenceTree()
         ]
-        fixture.tree_strata = [
+        fixture.tree_strata_pre_vec = [
             TreeStratum(),
             TreeStratum(),
             TreeStratum(),

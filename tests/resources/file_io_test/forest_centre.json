@@ -2,7 +2,7 @@
   {
     "py/object": "lukefi.metsi.data.model.ForestStand",
     "reference_trees": [],
-    "tree_strata": [
+    "tree_strata_pre_vec": [
       {
         "py/object": "lukefi.metsi.data.model.TreeStratum",
         "stand": null,
@@ -222,7 +222,7 @@
   {
     "py/object": "lukefi.metsi.data.model.ForestStand",
     "reference_trees": [],
-    "tree_strata": [],
+    "tree_strata_pre_vec": [],
     "identifier": "101",
     "management_unit_id": null,
     "stand_id": null,

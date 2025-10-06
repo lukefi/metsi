@@ -91,7 +91,7 @@ def prepare_growth_test_stand():
         tax_class_reduction=1,
         land_use_category=1,
         geo_location=(6656996.0, 310260.0, 10.0, "EPSG:3067"),
-        reference_trees=[
+        reference_trees_pre_vec=[
             ReferenceTree(species=TreeSpecies.PINE, stems_per_ha=123, breast_height_diameter=30, height=20, biological_age=55, breast_height_age=15, sapling=False),
             ReferenceTree(species=TreeSpecies.SPRUCE, stems_per_ha=123, breast_height_diameter=25, height=17, biological_age=37, breast_height_age=15, sapling=False),
             ReferenceTree(species=TreeSpecies.PINE, stems_per_ha=123, breast_height_diameter=0, height=0.3, biological_age=1, breast_height_age=0, sapling=True)
