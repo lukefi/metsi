@@ -12,7 +12,6 @@ from lukefi.metsi.data.formats.io_utils import (
     stands_to_csv_content,
     csv_content_to_stands,
     stands_to_rst_content,
-    stands_to_rsts_content,
     mela_par_file_content)
 from lukefi.metsi.app.app_io import MetsiConfiguration
 from lukefi.metsi.app.app_types import ExportableContainer
@@ -59,8 +58,6 @@ def stand_writer(container_format: str) -> StandWriter:
         return csv_writer
     if container_format == "rst":
         return rst_writer
-    if container_format == "rsts":
-        return rsts_writer
     if container_format == "npy":
         return npy_writer
     if container_format == "npz":
@@ -315,12 +312,6 @@ def rst_writer(filepath: Path, container: ExportableContainer[PossiblyLayered[Fo
     row_writer(filepath, rows)
     if container.additional_vars is not None:
         par_writer(filepath, container.additional_vars)
-
-# NOTE: Q: Onko tarvetta räätälöidä tätä kontrollitasolla?
-# - voidaanko tälle tehdä sama kuin par_writerille?
-def rsts_writer(filepath: Path, container: ExportableContainer[PossiblyLayered[ForestStand]]):
-    row_writer(filepath, stands_to_rsts_content(container))
-
 
 def npy_writer(filepath: Path, container: ExportableContainer):
     stands = container.export_objects
