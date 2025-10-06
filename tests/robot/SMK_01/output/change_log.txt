@@ -1,5 +1,0 @@
-When reference files are updated, mark it here with ticket number.
-__________________________________________________________________________________________
-
-
-11.6.2025	#MELA2-42	Test and initial references created. /Ari-Antti Tervonen
