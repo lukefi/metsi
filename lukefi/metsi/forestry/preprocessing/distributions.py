@@ -9,7 +9,6 @@
 import math
 from typing import Optional
 from lukefi.metsi.data.model import ReferenceTree, TreeStratum
-from lukefi.metsi.forestry.preprocessing import pre_util
 
 
 # ---- Weibull distribution model ----
@@ -24,8 +23,8 @@ def weibull_coeffs(diameter: float, basal_area: float, min_diameter: Optional[fl
     :param min_diameter: (optional) Should be a value between [0.0, 4.5]
     :return weight coefficients (a, b, c) used in the Weibull distribution calculation
     """
-    w1 = pre_util.get_or_default(min_diameter, math.exp(-1.306454 + (1.154433 *
-                                 math.log(diameter)) + (math.pow(0.33956, 2) / 2.0)))
+    w1 = min_diameter if min_diameter is not None else (
+        math.exp(-1.306454 + (1.154433 * math.log(diameter)) + (math.pow(0.33956, 2) / 2.0)))
     w3 = math.exp(0.64788 - (0.005558 * basal_area) + (0.025530 * diameter) + (math.pow(0.35365, 2) / 2.0))
     w2 = (diameter - w1) / (pow((-math.log(0.5)), (1.0 / w3)))
     w2 = max(w2, 0.0)
