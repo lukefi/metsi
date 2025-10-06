@@ -45,11 +45,11 @@ def lmfor_volume(stand: ForestStand) -> float:
     volmods_path = Path(__file__).parent.resolve() / "r" / "vol_mods_final_LM.rds"
 
     source_data = {
-        'height': robjects.FloatVector([tree.height for tree in stand.reference_trees]),
-        'breast_height_diameter': robjects.FloatVector([tree.breast_height_diameter for tree in stand.reference_trees]),
-        'degree_days': robjects.FloatVector([stand.degree_days for _ in range(len(stand.reference_trees))]),
-        'species': robjects.StrVector([lmfor_species_map.get(tree.species, 'birch') for tree in stand.reference_trees]),
-        'model_type': robjects.StrVector(['scanned' for _ in range(len(stand.reference_trees))])
+        'height': robjects.FloatVector([tree.height for tree in stand.reference_trees_pre_vec]),
+        'breast_height_diameter': robjects.FloatVector([tree.breast_height_diameter for tree in stand.reference_trees_pre_vec]),
+        'degree_days': robjects.FloatVector([stand.degree_days for _ in range(len(stand.reference_trees_pre_vec))]),
+        'species': robjects.StrVector([lmfor_species_map.get(tree.species, 'birch') for tree in stand.reference_trees_pre_vec]),
+        'model_type': robjects.StrVector(['scanned' for _ in range(len(stand.reference_trees_pre_vec))])
     }
     df = robjects.DataFrame(source_data)
     volumes = list(r['compute_tree_volumes'](df, str(volmods_path)))
