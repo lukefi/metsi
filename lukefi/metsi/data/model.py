@@ -399,18 +399,6 @@ class ForestStand(Finalizable):
     def __eq__(self, other):
         return id(self) == id(other)
 
-    def __deepcopy__(self, memo: dict) -> 'ForestStand':
-        stand = ForestStand.__new__(ForestStand)
-        stand.__dict__.update(self.__dict__)
-
-        stand.reference_trees = self.reference_trees.finalize()
-        stand.tree_strata = self.tree_strata.finalize()
-        if self.monthly_temperatures is not None:
-            stand.monthly_temperatures = list(self.monthly_temperatures)
-        if self.monthly_rainfall is not None:
-            stand.monthly_rainfall = list(self.monthly_rainfall)
-        return stand
-
     def __hash__(self):
         return id(self)
 
