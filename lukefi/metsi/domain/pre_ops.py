@@ -86,11 +86,11 @@ def generate_reference_trees(stands: StandList, **operation_params) -> StandList
     stratum_association_diameter_threshold = operation_params.get('stratum_association_diameter_threshold', 2.5)
     for i, stand in enumerate(stands):
         print(f"\rGenerating trees for stand {stand.identifier}    {i}/{len(stands)}", end="")
-        stand_trees = sorted(stand.reference_trees, key=lambda tree: tree.identifier if
+        stand_trees = sorted(stand.reference_trees_pre_vec, key=lambda tree: tree.identifier if
                              tree.identifier is not None else "")
         for tree in stand_trees:
             stratum = find_matching_storey_stratum_for_tree(
-                tree, stand.tree_strata, stratum_association_diameter_threshold)
+                tree, stand.tree_strata_pre_vec, stratum_association_diameter_threshold)
             if stratum is None:
                 continue
             if stratum.__dict__.get('_trees') is not None:
@@ -104,9 +104,9 @@ def generate_reference_trees(stands: StandList, **operation_params) -> StandList
                     tree.measured_height or 'NA',
                     tree.stems_per_ha or 'NA'
                 ])
-        stand.tree_strata.sort(key=lambda stratum: stratum.identifier if stratum.identifier is not None else "")
+        stand.tree_strata_pre_vec.sort(key=lambda stratum: stratum.identifier if stratum.identifier is not None else "")
         new_trees: list[ReferenceTree] = []
-        for stratum in stand.tree_strata:
+        for stratum in stand.tree_strata_pre_vec:
             stratum_trees: list[ReferenceTree] = []
             try:
                 stratum_trees = tree_generation.reference_trees_from_tree_stratum(stratum, **operation_params)
@@ -136,7 +136,7 @@ def generate_reference_trees(stands: StandList, **operation_params) -> StandList
                     stand.degree_days
                 ])
                 debug_output_rows.append(debug_output_row_from_comparison_set(stratum, validation_set))
-        stand.reference_trees = new_trees
+        stand.reference_trees_pre_vec = new_trees
     print()
     if debug:
         import csv  # pylint: disable=import-outside-toplevel
@@ -161,7 +161,7 @@ def supplement_missing_tree_heights(stands: StandList, **operation_params) -> St
     """ Fill in missing (None or nonpositive) tree heights from Näslund height curve """
     _ = operation_params
     for stand in stands:
-        for tree in stand.reference_trees:
+        for tree in stand.reference_trees_pre_vec:
             if (tree.height or 0) <= 0:
                 tree.height = naslund_height(tree.breast_height_diameter, tree.species)
     return stands
@@ -171,7 +171,7 @@ def supplement_missing_tree_ages(stands: StandList, **operation_params) -> Stand
     """ Attempt to fill in missing (None or nonpositive) tree ages using strata ages or other reference tree ages"""
     _ = operation_params
     for stand in stands:
-        supplement_age_for_reference_trees(stand.reference_trees, stand.tree_strata)
+        supplement_age_for_reference_trees(stand.reference_trees_pre_vec, stand.tree_strata_pre_vec)
     return stands
 
 
@@ -179,7 +179,7 @@ def supplement_missing_stratum_diameters(stands: StandList, **operation_params) 
     """ Attempt to fill in missing (None) stratum mean diameters using mean height """
     _ = operation_params
     for stand in stands:
-        for stratum in stand.tree_strata:
+        for stratum in stand.tree_strata_pre_vec:
             if stratum.mean_diameter is None:
                 if stratum.has_height_over_130_cm() and stand.land_use_category == LandUseCategory.SCRUB_LAND:
                     pre_util.supplement_mean_diameter(stratum)
@@ -192,12 +192,12 @@ def generate_sapling_trees_from_sapling_strata(stands: StandList, **operation_pa
     """ Create sapling reference trees from sapling strata """
     _ = operation_params
     for stand in stands:
-        for stratum in stand.tree_strata:
+        for stratum in stand.tree_strata_pre_vec:
             if stratum.sapling_stratum:
                 sapling = stratum.to_sapling_reference_tree()
-                stand.reference_trees.append(sapling)
+                stand.reference_trees_pre_vec.append(sapling)
                 sapling.stand = stand
-                tree_number = len(stand.reference_trees) + 1
+                tree_number = len(stand.reference_trees_pre_vec) + 1
                 sapling.identifier = f"{stand.identifier}-{tree_number}-tree"
     return stands
 
